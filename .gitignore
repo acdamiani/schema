@@ -13,3 +13,8 @@
 *.asset
 *.controller
 *.shader
+*.fbx.meta
+*.anim.meta
+*.asset.meta
+*.controller.meta
+*.shader.meta
