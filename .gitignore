@@ -8,8 +8,8 @@
 /Temp
 /UserSettings
 /obj
-.fbx
-.anim
-.asset
-.controller
-.shader
+*.fbx
+*.anim
+*.asset
+*.controller
+*.shader
