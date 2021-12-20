@@ -1,0 +1,16 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Schema.Runtime;
+
+public class #SCRIPTNAME# : Action {
+	class #SCRIPTNAME#Memory {
+		//Per-node memory goes here
+	}
+	
+	public override NodeStatus Tick(object nodeMemory, SchemaAgent agent) {
+		#SCRIPTNAME#Memory memory = (#SCRIPTNAME#Memory)nodeMemory;
+	
+		return NodeStatus.Success;
+	}
+}

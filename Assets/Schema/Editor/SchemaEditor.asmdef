@@ -1,0 +1,18 @@
+{
+    "name": "SchemaEditor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:42896ccc13d809e40b8fda7704d79c89"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

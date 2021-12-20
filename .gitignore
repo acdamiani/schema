@@ -1,0 +1,15 @@
+/.idea
+/.vscode
+/AssetsScreenshots
+/Library
+/Logs
+/Packages
+/ProjectSettings
+/Temp
+/UserSettings
+/obj
+.fbx
+.anim
+.asset
+.controller
+.shader

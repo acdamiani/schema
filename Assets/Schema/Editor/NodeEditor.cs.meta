@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 612f5e8db6c795e48be75d32ca21a580
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_ViewDataDictionary: {instanceID: 0}
+  - plus: {fileID: 2800000, guid: b1ead40689931a24a94bb427de81b8bb, type: 3}
+  - minus: {fileID: 2800000, guid: 983a9c4232fc8dc4e9cece36fc03f678, type: 3}
+  - circle: {fileID: 2800000, guid: e290ad1dc42c13f4195d40108dd45590, type: 3}
+  - nodeSkin: {fileID: 11400000, guid: 7d5740d1ac17bcb4fa79c41c3a2b8232, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
