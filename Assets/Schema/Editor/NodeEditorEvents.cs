@@ -226,6 +226,8 @@ namespace Schema.Editor
                             if (node.parent.children.IndexOf(node) != lastOrder)
                                 TraverseTree();
                         }
+
+                        GetViewRect(100f, true);
                     }
                     break;
                 case 2:

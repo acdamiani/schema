@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Schema.Runtime;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -13,6 +14,9 @@ namespace Schema.Editor
     {
         public static void Save(NodeEditor editor)
         {
+            if (NodeEditor.NodeEditorPrefs.formatOnSave)
+                editor.BeautifyTree(new Vector2(50f, 150f));
+
             //If file does not exist in project or doesn't exist at all, Save As
             if (editor.original == null || !AssetDatabase.Contains(editor.original))
             {
@@ -267,8 +271,10 @@ namespace Schema.Editor
         }
         public static void Screenshot(this NodeEditor editor)
         {
-            if (!Directory.Exists(Application.dataPath + "Screenshots/"))
-                Directory.CreateDirectory(Application.dataPath + "Screenshots/");
+            string path = Path.Combine(Application.dataPath, NodeEditor.NodeEditorPrefs.screenshotPath);
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
 
             EditorApplication.delayCall += () =>
             {
@@ -281,7 +287,7 @@ namespace Schema.Editor
                 tex.SetPixels(pixels);
 
                 byte[] bytes = tex.EncodeToPNG();
-                File.WriteAllBytes(Application.dataPath + "Screenshots/Screenshot " + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss.fff") + ".png", bytes);
+                File.WriteAllBytes(path + "/Screenshot " + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss.fff") + ".png", bytes);
             };
         }
     }

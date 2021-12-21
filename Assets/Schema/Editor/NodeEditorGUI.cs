@@ -662,27 +662,44 @@ namespace Schema.Editor
         }
         private void DrawMinimap()
         {
-            float maxHeight = 250f;
             float minimapPadding = 100f;
-            float minimapWidth = 250f;
 
-            Rect viewRect = GetViewRect(minimapPadding);
+            Rect viewRect = GetViewRect(minimapPadding, false);
 
-            float minimapHeight = viewRect.height / viewRect.width * minimapWidth;
-            float viewWidth = minimapHeight >= maxHeight ? minimapWidth / minimapHeight * maxHeight : minimapWidth;
-            minimapHeight = Mathf.Clamp(minimapHeight, 0f, maxHeight);
+            float minimapHeight = viewRect.height / viewRect.width * NodeEditorPrefs.minimapWidth;
+            float viewWidth = minimapHeight >= NodeEditorPrefs.maxMinimapHeight ? NodeEditorPrefs.minimapWidth / minimapHeight * NodeEditorPrefs.maxMinimapHeight : NodeEditorPrefs.minimapWidth;
+            minimapHeight = Mathf.Clamp(minimapHeight, 0f, NodeEditorPrefs.maxMinimapHeight);
 
-            Rect boxPos = new Rect(position.width - minimapWidth - GUIData.inspectorWidth - GUIData.sidebarPadding * 2 - 10f, position.height - minimapHeight - 10f, minimapWidth, minimapHeight);
+            Rect boxPos = Rect.zero;
+
+            switch (NodeEditorPrefs.minimapPosition)
+            {
+                case 0:
+                    boxPos = new Rect(10f, position.height - minimapHeight - 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    break;
+                case 1:
+                    boxPos = new Rect(10f, EditorStyles.toolbar.fixedHeight + 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    break;
+                case 2:
+                    boxPos = new Rect(position.width - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 10f - NodeEditorPrefs.minimapWidth, position.height - minimapHeight - 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    break;
+                case 3:
+                    boxPos = new Rect(position.width - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 10f - NodeEditorPrefs.minimapWidth, EditorStyles.toolbar.fixedHeight + 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    break;
+            }
+
             Rect gridViewRect = WindowToGridRect(window);
             gridViewRect.position = GridToMinimapPosition(gridViewRect.position, viewWidth, minimapPadding);
             gridViewRect.position = new Vector2(gridViewRect.position.x + boxPos.width / 2f - viewWidth / 2f, gridViewRect.position.y);
             gridViewRect.size = gridViewRect.size / viewRect.width * viewWidth;
 
-            EditorGUI.DrawRect(boxPos, NodeEditorResources.windowAccent);
+            Handles.DrawSolidRectangleWithOutline(boxPos, new Color(0.1f, 0.1f, 0.1f, NodeEditorPrefs.minimapOpacity), NodeEditorPrefs.minimapOutlineColor);
 
             GUILayout.BeginArea(boxPos);
 
             Rect localRect = new Rect(0f, 0f, boxPos.width, boxPos.height);
+
+            Color nodeOutlineColor = new Color(0.15f, 0.15f, 0.15f, 1f);
 
             bool hoveredNode = false;
             for (int i = target.nodes.Count - 1; i >= 0; i--)
@@ -696,7 +713,7 @@ namespace Schema.Editor
 
                 Rect nodeRect = new Rect(position, size);
 
-                Handles.DrawSolidRectangleWithOutline(nodeRect, NodeEditorResources.windowBackground, windowInfo.selected.Contains(node) ? Color.white : NodeEditorResources.windowAccent);
+                Handles.DrawSolidRectangleWithOutline(nodeRect, NodeEditorResources.windowBackground, windowInfo.selected.Contains(node) ? Color.white : nodeOutlineColor);
 
                 if (nodeRect.Contains(Event.current.mousePosition))
                 {
@@ -725,7 +742,7 @@ namespace Schema.Editor
         }
         private void DrawToolbar()
         {
-            Rect toolbar = new Rect(0f, 0f, position.width - GUIData.inspectorWidth - GUIData.sidebarPadding * 2, 32f);
+            Rect toolbar = new Rect(0f, 0f, position.width - GUIData.inspectorWidth - GUIData.sidebarPadding * 2, EditorStyles.toolbar.fixedHeight);
             GUI.color = NodeEditorResources.windowAccent;
             GUI.Box(toolbar, "", EditorStyles.toolbar);
 
@@ -734,20 +751,17 @@ namespace Schema.Editor
             GUILayout.BeginHorizontal();
 
             GUILayout.Button("View", EditorStyles.toolbarButton);
-            GUILayout.Space(15f);
 
             Rect r = GUILayoutUtility.GetRect(new GUIContent("Add"), EditorStyles.toolbarButton);
             if (GUI.Button(r, "Add", EditorStyles.toolbarButton))
                 GenerateAddMenu().ShowAsContext(r.x, r.y + r.height);
 
-            GUILayout.Space(15f);
-
             r = GUILayoutUtility.GetRect(new GUIContent("Node"), EditorStyles.toolbarButton);
             if (GUI.Button(r, "Node", EditorStyles.toolbarButton))
                 GenerateNodeContextMenu().ShowAsContext(r.x, r.y + r.height);
 
-            if (GUILayout.Button("Prettify"))
-                BeautifyTree(target.root, target.root.position, new Vector2(50f, 150f));
+            if (GUILayout.Button("Prettify", EditorStyles.toolbarButton))
+                BeautifyTree(new Vector2(50f, 150f));
 
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Load", EditorStyles.toolbarButton, GUILayout.Width(75f)))
@@ -783,30 +797,62 @@ namespace Schema.Editor
 
             if (IsNotLayoutEvent(Event.current) && inspectorArea.Contains(Event.current.mousePosition)) windowInfo.hoveredType = Window.Hovering.Inspector;
 
-            //draw divider line
-            Rect divider = new Rect(position.width - (inspectorWidth + GUIData.sidebarPadding * 2), windowInfo.dividerPos - GUIData.dividerHeight / 2f,
-                inspectorWidth + GUIData.sidebarPadding * 2, GUIData.dividerHeight);
-            Rect dividerInput = new Rect(position.width - inspectorWidth, windowInfo.dividerPos - (GUIData.dividerHeight * 5 / 2f),
-                inspectorWidth, GUIData.dividerHeight * 5);
-            EditorGUI.DrawRect(divider, NodeEditorResources.windowAccent);
+            if (!windowInfo.settingsShown)
+            {
+                //draw divider line
+                Rect divider = new Rect(position.width - (inspectorWidth + GUIData.sidebarPadding * 2), windowInfo.dividerPos - GUIData.dividerHeight / 2f,
+                    inspectorWidth + GUIData.sidebarPadding * 2, GUIData.dividerHeight);
+                Rect dividerInput = new Rect(position.width - inspectorWidth, windowInfo.dividerPos - (GUIData.dividerHeight * 5 / 2f),
+                    inspectorWidth, GUIData.dividerHeight * 5);
+                EditorGUI.DrawRect(divider, NodeEditorResources.windowAccent);
 
-            windowInfo.hoveringDivider =
-                IsNotLayoutEvent(Event.current) &&
-                dividerInput.Contains(Event.current.mousePosition);
+                windowInfo.hoveringDivider =
+                    IsNotLayoutEvent(Event.current) &&
+                    dividerInput.Contains(Event.current.mousePosition);
 
-            Rect inspector = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding, 0f, inspectorWidth, windowInfo.dividerPos);
-            GUILayout.BeginArea(inspector);
-            windowInfo.inspectorScroll = GUILayout.BeginScrollView(windowInfo.inspectorScroll);
-            DrawInspectorWindow();
-            GUILayout.EndScrollView();
-            GUILayout.EndArea();
-            Rect blackboard = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding,
-                windowInfo.dividerPos, inspectorWidth, position.height - windowInfo.dividerPos);
-            GUILayout.BeginArea(blackboard);
-            windowInfo.blackboardScroll = GUILayout.BeginScrollView(windowInfo.blackboardScroll);
-            DrawBlackboard(target.blackboard);
-            GUILayout.EndScrollView();
-            GUILayout.EndArea();
+                Rect inspector = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding, 0f, inspectorWidth, windowInfo.dividerPos);
+                GUILayout.BeginArea(inspector);
+                windowInfo.inspectorScroll = GUILayout.BeginScrollView(windowInfo.inspectorScroll);
+                DrawInspectorWindow();
+                GUILayout.EndScrollView();
+                GUILayout.EndArea();
+                Rect blackboard = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding,
+                    windowInfo.dividerPos, inspectorWidth, position.height - windowInfo.dividerPos);
+                GUILayout.BeginArea(blackboard);
+                windowInfo.blackboardScroll = GUILayout.BeginScrollView(windowInfo.blackboardScroll);
+                DrawBlackboard(target.blackboard);
+                GUILayout.EndScrollView();
+                GUILayout.EndArea();
+            }
+            else
+            {
+                Rect prefsWindow = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding, 0f, inspectorWidth, position.height);
+
+                GUILayout.BeginArea(prefsWindow);
+                windowInfo.inspectorScroll = GUILayout.BeginScrollView(windowInfo.inspectorScroll);
+                DrawPreferencesWindow();
+                GUILayout.EndScrollView();
+                GUILayout.EndArea();
+            }
+        }
+        void DrawPreferencesWindow()
+        {
+            GUILayout.Space(GUIData.sidebarPadding);
+            GUILayout.Label("Preferences", NodeEditorResources.styles.title);
+            GUILayout.Space(GUIData.sidebarPadding);
+
+            GUILayout.Label("General", EditorStyles.boldLabel);
+            NodeEditorPrefs.saveOnClose = EditorGUILayout.Toggle("Save on Close", NodeEditorPrefs.saveOnClose);
+            NodeEditorPrefs.formatOnSave = EditorGUILayout.Toggle("Format on Save", NodeEditorPrefs.formatOnSave);
+            NodeEditorPrefs.screenshotPath = EditorGUILayout.TextField("Screenshot Path", NodeEditorPrefs.screenshotPath);
+
+            GUILayout.Label("Minimap", EditorStyles.boldLabel);
+            GUILayout.Label("Minimap Position");
+            NodeEditorPrefs.minimapPosition = GUILayout.Toolbar(NodeEditorPrefs.minimapPosition, new string[] { "Bottom Left", "Top Left", "Bottom Right", "Top Right" });
+            NodeEditorPrefs.minimapWidth = EditorGUILayout.FloatField("Minimap Width", NodeEditorPrefs.minimapWidth);
+            NodeEditorPrefs.maxMinimapHeight = EditorGUILayout.FloatField("Max Minimap Height", NodeEditorPrefs.maxMinimapHeight);
+            NodeEditorPrefs.minimapOpacity = EditorGUILayout.Slider("Minimap Opacity", NodeEditorPrefs.minimapOpacity, 0f, 1f);
+            NodeEditorPrefs.minimapOutlineColor = EditorGUILayout.ColorField("Minimap Outline Color", NodeEditorPrefs.minimapOutlineColor);
         }
 
         ///<summary>
@@ -1101,7 +1147,7 @@ namespace Schema.Editor
 
             GUILayout.FlexibleSpace();
 
-            GUILayout.BeginVertical(GUILayout.Height(32f));
+            GUILayout.BeginVertical(GUILayout.Height(EditorStyles.toolbar.fixedHeight));
 
             GUILayout.FlexibleSpace();
 
@@ -1418,6 +1464,7 @@ namespace Schema.Editor
             internal string searchText;
             internal float splashScroll;
             public Rect minimapView;
+            public bool settingsShown;
             [SerializeField] internal Rect searchRect = new Rect(0f, 0f, 250f, 350f);
             public enum Hovering
             {
