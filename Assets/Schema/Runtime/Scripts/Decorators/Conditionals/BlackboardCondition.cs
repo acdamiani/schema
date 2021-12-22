@@ -32,7 +32,7 @@ public class BlackboardCondition : Decorator
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
         BlackboardConditionMemory memory = (BlackboardConditionMemory)decoratorMemory;
-        object val = memory.data.GetValue(blackboardKey.entry.Name);
+        object val = memory.data.GetValue(blackboardKey.entryID);
         bool isSet = val != null;
 
         bool ret = conditionType == ConditionType.IsSet ? isSet : !isSet;

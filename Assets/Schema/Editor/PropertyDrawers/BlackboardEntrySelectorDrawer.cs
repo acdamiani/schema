@@ -15,7 +15,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     [SerializeField] private int index;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        SerializedProperty idProperty = property.FindPropertyRelative("uID");
+        SerializedProperty idProperty = property.FindPropertyRelative("entryID");
 
         EditorGUI.BeginProperty(position, label, property);
 

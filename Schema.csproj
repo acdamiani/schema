@@ -82,6 +82,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorVariable.cs" />
      <Compile Include="Assets/Schema/HelperMethods.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/ScriptableDictionary.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wander.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/BlackboardCondition.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntrySelector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/RequireAgentComponentAttribute.cs" />
@@ -92,6 +93,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/NavMeshFilter.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
      <None Include="Assets/Schema/s.shader" />
     <Reference Include="UnityEngine">

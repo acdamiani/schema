@@ -17,6 +17,7 @@ namespace Schema.Editor
         private Func<bool> isDockedFunc;
         private UnityEditor.Editor editor;
         private UnityEditor.Editor blackboardEditor;
+        private UnityEditor.Editor defaultNodeEditor;
         private UnityEditor.Editor defaultDecoratorEditor;
         private List<Type> distinctTypes;
         private SchemaAgent activeAgent;
@@ -166,11 +167,12 @@ namespace Schema.Editor
                 targets.Add(windowInfo.selectedDecorator);
 
                 if (!defaultDecoratorEditor || defaultDecoratorEditor.target == null || defaultDecoratorEditor.target != windowInfo.selectedDecorator)
-                    UnityEditor.Editor.CreateCachedEditor(windowInfo.selectedDecorator, typeof(DecoratorEditor), ref defaultDecoratorEditor);
+                    UnityEditor.Editor.CreateCachedEditor(windowInfo.selectedDecorator, typeof(DefaultDecoratorEditor), ref defaultDecoratorEditor);
             }
             else if (windowInfo.selected.Count > 0)
             {
                 targets.AddRange(windowInfo.selected);
+
             }
 
             distinctTypes = targets.Select(x => x.GetType()).Distinct().ToList();
@@ -181,6 +183,9 @@ namespace Schema.Editor
             if (editor == null || editor.targets.Any(obj => obj == null) || !editor.targets.SequenceEqual(targets) && targets.Count > 0 && targets.All(x => x != null))
             {
                 UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), null, ref editor);
+
+                if (windowInfo.selectedDecorator == null && distinctTypes.Count == 1 && (defaultNodeEditor == null || defaultNodeEditor.targets.Any(obj => obj == null) || !defaultNodeEditor.targets.SequenceEqual(targets)) && targets.Count > 0 && targets.All(obj => obj != null))
+                    UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), typeof(DefaultNodeEditor), ref defaultNodeEditor);
             }
 
             // ReSharper disable once Unity.NoNullPropagation
@@ -327,6 +332,8 @@ namespace Schema.Editor
                     {
                         NodeTicked(node);
                     }
+
+                    windowInfo.nodeStatus = activeAgent.GetNodeStatus();
                 }
 
                 for (int i = nodes.Count - 1; i >= 0; i--)
@@ -346,9 +353,9 @@ namespace Schema.Editor
                     GUI.Box(rect, "", NodeEditorResources.styles.node);
 
                     if (windowInfo.selected.Contains(node))
-                        GUI.color = Color.white;
+                        GUI.color = NodeEditorPrefs.selectionColor;
                     else if (windowInfo.alpha.ContainsKey(node.uID))
-                        GUI.color = Color.Lerp(new Color32(80, 80, 80, 255), new Color32(247, 181, 0, 255), windowInfo.alpha[node.uID]);
+                        GUI.color = Color.Lerp(new Color32(80, 80, 80, 255), NodeEditorPrefs.highlightColor, windowInfo.alpha[node.uID]);
                     else if (windowInfo.selectedDecorator &&
                         node.priority > 0 &&
                         windowInfo.selectedDecorator.node.priority > 0 &&
@@ -392,6 +399,23 @@ namespace Schema.Editor
                         float iconHeight = error.image.height;
                         GUI.Label(new Rect(rect.x + rect.width - iconWidth / 2f, rect.y + rect.height - iconHeight / 2f, iconWidth, iconHeight), error, GUIStyle.none);
                     }
+
+                    if (NodeEditorPrefs.enableStatusIndicators && node.enableStatusIndicator && windowInfo.nodeStatus != null && Application.isPlaying && windowInfo.nodeStatus.ContainsKey(node.uID))
+                    {
+                        float iconSize = 32f;
+
+                        bool? nodeStatus = windowInfo.nodeStatus[node.uID];
+                        if (nodeStatus == true)
+                            GUI.color = NodeEditorPrefs.successColor;
+                        else if (nodeStatus == false)
+                            GUI.color = NodeEditorPrefs.failureColor;
+
+                        GUI.Label(new Rect(rect.x + rect.width - iconSize / 2f, rect.y - iconSize / 2f, iconSize, iconSize),
+                            "",
+                            NodeEditorResources.styles.decorator);
+                    }
+
+                    GUI.color = Color.white;
 
                     GUILayout.BeginArea(contained);
                     GUILayout.BeginVertical();
@@ -841,13 +865,39 @@ namespace Schema.Editor
             GUILayout.Label("Preferences", NodeEditorResources.styles.title);
             GUILayout.Space(GUIData.sidebarPadding);
 
-            GUILayout.Label("General", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("General", EditorStyles.boldLabel);
             NodeEditorPrefs.saveOnClose = EditorGUILayout.Toggle("Save on Close", NodeEditorPrefs.saveOnClose);
             NodeEditorPrefs.formatOnSave = EditorGUILayout.Toggle("Format on Save", NodeEditorPrefs.formatOnSave);
             NodeEditorPrefs.screenshotPath = EditorGUILayout.TextField("Screenshot Path", NodeEditorPrefs.screenshotPath);
 
-            GUILayout.Label("Minimap", EditorStyles.boldLabel);
-            GUILayout.Label("Minimap Position");
+            EditorGUILayout.LabelField("");
+
+            EditorGUILayout.LabelField("Editor", EditorStyles.boldLabel);
+            NodeEditorPrefs.selectionColor = EditorGUILayout.ColorField(
+                new GUIContent("Selection Color", "The selection color to use for nodes"),
+                NodeEditorPrefs.selectionColor
+            );
+            NodeEditorPrefs.highlightColor = EditorGUILayout.ColorField(
+                new GUIContent("Highlight Color", "The color to use when highlighting a node"),
+                NodeEditorPrefs.highlightColor
+            );
+            NodeEditorPrefs.enableStatusIndicators = EditorGUILayout.Toggle(
+                new GUIContent("Enable Status Indicators", "Toggle status indicators for all nodes"),
+                NodeEditorPrefs.enableStatusIndicators
+            );
+            NodeEditorPrefs.successColor = EditorGUILayout.ColorField(
+                new GUIContent("Success Color", "Color to use when successful"),
+                NodeEditorPrefs.successColor
+            );
+            NodeEditorPrefs.failureColor = EditorGUILayout.ColorField(
+                new GUIContent("Failure Color", "Color to use when failed"),
+                NodeEditorPrefs.failureColor
+            );
+
+            EditorGUILayout.LabelField("");
+
+            EditorGUILayout.LabelField("Minimap", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Minimap Position");
             NodeEditorPrefs.minimapPosition = GUILayout.Toolbar(NodeEditorPrefs.minimapPosition, new string[] { "Bottom Left", "Top Left", "Bottom Right", "Top Right" });
             NodeEditorPrefs.minimapWidth = EditorGUILayout.FloatField("Minimap Width", NodeEditorPrefs.minimapWidth);
             NodeEditorPrefs.maxMinimapHeight = EditorGUILayout.FloatField("Max Minimap Height", NodeEditorPrefs.maxMinimapHeight);
@@ -889,6 +939,8 @@ namespace Schema.Editor
                 EditorGUI.BeginChangeCheck();
                 if (isInspectingDecorator)
                     defaultDecoratorEditor.OnInspectorGUI();
+                else
+                    defaultNodeEditor.OnInspectorGUI();
                 editor.OnInspectorGUI();
                 if (EditorGUI.EndChangeCheck())
                 {
@@ -908,6 +960,8 @@ namespace Schema.Editor
                             node.dirty = true;
                         }
                     }
+
+                    SceneView.RepaintAll();
                 }
 
                 UpdateHideFlagsFromDictionary(cache);
@@ -1353,6 +1407,7 @@ namespace Schema.Editor
                 }
             }
             public Dictionary<string, float> alpha = new Dictionary<string, float>();
+            public Dictionary<string, bool?> nodeStatus;
             ///<summary>
             ///Whether we are currently panning the view
             ///</summary>

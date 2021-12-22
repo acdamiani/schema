@@ -28,6 +28,7 @@ public static class NodeEditorResources
     private static Texture2D _plus;
     private static Texture2D _minus;
     private static Texture2D _gridTexture;
+    private static Texture2D _circle;
     public static Texture2D warnIcon => _warnIcon != null ? _warnIcon : _warnIcon = EditorGUIUtility.FindTexture("console.warnicon");
     public static Texture2D errorIcon => _errorIcon != null ? _errorIcon : _errorIcon = EditorGUIUtility.FindTexture("console.erroricon");
     public static Texture2D infoIcon => _infoIcon != null ? _infoIcon : _infoIcon = EditorGUIUtility.FindTexture("console.infoicon");
@@ -39,6 +40,7 @@ public static class NodeEditorResources
     public static Texture2D blackboardIcon => _blackboardIcon != null ? _blackboardIcon : _blackboardIcon = Resources.Load<Texture2D>("blackboard_key");
     public static Texture2D plus => _plus != null ? _plus : _plus = EditorGUIUtility.FindTexture("Toolbar Plus More");
     public static Texture2D minus => _minus != null ? _minus : _minus = EditorGUIUtility.FindTexture("Toolbar Minus");
+    public static Texture2D circle => _circle != null ? _circle : _circle = Resources.Load<Texture2D>("Circle");
     public static Texture2D gridTexture
     {
         get

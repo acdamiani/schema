@@ -30,8 +30,6 @@ public class ConeCheckEditor : Editor
     {
         serializedObject.Update();
 
-        EditorGUI.BeginChangeCheck();
-
         tab = GUILayout.Toolbar(coneType.boolValue ? 1 : 0, new string[] { "Efficient", "Precise" });
         coneType.boolValue = tab == 1;
 
@@ -51,9 +49,6 @@ public class ConeCheckEditor : Editor
         {
             EditorGUILayout.PropertyField(resolution);
         }
-
-        if (EditorGUI.EndChangeCheck())
-            SceneView.RepaintAll();
 
         serializedObject.ApplyModifiedProperties();
     }

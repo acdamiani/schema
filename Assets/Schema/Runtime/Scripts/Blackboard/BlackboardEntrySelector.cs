@@ -24,12 +24,11 @@ using System.Linq;
 public class BlackboardEntrySelector
 {
     private Blackboard blackboard;
-    [SerializeField] private string uID;
-    public BlackboardEntry entry => String.IsNullOrEmpty(uID) ? null : blackboard?.GetEntry(uID);
+    public string entryID;
     [SerializeField] private List<string> filters = new List<string>();
     public void UpdateEntry(Blackboard blackboard)
     {
-        Debug.Log("updating entry");
+        Debug.Log("Updating entry...");
 
         List<BlackboardEntry> validEntries = new List<BlackboardEntry>();
 
@@ -37,13 +36,20 @@ public class BlackboardEntrySelector
             .FindAll(entry => filters.Select(item => Type.GetType(item)).Contains(Type.GetType(entry.type)));
 
         int index = validEntries
-            .FindIndex(x => x.uID == uID);
+            .FindIndex(x => x.uID == entryID);
 
-        uID = (index == -1 ? GetDefaultEntry(blackboard) : validEntries[index])?.uID;
+        entryID = (index == -1 ? GetDefaultEntry(blackboard) : validEntries[index])?.uID;
 
         this.blackboard = blackboard;
-
-        Debug.Log(blackboard);
+    }
+    /// <summary>
+    /// Gets the referenced Blackboard Entry by this selector. This is only available in the Editor. 
+    /// To get values and other information during runtime, use the BlackboardData class.
+    /// </summary>
+    /// <returns>The Editor-only Blackboard Entry referenced by this selector</returns>
+    public BlackboardEntry GetEditorEntry()
+    {
+        return String.IsNullOrEmpty(entryID) ? null : blackboard?.GetEntry(entryID);
     }
     BlackboardEntry GetDefaultEntry(Blackboard blackboard)
     {
@@ -81,7 +87,6 @@ public class BlackboardEntrySelector
     }
     public void AddAllFilters()
     {
-        Debug.Log("adding all filters");
         foreach (Type t in Blackboard.typeColors.Keys)
         {
             AddFilter(t);

@@ -2,14 +2,15 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
-[CustomPropertyDrawer(typeof(TagFilter))]
-public class TagFilterDrawer : PropertyDrawer
+[CustomPropertyDrawer(typeof(NavMeshAreaFilter))]
+public class NavMeshFilterDrawer : PropertyDrawer
 {
     private bool initializedMask;
     private int lastMask;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        SerializedProperty selectedTags = property.FindPropertyRelative("tags");
+        SerializedProperty selectedTags = property.FindPropertyRelative("areas");
+        SerializedProperty mask = property.FindPropertyRelative("mask");
 
         if (!initializedMask)
         {
@@ -42,7 +43,7 @@ public class TagFilterDrawer : PropertyDrawer
 
         EditorGUI.BeginProperty(position, label, property);
 
-        int nextMask = EditorGUI.MaskField(position, label, lastMask, UnityEditorInternal.InternalEditorUtility.tags);
+        int nextMask = EditorGUI.MaskField(position, label, lastMask, GameObjectUtility.GetNavMeshAreaNames());
 
         if (lastMask != nextMask)
         {
@@ -65,6 +66,7 @@ public class TagFilterDrawer : PropertyDrawer
             }
         }
         lastMask = nextMask;
+        mask.intValue = lastMask;
 
         EditorGUI.EndProperty();
     }

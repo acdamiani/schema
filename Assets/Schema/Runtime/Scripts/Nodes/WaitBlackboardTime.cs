@@ -28,9 +28,9 @@ public class WaitBlackboardTime : Action
     {
         WaitBlackboardTimeMemory memory = (WaitBlackboardTimeMemory)nodeMemory;
 
-        if (number.entry == null) return NodeStatus.Failure;
+        if (string.IsNullOrEmpty(number.entryID)) return NodeStatus.Failure;
 
-        if (Time.time - memory.startTime >= memory.data.GetValue<float>(number.entry.Name))
+        if (Time.time - memory.startTime >= memory.data.GetValue<float>(number.entryID))
         {
             return NodeStatus.Success;
         }

@@ -38,9 +38,11 @@
   <ItemGroup>
      <Compile Include="Assets/Schema/Editor/EditorReflection.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorEvents.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/MoveToRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SoundHeardEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorUtilities.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorFileHandler.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultNodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/GraphEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/BlackboardCompareEditor.cs" />
@@ -53,10 +55,10 @@
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/AnimatorVariableValueDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/PlaySoundEditor.cs" />
      <Compile Include="Assets/Schema/Editor/ShortcutManager.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultDecoratorEditor.cs" />
      <Compile Include="Assets/Schema/Editor/EditorInspector.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomWeightedEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/DecoratorEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorGUI.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/SchemaAgentEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Components/CoverVolumeEditor.cs" />
@@ -65,6 +67,7 @@
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntrySelectorDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/RaycastEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagFilterDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/PropertyDrawers/NavMeshFilterDrawer.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
     <Reference Include="UnityEngine">

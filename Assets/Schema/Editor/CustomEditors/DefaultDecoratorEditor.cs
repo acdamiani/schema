@@ -4,13 +4,13 @@ using System;
 using System.Reflection;
 
 [CustomEditor(typeof(Schema.Runtime.Decorator))]
-public class DecoratorEditor : Editor
+public class DefaultDecoratorEditor : Editor
 {
     private bool shouldShowAborts = false;
     private SerializedProperty aborts;
     void OnEnable()
     {
-        if (target)
+        if (target != null && serializedObject != null)
         {
             try
             {
@@ -21,10 +21,7 @@ public class DecoratorEditor : Editor
 
                 aborts = serializedObject.FindProperty("abortsType");
             }
-            catch
-            {
-                Debug.Log(target.GetType());
-            }
+            catch { }
         }
     }
     public override void OnInspectorGUI()

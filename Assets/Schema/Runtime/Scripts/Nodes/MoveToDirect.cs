@@ -23,8 +23,9 @@ internal class MoveToDirect : Action
     }
     private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
     {
-        System.Type t = System.Type.GetType(selector.entry.type);
-        object value = data.GetValue(selector.entry.Name);
+        BlackboardData.EntryData entryData = data.GetEntry(selector.entryID);
+        System.Type t = entryData.type;
+        object value = data.GetValue(selector.entryID);
 
         //Not ideal to run every frame, so will be cached in the node state	
         if (t == typeof(GameObject))
@@ -54,7 +55,7 @@ internal class MoveToDirect : Action
     }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (selector.entry != null)
+        if (string.IsNullOrEmpty(selector.entryID))
         {
             MoveToDirectMemory memory = (MoveToDirectMemory)nodeMemory;
             memory.point = GetPoint(selector, agent.GetBlackboardData());

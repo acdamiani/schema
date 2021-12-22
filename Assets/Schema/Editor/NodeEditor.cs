@@ -276,6 +276,7 @@ namespace Schema.Editor
 
             ValidateConnections();
             TraverseTree();
+            GetViewRect(100f, true);
         }
         //Validates connections between nodes also resets HideFlags
         void ValidateConnections()
@@ -1467,6 +1468,31 @@ namespace Schema.Editor
                 get => EditorPrefs.GetString("SCHEMA_PREF__screenshotPath", "Screenshots");
                 set => EditorPrefs.SetString("SCHEMA_PREF__screenshotPath", value);
             }
+            public static Color selectionColor
+            {
+                get => GetColor("SCHEMA_PREF__selectionColor", Color.white);
+                set => SetColor("SCHEMA_PREF__selectionColor", value);
+            }
+            public static Color highlightColor
+            {
+                get => GetColor("SCHEMA_PREF__highlightColor", new Color32(247, 181, 0, 255));
+                set => SetColor("SCHEMA_PREF__highlightColor", value);
+            }
+            public static bool enableStatusIndicators
+            {
+                get => EditorPrefs.GetBool("SCHEMA_PREF__enableStatusIndicators", true);
+                set => EditorPrefs.SetBool("SCHEMA_PREF__enableStatusIndicators", value);
+            }
+            public static Color successColor
+            {
+                get => GetColor("SCHEMA_PREF__successColor", Color.green);
+                set => SetColor("SCHEMA_PREF__successColor", value);
+            }
+            public static Color failureColor
+            {
+                get => GetColor("SCHEMA_PREF__failureColor", Color.red);
+                set => SetColor("SCHEMA_PREF__failureColor", value);
+            }
             public static float minimapWidth
             {
                 get => EditorPrefs.GetFloat("SCHEMA_PREF__minimapWidth", 250f);
@@ -1489,22 +1515,24 @@ namespace Schema.Editor
             }
             public static Color minimapOutlineColor
             {
-                get
-                {
-                    return new Color(
-                        EditorPrefs.GetFloat("SCHEMA_PREF__minimapOutlineColor_r", 1.0f),
-                        EditorPrefs.GetFloat("SCHEMA_PREF__minimapOutlineColor_g", 1.0f),
-                        EditorPrefs.GetFloat("SCHEMA_PREF__minimapOutlineColor_b", 1.0f),
-                        EditorPrefs.GetFloat("SCHEMA_PREF__minimapOutlineColor_a", 1.0f)
-                    );
-                }
-                set
-                {
-                    EditorPrefs.SetFloat("SCHEMA_PREF__minimapOutlineColor_r", value.r);
-                    EditorPrefs.SetFloat("SCHEMA_PREF__minimapOutlineColor_g", value.g);
-                    EditorPrefs.SetFloat("SCHEMA_PREF__minimapOutlineColor_b", value.b);
-                    EditorPrefs.SetFloat("SCHEMA_PREF__minimapOutlineColor_a", value.a);
-                }
+                get => GetColor("SCHEMA_PREF__minimapOutlineColor", Color.gray);
+                set => SetColor("SCHEMA_PREF__minimapOutlineColor", value);
+            }
+            private static Color GetColor(string key, Color defaultValue)
+            {
+                float r = EditorPrefs.GetFloat(key + "_r", defaultValue.r);
+                float g = EditorPrefs.GetFloat(key + "_g", defaultValue.g);
+                float b = EditorPrefs.GetFloat(key + "_b", defaultValue.b);
+                float a = EditorPrefs.GetFloat(key + "_a", defaultValue.a);
+
+                return new Color(r, g, b, a);
+            }
+            private static void SetColor(string key, Color value)
+            {
+                EditorPrefs.SetFloat(key + "_r", value.r);
+                EditorPrefs.SetFloat(key + "_g", value.g);
+                EditorPrefs.SetFloat(key + "_b", value.b);
+                EditorPrefs.SetFloat(key + "_a", value.a);
             }
         }
     }

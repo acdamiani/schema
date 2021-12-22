@@ -20,7 +20,7 @@ public class Raycast : Decorator
     }
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
-        if (point.entry == null)
+        if (string.IsNullOrEmpty(point.entryID))
             return false;
 
         return TestCone(agent, agent.GetBlackboardData());
@@ -65,8 +65,8 @@ public class Raycast : Decorator
     }
     private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
     {
-        System.Type t = System.Type.GetType(selector.entry.type);
-        object value = data.GetValue(selector.entry.Name);
+        System.Type t = data.GetEntryType(selector.entryID);
+        object value = data.GetValue(selector.entryID);
 
         if (value == null) return Vector3.zero;
 
@@ -100,7 +100,7 @@ public class Raycast : Decorator
     {
         List<Error> errors = new List<Error>();
 
-        if (type == RaycastType.Dynamic && point.entry == null)
+        if (type == RaycastType.Dynamic && string.IsNullOrEmpty(point.entryID))
             errors.Add(new Error("Raycast is marked as dynamic but no valid key picked", Error.Severity.Warning));
 
         return errors;

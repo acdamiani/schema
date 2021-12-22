@@ -20,8 +20,8 @@ public class RotateTo : Schema.Runtime.Action
     }
     private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
     {
-        System.Type t = System.Type.GetType(selector.entry.type);
-        object value = data.GetValue(selector.entry.Name);
+        System.Type t = data.GetEntryType(selector.entryID);
+        object value = data.GetValue(selector.entryID);
 
         if (value == null) return Vector3.zero;
 

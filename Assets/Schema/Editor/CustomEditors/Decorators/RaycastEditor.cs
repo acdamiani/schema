@@ -24,8 +24,6 @@ public class RaycastEditor : Editor
         serializedObject.Update();
         Raycast raycast = (Raycast)target;
 
-        EditorGUI.BeginChangeCheck();
-
         raycast.type = (Raycast.RaycastType)GUILayout.Toolbar((int)raycast.type, new string[] { "Absolute", "Dynamic" });
 
         EditorGUILayout.PropertyField(visualize);
@@ -41,8 +39,6 @@ public class RaycastEditor : Editor
         {
             EditorGUILayout.PropertyField(point);
         }
-
-        if (EditorGUI.EndChangeCheck()) SceneView.RepaintAll();
 
         serializedObject.ApplyModifiedProperties();
     }

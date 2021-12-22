@@ -11,10 +11,9 @@ public class MoveToRandom : Action
     {
         public Vector3 position;
     }
-    public int xMin;
-    public int zMin;
-    public int xMax;
-    public int zMax;
+    public Vector2 x;
+    public Vector2 y;
+    public Vector2 z;
     [Range(0, 100)]
     public float speed;
     [Tooltip("Whether the random position is relative to the current agent's position")]
@@ -22,7 +21,7 @@ public class MoveToRandom : Action
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
         MoveToRandomMemory memory = (MoveToRandomMemory)nodeMemory;
-        memory.position = new Vector3(Random.Range(xMin, xMax), agent.transform.position.y, Random.Range(zMin, zMax));
+        memory.position = new Vector3(Random.Range(x.x, x.y), Random.Range(y.x, y.y), Random.Range(z.x, z.y));
 
         if (isRelative)
             memory.position += agent.transform.position;

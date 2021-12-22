@@ -21,7 +21,7 @@ public class ConeCheck : Decorator
     [Tooltip("The tags to filter from. Only these tags will be considered when checking the cone")]
     public TagFilter tagFilter;
     [Info]
-    public string willStore => $"Will store hit object in GameObject {(gameObjectKey.entry != null ? gameObjectKey.entry.Name : "null")}";
+    public string willStore => $"Will store hit object in GameObject {(gameObjectKey.GetEditorEntry() != null ? gameObjectKey.GetEditorEntry().Name : "null")}";
     class ConeCheckMemory
     {
         public BlackboardData data;
@@ -52,13 +52,13 @@ public class ConeCheck : Decorator
         GameObject go = TestCone(agent);
         if (go)
         {
-            memory.data.SetValue<GameObject>(gameObjectKey.entry.Name, go);
+            memory.data.SetValue<GameObject>(gameObjectKey.entryID, go);
 
             return true;
         }
         else
         {
-            memory.data.SetValue<GameObject>(gameObjectKey.entry.Name, null);
+            memory.data.SetValue<GameObject>(gameObjectKey.entryID, null);
 
             return false;
         }
@@ -247,7 +247,7 @@ public class ConeCheck : Decorator
     }
     public override List<Error> GetErrors()
     {
-        if (string.IsNullOrEmpty(gameObjectKey.entry?.Name))
+        if (string.IsNullOrEmpty(gameObjectKey.entryID))
         {
             return new List<Error>() { new Error("Node has no valid GameObject key in which to store the hit object", Error.Severity.Info) };
         }

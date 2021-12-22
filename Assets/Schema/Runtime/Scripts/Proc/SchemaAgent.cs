@@ -12,10 +12,11 @@ public class SchemaAgent : MonoBehaviour
     private OptimizedGraph graph;
     private int currentIndex;
     private bool firstCall = true;
+    [NonSerialized] public Node editorTarget;
     private List<Node> calledNodes = new List<Node>();
     private BlackboardData blackboardData;
 #if UNITY_EDITOR
-    [NonSerialized] public Node editorTarget;
+    private Dictionary<string, bool?> nodeStatus = new Dictionary<string, bool?>();
 #endif
 
     private Dictionary<string, object> agentState = new Dictionary<string, object>();
@@ -85,6 +86,12 @@ public class SchemaAgent : MonoBehaviour
     {
         return calledNodes;
     }
+#if UNITY_EDITOR
+    public Dictionary<string, bool?> GetNodeStatus()
+    {
+        return nodeStatus;
+    }
+#endif
     public BlackboardData GetBlackboardData()
     {
         return blackboardData;
@@ -121,7 +128,7 @@ public class SchemaAgent : MonoBehaviour
             RequireAgentComponentAttribute a = type.GetCustomAttribute<RequireAgentComponentAttribute>();
 
             if (a == null) continue;
-            
+
             //Check to see if it exists on the current gameObject
             foreach (Type attType in a.types)
             {
@@ -204,6 +211,10 @@ public class SchemaAgent : MonoBehaviour
                             callerIndex = node.relativeIndex;
                         }
 
+#if UNITY_EDITOR
+                        nodeStatus[node.node.uID] = context == NodeStatus.Success;
+#endif
+
                         ExitNode(node, OptimizedNode.TypeCode.Flow);
                     }
                     else
@@ -254,7 +265,6 @@ public class SchemaAgent : MonoBehaviour
 
                     if (context != NodeStatus.Running)
                     {
-
                         bool willRepeatNode = false;
 
                         for (int i = 0; i < node.decorators.Length; i++)
@@ -274,6 +284,10 @@ public class SchemaAgent : MonoBehaviour
                             currentIndex = node.parent;
                             callerIndex = node.relativeIndex;
                         }
+
+#if UNITY_EDITOR
+                        nodeStatus[node.node.uID] = context == NodeStatus.Success;
+#endif
 
                         firstCall = true;
                         ExitNode(node, OptimizedNode.TypeCode.Action);
@@ -457,7 +471,7 @@ public class SchemaAgent : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (!editorTarget) return;
-        
+
         editorTarget.DrawGizmos(this);
 
         foreach (Decorator d in editorTarget.decorators)

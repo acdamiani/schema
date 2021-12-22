@@ -17,7 +17,8 @@ namespace Schema.Runtime
         [HideInInspector] public Vector2 position;
         [HideInInspector] public int priority;
         [HideInInspector] public Graph graph;
-        [DisableOnPlay] [SerializeField] private string _name;
+        [Tooltip("Toggle the status indicator for this node"), HideInInspector] public bool enableStatusIndicator = true;
+        [SerializeField, HideInInspector, DisableOnPlay] private string _name;
         public Type GetMemoryType()
         {
             Type[] types = GetType().GetTypeInfo().DeclaredNestedTypes.ToArray();
@@ -30,7 +31,7 @@ namespace Schema.Runtime
             return types[0];
         }
         /// <summary>
-        ///	Override to allow for Gizmo visualization in the inspector. This will be called only for the currently selected SchemaAgent. 
+        ///	Override to allow for Gizmo visualization in the scene view. This will be called only for the currently selected SchemaAgent. 
         /// </summary>
         public virtual void DrawGizmos(SchemaAgent agent) { }
         public string Name

@@ -16,7 +16,9 @@ public class BlackboardCompare : Decorator
     }
     private void OnValidate()
     {
-        if (entryOne.entry != null && Type.GetType(entryOne.entry.type).IsNumeric())
+        BlackboardEntry entryOneEditor = entryOne.GetEditorEntry();
+
+        if (entryOneEditor != null && Type.GetType(entryOneEditor.type).IsNumeric())
         {
             entryTwo.ClearFilters();
             entryTwo.AddNumericFilter();
@@ -30,11 +32,11 @@ public class BlackboardCompare : Decorator
     {
         BlackboardData blackboard = agent.GetBlackboardData();
 
-        Type t1 = Type.GetType(entryOne.entry.type);
-        Type t2 = Type.GetType(entryTwo.entry.type);
+        Type t1 = blackboard.GetEntryType(entryOne.entryID);
+        Type t2 = blackboard.GetEntryType(entryTwo.entryID);
 
-        object val1 = blackboard.GetValue(entryOne.entry.Name);
-        object val2 = blackboard.GetValue(entryOne.entry.Name);
+        object val1 = blackboard.GetValue(entryOne.entryID);
+        object val2 = blackboard.GetValue(entryOne.entryID);
 
         return Compare(t1, t2, val1, val2);
     }

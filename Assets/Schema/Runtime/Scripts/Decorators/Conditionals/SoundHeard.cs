@@ -12,7 +12,7 @@ public class SoundHeard : Decorator
     [Tooltip("The tags to filter from. Only these tags will be considered when listening for noise")]
     public TagFilter tagFilter;
     [Info]
-    public string willStore => $"Will store closest sound location in Vector3 {(hitPoint.entry != null ? hitPoint.entry.Name : "null")}";
+    public string willStore => $"Will store closest sound location in Vector3 {(hitPoint.GetEditorEntry() != null ? hitPoint.GetEditorEntry().Name : "null")}";
     class SoundHeardMemory
     {
         public BlackboardData data;

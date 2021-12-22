@@ -21,16 +21,19 @@ public class FindGameObject : Action
     {
         FindGameObjectMemory memory = (FindGameObjectMemory)nodeMemory;
 
-        if (gameObject.entry != null)
+        BlackboardData.EntryData entry = memory.data.GetEntry(gameObject.entryID);
+
+        if (!string.IsNullOrEmpty(gameObject.entryID))
         {
             GameObject found = GameObject.Find(gameObjectName);
+
             if (!found)
             {
                 return NodeStatus.Failure;
             }
             else
             {
-                memory.data.SetValue<GameObject>(gameObject.entry.Name, found);
+                memory.data.SetValue<GameObject>(gameObject.entryID, found);
                 return NodeStatus.Success;
             }
         }

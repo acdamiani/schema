@@ -27,8 +27,14 @@ public class MoveTo : Action
     }
     private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
     {
-        System.Type t = System.Type.GetType(selector.entry.type);
-        object value = data.GetValue(selector.entry.Name);
+        BlackboardData.EntryData entryData = data.GetEntry(selector.entryID);
+        System.Type t = entryData.type;
+        object value = data.GetValue(selector.entryID);
+
+        Debug.Log(selector.entryID);
+
+        Debug.Log(value.GetType());
+        Debug.Log(t);
 
         if (value == null) return Vector3.zero;
 
@@ -70,29 +76,25 @@ public class MoveTo : Action
     }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (selector.entry != null)
+        if (string.IsNullOrEmpty(selector.entryID))
+            return NodeStatus.Failure;
+
+        MoveToMemory memory = (MoveToMemory)nodeMemory;
+        memory.point = GetPoint(selector, agent.GetBlackboardData());
+        memory.agent.speed = speed;
+        memory.agent.stoppingDistance = acceptableRadius;
+        memory.agent.angularSpeed = angularSpeed;
+
+        if (memory.agent.SetDestination(memory.point))
         {
-            MoveToMemory memory = (MoveToMemory)nodeMemory;
-            memory.point = GetPoint(selector, agent.GetBlackboardData());
-            memory.agent.speed = speed;
-            memory.agent.stoppingDistance = acceptableRadius;
-            memory.agent.angularSpeed = angularSpeed;
-
-            if (memory.agent.SetDestination(memory.point))
+            if (!memory.agent.pathPending &&
+            (memory.agent.remainingDistance <= memory.agent.stoppingDistance) &&
+            (!memory.agent.hasPath || memory.agent.velocity.sqrMagnitude == 0f))
             {
-                if (!memory.agent.pathPending &&
-                (memory.agent.remainingDistance <= memory.agent.stoppingDistance) &&
-                (!memory.agent.hasPath || memory.agent.velocity.sqrMagnitude == 0f))
-                {
-                    return NodeStatus.Success;
-                }
+                return NodeStatus.Success;
+            }
 
-                return NodeStatus.Running;
-            }
-            else
-            {
-                return NodeStatus.Failure;
-            }
+            return NodeStatus.Running;
         }
         else
         {
