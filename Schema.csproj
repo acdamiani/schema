@@ -38,6 +38,7 @@
   <ItemGroup>
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardNumber.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandomWeighted.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetBlackboardValue.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntry.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/CustomAction.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Components/CoverVolume.cs" />
@@ -56,9 +57,11 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardBool.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/TriggerAnimator.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Proc/SchemaManager.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagList.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/DisableOnPlayAttribute.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Graph.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Flow.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/NavMeshAreaMask.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AddForce.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardString.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Patrol.cs" />
@@ -66,6 +69,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/DebugLog.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Blackboard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardInt.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObjectWithTag.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector2.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector3.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToRandom.cs" />
@@ -93,7 +97,6 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/NavMeshFilter.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
      <None Include="Assets/Schema/s.shader" />
     <Reference Include="UnityEngine">

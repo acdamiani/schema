@@ -26,7 +26,6 @@ namespace Schema.Editor
         public GUIData guiData;
         private int nodeCount;
         private int jk;
-
         [DidReloadScripts]
         static void Init()
         {
@@ -114,6 +113,7 @@ namespace Schema.Editor
             Undo.ClearAll();
 
             UpdateSelectors();
+            Blackboard.instance = target.blackboard;
             GetViewRect(100f, true);
         }
         void IHasCustomMenu.AddItemsToMenu(GenericMenu menu)
@@ -221,8 +221,8 @@ namespace Schema.Editor
                 "parent",
                 "children",
                 "decorators",
-				//! This will cause the editor to crash if removed
-				"graph",
+        		//! This will cause the editor to crash if removed
+        		"graph",
                 "position",
                 "node",
                 "_icon"
@@ -235,7 +235,16 @@ namespace Schema.Editor
                 if (!nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.FieldType)) && !invalidNames.Contains(field.Name))
                 {
                     if (typeof(BlackboardEntrySelector).IsAssignableFrom(field.FieldType))
+                    {
                         yield return (BlackboardEntrySelector)field.GetValue(obj);
+                    }
+                    else if (typeof(IEnumerable<BlackboardEntrySelector>).IsAssignableFrom(field.FieldType))
+                    {
+                        IEnumerable<BlackboardEntrySelector> l = (IEnumerable<BlackboardEntrySelector>)field.GetValue(obj);
+
+                        foreach (BlackboardEntrySelector s in l)
+                            yield return s;
+                    }
                     else
                     {
                         foreach (BlackboardEntrySelector s in GetSelectors(field.GetValue(obj)))
@@ -318,6 +327,8 @@ namespace Schema.Editor
             RegisterShortcuts();
 
             instance = this;
+            if (target != null && target.blackboard != null)
+                Blackboard.instance = target.blackboard;
         }
         void FocusSearch()
         {
@@ -353,8 +364,8 @@ namespace Schema.Editor
             }
 
             instance = null;
+            Blackboard.instance = null;
             DestroyImmediate(editor);
-            //
             DestroyImmediate(blackboardEditor);
         }
         private void OpenUrl(string url)
@@ -1485,12 +1496,12 @@ namespace Schema.Editor
             }
             public static Color successColor
             {
-                get => GetColor("SCHEMA_PREF__successColor", Color.green);
+                get => GetColor("SCHEMA_PREF__successColor", new Color32(64, 255, 64, 255));
                 set => SetColor("SCHEMA_PREF__successColor", value);
             }
             public static Color failureColor
             {
-                get => GetColor("SCHEMA_PREF__failureColor", Color.red);
+                get => GetColor("SCHEMA_PREF__failureColor", new Color32(255, 32, 32, 255));
                 set => SetColor("SCHEMA_PREF__failureColor", value);
             }
             public static float minimapWidth
@@ -1505,7 +1516,7 @@ namespace Schema.Editor
             }
             public static int minimapPosition
             {
-                get => EditorPrefs.GetInt("SCHEMA_PREF__minimapPosition", 3);
+                get => EditorPrefs.GetInt("SCHEMA_PREF__minimapPosition", 2);
                 set => EditorPrefs.SetInt("SCHEMA_PREF__minimapPosition", Mathf.Clamp(value, 0, 4));
             }
             public static float minimapOpacity
@@ -1533,6 +1544,28 @@ namespace Schema.Editor
                 EditorPrefs.SetFloat(key + "_g", value.g);
                 EditorPrefs.SetFloat(key + "_b", value.b);
                 EditorPrefs.SetFloat(key + "_a", value.a);
+            }
+            public static void ResetToDefault()
+            {
+                List<TypeCode> valid = new List<TypeCode> { TypeCode.String, TypeCode.Single, TypeCode.Boolean, TypeCode.Int32 };
+
+                Type t = typeof(NodeEditorPrefs);
+                PropertyInfo[] fields = t.GetProperties(BindingFlags.Static | BindingFlags.Public);
+
+                foreach (PropertyInfo property in fields)
+                {
+                    if (valid.Contains(Type.GetTypeCode(property.PropertyType)))
+                    {
+                        EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name);
+                    }
+                    else if (typeof(UnityEngine.Color).IsAssignableFrom(property.PropertyType))
+                    {
+                        EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name + "_r");
+                        EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name + "_g");
+                        EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name + "_b");
+                        EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name + "_a");
+                    }
+                }
             }
         }
     }

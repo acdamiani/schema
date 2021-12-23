@@ -9,14 +9,8 @@ public class CoverVolume : MonoBehaviour
     public Vector3 center;
     public Vector3 size = Vector3.one;
     public float spacing = .5f;
-    public GameObject target;
-    public GameObject agent;
     public float preferredDist = 1.0f;
-    private void OnEnable()
-    {
-        target = GameObject.Find("Enemy");
-        agent = GameObject.Find("Agent");
-    }
+    public NavMeshAreaMask filter;
     public Vector3[] GeneratePoints()
     {
         //Generate evenly distributed points inside bounds
@@ -47,7 +41,7 @@ public class CoverVolume : MonoBehaviour
 
                     NavMeshHit hit;
 
-                    if (NavMesh.SamplePosition(point, out hit, spacing / 2f, -1))
+                    if (NavMesh.SamplePosition(point, out hit, spacing / 2f, filter.mask))
                     {
                         //Double check that the point is inside the cube
                         Vector3 pos = hit.position;
@@ -68,43 +62,43 @@ public class CoverVolume : MonoBehaviour
 
         return p.ToArray();
     }
-    public Dictionary<Vector3, float> ClassifyPoints(Vector3[] points, GameObject target, GameObject agent)
-    {
-        //All colliders in the scene
-        Collider[] colliders = GameObject.FindObjectsOfType<Collider>();
+    // public Dictionary<Vector3, float> ClassifyPoints(Vector3[] points, GameObject target, GameObject agent)
+    // {
+    //     //All colliders in the scene
+    //     Collider[] colliders = GameObject.FindObjectsOfType<Collider>();
 
-        Dictionary<Vector3, float> d = new Dictionary<Vector3, float>();
+    //     Dictionary<Vector3, float> d = new Dictionary<Vector3, float>();
 
-        float diagonal = SqrDiagonalDist(MultiplyComponents(transform.lossyScale, size));
+    //     float diagonal = SqrDiagonalDist(MultiplyComponents(transform.lossyScale, size));
 
-        for (int i = 0; i < points.Length; i++)
-        {
-            Vector3 point = points[i];
+    //     for (int i = 0; i < points.Length; i++)
+    //     {
+    //         Vector3 point = points[i];
 
-            //Factors that invalidate a point
-            RaycastHit hitInfo;
-            if (!Physics.Linecast(target.transform.position, point, out hitInfo))
-            {
-                d.Add(point, 0f);
-                continue;
-            }
+    //         //Factors that invalidate a point
+    //         RaycastHit hitInfo;
+    //         if (!Physics.Linecast(target.transform.position, point, out hitInfo))
+    //         {
+    //             d.Add(point, 0f);
+    //             continue;
+    //         }
 
-            //Vector3.Distance(a,b) is the same as (a-b).magnitude
-            float targetDist = (target.transform.position - point).sqrMagnitude / diagonal;
-            targetDist = Mathf.Clamp01(targetDist);
+    //         //Vector3.Distance(a,b) is the same as (a-b).magnitude
+    //         float targetDist = (target.transform.position - point).sqrMagnitude / diagonal;
+    //         targetDist = Mathf.Clamp01(targetDist);
 
-            float agentDist = (agent.transform.position - point).sqrMagnitude / diagonal;
-            agentDist = 1f - Mathf.Clamp01(agentDist);
+    //         float agentDist = (agent.transform.position - point).sqrMagnitude / diagonal;
+    //         agentDist = 1f - Mathf.Clamp01(agentDist);
 
-            //Get closest collider
-            float colliderDist = DistToCollider(point) / preferredDist;
-            colliderDist = 1f - Mathf.Clamp01(colliderDist);
+    //         //Get closest collider
+    //         float colliderDist = DistToCollider(point) / preferredDist;
+    //         colliderDist = 1f - Mathf.Clamp01(colliderDist);
 
-            d.Add(points[i], agentDist * 0.25f + targetDist * 0.20f + colliderDist * 0.55f);
-        }
+    //         d.Add(points[i], agentDist * 0.25f + targetDist * 0.20f + colliderDist * 0.55f);
+    //     }
 
-        return d;
-    }
+    //     return d;
+    // }
     public float DistToCollider(Vector3 point)
     {
         float stepSize = 0.1f;

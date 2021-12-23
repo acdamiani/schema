@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
-[CustomPropertyDrawer(typeof(NavMeshAreaFilter))]
-public class NavMeshFilterDrawer : PropertyDrawer
+[CustomPropertyDrawer(typeof(NavMeshAreaMask))]
+public class NavMeshAreaMaskDrawer : PropertyDrawer
 {
     private bool initializedMask;
     private int lastMask;

@@ -7,47 +7,55 @@ using UnityEditor;
 [CustomPropertyDrawer(typeof(BlackboardEntry))]
 public class BlackboardEntryDrawer : PropertyDrawer
 {
-	private Vector2 nameSize;
-	public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-	{
-		EditorGUI.BeginProperty(position, label, property);
+    private Vector2 nameSize;
+    SerializedObject obj;
+    SerializedProperty nameProp;
+    SerializedProperty typeProp;
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    {
+        EditorGUI.BeginProperty(position, label, property);
 
-		DrawBlackboard(position, property, label);
+        DrawBlackboard(position, property, label);
 
-		EditorGUI.EndProperty();
-	}
-	private void DrawBlackboard(Rect position, SerializedProperty property, GUIContent label)
-	{
-		int oldIndentLevel = EditorGUI.indentLevel;
+        EditorGUI.EndProperty();
+    }
+    private void DrawBlackboard(Rect position, SerializedProperty property, GUIContent label)
+    {
+        int oldIndentLevel = EditorGUI.indentLevel;
 
-		SerializedObject obj = new SerializedObject(property.objectReferenceValue);
-		SerializedProperty nameProp = obj.FindProperty("_name");
-		SerializedProperty typeProp = obj.FindProperty("_type");
+        if (obj == null)
+            obj = new SerializedObject(property.objectReferenceValue);
 
-		nameSize = EditorStyles.whiteLargeLabel.CalcSize(new GUIContent(nameProp.stringValue));
+        if (nameProp == null)
+            nameProp = obj.FindProperty("_name");
 
-		Rect imgRect = new Rect(position.x + position.width - 50f, position.y + position.height / 2f - 16f, 32f, 32f);
-		Rect labelRect = new Rect(position.x + 15f, position.y + position.height / 2f - nameSize.y / 2f, nameSize.x, nameSize.y);
+        if (typeProp == null)
+            typeProp = obj.FindProperty("_type");
 
-		GUI.Label(labelRect, nameProp.stringValue, EditorGUIUtility.isProSkin ? EditorStyles.whiteLargeLabel : EditorStyles.largeLabel);
+        string entryName = "Test Name";
 
-		Type currentType = Type.GetType(typeProp.stringValue);
-		string last = typeProp.stringValue;
+        nameSize = EditorStyles.whiteLargeLabel.CalcSize(new GUIContent(entryName));
 
-		GUI.color = Blackboard.typeColors[currentType];
+        Rect imgRect = new Rect(position.x + position.width - 50f, position.y + position.height / 2f - 16f, 32f, 32f);
+        Rect labelRect = new Rect(position.x + 15f, position.y + position.height / 2f - nameSize.y / 2f, nameSize.x, nameSize.y);
 
-		Vector2 typeLabelSize = EditorStyles.miniLabel.CalcSize(new GUIContent(currentType.Name));
+        GUI.Label(labelRect, entryName, EditorGUIUtility.isProSkin ? EditorStyles.whiteLargeLabel : EditorStyles.largeLabel);
 
-		GUI.DrawTexture(imgRect, NodeEditorResources.blackboardIcon);
-		GUI.color = Color.white;
-		GUI.Label(new Rect(imgRect.x - typeLabelSize.x - 5f, imgRect.y + imgRect.height / 2f - typeLabelSize.y / 2f, typeLabelSize.x, typeLabelSize.y), currentType.Name, EditorStyles.miniLabel);
+        //string last = typeProp.stringValue;
+        Type currentType = typeof(float);//Type.GetType(last);
 
-		obj.ApplyModifiedProperties();
+        GUI.color = Blackboard.typeColors[currentType];
 
-		EditorGUI.indentLevel = oldIndentLevel;
-	}
+        Vector2 typeLabelSize = EditorStyles.miniLabel.CalcSize(new GUIContent(currentType.Name));
 
-	/* 	private void HandleEvents(Rect position, Event e)
+        GUI.DrawTexture(imgRect, NodeEditorResources.blackboardIcon);
+        GUI.color = Color.white;
+        GUI.Label(new Rect(imgRect.x - typeLabelSize.x - 5f, imgRect.y + imgRect.height / 2f - typeLabelSize.y / 2f, typeLabelSize.x, typeLabelSize.y), currentType.Name, EditorStyles.miniLabel);
+
+        EditorGUI.indentLevel = oldIndentLevel;
+    }
+
+    /* 	private void HandleEvents(Rect position, Event e)
 		{
 			switch (e.type)
 			{

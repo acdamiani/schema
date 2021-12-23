@@ -29,6 +29,10 @@ public class SchemaAgent : MonoBehaviour
     public bool logTaskChanges;
     public int maxIterationsPerTick = 1000;
     public bool ignoreTickOverstep;
+    private bool ticked;
+    private int count;
+    private int callerIndex;
+    NodeStatus context;
     private void Start()
     {
         if (!target) return;
@@ -96,14 +100,6 @@ public class SchemaAgent : MonoBehaviour
     {
         return blackboardData;
     }
-
-    //Ticks our graph
-    private void Update()
-    {
-        if (!target) return;
-        EvaluateDecorators();
-        Tick();
-    }
     void Reset()
     {
         VerifyComponents();
@@ -143,12 +139,10 @@ public class SchemaAgent : MonoBehaviour
     {
         calledNodes.Clear();
 
-        bool ticked = false;
-        int count = 0;
-
-        int callerIndex = -1;
-
-        NodeStatus context = NodeStatus.None;
+        ticked = false;
+        count = 0;
+        callerIndex = -1;
+        context = NodeStatus.None;
 
         while (!ticked)
         {
@@ -315,9 +309,7 @@ public class SchemaAgent : MonoBehaviour
 
     private void EvaluateDecorators()
     {
-        List<OptimizedDecorator> keys = new List<OptimizedDecorator>(decoratorState.Keys);
-
-        foreach (OptimizedDecorator d in keys)
+        foreach (OptimizedDecorator d in decoratorState.Keys)
         {
             bool result = d.decorator.Evaluate(agentState[d.decorator.uID], this);
             if (result == decoratorState[d]) continue;

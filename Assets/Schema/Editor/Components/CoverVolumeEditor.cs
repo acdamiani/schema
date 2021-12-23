@@ -12,10 +12,12 @@ public class CoverVolumeEditor : Editor
     bool editingCollider => EditMode.editMode == EditMode.SceneViewEditMode.Collider && EditMode.IsOwner(this);
     SerializedProperty size;
     SerializedProperty center;
+    SerializedProperty filter;
     private void OnEnable()
     {
         size = serializedObject.FindProperty("size");
         center = serializedObject.FindProperty("center");
+        filter = serializedObject.FindProperty("filter");
     }
     public override void OnInspectorGUI()
     {
@@ -26,7 +28,9 @@ public class CoverVolumeEditor : Editor
         EditMode.DoEditModeInspectorModeButton(EditMode.SceneViewEditMode.Collider, "Edit Volume",
                     EditorGUIUtility.IconContent("EditCollider"), GetBounds, this);
 
+
         EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(filter);
         EditorGUILayout.PropertyField(size);
         EditorGUILayout.PropertyField(center);
 
@@ -86,12 +90,11 @@ public class CoverVolumeEditor : Editor
         Gizmos.color = lastCol;
         Gizmos.matrix = lastMatrix;
 
-        Dictionary<Vector3, float> p = volume.ClassifyPoints(volume.GeneratePoints(), volume.target, volume.agent);
+        Vector3[] p = volume.GeneratePoints();
 
-        foreach (KeyValuePair<Vector3, float> v in p)
+        foreach (Vector3 v in p)
         {
-            Gizmos.color = Color.Lerp(Color.blue, Color.red, v.Value);
-            Gizmos.DrawCube(v.Key, Vector3.one * .1f);
+            Gizmos.DrawCube(v, Vector3.one * .1f);
         }
     }
 }

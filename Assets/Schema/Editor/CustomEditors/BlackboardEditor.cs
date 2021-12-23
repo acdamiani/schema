@@ -25,27 +25,6 @@ public class BlackboardEditor : Editor
             selectedIndex = blackboard.entries.Count - 1;
         }
 
-        // if (!Schema.EditorInternal.NodeEditor.instance.windowInfo.searchIsShown)
-        // {
-        //     switch (Event.current.type)
-        //     {
-        //         case EventType.KeyDown:
-        //             if (Event.current.keyCode == KeyCode.UpArrow)
-        //             {
-        //                 selectedIndex--;
-        //                 selectedIndex = selectedIndex < 0 ? 0 : selectedIndex;
-        //                 clickedAny = true;
-        //             }
-        //             else if (Event.current.keyCode == KeyCode.DownArrow)
-        //             {
-        //                 selectedIndex++;
-        //                 selectedIndex = selectedIndex > blackboard.entries.Count - 1 ? blackboard.entries.Count - 1 : selectedIndex;
-        //                 clickedAny = true;
-        //             }
-        //             break;
-        //     }
-        // }
-
         GUILayout.BeginHorizontal();
 
         if (GUILayout.Button(NodeEditorResources.plus, GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16))) ShowContext();
@@ -59,11 +38,9 @@ public class BlackboardEditor : Editor
 
         serializedObject.Update();
 
-        SerializedProperty entries = serializedObject.FindProperty("entries");
-
         GUILayout.Space(10);
 
-        for (int i = 0; i < entries.arraySize; i++)
+        for (int i = 0; i < blackboard.entries.Count; i++)
         {
             GUI.color = GUI.skin.settings.selectionColor;
             if (selectedIndex == i)
@@ -73,7 +50,7 @@ public class BlackboardEditor : Editor
 
             GUI.color = Color.white;
 
-            EditorGUILayout.PropertyField(entries.GetArrayElementAtIndex(i), GUILayout.ExpandWidth(true), GUILayout.Height(32));
+            DrawEntry(blackboard.entries[i].Name, Type.GetType(blackboard.entries[i].type));
 
             Rect r = GUILayoutUtility.GetLastRect();
 
@@ -118,5 +95,33 @@ public class BlackboardEditor : Editor
         selectedIndex = selectedIndex > 0 ? selectedIndex : 0;
 
         if (blackboard.entries.Count == 0) selectedIndex = -1;
+    }
+    private void DrawEntry(string name, Type type)
+    {
+        int oldIndentLevel = EditorGUI.indentLevel;
+
+        Vector2 nameSize = EditorStyles.whiteLargeLabel.CalcSize(new GUIContent(name));
+
+        GUILayout.BeginHorizontal(GUILayout.Height(32f));
+
+        GUILayout.Space(8f);
+
+        GUILayout.Label(name, EditorGUIUtility.isProSkin ? EditorStyles.whiteLargeLabel : EditorStyles.largeLabel);
+
+        GUILayout.FlexibleSpace();
+        GUILayout.Label(type.Name, EditorStyles.miniLabel, GUILayout.Height(32));
+        GUILayout.Space(8f);
+
+        GUI.color = Blackboard.typeColors[type];
+        Vector2 typeLabelSize = EditorStyles.miniLabel.CalcSize(new GUIContent(type.Name));
+        Rect imgRect = GUILayoutUtility.GetRect(new GUIContent(NodeEditorResources.blackboardIcon), GUIStyle.none, GUILayout.Width(32), GUILayout.Height(32));
+        GUI.DrawTexture(imgRect, NodeEditorResources.blackboardIcon);
+        GUI.color = Color.white;
+
+        GUILayout.Space(8f);
+
+        GUILayout.EndHorizontal();
+
+        EditorGUI.indentLevel = oldIndentLevel;
     }
 }

@@ -1,8 +1,8 @@
 [System.Serializable]
 public class BlackboardGameObject : BlackboardEntrySelector
 {
-	public BlackboardGameObject()
-	{
-		base.AddObjectFilter();
-	}
+    public BlackboardGameObject()
+    {
+        base.AddGameObjectFilter();
+    }
 }

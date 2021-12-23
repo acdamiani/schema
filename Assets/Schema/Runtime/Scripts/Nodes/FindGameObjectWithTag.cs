@@ -1,31 +1,31 @@
 using Schema.Runtime;
 using UnityEngine;
 
-[DarkIcon("Dark/FindGameObject")]
-[LightIcon("Light/FindGameObject")]
-public class FindGameObject : Action
+[DarkIcon("Dark/FindGameObjectWithTag")]
+[LightIcon("Light/FindGameObjectWithTag")]
+public class FindGameObjectWithTag : Action
 {
-    class FindGameObjectMemory
+    class FindGameObjectWithTagMemory
     {
         public BlackboardData data;
     }
-    public string gameObjectName;
+    public TagList gameObjectTag;
     [Tooltip("The Blackboard Key in which to store the found object")]
     public BlackboardGameObject gameObject;
     public override void OnInitialize(object nodeMemory, SchemaAgent agent)
     {
-        FindGameObjectMemory memory = (FindGameObjectMemory)nodeMemory;
+        FindGameObjectWithTagMemory memory = (FindGameObjectWithTagMemory)nodeMemory;
         memory.data = agent.GetBlackboardData();
     }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        FindGameObjectMemory memory = (FindGameObjectMemory)nodeMemory;
+        FindGameObjectWithTagMemory memory = (FindGameObjectWithTagMemory)nodeMemory;
 
         BlackboardData.EntryData entry = memory.data.GetEntry(gameObject.entryID);
 
         if (!string.IsNullOrEmpty(gameObject.entryID))
         {
-            GameObject found = GameObject.Find(gameObjectName);
+            GameObject found = GameObject.FindGameObjectWithTag(gameObjectTag.tag);
 
             if (!found)
             {

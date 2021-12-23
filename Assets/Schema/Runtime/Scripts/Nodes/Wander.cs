@@ -11,7 +11,7 @@ public class Wander : Action
 {
     [Tooltip("The distance an agent will travel in any direction")]
     public float distance = 1f;
-    public NavMeshAreaFilter navmeshAreaMask;
+    public NavMeshAreaMask navmeshAreaMask;
     public bool visualize;
     class WanderMemory
     {
@@ -58,7 +58,6 @@ public class Wander : Action
         }
         else
         {
-            Debug.Log(memory.destination);
             return NodeStatus.Failure;
         }
     }

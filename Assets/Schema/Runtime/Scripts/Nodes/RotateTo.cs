@@ -16,7 +16,7 @@ public class RotateTo : Schema.Runtime.Action
     {
         selector.AddVector2Filter();
         selector.AddVector3Filter();
-        selector.AddObjectFilter();
+        selector.AddGameObjectFilter();
     }
     private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
     {

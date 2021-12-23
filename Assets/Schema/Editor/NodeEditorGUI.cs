@@ -203,10 +203,10 @@ namespace Schema.Editor
             {
                 if (agent)
                 {
-                    if (windowInfo.selectedDecorator)
+                    if (windowInfo.selectedDecorator != null)
                         agent.editorTarget = windowInfo.selectedDecorator.node;
-                    else
-                        agent.editorTarget = windowInfo.selected.Count > 0 ? windowInfo.selected[0] : null;
+                    else if (editor != null)
+                        agent.editorTarget = (Node)editor.targets[0];
                 }
                 activeAgent = null;
             }
@@ -903,6 +903,11 @@ namespace Schema.Editor
             NodeEditorPrefs.maxMinimapHeight = EditorGUILayout.FloatField("Max Minimap Height", NodeEditorPrefs.maxMinimapHeight);
             NodeEditorPrefs.minimapOpacity = EditorGUILayout.Slider("Minimap Opacity", NodeEditorPrefs.minimapOpacity, 0f, 1f);
             NodeEditorPrefs.minimapOutlineColor = EditorGUILayout.ColorField("Minimap Outline Color", NodeEditorPrefs.minimapOutlineColor);
+
+            EditorGUILayout.LabelField("");
+
+            if (GUILayout.Button("Reset to default"))
+                NodeEditorPrefs.ResetToDefault();
         }
 
         ///<summary>
@@ -937,11 +942,14 @@ namespace Schema.Editor
                 bool isInspectingDecorator = editor.targets.OfType<Decorator>().Count() > 0;
 
                 EditorGUI.BeginChangeCheck();
+                EditorGUI.BeginDisabledGroup(Application.isPlaying);
                 if (isInspectingDecorator)
                     defaultDecoratorEditor.OnInspectorGUI();
-                else
+                else if (editor.targets.All(obj => typeof(Node).IsAssignableFrom(obj.GetType())))
                     defaultNodeEditor.OnInspectorGUI();
+                EditorGUILayout.LabelField("");
                 editor.OnInspectorGUI();
+                EditorGUI.EndDisabledGroup();
                 if (EditorGUI.EndChangeCheck())
                 {
                     windowInfo.treeDirty = true;
@@ -1087,8 +1095,6 @@ namespace Schema.Editor
             }
 
             GUILayout.BeginVertical(NodeEditorResources.styles.backgroundBg);
-
-            Debug.Log(NodeEditorResources.styles.backgroundBg);
 
             GUILayout.Label(windowInfo.searchWantsNode ? "Add Node" : "Add Decorator", EditorStyles.whiteLargeLabel);
 

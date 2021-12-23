@@ -17,7 +17,7 @@ internal class MoveToDirect : Action
     public BlackboardEntrySelector selector = new BlackboardEntrySelector();
     private void OnEnable()
     {
-        selector.AddObjectFilter();
+        selector.AddGameObjectFilter();
         selector.AddVector2Filter();
         selector.AddVector3Filter();
     }

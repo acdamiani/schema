@@ -4,19 +4,6 @@ using UnityEngine;
 using Schema.Runtime;
 using System.Linq;
 
-/* 		{ typeof(int), Color.black },
-		{ typeof(string), Color.black },
-		{ typeof(long), Color.black },
-		{ typeof(short), Color.black },
-		{ typeof(bool), Color.black },
-		{ typeof(Enum), Color.black },
-		{ typeof(Quaternion), Color.black },
-		{ typeof(Vector2), Color.black },
-		{ typeof(Vector3), Color.black },
-		{ typeof(Matrix4x4), Color.black },
-		{ typeof(Type), Color.black },
-		{ typeof(UnityEngine.Object), Color.black } */
-
 /// <summary>
 ///	Field to accept Blackboard Keys as inputs
 /// </summary>
@@ -24,12 +11,20 @@ using System.Linq;
 public class BlackboardEntrySelector
 {
     private Blackboard blackboard;
+    public int mask;
+    public bool test = false;
     public string entryID;
-    [SerializeField] private List<string> filters = new List<string>();
+#if UNITY_EDITOR
+    private string entryName => GetEditorEntry().Name;
+#endif
+    public List<string> filters = new List<string>();
+    public BlackboardEntrySelector()
+    {
+        if (Blackboard.instance != null)
+            Blackboard.instance.ConnectSelector(this);
+    }
     public void UpdateEntry(Blackboard blackboard)
     {
-        Debug.Log("Updating entry...");
-
         List<BlackboardEntry> validEntries = new List<BlackboardEntry>();
 
         validEntries = blackboard.entries
@@ -67,7 +62,7 @@ public class BlackboardEntrySelector
         AddFilter<int>();
         AddFilter<float>();
     }
-    public void AddObjectFilter()
+    public void AddGameObjectFilter()
     {
         AddFilter<GameObject>();
     }
@@ -94,7 +89,6 @@ public class BlackboardEntrySelector
     }
     public void AddIntFilter()
     {
-        Debug.Log("adding int filter");
         AddFilter<int>();
     }
     public void AddFloatFilter()

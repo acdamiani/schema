@@ -16,11 +16,14 @@ public class BlackboardCompareEditor : Editor
         entryOne = serializedObject.FindProperty("entryOne");
         entryTwo = serializedObject.FindProperty("entryTwo");
 
-        Type t1 = Type.GetType(obj.entryOne.GetEditorEntry().type);
-        Type t2 = Type.GetType(obj.entryTwo.GetEditorEntry().type);
-
         EditorGUILayout.PropertyField(serializedObject.FindProperty("entryOne"), true);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("entryTwo"), true);
+
+        Type t1 = Type.GetType(obj.entryOne.GetEditorEntry()?.type);
+        Type t2 = Type.GetType(obj.entryTwo.GetEditorEntry()?.type);
+
+        if (t1 == null || t2 == null)
+            return;
 
         if ((t1.IsNumeric() && t2.IsNumeric()) && (t1.IsDecimal() || t2.IsDecimal()))
             obj.epsilon = Mathf.Clamp(EditorGUILayout.FloatField("Epsilon", obj.epsilon), 0f, float.MaxValue);

@@ -47,12 +47,18 @@ namespace Schema.Editor
                         switch (e.commandName)
                         {
                             case "SoftDelete":
-                                if (e.type == EventType.ExecuteCommand) DeleteSelected();
+                                e.Use();
+
+                                DeleteSelected();
                                 break;
                             case "Delete":
-                                if (e.type == EventType.ExecuteCommand) DeleteSelected();
+                                e.Use();
+
+                                DeleteSelected();
                                 break;
                             case "FrameSelected":
+                                e.Use();
+
                                 if (windowInfo.selected.Count > 0)
                                 {
                                     List<Vector2> positions = windowInfo.selected.Select(node => node.position).ToList();
@@ -78,15 +84,21 @@ namespace Schema.Editor
                                 }
                                 break;
                             case "Copy":
+                                e.Use();
+
                                 if (windowInfo.selectedDecorator != null)
                                     Copy(windowInfo.selectedDecorator);
                                 else if (windowInfo.selected.Count > 0)
                                     Copy(windowInfo.selected);
                                 break;
                             case "Paste":
+                                e.Use();
+
                                 Paste();
                                 break;
                             case "SelectAll":
+                                e.Use();
+
                                 List<Node> iteration = new List<Node>(target.nodes);
 
                                 foreach (Node node in iteration)
@@ -95,6 +107,8 @@ namespace Schema.Editor
                                 }
                                 break;
                             case "DeselectAll":
+                                e.Use();
+
                                 windowInfo.selected.Clear();
                                 break;
                         }

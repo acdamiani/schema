@@ -14,7 +14,7 @@ public class Raycast : Decorator
     public bool visualize = true;
     private void OnEnable()
     {
-        point.AddObjectFilter();
+        point.AddGameObjectFilter();
         point.AddVector2Filter();
         point.AddVector3Filter();
     }

@@ -8,105 +8,135 @@ using System.Collections.Generic;
 [CustomPropertyDrawer(typeof(BlackboardEntrySelector), true)]
 public class BlackboardEntrySelectorDrawer : PropertyDrawer
 {
+    [Serializable]
+    struct EntryData
+    {
+        public string name;
+        public string id;
+        public Type type;
+        public EntryData(string name, string id, Type type)
+        {
+            this.name = name;
+            this.id = id;
+            this.type = type;
+        }
+    }
+    [SerializeField] private SerializableDictionary<string, int> indices = new SerializableDictionary<string, int>();
+    [SerializeField] private EntryData[] entryData;
+    private string[] entryByteStrings;
     private Blackboard blackboard;
-    private List<Type> filters;
-    private string[] optionsList;
-    private bool invalid = true;
-    [SerializeField] private int index;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        SerializedProperty idProperty = property.FindPropertyRelative("entryID");
+        SerializedProperty mask = property.FindPropertyRelative("mask");
+        SerializedProperty entryID = property.FindPropertyRelative("entryID");
+
+        //If the entryNames changes, recalculate the mask, and the cached array as well
+        if (entryData == null || entryByteStrings == null || !entryByteStrings.SequenceEqual(Blackboard.instance.entryByteStrings))
+        {
+            Debug.Log("Recalculating");
+
+            mask.intValue = Blackboard.instance.GetMask(GetFilters(property.FindPropertyRelative("filters")));
+
+            entryData = new EntryData[Blackboard.instance.entryByteStrings.Length];
+
+            for (int i = 0; i < entryData.Length; i++)
+            {
+                string name = GetName(Blackboard.instance.entryByteStrings[i]);
+                string id = GetID(Blackboard.instance.entryByteStrings[i]);
+                entryData[i] = new EntryData(name, id, null);
+            }
+
+            if (entryByteStrings == null || entryByteStrings.Length != Blackboard.instance.entryByteStrings.Length)
+                entryByteStrings = new string[Blackboard.instance.entryByteStrings.Length];
+
+            Array.Copy(Blackboard.instance.entryByteStrings, entryByteStrings, Blackboard.instance.entryByteStrings.Length);
+        }
+
+        EntryData[] filteredOptions = FilterArrayByMask(entryData, mask.intValue);
+        GUIContent[] contentOptions = new GUIContent[filteredOptions.Length];
+
+        int curIndex = -1;
+
+        for (int j = 0; j < filteredOptions.Length; j++)
+        {
+            if (filteredOptions[j].id == entryID.stringValue)
+                curIndex = j;
+        }
+
+        curIndex = curIndex == -1 ? filteredOptions.Length - 1 : curIndex;
+
+        for (int i = 0; i < filteredOptions.Length; i++)
+            contentOptions[i] = new GUIContent(filteredOptions[i].name);
 
         EditorGUI.BeginProperty(position, label, property);
 
-        if (!blackboard)
-        {
-            blackboard = GetBlackboardInstance(property);
-        }
+        int newIndex = EditorGUI.Popup(position, label, curIndex, contentOptions);
 
-        filters = GetTypeFilters(property);
-
-        optionsList = GetOptionsList(filters, blackboard);
-
-        if (invalid)
-        {
-            EditorGUI.Popup(position, label.text, 0, new string[] { "No valid keys found" });
-        }
-        else
-        {
-            List<BlackboardEntry> validEntries = blackboard.entries
-                .FindAll(entry => filters.Contains(Type.GetType(entry.type)));
-
-            foreach (BlackboardEntry entry in blackboard.entries)
-            {
-                if (entry.uID.Equals(idProperty.stringValue) && optionsList.ToList().Contains(entry.Name))
-                    index = optionsList.ToList().IndexOf(entry.Name);
-            }
-
-            if (index >= optionsList.Length)
-                index = 0;
-
-            index = EditorGUI.Popup(
-                position,
-                label.text,
-                index,
-                optionsList
-            );
-
-            string selected = optionsList[index];
-
-            int j = blackboard.entries.FindIndex(entry => entry.Name.Equals(selected));
-
-            if (j == -1)
-            {
-                idProperty.stringValue = "";
-            }
-            else if (!blackboard.entries[j].uID.Equals(idProperty.stringValue))
-            {
-                idProperty.stringValue = blackboard.entries[j].uID;
-            }
-        }
+        entryID.stringValue = filteredOptions[newIndex].id;
 
         EditorGUI.EndProperty();
     }
-    Blackboard GetBlackboardInstance(SerializedProperty property)
+    private List<string> GetFilters(SerializedProperty property)
     {
-        UnityEngine.Object targetObject = property.serializedObject.targetObject;
+        List<string> filters = new List<string>();
 
-        if (targetObject is Node node)
+        for (int i = 0; i < property.arraySize; i++)
         {
-            return node.graph.blackboard;
+            SerializedProperty propAtIndex = property.GetArrayElementAtIndex(i);
+            filters.Add(propAtIndex.stringValue);
         }
-        else if (targetObject is Decorator decorator)
-        {
-            return decorator.node.graph.blackboard;
-        }
-        else
-        {
-            return null;
-        }
+
+        return filters;
     }
-    List<Type> GetTypeFilters(SerializedProperty property)
+    private string GetName(string s)
     {
-        SerializedProperty filters = property.FindPropertyRelative("filters");
+        byte[] bytes = Convert.FromBase64String(s);
+        byte[] nameBytes = new byte[bytes.Length - 32];
 
-        List<Type> types = new List<Type>();
+        for (int i = 32; i < bytes.Length; i++)
+            nameBytes[i - 32] = bytes[i];
 
-        for (int i = 0; i < filters.arraySize; i++)
+        return System.Text.Encoding.ASCII.GetString(nameBytes);
+    }
+    private string GetID(string s)
+    {
+        byte[] bytes = Convert.FromBase64String(s);
+        byte[] idBytes = new byte[32];
+
+        for (int i = 0; i < 32; i++)
+            idBytes[i] = bytes[i];
+
+        return System.Text.Encoding.ASCII.GetString(idBytes);
+    }
+    private T[] FilterArrayByMask<T>(T[] array, int mask)
+    {
+        T[] ret = new T[Mathf.Clamp(BitCount(mask), 0, array.Length)];
+
+        if (ret.Length == 0)
+            return ret;
+
+        int j = ret.Length - 1;
+        for (int i = array.Length - 1; i >= 0; i--)
         {
-            SerializedProperty filter = filters.GetArrayElementAtIndex(i);
-            string str = filter.stringValue;
+            bool isIncluded = (mask & (1 << (array.Length - i - 1))) != 0;
 
-            types.Add(Type.GetType(str));
+            if (isIncluded)
+            {
+                ret[j] = array[i];
+                j--;
+            }
         }
 
-        return types;
+        return ret;
     }
-    string[] GetOptionsList(List<Type> filters, Blackboard blackboard)
+    int BitCount(int u)
     {
-        string[] arr = blackboard.entries.FindAll(entry => filters.Contains(Type.GetType(entry.type))).Select(entry => entry.Name).ToArray();
-        invalid = arr.Length == 0;
-
-        return arr;
+        int count = 0;
+        while (u != 0)
+        {
+            u = u & (u - 1);
+            count++;
+        }
+        return count;
     }
 }

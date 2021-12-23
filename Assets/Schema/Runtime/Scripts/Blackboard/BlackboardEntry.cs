@@ -31,7 +31,7 @@ public class BlackboardEntry : ScriptableObject
         }
     }
     [SerializeField] private string _type;
-    [SerializeField] public string uID;
+    public string uID;
     public Blackboard blackboard;
     public BlackboardEntry()
     {
