@@ -30,13 +30,6 @@ public class SchemaAgentEditor : Editor
 
         if (advancedFoldout)
         {
-            agent.ticksPerSecond = Mathf.Clamp(EditorGUILayout.IntField(
-                new GUIContent("TPS", "Ticks Per Second, or the how many times the behavior tree will execute within a given second. The recommended value is 60"),
-                agent.ticksPerSecond), 1, 120);
-            agent.checksPerSecond = Mathf.Clamp(EditorGUILayout.IntField(
-                new GUIContent("CPS", "Checks Per Second, or how many times per second the engine will evaluate relevant decorators and abort the tree if necessary. It is recommended that this have the same value as the TPS of the tree"),
-                agent.checksPerSecond), 1, 120);
-
             agent.logTaskChanges = EditorGUILayout.Toggle(new GUIContent("Log Task Changes", "When checked, will log whenever the task has changed to the console"), agent.logTaskChanges);
             agent.ignoreTickOverstep = EditorGUILayout.Toggle(new GUIContent("Ignore Tick Overstep", "Ignore the overstepping of the tick limit for this agent. It is highly recommended that this stay off, as checking it will no longer stop infinite loops"), agent.ignoreTickOverstep);
         }

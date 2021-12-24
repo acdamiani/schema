@@ -63,42 +63,6 @@ public class ConeCheck : Decorator
             return false;
         }
     }
-    public override void DrawGizmos(SchemaAgent agent)
-    {
-        if (!visualize)
-            return;
-
-        if (precisionMode)
-        {
-            RayRepresentation[] rayRepresentations = GenerateRays(agent);
-            Ray[] rays = new Ray[rayRepresentations.Length];
-
-            for (int i = 0; i < rayRepresentations.Length; i++)
-            {
-                rays[i] = (Ray)rayRepresentations[i];
-            }
-
-            Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
-            hits = GetHitInfo(rays);
-
-            for (int i = 0; i < rays.Length; i++)
-            {
-                RayRepresentation rayRepresentation = rayRepresentations[i];
-                Ray ray = rays[i];
-
-                if (hits.ContainsKey(ray) && tagFilter.tags.Contains(hits[ray].transform.tag))
-                    Gizmos.color = Color.green;
-                else
-                    Gizmos.color = Color.white;
-
-                Gizmos.DrawRay(rayRepresentation.start, rayRepresentation.direction);
-            }
-        }
-        else
-        {
-            DrawCone(agent, TestCone(agent));
-        }
-    }
     private GameObject TestCone(SchemaAgent agent)
     {
         if (precisionMode)
@@ -256,6 +220,43 @@ public class ConeCheck : Decorator
             return new List<Error>();
         }
     }
+#if UNITY_EDITOR
+    public override void DrawGizmos(SchemaAgent agent)
+    {
+        if (!visualize)
+            return;
+
+        if (precisionMode)
+        {
+            RayRepresentation[] rayRepresentations = GenerateRays(agent);
+            Ray[] rays = new Ray[rayRepresentations.Length];
+
+            for (int i = 0; i < rayRepresentations.Length; i++)
+            {
+                rays[i] = (Ray)rayRepresentations[i];
+            }
+
+            Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
+            hits = GetHitInfo(rays);
+
+            for (int i = 0; i < rays.Length; i++)
+            {
+                RayRepresentation rayRepresentation = rayRepresentations[i];
+                Ray ray = rays[i];
+
+                if (hits.ContainsKey(ray) && tagFilter.tags.Contains(hits[ray].transform.tag))
+                    Gizmos.color = Color.green;
+                else
+                    Gizmos.color = Color.white;
+
+                Gizmos.DrawRay(rayRepresentation.start, rayRepresentation.direction);
+            }
+        }
+        else
+        {
+            DrawCone(agent, TestCone(agent));
+        }
+    }
     private void DrawCone(SchemaAgent agent, bool hit)
     {
         Quaternion offsetRotation = Quaternion.AngleAxis(coneDirection, agent.transform.right);
@@ -279,4 +280,5 @@ public class ConeCheck : Decorator
         Handles.DrawLine(tip, agent.transform.position + rotatedOffset + rotation * (topNoRotate + Vector3.right * radius), 2f);
         Handles.DrawWireDisc(agent.transform.position + rotatedOffset + topCenter, normal, radius, 2f);
     }
+#endif
 }

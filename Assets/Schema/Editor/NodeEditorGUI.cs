@@ -3,6 +3,8 @@ using UnityEditor;
 using System;
 using System.Collections.Generic;
 using Schema.Runtime;
+using Schema.Utilities;
+using Schema.Editor.Utilities;
 using System.Linq;
 
 namespace Schema.Editor
@@ -43,6 +45,8 @@ namespace Schema.Editor
                 DrawToolbar();
                 DrawInspector();
 
+                Blackboard.instance = target.blackboard;
+
                 Vector2 size;
 
                 if (windowInfo.selectedDecorator)
@@ -75,7 +79,7 @@ namespace Schema.Editor
 
                 if (activeAgent != null)
                 {
-                    string content = "Viewing GameObject " + activeAgent.gameObject.name;
+                    string content = $"Viewing GameObject {activeAgent.gameObject.name}. t={Time.time}";
                     size = EditorStyles.boldLabel.CalcSize(new GUIContent(content));
                     GUI.Label(new Rect(8f, 32f, size.x, size.y), content, EditorStyles.boldLabel);
                 }
@@ -125,6 +129,8 @@ namespace Schema.Editor
                 EndWindows();
             }
 
+            if (windowInfo != null)
+                windowInfo.timeLastFrame = Time.realtimeSinceStartup;
             Repaint();
         }
 
@@ -201,14 +207,15 @@ namespace Schema.Editor
             }
             else
             {
-                if (agent)
-                {
-                    if (windowInfo.selectedDecorator != null)
-                        agent.editorTarget = windowInfo.selectedDecorator.node;
-                    else if (editor != null)
-                        agent.editorTarget = (Node)editor.targets[0];
-                }
                 activeAgent = null;
+            }
+
+            if (agent)
+            {
+                if (windowInfo.selectedDecorator != null)
+                    agent.editorTarget = windowInfo.selectedDecorator.node;
+                else if (editor != null && editor.targets.All(target => typeof(Node).IsAssignableFrom(target.GetType())))
+                    agent.editorTarget = (Node)editor.targets[0];
             }
 
             switch (searchWantsFocus)
@@ -251,9 +258,9 @@ namespace Schema.Editor
                         child.position.y - 16f));
 
                     Handles.DrawBezier(
-                        @from,
+                        from,
                         new Vector2(to.x, to.y - 8f),
-                        @from + Vector2.up * 50f,
+                        from + Vector2.up * 50f,
                         to - Vector2.up * 50f,
                         Color.white,
                         null,
@@ -587,7 +594,7 @@ namespace Schema.Editor
 
                 foreach (string node in keys)
                 {
-                    windowInfo.alpha[node] -= 0.5f * Time.deltaTime;
+                    windowInfo.alpha[node] -= 2f * Mathf.Clamp(windowInfo.deltaTime, 0f, float.MaxValue);
 
                     if (windowInfo.alpha[node] <= 0f)
                     {
@@ -1420,6 +1427,8 @@ namespace Schema.Editor
             internal bool isPanning;
             internal Vector2 nextPan;
             internal float recordedTime;
+            internal float timeLastFrame;
+            internal float deltaTime => Time.realtimeSinceStartup - timeLastFrame;
             public float panDuration;
             private Vector2 _pan;
             ///<summary>

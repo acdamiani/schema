@@ -23,7 +23,9 @@ public class Wait : Schema.Runtime.Action
     }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (Time.time - ((WaitMemory)nodeMemory).startTime >= seconds)
+        WaitMemory memory = (WaitMemory)nodeMemory;
+
+        if (Time.time - memory.startTime >= seconds)
         {
             return NodeStatus.Success;
         }

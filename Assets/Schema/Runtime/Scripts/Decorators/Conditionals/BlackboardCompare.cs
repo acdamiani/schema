@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Schema;
 using Schema.Runtime;
+using Schema.Utilities;
 public class BlackboardCompare : Decorator
 {
     public BlackboardEntrySelector entryOne = new BlackboardEntrySelector();

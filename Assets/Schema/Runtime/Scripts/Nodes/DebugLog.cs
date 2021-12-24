@@ -7,7 +7,7 @@ using System.Linq;
 [LightIcon("Light/DebugLog")]
 public class DebugLog : Action
 {
-    public string message;
+    [TextArea] public string message;
     public List<BlackboardEntrySelector> keys;
     class DebugLogMemory
     {
@@ -15,13 +15,19 @@ public class DebugLog : Action
     }
     private void OnEnable()
     {
-        foreach (BlackboardEntrySelector key in keys)
-            key.AddAllFilters();
+        if (keys != null)
+        {
+            foreach (BlackboardEntrySelector key in keys)
+                key.AddAllFilters();
+        }
     }
     private void OnValidate()
     {
-        foreach (BlackboardEntrySelector key in keys)
-            key.AddAllFilters();
+        if (keys != null)
+        {
+            foreach (BlackboardEntrySelector key in keys)
+                key.AddAllFilters();
+        }
     }
     public override void OnInitialize(object nodeMemory, SchemaAgent agent)
     {

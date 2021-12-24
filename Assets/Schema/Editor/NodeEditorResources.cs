@@ -41,6 +41,7 @@ public static class NodeEditorResources
     public static Texture2D plus => _plus != null ? _plus : _plus = EditorGUIUtility.FindTexture("Toolbar Plus More");
     public static Texture2D minus => _minus != null ? _minus : _minus = EditorGUIUtility.FindTexture("Toolbar Minus");
     public static Texture2D circle => _circle != null ? _circle : _circle = Resources.Load<Texture2D>("Circle");
+    public static Texture2D solid => _solid != null ? _solid : _solid = GenerateSolid(Color.white, new Vector2Int(32, 32));
     public static Texture2D gridTexture
     {
         get

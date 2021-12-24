@@ -12,11 +12,8 @@ public class BlackboardEntrySelector
 {
     private Blackboard blackboard;
     public int mask;
-    public bool test = false;
+    public string entryName;
     public string entryID;
-#if UNITY_EDITOR
-    private string entryName => GetEditorEntry().Name;
-#endif
     public List<string> filters = new List<string>();
     public BlackboardEntrySelector()
     {

@@ -3,8 +3,8 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Reflection;
-using Schema;
 using Schema.Runtime;
+using Schema.Utilities;
 
 public class SchemaAgent : MonoBehaviour
 {
@@ -12,20 +12,17 @@ public class SchemaAgent : MonoBehaviour
     private OptimizedGraph graph;
     private int currentIndex;
     private bool firstCall = true;
-    [NonSerialized] public Node editorTarget;
     private List<Node> calledNodes = new List<Node>();
     private BlackboardData blackboardData;
 #if UNITY_EDITOR
+    [NonSerialized] public Node editorTarget;
     private Dictionary<string, bool?> nodeStatus = new Dictionary<string, bool?>();
 #endif
-
     private Dictionary<string, object> agentState = new Dictionary<string, object>();
     private Dictionary<OptimizedDecorator, bool> decoratorState = new Dictionary<OptimizedDecorator, bool>();
     // Start is called before the first frame update
     // TODO: Implement
     public bool restartOnComplete;
-    public int ticksPerSecond = 60;
-    public int checksPerSecond = 60;
     public bool logTaskChanges;
     public int maxIterationsPerTick = 1000;
     public bool ignoreTickOverstep;
@@ -83,8 +80,13 @@ public class SchemaAgent : MonoBehaviour
 
         VerifyComponents();
 
-        InvokeRepeating(nameof(EvaluateDecorators), 0f, 60f / checksPerSecond);
-        InvokeRepeating(nameof(Tick), 0f, 60f / ticksPerSecond);
+        // InvokeRepeating(nameof(EvaluateDecorators), 0f, 1f / checksPerSecond);
+        // InvokeRepeating(nameof(Tick), 0f, 1f / ticksPerSecond);
+    }
+    void Update()
+    {
+        EvaluateDecorators();
+        Tick();
     }
     public List<Node> GetCalledNodes()
     {
@@ -178,6 +180,8 @@ public class SchemaAgent : MonoBehaviour
                         currentIndex = node.parent;
                         callerIndex = node.relativeIndex;
 
+                        nodeStatus[node.node.uID] = false;
+
                         break;
                     }
 
@@ -244,6 +248,8 @@ public class SchemaAgent : MonoBehaviour
                         context = NodeStatus.Failure;
                         currentIndex = node.parent;
                         callerIndex = node.relativeIndex;
+
+                        nodeStatus[node.node.uID] = false;
 
                         break;
                     }

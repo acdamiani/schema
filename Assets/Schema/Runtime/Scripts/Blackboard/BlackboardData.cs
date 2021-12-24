@@ -36,6 +36,14 @@ public class BlackboardData
         }
         return null;
     }
+    public object GetValue(BlackboardEntrySelector selector)
+    {
+        return GetValue(selector.entryID);
+    }
+    public object GetType(BlackboardEntrySelector selector)
+    {
+        return GetValue(selector).GetType();
+    }
     public object GetValue(string id)
     {
         if (string.IsNullOrEmpty(id))
@@ -52,6 +60,12 @@ public class BlackboardData
             return null;
         }
     }
+    public T GetValue<T>(BlackboardEntrySelector selector)
+    {
+        if (selector == null || String.IsNullOrEmpty(selector.entryID)) return default(T);
+
+        return GetValue<T>(selector.entryID);
+    }
     public T GetValue<T>(string id)
     {
         if (values.ContainsKey(id))
@@ -63,7 +77,7 @@ public class BlackboardData
             return default(T);
         }
     }
-    public void SetValue<T>(string id, object value)
+    public void SetValue<T>(string id, T value)
     {
         EntryData v = values[id];
         if (value == null)

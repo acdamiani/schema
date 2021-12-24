@@ -5,6 +5,11 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
+// A word of warning if you happen to be reading this code.
+// This has gone through three iterations, all in an attempt to simply allow a dropdown with BlackboardEntries
+// Unity's way of handling custom Properties is extremely difficult to work through, leading to the mess you see below
+// If anyone has a better way of doing this, please contact me
+
 [CustomPropertyDrawer(typeof(BlackboardEntrySelector), true)]
 public class BlackboardEntrySelectorDrawer : PropertyDrawer
 {
@@ -21,20 +26,19 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             this.type = type;
         }
     }
-    [SerializeField] private SerializableDictionary<string, int> indices = new SerializableDictionary<string, int>();
     [SerializeField] private EntryData[] entryData;
     private string[] entryByteStrings;
     private Blackboard blackboard;
+    private readonly GUIContent[] noEntries = new GUIContent[] { new GUIContent("No valid entries found") };
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         SerializedProperty mask = property.FindPropertyRelative("mask");
         SerializedProperty entryID = property.FindPropertyRelative("entryID");
+        SerializedProperty entryName = property.FindPropertyRelative("entryName");
 
         //If the entryNames changes, recalculate the mask, and the cached array as well
         if (entryData == null || entryByteStrings == null || !entryByteStrings.SequenceEqual(Blackboard.instance.entryByteStrings))
         {
-            Debug.Log("Recalculating");
-
             mask.intValue = Blackboard.instance.GetMask(GetFilters(property.FindPropertyRelative("filters")));
 
             entryData = new EntryData[Blackboard.instance.entryByteStrings.Length];
@@ -53,28 +57,41 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         }
 
         EntryData[] filteredOptions = FilterArrayByMask(entryData, mask.intValue);
-        GUIContent[] contentOptions = new GUIContent[filteredOptions.Length];
 
-        int curIndex = -1;
-
-        for (int j = 0; j < filteredOptions.Length; j++)
+        if (filteredOptions.Length == 0)
         {
-            if (filteredOptions[j].id == entryID.stringValue)
-                curIndex = j;
+            EditorGUI.BeginProperty(position, label, property);
+
+            EditorGUI.Popup(position, label, 0, noEntries);
+
+            EditorGUI.EndProperty();
         }
+        else
+        {
+            GUIContent[] contentOptions = new GUIContent[filteredOptions.Length];
 
-        curIndex = curIndex == -1 ? filteredOptions.Length - 1 : curIndex;
+            int curIndex = -1;
 
-        for (int i = 0; i < filteredOptions.Length; i++)
-            contentOptions[i] = new GUIContent(filteredOptions[i].name);
+            for (int j = 0; j < filteredOptions.Length; j++)
+            {
+                if (filteredOptions[j].id == entryID.stringValue)
+                    curIndex = j;
+            }
 
-        EditorGUI.BeginProperty(position, label, property);
+            curIndex = curIndex == -1 ? filteredOptions.Length - 1 : curIndex;
 
-        int newIndex = EditorGUI.Popup(position, label, curIndex, contentOptions);
+            for (int i = 0; i < filteredOptions.Length; i++)
+                contentOptions[i] = new GUIContent(filteredOptions[i].name);
 
-        entryID.stringValue = filteredOptions[newIndex].id;
+            EditorGUI.BeginProperty(position, label, property);
 
-        EditorGUI.EndProperty();
+            int newIndex = EditorGUI.Popup(position, label, curIndex, contentOptions);
+
+            EditorGUI.EndProperty();
+
+            entryID.stringValue = filteredOptions[newIndex].id;
+            entryName.stringValue = filteredOptions[newIndex].name;
+        }
     }
     private List<string> GetFilters(SerializedProperty property)
     {
@@ -115,7 +132,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         if (ret.Length == 0)
             return ret;
 
-        int j = ret.Length - 1;
+        int j = 0;
         for (int i = array.Length - 1; i >= 0; i--)
         {
             bool isIncluded = (mask & (1 << (array.Length - i - 1))) != 0;
@@ -123,7 +140,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             if (isIncluded)
             {
                 ret[j] = array[i];
-                j--;
+                j++;
             }
         }
 

@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Schema;
+using Schema.Utilities;
 
 [Serializable]
 public class Blackboard : ScriptableObject
@@ -57,7 +57,6 @@ public class Blackboard : ScriptableObject
         {
             selector.UpdateEntry(this);
             selector.mask = GetMask(selector.filters);
-            selector.test = true;
         }
 
         if (typeArrays == null)
@@ -135,7 +134,7 @@ public class Blackboard : ScriptableObject
     {
         string[] ret = new string[entries.Count];
 
-        for (int i = 0; i < ret.Length; i++)
+        for (int i = ret.Length - 1; i >= 0; i--)
         {
             BlackboardEntry entry = entries[i];
 
@@ -144,7 +143,7 @@ public class Blackboard : ScriptableObject
 
             string s = Convert.ToBase64String(guidBytes.Concat(nameBytes).ToArray());
 
-            ret[i] = s;
+            ret[ret.Length - i - 1] = s;
         }
 
         return ret;

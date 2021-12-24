@@ -2,6 +2,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Schema.Utilities;
 using Schema.Runtime;
 
 //Handles all events for the NodeEditor window

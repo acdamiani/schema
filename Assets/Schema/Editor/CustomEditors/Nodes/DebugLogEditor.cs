@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
@@ -8,6 +10,7 @@ public class DebugLogEditor : Editor
     SerializedProperty message;
     SerializedProperty keys;
     string m;
+    GUIStyle boxStyle;
     void OnEnable()
     {
         message = serializedObject.FindProperty("message");
@@ -15,6 +18,18 @@ public class DebugLogEditor : Editor
     }
     public override void OnInspectorGUI()
     {
+        DebugLog debugLog = (DebugLog)targets[0];
+
+        if (boxStyle == null)
+        {
+            boxStyle = new GUIStyle(EditorStyles.helpBox);
+            boxStyle.richText = true;
+        }
+
+        string[] names = new string[0];
+        if (debugLog != null && debugLog.keys != null)
+            names = debugLog.keys.Select(key => key.entryName).ToArray();
+
         serializedObject.Update();
 
         EditorGUILayout.PropertyField(message);
@@ -24,31 +39,14 @@ public class DebugLogEditor : Editor
 
         try
         {
-            m = String.Format(message.stringValue, GetKeyNames((DebugLog)targets[0], keys));
+            m = String.Format(message.stringValue, names);
         }
         catch (Exception e)
         {
             EditorGUILayout.HelpBox(e.Message, MessageType.Warning);
         }
-        EditorGUILayout.HelpBox(m, MessageType.None);
+        EditorGUILayout.TextArea(m, boxStyle);
 
         serializedObject.ApplyModifiedProperties();
-    }
-    private string[] GetKeyNames(DebugLog obj, SerializedProperty keys)
-    {
-        string[] arr = new string[keys.arraySize];
-
-        for (int i = 0; i < keys.arraySize; i++)
-        {
-            SerializedProperty element = keys.GetArrayElementAtIndex(i);
-            SerializedProperty entryID = element.FindPropertyRelative("entryID");
-
-            if (String.IsNullOrEmpty(entryID.stringValue))
-                continue;
-
-            arr[i] = Blackboard.instance.GetEntry(entryID.stringValue).Name;
-        }
-
-        return arr;
     }
 }

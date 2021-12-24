@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System;
-using Schema;
+using Schema.Utilities;
 
 [CustomEditor(typeof(BlackboardCompare))]
 public class BlackboardCompareEditor : Editor

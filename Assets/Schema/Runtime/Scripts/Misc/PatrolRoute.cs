@@ -9,6 +9,7 @@ public class PatrolRoute : MonoBehaviour
 {
     public List<Vector3> points = new List<Vector3>();
     [HideInInspector] public int selected;
+#if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         if (points == null) return;
@@ -51,4 +52,5 @@ public class PatrolRoute : MonoBehaviour
             Gizmos.DrawWireSphere(point, HandleUtility.GetHandleSize(point) * 0.5f);
         }
     }
+#endif
 }

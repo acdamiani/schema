@@ -36,6 +36,7 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Flee.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardNumber.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandomWeighted.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetBlackboardValue.cs" />
@@ -55,6 +56,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Selector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/ConeCheck.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardBool.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetBlackboardValueRandom.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/TriggerAnimator.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Proc/SchemaManager.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagList.cs" />
@@ -70,10 +72,10 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Blackboard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardInt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObjectWithTag.cs" />
+     <Compile Include="Assets/Schema/Utilities/HelperMethods.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector2.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector3.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToRandom.cs" />
-     <Compile Include="Assets/Schema/DownloadIcon.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Timer.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlayAnimation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Sequence.cs" />
@@ -84,7 +86,6 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/WaitBlackboardTime.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Loop.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorVariable.cs" />
-     <Compile Include="Assets/Schema/HelperMethods.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/ScriptableDictionary.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wander.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/BlackboardCondition.cs" />
@@ -97,8 +98,10 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateAway.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLayerWeight.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLookAt.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
-     <None Include="Assets/Schema/s.shader" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.24f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>

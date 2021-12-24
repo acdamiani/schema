@@ -242,8 +242,11 @@ namespace Schema.Editor
                     {
                         IEnumerable<BlackboardEntrySelector> l = (IEnumerable<BlackboardEntrySelector>)field.GetValue(obj);
 
-                        foreach (BlackboardEntrySelector s in l)
-                            yield return s;
+                        if (l != null)
+                        {
+                            foreach (BlackboardEntrySelector s in l)
+                                yield return s;
+                        }
                     }
                     else
                     {
@@ -1501,7 +1504,7 @@ namespace Schema.Editor
             }
             public static Color failureColor
             {
-                get => GetColor("SCHEMA_PREF__failureColor", new Color32(255, 32, 32, 255));
+                get => GetColor("SCHEMA_PREF__failureColor", new Color32(255, 64, 64, 255));
                 set => SetColor("SCHEMA_PREF__failureColor", value);
             }
             public static float minimapWidth

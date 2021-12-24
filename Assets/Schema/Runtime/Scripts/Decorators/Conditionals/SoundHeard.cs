@@ -26,25 +26,6 @@ public class SoundHeard : Decorator
     {
         return false;
     }
-    public override void DrawGizmos(SchemaAgent agent)
-    {
-        if (!visualize)
-            return;
-
-        Vector3[] audioPoints = GetAudio(agent);
-
-        Color handlesColor = Handles.color;
-
-        for (int i = 0; i < audioPoints.Length; i++)
-        {
-            Vector3 point = audioPoints[i];
-
-            Handles.color = new Color(0f, 1f, 0f, 0.25f);
-            Handles.DrawSolidDisc(point, SceneView.lastActiveSceneView.rotation * Vector3.forward, 1f);
-        }
-
-        Handles.color = handlesColor;
-    }
     private Vector3[] GetAudio(SchemaAgent agent)
     {
         AudioSource[] sources = GameObject.FindObjectsOfType<AudioSource>();
@@ -64,4 +45,25 @@ public class SoundHeard : Decorator
         source.GetCustomCurve(AudioSourceCurveType.CustomRolloff);
         return 0f;
     }
+#if UNITY_EDITOR
+    public override void DrawGizmos(SchemaAgent agent)
+    {
+        if (!visualize)
+            return;
+
+        Vector3[] audioPoints = GetAudio(agent);
+
+        Color handlesColor = Handles.color;
+
+        for (int i = 0; i < audioPoints.Length; i++)
+        {
+            Vector3 point = audioPoints[i];
+
+            Handles.color = new Color(0f, 1f, 0f, 0.25f);
+            Handles.DrawSolidDisc(point, SceneView.lastActiveSceneView.rotation * Vector3.forward, 1f);
+        }
+
+        Handles.color = handlesColor;
+    }
+#endif
 }

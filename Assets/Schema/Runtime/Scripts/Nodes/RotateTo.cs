@@ -5,12 +5,16 @@ using UnityEngine;
 public class RotateTo : Schema.Runtime.Action
 {
     public BlackboardEntrySelector selector = new BlackboardEntrySelector();
-    public bool lockXRotation = true;
-    public bool lockYRotation;
-    public bool lockZRotation = true;
+    [Tooltip("Speed of rotation, in deg/sec")]
+    public float speed;
+    [Tooltip("Enable smooth interpolation")]
+    public bool slerp = true;
     class RotateToMemory
     {
         public BlackboardData data;
+        public Vector3 forwardInitial;
+        public Quaternion rotationInitial;
+        public float t;
     }
     void OnEnable()
     {
@@ -57,14 +61,30 @@ public class RotateTo : Schema.Runtime.Action
 
         memory.data = agent.GetBlackboardData();
     }
+    public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
+    {
+        RotateToMemory memory = (RotateToMemory)nodeMemory;
+
+        memory.forwardInitial = agent.transform.forward;
+        memory.rotationInitial = agent.transform.rotation;
+        memory.t = Time.time;
+    }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         RotateToMemory memory = (RotateToMemory)nodeMemory;
+
         Vector3 point = GetPoint(selector, memory.data);
-        Quaternion rotation = agent.transform.rotation * Quaternion.LookRotation(point, Vector3.up);
+        Quaternion rotation = Quaternion.FromToRotation(memory.forwardInitial, (point - agent.transform.position).normalized);
+        float angleDiff = Vector3.Angle(agent.transform.forward, (point - agent.transform.position).normalized);
 
-        agent.transform.rotation = rotation;
+        if (slerp)
+            agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, memory.rotationInitial * rotation, Time.deltaTime * speed / angleDiff);
+        else
+            agent.transform.rotation = Quaternion.Lerp(agent.transform.rotation, rotation, Time.deltaTime * speed / angleDiff);
 
-        return NodeStatus.Success;
+        if (Mathf.Abs(angleDiff) > 0.0001f)
+            return NodeStatus.Running;
+        else
+            return NodeStatus.Success;
     }
 }

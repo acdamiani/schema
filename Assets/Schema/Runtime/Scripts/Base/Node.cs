@@ -17,6 +17,7 @@ namespace Schema.Runtime
         [HideInInspector] public Vector2 position;
         [HideInInspector] public int priority;
         [HideInInspector] public Graph graph;
+        [HideInInspector, TextArea] public string comment;
         [Tooltip("Toggle the status indicator for this node"), HideInInspector] public bool enableStatusIndicator = true;
         [SerializeField, HideInInspector, DisableOnPlay] private string _name;
         public Type GetMemoryType()
