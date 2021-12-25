@@ -26,6 +26,37 @@ namespace Schema.Utilities
                 list[i] = list[i - 1];
             list[0] = item;
         }
+        public static T[] FilterArrayByMask<T>(T[] array, int mask)
+        {
+            T[] ret = new T[Mathf.Clamp(BitCount(mask), 0, array.Length)];
+
+            if (ret.Length == 0)
+                return ret;
+
+            int j = 0;
+            for (int i = array.Length - 1; i >= 0; i--)
+            {
+                bool isIncluded = (mask & (1 << (array.Length - i - 1))) != 0;
+
+                if (isIncluded)
+                {
+                    ret[j] = array[i];
+                    j++;
+                }
+            }
+
+            return ret;
+        }
+        public static int BitCount(int u)
+        {
+            int count = 0;
+            while (u != 0)
+            {
+                u = u & (u - 1);
+                count++;
+            }
+            return count;
+        }
         public static Texture2D Invert(this Texture2D texture)
         {
             if (!texture.isReadable)

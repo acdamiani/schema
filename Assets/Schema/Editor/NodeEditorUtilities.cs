@@ -84,7 +84,7 @@ namespace Schema.Utilities
             }
         }
 
-        [MenuItem("Assets/Create/Schema/Custom Node", false, 89)]
+        [MenuItem("Assets/Create/Schema/Custom Node", false, 85)]
         private static void CreateNode()
         {
             CreateFromTemplate("Schema_NodeTemplate.cs", "CustomNode.cs");

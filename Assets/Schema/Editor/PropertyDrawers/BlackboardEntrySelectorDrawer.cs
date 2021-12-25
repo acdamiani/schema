@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEditor;
-using Schema.Runtime;
+using Schema.Utilities;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -56,7 +56,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             Array.Copy(Blackboard.instance.entryByteStrings, entryByteStrings, Blackboard.instance.entryByteStrings.Length);
         }
 
-        EntryData[] filteredOptions = FilterArrayByMask(entryData, mask.intValue);
+        EntryData[] filteredOptions = HelperMethods.FilterArrayByMask(entryData, mask.intValue);
 
         if (filteredOptions.Length == 0)
         {
@@ -124,36 +124,5 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             idBytes[i] = bytes[i];
 
         return System.Text.Encoding.ASCII.GetString(idBytes);
-    }
-    private T[] FilterArrayByMask<T>(T[] array, int mask)
-    {
-        T[] ret = new T[Mathf.Clamp(BitCount(mask), 0, array.Length)];
-
-        if (ret.Length == 0)
-            return ret;
-
-        int j = 0;
-        for (int i = array.Length - 1; i >= 0; i--)
-        {
-            bool isIncluded = (mask & (1 << (array.Length - i - 1))) != 0;
-
-            if (isIncluded)
-            {
-                ret[j] = array[i];
-                j++;
-            }
-        }
-
-        return ret;
-    }
-    int BitCount(int u)
-    {
-        int count = 0;
-        while (u != 0)
-        {
-            u = u & (u - 1);
-            count++;
-        }
-        return count;
     }
 }

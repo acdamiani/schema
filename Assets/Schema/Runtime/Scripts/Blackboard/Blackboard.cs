@@ -43,9 +43,9 @@ public class Blackboard : ScriptableObject
         if (!selectors.Contains(selector))
         {
             selectors.Add(selector);
-            selector.UpdateEntry(this);
 
             selector.mask = GetMask(selector.filters);
+            selector.UpdateEntry(this);
         }
     }
     public void UpdateSelectors()

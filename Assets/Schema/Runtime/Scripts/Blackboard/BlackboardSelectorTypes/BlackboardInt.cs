@@ -1,8 +1,5 @@
 [System.Serializable]
 public class BlackboardInt : BlackboardEntrySelector
 {
-	public BlackboardInt()
-	{
-		base.AddIntFilter();
-	}
+    public BlackboardInt() : base(typeof(int)) { }
 }

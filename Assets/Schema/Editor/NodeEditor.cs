@@ -183,6 +183,7 @@ namespace Schema.Editor
 
                 foreach (Decorator d in node.decorators)
                 {
+                    Debug.Log("Running");
                     toConnect.AddRange(GetSelectors(d));
                 }
             }

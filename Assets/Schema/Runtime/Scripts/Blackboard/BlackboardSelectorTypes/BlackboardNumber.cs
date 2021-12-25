@@ -1,9 +1,5 @@
 [System.Serializable]
 public class BlackboardNumber : BlackboardEntrySelector
 {
-	public BlackboardNumber()
-	{
-		base.AddFloatFilter();
-		base.AddIntFilter();
-	}
+    public BlackboardNumber() : base(typeof(float), typeof(int)) { }
 }

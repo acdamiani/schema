@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Schema.Runtime;
+using Schema.Utilities;
 using System.Linq;
 
 /// <summary>
@@ -14,7 +15,14 @@ public class BlackboardEntrySelector
     public int mask;
     public string entryName;
     public string entryID;
-    public List<string> filters = new List<string>();
+    public List<string> filters;
+    public BlackboardEntrySelector(params Type[] filters)
+    {
+        this.filters = filters.Select(x => x.AssemblyQualifiedName).ToList();
+
+        if (Blackboard.instance != null)
+            Blackboard.instance.ConnectSelector(this);
+    }
     public BlackboardEntrySelector()
     {
         if (Blackboard.instance != null)
@@ -22,15 +30,16 @@ public class BlackboardEntrySelector
     }
     public void UpdateEntry(Blackboard blackboard)
     {
-        List<BlackboardEntry> validEntries = new List<BlackboardEntry>();
+        string[] validEntries = HelperMethods.FilterArrayByMask(blackboard.entryByteStrings, mask);
 
-        validEntries = blackboard.entries
-            .FindAll(entry => filters.Select(item => Type.GetType(item)).Contains(Type.GetType(entry.type)));
+        if (String.IsNullOrEmpty(entryID) && validEntries.Length > 0)
+        {
+            string s = validEntries[0];
+            entryID = GetID(s);
+            entryName = GetName(s);
+        }
 
-        int index = validEntries
-            .FindIndex(x => x.uID == entryID);
-
-        entryID = (index == -1 ? GetDefaultEntry(blackboard) : validEntries[index])?.uID;
+        Debug.Log("Updating Entry...");
 
         this.blackboard = blackboard;
     }
@@ -42,6 +51,26 @@ public class BlackboardEntrySelector
     public BlackboardEntry GetEditorEntry()
     {
         return String.IsNullOrEmpty(entryID) ? null : blackboard?.GetEntry(entryID);
+    }
+    private string GetName(string s)
+    {
+        byte[] bytes = Convert.FromBase64String(s);
+        byte[] nameBytes = new byte[bytes.Length - 32];
+
+        for (int i = 32; i < bytes.Length; i++)
+            nameBytes[i - 32] = bytes[i];
+
+        return System.Text.Encoding.ASCII.GetString(nameBytes);
+    }
+    private string GetID(string s)
+    {
+        byte[] bytes = Convert.FromBase64String(s);
+        byte[] idBytes = new byte[32];
+
+        for (int i = 0; i < 32; i++)
+            idBytes[i] = bytes[i];
+
+        return System.Text.Encoding.ASCII.GetString(idBytes);
     }
     BlackboardEntry GetDefaultEntry(Blackboard blackboard)
     {
@@ -61,6 +90,7 @@ public class BlackboardEntrySelector
     }
     public void AddGameObjectFilter()
     {
+        Debug.Log("Adding filter");
         AddFilter<GameObject>();
     }
     public void AddFilter<T>()

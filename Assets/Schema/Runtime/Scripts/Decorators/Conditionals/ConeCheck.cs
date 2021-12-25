@@ -21,7 +21,7 @@ public class ConeCheck : Decorator
     [Tooltip("The tags to filter from. Only these tags will be considered when checking the cone")]
     public TagFilter tagFilter;
     [Info]
-    public string willStore => $"Will store hit object in GameObject {(gameObjectKey.GetEditorEntry() != null ? gameObjectKey.GetEditorEntry().Name : "null")}";
+    public string willStore => $"Will store hit object in GameObject {gameObjectKey.entryName}";
     class ConeCheckMemory
     {
         public BlackboardData data;

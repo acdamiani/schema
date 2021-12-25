@@ -4,7 +4,7 @@ using System;
 
 namespace Schema.Runtime
 {
-    [CreateAssetMenu(menuName = "Schema/Behavior Tree")]
+    [CreateAssetMenu(menuName = "Schema/Behavior Tree", order = 84)]
     [Serializable]
     public class Graph : ScriptableObject
     {
