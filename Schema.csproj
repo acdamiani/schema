@@ -42,11 +42,13 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetBlackboardValue.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntry.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/CustomAction.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardFloat.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Components/CoverVolume.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/BlackboardCompare.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlaySound.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardData.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObject.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Cross.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wait.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/SoundHeard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveTo.cs" />
@@ -73,6 +75,8 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Blackboard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardInt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObjectWithTag.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Dot.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector.cs" />
      <Compile Include="Assets/Schema/Utilities/HelperMethods.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector2.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector3.cs" />
@@ -86,6 +90,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Decorator.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Root.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/WaitBlackboardTime.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Angle.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Loop.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorVariable.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/ScriptableDictionary.cs" />
@@ -96,17 +101,13 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Node.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/Raycast.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandom.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Distance.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLookAt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToDirect.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Angle.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardFloat.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Dot.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Cross.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Distance.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetPosition.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.24f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

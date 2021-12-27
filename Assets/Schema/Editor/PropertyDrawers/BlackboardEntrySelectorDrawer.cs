@@ -28,8 +28,6 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     }
     [SerializeField] private EntryData[] entryData;
     private string[] entryByteStrings;
-    private Blackboard blackboard;
-    private readonly GUIContent[] noEntries = new GUIContent[] { new GUIContent("No valid entries found") };
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         SerializedProperty mask = property.FindPropertyRelative("mask");
@@ -58,39 +56,35 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         EntryData[] filteredOptions = HelperMethods.FilterArrayByMask(entryData, mask.intValue);
 
-        if (filteredOptions.Length == 0)
+        GUIContent[] contentOptions = new GUIContent[filteredOptions.Length + 1];
+        contentOptions[0] = new GUIContent("None");
+
+        int curIndex = 0;
+
+        for (int j = 0; j < filteredOptions.Length; j++)
         {
-            EditorGUI.BeginProperty(position, label, property);
+            if (filteredOptions[j].id == entryID.stringValue)
+                curIndex = j + 1;
+        }
 
-            EditorGUI.Popup(position, label, 0, noEntries);
+        for (int i = 1; i < contentOptions.Length; i++)
+            contentOptions[i] = new GUIContent(filteredOptions[i - 1].name);
 
-            EditorGUI.EndProperty();
+        EditorGUI.BeginProperty(position, label, property);
+
+        int newIndex = EditorGUI.Popup(position, label, curIndex, contentOptions);
+
+        EditorGUI.EndProperty();
+
+        if (newIndex == 0)
+        {
+            entryID.stringValue = "";
+            entryName.stringValue = "";
         }
         else
         {
-            GUIContent[] contentOptions = new GUIContent[filteredOptions.Length];
-
-            int curIndex = -1;
-
-            for (int j = 0; j < filteredOptions.Length; j++)
-            {
-                if (filteredOptions[j].id == entryID.stringValue)
-                    curIndex = j;
-            }
-
-            curIndex = curIndex == -1 ? filteredOptions.Length - 1 : curIndex;
-
-            for (int i = 0; i < filteredOptions.Length; i++)
-                contentOptions[i] = new GUIContent(filteredOptions[i].name);
-
-            EditorGUI.BeginProperty(position, label, property);
-
-            int newIndex = EditorGUI.Popup(position, label, curIndex, contentOptions);
-
-            EditorGUI.EndProperty();
-
-            entryID.stringValue = filteredOptions[newIndex].id;
-            entryName.stringValue = filteredOptions[newIndex].name;
+            entryID.stringValue = filteredOptions[newIndex - 1].id;
+            entryName.stringValue = filteredOptions[newIndex - 1].name;
         }
     }
     private List<string> GetFilters(SerializedProperty property)

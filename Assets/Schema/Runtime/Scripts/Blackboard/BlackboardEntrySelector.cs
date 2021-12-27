@@ -32,16 +32,11 @@ public class BlackboardEntrySelector
     }
     public void UpdateEntry(Blackboard blackboard)
     {
-        string[] validEntries = HelperMethods.FilterArrayByMask(blackboard.entryByteStrings, mask);
-
-        if (String.IsNullOrEmpty(entryID) && validEntries.Length > 0)
+        if (blackboard.entries.FindIndex(entry => entry.uID == entryID) == -1)
         {
-            string s = validEntries[0];
-            entryID = GetID(s);
-            entryName = GetName(s);
+            entryID = "";
+            entryName = "";
         }
-
-        this.blackboard = blackboard;
     }
     /// <summary>
     /// Gets the referenced Blackboard Entry by this selector. This is only available in the Editor. 
