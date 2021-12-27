@@ -16,6 +16,7 @@ public class BlackboardEntrySelector
     public string entryName;
     public string entryID;
     public List<string> filters;
+    public bool empty => String.IsNullOrEmpty(entryID);
     public BlackboardEntrySelector(params Type[] filters)
     {
         this.filters = filters.Select(x => x.AssemblyQualifiedName).ToList();

@@ -818,7 +818,6 @@ namespace Schema.Editor
         ///</summary>
         private void DrawInspector()
         {
-
             if (windowInfo.dividerPos < 0.0f) windowInfo.dividerPos = position.height / 2f;
 
             float inspectorWidth = GUIData.inspectorWidth;
@@ -951,10 +950,16 @@ namespace Schema.Editor
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.BeginDisabledGroup(Application.isPlaying);
                 if (isInspectingDecorator)
+                {
                     defaultDecoratorEditor.OnInspectorGUI();
+                    EditorGUILayout.LabelField("");
+                }
                 else if (editor.targets.All(obj => typeof(Node).IsAssignableFrom(obj.GetType())))
+                {
                     defaultNodeEditor.OnInspectorGUI();
-                EditorGUILayout.LabelField("");
+                    EditorGUILayout.LabelField("");
+                }
+                EditorGUILayout.LabelField(editor.targets[0].name, EditorStyles.boldLabel);
                 editor.OnInspectorGUI();
                 EditorGUI.EndDisabledGroup();
                 if (EditorGUI.EndChangeCheck())

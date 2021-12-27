@@ -13,6 +13,7 @@ public class BlackboardEntry : ScriptableObject
         set
         {
             _name = value;
+            name = value;
             blackboard.UpdateSelectors();
         }
     }

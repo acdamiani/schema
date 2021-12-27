@@ -37,12 +37,10 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Flee.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardNumber.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandomWeighted.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetBlackboardValue.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntry.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/CustomAction.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardFloat.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Components/CoverVolume.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/BlackboardCompare.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlaySound.cs" />
@@ -58,7 +56,6 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Selector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/ConeCheck.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateAway.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardBool.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetBlackboardValueRandom.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/TriggerAnimator.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Proc/SchemaManager.cs" />
@@ -68,23 +65,17 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Flow.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/NavMeshAreaMask.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AddForce.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardString.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Patrol.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/ReturnResult.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/DebugLog.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Blackboard.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardInt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObjectWithTag.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Dot.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector.cs" />
      <Compile Include="Assets/Schema/Utilities/HelperMethods.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector2.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector3.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToRandom.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Timer.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlayAnimation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Sequence.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardGameObject.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/PatrolRoute.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLayerWeight.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Decorator.cs" />
@@ -108,6 +99,8 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetPosition.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetRotation.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardKeyTypes.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.24f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
