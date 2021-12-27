@@ -36,8 +36,7 @@ public class SchemaAgent : MonoBehaviour
         if (!target) return;
         graph = SchemaManager.LoadGraph(target, false);
 
-        blackboard = new BlackboardData();
-        blackboard.Initialize(target.blackboard);
+        blackboard = new BlackboardData(target.blackboard);
 
         foreach (OptimizedNode oNode in graph.nodes)
         {

@@ -19,7 +19,11 @@ public class BlackboardData
     }
     private SchemaAgent agent;
     private Dictionary<string, EntryData> values = new Dictionary<string, EntryData>();
-    public void Initialize(Blackboard blackboard)
+    public BlackboardData(Blackboard blackboard)
+    {
+        Initialize(blackboard);
+    }
+    private void Initialize(Blackboard blackboard)
     {
         foreach (BlackboardEntry entry in blackboard.entries)
         {
@@ -40,7 +44,7 @@ public class BlackboardData
     {
         return GetValue(selector.entryID);
     }
-    public object GetType(BlackboardEntrySelector selector)
+    public Type GetType(BlackboardEntrySelector selector)
     {
         return GetValue(selector).GetType();
     }
@@ -76,6 +80,10 @@ public class BlackboardData
         {
             return default(T);
         }
+    }
+    public void SetValue<T>(BlackboardEntrySelector selector, T value)
+    {
+        SetValue<T>(selector.entryID, value);
     }
     public void SetValue<T>(string id, T value)
     {

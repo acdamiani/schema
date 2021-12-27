@@ -37,21 +37,21 @@ public class SetBlackboardValueEditor : Editor
         switch (Type.GetTypeCode(t))
         {
             case TypeCode.String:
-                stringValue.stringValue = EditorGUILayout.TextField("Value", stringValue.stringValue);
+                EditorGUILayout.PropertyField(stringValue);
                 break;
             case TypeCode.Int32:
-                intValue.intValue = EditorGUILayout.IntField("Value", intValue.intValue);
+                EditorGUILayout.PropertyField(intValue);
                 break;
             case TypeCode.Single:
-                floatValue.floatValue = EditorGUILayout.FloatField("Value", floatValue.floatValue);
+                EditorGUILayout.PropertyField(floatValue);
                 break;
             default:
                 if (typeof(Vector4) == t)
-                    vector4Value.vector4Value = EditorGUILayout.Vector4Field("Value", vector4Value.vector4Value);
+                    EditorGUILayout.PropertyField(vector4Value);
                 else if (typeof(Vector3) == t)
-                    vector3Value.vector3Value = EditorGUILayout.Vector3Field("Value", vector3Value.vector3Value);
+                    EditorGUILayout.PropertyField(vector3Value);
                 else if (typeof(Vector2) == t)
-                    vector2Value.vector2Value = EditorGUILayout.Vector2Field("Value", vector2Value.vector2Value);
+                    EditorGUILayout.PropertyField(vector2Value);
 
                 break;
         }

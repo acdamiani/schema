@@ -3,22 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using Schema.Runtime;
 
-public class Vector3Angle : Action
+public class Distance : Action
 {
-    [Tooltip("The first vector to get the angle between")]
+    [Tooltip("Vector A")]
     public BlackboardVector vectorOne;
-    [Tooltip("The second vector to get the angle between")]
+    [Tooltip("Vector B")]
     public BlackboardVector vectorTwo;
-    [Tooltip("Blackboard variable to store the angle in")]
-    public BlackboardFloat angleKey;
-    [Tooltip("Get the signed angle between Vectors")]
-    public bool signed;
-    [Tooltip("Convert result to radians")]
-    public bool radians;
+    [Tooltip("Blackboard variable to store the distance in")]
+    public BlackboardFloat distance;
+    [Tooltip("Whether to get distance squred, which avoids the expensive sqrt operation")]
+    public bool squared;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        float angle;
-
         Vector3 v1 = agent.blackboard.GetType(vectorOne) == typeof(Vector3) ?
             agent.blackboard.GetValue<Vector3>(vectorOne) :
             (Vector3)agent.blackboard.GetValue<Vector2>(vectorOne);
@@ -27,14 +23,10 @@ public class Vector3Angle : Action
             agent.blackboard.GetValue<Vector3>(vectorTwo) :
             (Vector3)agent.blackboard.GetValue<Vector2>(vectorTwo);
 
-        if (signed)
-            angle = Vector3.SignedAngle(v1, v2, Vector3.up);
-        else
-            angle = Vector3.Angle(v1, v2);
+        Vector3 diff = v1 - v2;
+        float dist = squared ? diff.sqrMagnitude : diff.magnitude;
 
-        angle = radians ? Mathf.Deg2Rad * angle : angle;
-
-        agent.blackboard.SetValue<float>(angleKey, angle);
+        agent.blackboard.SetValue<float>(distance, dist);
 
         return NodeStatus.Success;
     }
