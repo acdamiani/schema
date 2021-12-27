@@ -9,10 +9,6 @@ public class DebugLog : Action
 {
     [TextArea] public string message;
     public List<BlackboardEntrySelector> keys;
-    class DebugLogMemory
-    {
-        public BlackboardData data;
-    }
     private void OnEnable()
     {
         if (keys != null)
@@ -29,17 +25,9 @@ public class DebugLog : Action
                 key.AddAllFilters();
         }
     }
-    public override void OnInitialize(object nodeMemory, SchemaAgent agent)
-    {
-        DebugLogMemory memory = (DebugLogMemory)nodeMemory;
-
-        memory.data = agent.GetBlackboardData();
-    }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        DebugLogMemory memory = (DebugLogMemory)nodeMemory;
-
-        object[] values = keys.Select(key => memory.data.GetValue(key.entryID)).ToArray();
+        object[] values = keys.Select(key => agent.blackboard.GetValue(key.entryID)).ToArray();
 
         try
         {

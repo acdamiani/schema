@@ -11,7 +11,6 @@ public class RotateTo : Schema.Runtime.Action
     public bool slerp = true;
     class RotateToMemory
     {
-        public BlackboardData data;
         public Vector3 forwardInitial;
         public Quaternion rotationInitial;
         public float t;
@@ -55,12 +54,6 @@ public class RotateTo : Schema.Runtime.Action
             return Vector3.zero;
         }
     }
-    public override void OnInitialize(object nodeMemory, SchemaAgent agent)
-    {
-        RotateToMemory memory = (RotateToMemory)nodeMemory;
-
-        memory.data = agent.GetBlackboardData();
-    }
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
         RotateToMemory memory = (RotateToMemory)nodeMemory;
@@ -73,7 +66,7 @@ public class RotateTo : Schema.Runtime.Action
     {
         RotateToMemory memory = (RotateToMemory)nodeMemory;
 
-        Vector3 point = GetPoint(selector, memory.data);
+        Vector3 point = GetPoint(selector, agent.blackboard);
         Quaternion rotation = Quaternion.FromToRotation(memory.forwardInitial, (point - agent.transform.position).normalized);
         float angleDiff = Vector3.Angle(agent.transform.forward, (point - agent.transform.position).normalized);
 

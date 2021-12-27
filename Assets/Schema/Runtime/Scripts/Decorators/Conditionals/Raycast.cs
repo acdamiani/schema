@@ -23,7 +23,7 @@ public class Raycast : Decorator
         if (string.IsNullOrEmpty(point.entryID))
             return false;
 
-        return TestCone(agent, agent.GetBlackboardData());
+        return TestCone(agent, agent.blackboard);
     }
     public override void DrawGizmos(SchemaAgent agent)
     {

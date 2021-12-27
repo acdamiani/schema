@@ -13,15 +13,6 @@ public class SoundHeard : Decorator
     public TagFilter tagFilter;
     [Info]
     public string willStore => $"Will store closest sound location in Vector3 {(hitPoint.GetEditorEntry() != null ? hitPoint.GetEditorEntry().Name : "null")}";
-    class SoundHeardMemory
-    {
-        public BlackboardData data;
-    }
-    public override void OnInitialize(object decoratorMemory, SchemaAgent agent)
-    {
-        SoundHeardMemory memory = (SoundHeardMemory)decoratorMemory;
-        memory.data = agent.GetBlackboardData();
-    }
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
         return false;

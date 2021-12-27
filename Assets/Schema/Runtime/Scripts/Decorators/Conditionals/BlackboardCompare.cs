@@ -31,13 +31,11 @@ public class BlackboardCompare : Decorator
     }
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
-        BlackboardData blackboard = agent.GetBlackboardData();
+        Type t1 = agent.blackboard.GetEntryType(entryOne.entryID);
+        Type t2 = agent.blackboard.GetEntryType(entryTwo.entryID);
 
-        Type t1 = blackboard.GetEntryType(entryOne.entryID);
-        Type t2 = blackboard.GetEntryType(entryTwo.entryID);
-
-        object val1 = blackboard.GetValue(entryOne.entryID);
-        object val2 = blackboard.GetValue(entryOne.entryID);
+        object val1 = agent.blackboard.GetValue(entryOne.entryID);
+        object val2 = agent.blackboard.GetValue(entryOne.entryID);
 
         return Compare(t1, t2, val1, val2);
     }

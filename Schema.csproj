@@ -55,6 +55,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Cooldown.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Selector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/ConeCheck.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateAway.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardBool.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetBlackboardValueRandom.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/TriggerAnimator.cs" />
@@ -81,6 +82,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Sequence.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardGameObject.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/PatrolRoute.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLayerWeight.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Decorator.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Root.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/WaitBlackboardTime.cs" />
@@ -94,13 +96,14 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Node.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/Raycast.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandom.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLookAt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToDirect.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateAway.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLayerWeight.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLookAt.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Angle.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardFloat.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardSelectorTypes/BlackboardVector.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.24f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

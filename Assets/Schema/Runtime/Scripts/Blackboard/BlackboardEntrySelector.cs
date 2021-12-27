@@ -25,6 +25,8 @@ public class BlackboardEntrySelector
     }
     public BlackboardEntrySelector()
     {
+        this.filters = new List<string>();
+
         if (Blackboard.instance != null)
             Blackboard.instance.ConnectSelector(this);
     }
@@ -38,8 +40,6 @@ public class BlackboardEntrySelector
             entryID = GetID(s);
             entryName = GetName(s);
         }
-
-        Debug.Log("Updating Entry...");
 
         this.blackboard = blackboard;
     }

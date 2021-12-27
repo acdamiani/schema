@@ -10,15 +10,8 @@ public class WaitBlackboardTime : Action
     class WaitBlackboardTimeMemory
     {
         public float startTime;
-        public BlackboardData data;
     }
     public BlackboardNumber number;
-    public override void OnInitialize(object nodeMemory, SchemaAgent agent)
-    {
-        WaitBlackboardTimeMemory memory = (WaitBlackboardTimeMemory)nodeMemory;
-
-        memory.data = agent.GetBlackboardData();
-    }
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
         WaitBlackboardTimeMemory memory = (WaitBlackboardTimeMemory)nodeMemory;
@@ -30,7 +23,7 @@ public class WaitBlackboardTime : Action
 
         if (string.IsNullOrEmpty(number.entryID)) return NodeStatus.Failure;
 
-        if (Time.time - memory.startTime >= memory.data.GetValue<float>(number.entryID))
+        if (Time.time - memory.startTime >= agent.blackboard.GetValue<float>(number.entryID))
         {
             return NodeStatus.Success;
         }

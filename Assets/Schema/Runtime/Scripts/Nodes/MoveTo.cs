@@ -80,7 +80,7 @@ public class MoveTo : Action
             return NodeStatus.Failure;
 
         MoveToMemory memory = (MoveToMemory)nodeMemory;
-        memory.point = GetPoint(selector, agent.GetBlackboardData());
+        memory.point = GetPoint(selector, agent.blackboard);
         memory.agent.speed = speed;
         memory.agent.stoppingDistance = acceptableRadius;
         memory.agent.angularSpeed = angularSpeed;

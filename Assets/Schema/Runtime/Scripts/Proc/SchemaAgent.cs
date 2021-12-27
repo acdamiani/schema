@@ -13,9 +13,10 @@ public class SchemaAgent : MonoBehaviour
     private int currentIndex;
     private bool firstCall = true;
     private List<Node> calledNodes = new List<Node>();
-    private BlackboardData blackboardData;
+    public BlackboardData blackboard { get; private set; }
 #if UNITY_EDITOR
-    [NonSerialized] public Node editorTarget;
+    [NonSerialized]
+    public Node editorTarget;
     private Dictionary<string, bool?> nodeStatus = new Dictionary<string, bool?>();
 #endif
     private Dictionary<string, object> agentState = new Dictionary<string, object>();
@@ -35,8 +36,8 @@ public class SchemaAgent : MonoBehaviour
         if (!target) return;
         graph = SchemaManager.LoadGraph(target, false);
 
-        blackboardData = new BlackboardData();
-        blackboardData.Initialize(target.blackboard);
+        blackboard = new BlackboardData();
+        blackboard.Initialize(target.blackboard);
 
         foreach (OptimizedNode oNode in graph.nodes)
         {
@@ -98,10 +99,6 @@ public class SchemaAgent : MonoBehaviour
         return nodeStatus;
     }
 #endif
-    public BlackboardData GetBlackboardData()
-    {
-        return blackboardData;
-    }
     void Reset()
     {
         VerifyComponents();

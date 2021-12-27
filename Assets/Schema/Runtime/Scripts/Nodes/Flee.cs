@@ -28,7 +28,6 @@ public class Flee : Action
     private Vector3 randomPoint;
     class FleeMemory
     {
-        public BlackboardData data;
         public NavMeshAgent agent;
         public Vector3 point;
     }
@@ -36,13 +35,12 @@ public class Flee : Action
     {
         FleeMemory memory = (FleeMemory)nodeMemory;
 
-        memory.data = agent.GetBlackboardData();
         memory.agent = agent.GetComponent<NavMeshAgent>();
     }
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
         FleeMemory memory = (FleeMemory)nodeMemory;
-        GameObject enemyObject = memory.data.GetValue<GameObject>(enemy);
+        GameObject enemyObject = agent.blackboard.GetValue<GameObject>(enemy);
 
         if (enemyObject == null)
         {

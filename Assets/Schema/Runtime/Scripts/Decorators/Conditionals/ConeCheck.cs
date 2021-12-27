@@ -22,10 +22,6 @@ public class ConeCheck : Decorator
     public TagFilter tagFilter;
     [Info]
     public string willStore => $"Will store hit object in GameObject {gameObjectKey.entryName}";
-    class ConeCheckMemory
-    {
-        public BlackboardData data;
-    }
     private class RayRepresentation
     {
         public Vector3 start;
@@ -40,25 +36,18 @@ public class ConeCheck : Decorator
             return new Ray(rayRepresentation.start, rayRepresentation.direction.normalized);
         }
     }
-    public override void OnInitialize(object decoratorMemory, SchemaAgent agent)
-    {
-        ConeCheckMemory memory = (ConeCheckMemory)decoratorMemory;
-        memory.data = agent.GetBlackboardData();
-    }
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
-        ConeCheckMemory memory = (ConeCheckMemory)decoratorMemory;
-
         GameObject go = TestCone(agent);
         if (go)
         {
-            memory.data.SetValue<GameObject>(gameObjectKey.entryID, go);
+            agent.blackboard.SetValue<GameObject>(gameObjectKey.entryID, go);
 
             return true;
         }
         else
         {
-            memory.data.SetValue<GameObject>(gameObjectKey.entryID, null);
+            agent.blackboard.SetValue<GameObject>(gameObjectKey.entryID, null);
 
             return false;
         }

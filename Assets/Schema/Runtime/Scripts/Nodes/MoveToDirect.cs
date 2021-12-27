@@ -58,7 +58,7 @@ internal class MoveToDirect : Action
         if (string.IsNullOrEmpty(selector.entryID))
         {
             MoveToDirectMemory memory = (MoveToDirectMemory)nodeMemory;
-            memory.point = GetPoint(selector, agent.GetBlackboardData());
+            memory.point = GetPoint(selector, agent.blackboard);
 
             if (rotateTowardsTarget)
             {
