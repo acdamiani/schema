@@ -824,6 +824,7 @@ namespace Schema.Editor
                 if (asChild && !operators[i].canHaveChildren) continue;
 
                 Node node = (Node)ScriptableObject.CreateInstance(nodeType);
+                node.name = node.GetType().Name;
                 node.hideFlags = HideFlags.HideAndDontSave;
                 List<UnityEngine.Object> toRecord = new List<UnityEngine.Object> { node };
                 if (node.parent != null) toRecord.Add(node.parent);

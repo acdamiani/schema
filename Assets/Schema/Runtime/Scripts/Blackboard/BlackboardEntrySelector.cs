@@ -94,6 +94,7 @@ public class BlackboardEntrySelector
         if (Blackboard.typeColors.ContainsKey(typeof(T)) && !filters.Contains(typeof(T).AssemblyQualifiedName))
         {
             filters.Add(typeof(T).AssemblyQualifiedName);
+            mask = Blackboard.instance.GetMask(filters);
         }
     }
     public void AddFilter(Type type)
@@ -101,6 +102,7 @@ public class BlackboardEntrySelector
         if (Blackboard.typeColors.ContainsKey(type) && !filters.Contains(type.AssemblyQualifiedName))
         {
             filters.Add(type.AssemblyQualifiedName);
+            mask = Blackboard.instance.GetMask(filters);
         }
     }
     public void AddAllFilters()

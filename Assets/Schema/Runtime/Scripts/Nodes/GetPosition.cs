@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Schema.Runtime;
 
+[DarkIcon("c_TransformIcon")]
+[LightIcon("c_TransformIcon")]
 public class GetPosition : Action
 {
     [Tooltip("Use the current Game Object rather than a Blackboard Key")]
@@ -40,7 +42,7 @@ public class GetPosition : Action
         List<Error> ret = new List<Error>();
 
         if (!useSelf && gameObject.empty)
-            ret.Add(new Error("GameObject Key is empty", Error.Severity.Error));
+            ret.Add(new Error("GameObject Key is empty", Error.Severity.Warning));
 
         if (positionKey.empty)
             ret.Add(new Error("Position Key is empty", Error.Severity.Warning));

@@ -37,6 +37,8 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         //If the entryNames changes, recalculate the mask, and the cached array as well
         if (entryData == null || entryByteStrings == null || !entryByteStrings.SequenceEqual(Blackboard.instance.entryByteStrings))
         {
+            Debug.Log("recalculating");
+
             mask.intValue = Blackboard.instance.GetMask(GetFilters(property.FindPropertyRelative("filters")));
 
             entryData = new EntryData[Blackboard.instance.entryByteStrings.Length];

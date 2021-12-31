@@ -212,7 +212,7 @@ namespace Schema.Editor
             switch (current.button)
             {
                 case 0:
-                    if (windowInfo.hoveredType == Window.Hovering.Minimap || windowInfo.hoveredType == Window.Hovering.MinimapNode)
+                    if (windowInfo.hoveredType == Window.Hovering.Minimap || windowInfo.hoveredType == Window.Hovering.MinimapNode && !drawBox)
                     {
                         Vector2 ratio = window.size / (windowInfo.minimapView.size);
 

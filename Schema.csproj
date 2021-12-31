@@ -47,12 +47,14 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardData.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObject.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Cross.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetRotation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wait.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/SoundHeard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Action.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Proc/SchemaAgent.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Cooldown.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetPosition.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Selector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/ConeCheck.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateAway.cs" />
@@ -75,12 +77,14 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToRandom.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Timer.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlayAnimation.cs" />
+     <Compile Include="Assets/Schema/DownloadIcon.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Sequence.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/PatrolRoute.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLayerWeight.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Decorator.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Root.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/WaitBlackboardTime.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardKeyTypes.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Angle.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Loop.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorVariable.cs" />
@@ -98,9 +102,8 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetPosition.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetRotation.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardKeyTypes.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetScale.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetBounds.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.24f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

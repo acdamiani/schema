@@ -46,6 +46,7 @@ namespace Schema.Runtime
             }
             set
             {
+                name = value;
                 _name = value;
             }
         }
