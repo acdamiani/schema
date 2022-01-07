@@ -845,7 +845,7 @@ namespace Schema.Editor
 
                 if (!asChild)
                 {
-                    node.position = position - size / 2f;
+                    node.position = position - GetAreaWithPadding(node, false) / 2f;
                 }
                 else
                 {

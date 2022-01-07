@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Schema.Runtime;
 
+[DarkIcon("Dark/Blackboard")]
+[LightIcon("Light/Blackboard")]
 public class SetBlackboardValue : Action
 {
     public BlackboardEntrySelector selector = new BlackboardEntrySelector();

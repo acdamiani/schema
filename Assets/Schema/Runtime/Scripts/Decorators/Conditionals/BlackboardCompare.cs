@@ -19,7 +19,7 @@ public class BlackboardCompare : Decorator
     {
         BlackboardEntry entryOneEditor = entryOne.GetEditorEntry();
 
-        if (entryOneEditor != null && Type.GetType(entryOneEditor.type).IsNumeric())
+        if (entryOneEditor != null && Type.GetType(entryOneEditor.typeString).IsNumeric())
         {
             entryTwo.ClearFilters();
             entryTwo.AddNumericFilter();

@@ -18,7 +18,7 @@ public class BlackboardEntryEditor : Editor
     public override void OnInspectorGUI()
     {
         BlackboardEntry entry = (BlackboardEntry)target;
-        Type type = Type.GetType(entry.type);
+        Type type = Type.GetType(entry.typeString);
 
         string newName = EditorGUILayout.TextField("Name", entry.Name);
         string newType = possibleTypes[
@@ -32,8 +32,8 @@ public class BlackboardEntryEditor : Editor
         if (!newName.Equals(entry.Name))
             entry.Name = newName;
 
-        if (!newType.Equals(entry.type))
-            entry.type = newType;
+        if (!newType.Equals(entry.typeString))
+            entry.typeString = newType;
 
         EditorGUILayout.LabelField("Description");
         EditorStyles.textField.wordWrap = true;

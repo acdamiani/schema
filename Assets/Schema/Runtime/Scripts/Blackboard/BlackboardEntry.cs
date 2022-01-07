@@ -19,19 +19,19 @@ public class BlackboardEntry : ScriptableObject
     }
     [SerializeField] private string _name;
     public string description;
-    public string type
+    public string typeString
     {
         get
         {
-            return _type;
+            return _typeString;
         }
         set
         {
-            _type = value;
+            _typeString = value;
             blackboard.UpdateSelectors();
         }
     }
-    [SerializeField] private string _type;
+    [SerializeField] private string _typeString;
     public string uID;
     public Blackboard blackboard;
     public BlackboardEntry()

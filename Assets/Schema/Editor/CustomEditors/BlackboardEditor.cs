@@ -50,7 +50,7 @@ public class BlackboardEditor : Editor
 
             GUI.color = Color.white;
 
-            DrawEntry(blackboard.entries[i].Name, Type.GetType(blackboard.entries[i].type));
+            DrawEntry(blackboard.entries[i].Name, Type.GetType(blackboard.entries[i].typeString));
 
             Rect r = GUILayoutUtility.GetLastRect();
 

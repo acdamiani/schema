@@ -70,7 +70,7 @@ public class BlackboardEntrySelector
     }
     BlackboardEntry GetDefaultEntry(Blackboard blackboard)
     {
-        List<BlackboardEntry> entries = blackboard.entries.FindAll(entry => filters.Select(item => Type.GetType(item)).Contains(Type.GetType(entry.type)));
+        List<BlackboardEntry> entries = blackboard.entries.FindAll(entry => filters.Select(item => Type.GetType(item)).Contains(Type.GetType(entry.typeString)));
 
         if (entries.Count == 0) return null;
         else return entries[0];

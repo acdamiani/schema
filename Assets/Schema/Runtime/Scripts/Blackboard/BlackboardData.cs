@@ -27,9 +27,9 @@ public class BlackboardData
     {
         foreach (BlackboardEntry entry in blackboard.entries)
         {
-            object defaultValue = GetDefault(Type.GetType(entry.type));
+            object defaultValue = GetDefault(Type.GetType(entry.typeString));
 
-            values.Add(entry.uID, new EntryData(entry.name, defaultValue, Type.GetType(entry.type)));
+            values.Add(entry.uID, new EntryData(entry.name, defaultValue, Type.GetType(entry.typeString)));
         }
     }
     private object GetDefault(Type t)

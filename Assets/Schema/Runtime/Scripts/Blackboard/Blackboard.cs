@@ -64,7 +64,7 @@ public class Blackboard : ScriptableObject
 
         foreach (Type t in typeColors.Keys)
         {
-            IEnumerable<BlackboardEntry> entriesForType = entries.FindAll(entry => Type.GetType(entry.type) == t);
+            IEnumerable<BlackboardEntry> entriesForType = entries.FindAll(entry => Type.GetType(entry.typeString) == t);
             typeArrays[t] = entriesForType.ToArray();
         }
 
@@ -78,7 +78,7 @@ public class Blackboard : ScriptableObject
         int ret = 0;
         for (int i = entries.Count - 1; i >= 0; i--)
         {
-            bool entryIncluded = typeArray.Contains(Type.GetType(entries[i].type));
+            bool entryIncluded = typeArray.Contains(Type.GetType(entries[i].typeString));
 
             if (entryIncluded)
                 ret |= 1 << i;
@@ -99,7 +99,7 @@ public class Blackboard : ScriptableObject
         entry.blackboard = this;
 
         entry.Name = UniqueName(type.Name + "Key", entries.Select(e => e.Name).ToList());
-        entry.type = type.AssemblyQualifiedName;
+        entry.typeString = type.AssemblyQualifiedName;
 
         entry.hideFlags = HideFlags.HideAndDontSave;
 
