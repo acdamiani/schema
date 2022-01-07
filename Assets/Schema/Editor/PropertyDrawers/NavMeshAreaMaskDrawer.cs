@@ -12,7 +12,7 @@ public class NavMeshAreaMaskDrawer : PropertyDrawer
         SerializedProperty selectedTags = property.FindPropertyRelative("areas");
         SerializedProperty mask = property.FindPropertyRelative("mask");
 
-        if (!initializedMask)
+        if (!initializedMask && mask.intValue != -1)
         {
             //Initialize mask from serialized string array
             List<string> values = new List<string>();
@@ -23,23 +23,31 @@ public class NavMeshAreaMaskDrawer : PropertyDrawer
             }
 
             //To fill int completely if we get all the tags
-            int tagCount = 0;
-            for (int i = 0; i < UnityEditorInternal.InternalEditorUtility.tags.Length; i++)
-            {
-                string tag = UnityEditorInternal.InternalEditorUtility.tags[i];
-
-                if (values.Contains(tag))
-                {
-                    lastMask = lastMask | (1 << i);
-                    tagCount++;
-                }
-            }
+            int tagCount = values.Count;
 
             if (tagCount == UnityEditorInternal.InternalEditorUtility.tags.Length)
+            {
                 lastMask = -1;
+            }
+            else
+            {
+                for (int i = 0; i < UnityEditorInternal.InternalEditorUtility.tags.Length; i++)
+                {
+                    string tag = UnityEditorInternal.InternalEditorUtility.tags[i];
 
-            initializedMask = true;
+                    if (values.Contains(tag))
+                    {
+                        lastMask = lastMask | (1 << i);
+                    }
+                }
+            }
         }
+        else if (!initializedMask)
+        {
+            lastMask = mask.intValue;
+        }
+
+        initializedMask = true;
 
         EditorGUI.BeginProperty(position, label, property);
 

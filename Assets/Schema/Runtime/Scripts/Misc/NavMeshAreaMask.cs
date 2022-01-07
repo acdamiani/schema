@@ -4,5 +4,5 @@ using System.Collections.Generic;
 public class NavMeshAreaMask
 {
     public List<string> areas = new List<string>();
-    public int mask;
+    public int mask = -1;
 }
