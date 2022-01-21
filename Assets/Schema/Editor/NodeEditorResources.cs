@@ -118,7 +118,7 @@ public static class NodeEditorResources
     }
     public class Styles
     {
-        public readonly GUIStyle node, decorator, title, nodeLabel, nodeText, nodeSelected, newNode, addNodeWindow, backgroundBg, searchbar, searchResult, minimap;
+        public readonly GUIStyle node, decorator, title, nodeLabel, nodeText, nodeSelected, newNode, addNodeWindow, backgroundBg, searchbar, searchResult, minimap, nameField;
         ///<summary>
         ///Generates Styles object which is used in the Node Editor GUI
         ///</summary>
@@ -235,6 +235,10 @@ public static class NodeEditorResources
                     textColor = Color.gray
                 }
             };
+
+            nameField = new GUIStyle("PR TextField");
+            //TODO: Make this not magic
+            nameField.fixedWidth = 250f;
         }
     }
 }

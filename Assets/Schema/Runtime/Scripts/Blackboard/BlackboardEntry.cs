@@ -28,10 +28,27 @@ public class BlackboardEntry : ScriptableObject
         set
         {
             _typeString = value;
+            _type = Type.GetType(_typeString);
             blackboard.UpdateSelectors();
         }
     }
     [SerializeField] private string _typeString;
+    public Type type
+    {
+        get
+        {
+            if (_type == null)
+                _type = Type.GetType(_typeString);
+
+            return _type;
+        }
+        set
+        {
+            _typeString = value.AssemblyQualifiedName;
+            _type = value;
+        }
+    }
+    private Type _type;
     public string uID;
     public Blackboard blackboard;
     public BlackboardEntry()

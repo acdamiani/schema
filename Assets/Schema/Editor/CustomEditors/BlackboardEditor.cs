@@ -8,9 +8,9 @@ using System.Linq;
 public class BlackboardEditor : Editor
 {
     private Blackboard blackboard;
-    private Rect hoveredRect;
     private Rect selectedRect;
     public int selectedIndex = -1;
+    private string nameFieldControlName;
     public void OnEnable()
     {
         if (target != null && target.GetType() == typeof(Blackboard))
@@ -45,12 +45,10 @@ public class BlackboardEditor : Editor
             GUI.color = GUI.skin.settings.selectionColor;
             if (selectedIndex == i)
                 GUI.Box(selectedRect, "", NodeEditorResources.styles.node);
-            /* 			else if (hoveredIndex == i)
-							EditorGUI.DrawRect(hoveredRect, Color.gray); */
 
             GUI.color = Color.white;
 
-            DrawEntry(blackboard.entries[i].Name, Type.GetType(blackboard.entries[i].typeString));
+            DrawEntry(blackboard.entries[i]);
 
             Rect r = GUILayoutUtility.GetLastRect();
 
@@ -64,6 +62,9 @@ public class BlackboardEditor : Editor
                 selectedIndex = i;
                 selectedRect = r;
                 clickedAny = true;
+
+                if (selectedIndex != i)
+                    GUI.FocusControl("");
             }
         }
 
@@ -96,32 +97,59 @@ public class BlackboardEditor : Editor
 
         if (blackboard.entries.Count == 0) selectedIndex = -1;
     }
-    private void DrawEntry(string name, Type type)
+    private void DrawEntry(BlackboardEntry entry)
     {
-        int oldIndentLevel = EditorGUI.indentLevel;
+        Event current = Event.current;
 
-        Vector2 nameSize = EditorStyles.whiteLargeLabel.CalcSize(new GUIContent(name));
+        Vector2 nameSize = EditorStyles.whiteLabel.CalcSize(new GUIContent(entry.Name));
 
-        GUILayout.BeginHorizontal(GUILayout.Height(32f));
+        GUILayout.BeginVertical(GUILayout.Height(32f));
+        GUILayout.Space(8f);
+        GUILayout.BeginHorizontal(GUILayout.Height(16f));
 
         GUILayout.Space(8f);
 
-        GUILayout.Label(name, EditorGUIUtility.isProSkin ? EditorStyles.whiteLargeLabel : EditorStyles.largeLabel);
-
-        GUILayout.FlexibleSpace();
-        GUILayout.Label(type.Name, EditorStyles.miniLabel, GUILayout.Height(32));
-        GUILayout.Space(8f);
-
-        GUI.color = Blackboard.typeColors[type];
-        Vector2 typeLabelSize = EditorStyles.miniLabel.CalcSize(new GUIContent(type.Name));
-        Rect imgRect = GUILayoutUtility.GetRect(new GUIContent(NodeEditorResources.blackboardIcon), GUIStyle.none, GUILayout.Width(32), GUILayout.Height(32));
-        GUI.DrawTexture(imgRect, NodeEditorResources.blackboardIcon);
+        GUI.color = Blackboard.typeColors[entry.type];
+        Rect imgRect = GUILayoutUtility.GetRect(new GUIContent(NodeEditorResources.circle), GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16));
+        GUI.DrawTexture(imgRect, NodeEditorResources.circle);
         GUI.color = Color.white;
 
         GUILayout.Space(8f);
 
-        GUILayout.EndHorizontal();
+        if (nameFieldControlName == entry.uID)
+        {
+            GUI.SetNextControlName(entry.uID);
+            entry.Name = GUILayout.TextField(entry.Name, NodeEditorResources.styles.nameField);
+        }
+        else
+        {
+            GUILayout.Label(entry.Name, NodeEditorResources.styles.nameField);
+        }
 
-        EditorGUI.indentLevel = oldIndentLevel;
+        Rect last = GUILayoutUtility.GetLastRect();
+        Rect name = new Rect(last.x, last.y, nameSize.x, last.height);
+
+        if (current.clickCount == 2 && current.button == 0 && name.Contains(current.mousePosition))
+        {
+            nameFieldControlName = entry.uID;
+            GUI.FocusControl(entry.uID);
+        }
+        // nameFieldControlName is this entry but not editing text field
+        else if (GUI.GetNameOfFocusedControl() != entry.uID && !String.IsNullOrEmpty(nameFieldControlName))
+        {
+            nameFieldControlName = "";
+        }
+
+        GUILayout.FlexibleSpace();
+        GUILayout.Label(entry.type.Name, EditorStyles.miniLabel);
+        GUILayout.Space(8f);
+
+        Vector2 typeLabelSize = EditorStyles.miniLabel.CalcSize(new GUIContent(entry.type.Name));
+
+        GUILayout.Space(8f);
+
+        GUILayout.EndHorizontal();
+        GUILayout.Space(8f);
+        GUILayout.EndVertical();
     }
 }

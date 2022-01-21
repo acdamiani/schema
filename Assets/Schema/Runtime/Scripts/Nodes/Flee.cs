@@ -29,6 +29,7 @@ public class Flee : Action
     class FleeMemory
     {
         public NavMeshAgent agent;
+        public GameObject enemy;
         public Vector3 point;
     }
     public override void OnInitialize(object nodeMemory, SchemaAgent agent)
@@ -53,6 +54,8 @@ public class Flee : Action
 
         bool chosePoint = NavMesh.SamplePosition(point, out NavMeshHit hit, maxDistance, areaMask.mask);
 
+        memory.enemy = enemyObject;
+
         if (!chosePoint)
             memory.point = Vector3.positiveInfinity;
         else
@@ -66,7 +69,8 @@ public class Flee : Action
         {
             if (!memory.agent.pathPending &&
             (memory.agent.remainingDistance <= memory.agent.stoppingDistance) &&
-            (!memory.agent.hasPath || memory.agent.velocity.sqrMagnitude == 0f))
+            (!memory.agent.hasPath || memory.agent.velocity.sqrMagnitude == 0f) &&
+            Vector3.Distance(agent.transform.position, memory.enemy.transform.position) >= safeDistance)
             {
                 return NodeStatus.Success;
             }
@@ -126,6 +130,13 @@ public class Flee : Action
         UnityEditor.Handles.DrawWireArc(agent.transform.position, Vector3.up, from, angle, minDistance);
         Gizmos.DrawRay(agent.transform.position, qa * rot * Vector3.forward * maxDistance);
         Gizmos.DrawRay(agent.transform.position, qb * rot * Vector3.forward * maxDistance);
+
+        Color handlesColor = UnityEditor.Handles.color;
+        UnityEditor.Handles.color = Color.green;
+
+        UnityEditor.Handles.DrawWireDisc(agent.transform.position, Vector3.up, safeDistance);
+
+        UnityEditor.Handles.color = handlesColor;
     }
 #endif
 }
