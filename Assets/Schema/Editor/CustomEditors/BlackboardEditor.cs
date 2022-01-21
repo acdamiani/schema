@@ -59,17 +59,20 @@ public class BlackboardEditor : Editor
 
             if (r.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
+                if (selectedIndex != i)
+                    GUI.FocusControl("");
+
                 selectedIndex = i;
                 selectedRect = r;
                 clickedAny = true;
-
-                if (selectedIndex != i)
-                    GUI.FocusControl("");
             }
         }
 
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
             selectedIndex = -1;
+
+        if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
+            GUI.FocusControl("");
 
         serializedObject.ApplyModifiedProperties();
     }
@@ -135,7 +138,7 @@ public class BlackboardEditor : Editor
             GUI.FocusControl(entry.uID);
         }
         // nameFieldControlName is this entry but not editing text field
-        else if (GUI.GetNameOfFocusedControl() != entry.uID && !String.IsNullOrEmpty(nameFieldControlName))
+        else if (GUI.GetNameOfFocusedControl() != entry.uID && nameFieldControlName == entry.uID)
         {
             nameFieldControlName = "";
         }
