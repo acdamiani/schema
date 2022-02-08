@@ -65,6 +65,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagList.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/DisableOnPlayAttribute.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Graph.cs" />
+     <Compile Include="Assets/Schema/Utilities/NameAliases.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Flow.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/NavMeshAreaMask.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AddForce.cs" />
@@ -85,7 +86,6 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Decorator.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Root.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/WaitBlackboardTime.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardKeyTypes.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Angle.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Loop.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorVariable.cs" />

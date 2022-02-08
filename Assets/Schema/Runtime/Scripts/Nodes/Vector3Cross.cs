@@ -6,11 +6,11 @@ using Schema.Runtime;
 public class Vector3Cross : Action
 {
     [Tooltip("LHS of the cross product")]
-    public BlackboardVector vectorOne;
+    public BlackboardEntrySelector<Vector3> vectorOne;
     [Tooltip("RHS of the cross product")]
-    public BlackboardVector vectorTwo;
+    public BlackboardEntrySelector<Vector3> vectorTwo;
     [Tooltip("Blackboard variable to store the cross product in")]
-    public BlackboardVector3 angleKey;
+    public BlackboardEntrySelector<Vector3> angleKey;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Vector3 v1 = agent.blackboard.GetType(vectorOne) == typeof(Vector3) ?

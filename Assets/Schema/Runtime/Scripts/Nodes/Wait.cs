@@ -11,7 +11,7 @@ public class Wait : Schema.Runtime.Action
     {
         public float startTime;
     }
-    public float seconds = 1.0f;
+    public float seconds;
     void OnValidate()
     {
         seconds = seconds > 0.001f ? seconds : 0.001f;

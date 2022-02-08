@@ -18,13 +18,7 @@ public class MoveTo : Action
     public float acceptableRadius = 1f;
     [Tooltip("How fast the agent can turn to look at a target, given in deg/sec")]
     public float angularSpeed = 120f;
-    public BlackboardEntrySelector selector = new BlackboardEntrySelector();
-    private void OnEnable()
-    {
-        selector.AddGameObjectFilter();
-        selector.AddVector2Filter();
-        selector.AddVector3Filter();
-    }
+    public BlackboardEntrySelector<float> selector;
     private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
     {
         BlackboardData.EntryData entryData = data.GetEntry(selector.entryID);

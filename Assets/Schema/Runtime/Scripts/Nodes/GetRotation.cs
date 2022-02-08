@@ -12,11 +12,11 @@ public class GetRotation : Action
     [Tooltip("Get rotation in euler angles")]
     public bool eulerAngles = true;
     [Tooltip("GameObject to get position from")]
-    public BlackboardGameObject gameObject;
+    public BlackboardEntrySelector<GameObject> gameObject;
     [Tooltip("Key to store euler angles of rotation in")]
-    public BlackboardVector3 eulerKey;
+    public BlackboardEntrySelector<Vector3> eulerKey;
     [Tooltip("Key to store rotation as Quaternion in")]
-    public BlackboardQuaternion quaternionKey;
+    public BlackboardEntrySelector<Quaternion> quaternionKey;
     [Tooltip("When toggled, will use local rotation (relative to parent) instead of world position")]
     public bool local;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

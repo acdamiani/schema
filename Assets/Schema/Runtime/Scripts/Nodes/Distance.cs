@@ -6,11 +6,11 @@ using Schema.Runtime;
 public class Distance : Action
 {
     [Tooltip("Vector A")]
-    public BlackboardVector vectorOne;
+    public BlackboardEntrySelector<Vector3> vectorOne;
     [Tooltip("Vector B")]
-    public BlackboardVector vectorTwo;
+    public BlackboardEntrySelector<Vector3> vectorTwo;
     [Tooltip("Blackboard variable to store the distance in")]
-    public BlackboardFloat distance;
+    public BlackboardEntrySelector<float> distance;
     [Tooltip("Whether to get distance squred, which avoids the expensive sqrt operation")]
     public bool squared;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

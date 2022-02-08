@@ -6,11 +6,11 @@ using Schema.Runtime;
 public class Vector3Angle : Action
 {
     [Tooltip("The first vector to get the angle between")]
-    public BlackboardVector vectorOne;
+    public BlackboardEntrySelector<Vector3> vectorOne;
     [Tooltip("The second vector to get the angle between")]
-    public BlackboardVector vectorTwo;
+    public BlackboardEntrySelector<Vector3> vectorTwo;
     [Tooltip("Blackboard variable to store the angle in")]
-    public BlackboardFloat angleKey;
+    public BlackboardEntrySelector<float> angleKey;
     [Tooltip("Get the signed angle between Vectors")]
     public bool signed;
     [Tooltip("Convert result to radians")]

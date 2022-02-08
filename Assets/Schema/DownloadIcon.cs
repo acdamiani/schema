@@ -4,9 +4,11 @@ using System.Collections.Generic;
 public class DownloadIcon : MonoBehaviour
 {
     public bool test;
-    public void OnValidate()
+    public static void Download()
     {
-        Texture tex = EditorGUIUtility.IconContent("MeshFilter Icon").image;
+        GUIStyle s = GUI.skin.GetStyle("ObjectFieldButton");
+
+        Texture tex = (s.normal.background);
 
         RenderTexture tmp = RenderTexture.GetTemporary(
                 tex.width,

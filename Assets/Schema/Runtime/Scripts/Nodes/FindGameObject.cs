@@ -7,7 +7,7 @@ public class FindGameObject : Action
 {
     public string gameObjectName;
     [Tooltip("The Blackboard Key in which to store the found object")]
-    public BlackboardGameObject gameObject;
+    public BlackboardEntrySelector<GameObject> gameObject;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         BlackboardData.EntryData entry = agent.blackboard.GetEntry(gameObject.entryID);

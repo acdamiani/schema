@@ -8,7 +8,7 @@ public class SoundHeard : Decorator
     public float soundSensitivity = 60.0f;
     [Tooltip("Display heard noises locations in the editor for the currently selected agent")]
     public bool visualize = true;
-    public BlackboardVector3 hitPoint;
+    public BlackboardEntrySelector<Vector3> hitPoint;
     [Tooltip("The tags to filter from. Only these tags will be considered when listening for noise")]
     public TagFilter tagFilter;
     [Info]

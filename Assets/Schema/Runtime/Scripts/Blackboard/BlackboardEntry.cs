@@ -14,7 +14,6 @@ public class BlackboardEntry : ScriptableObject
         {
             _name = value;
             name = value;
-            blackboard.UpdateSelectors();
         }
     }
     [SerializeField] private string _name;
@@ -29,7 +28,6 @@ public class BlackboardEntry : ScriptableObject
         {
             _typeString = value;
             _type = Type.GetType(_typeString);
-            blackboard.UpdateSelectors();
         }
     }
     [SerializeField] private string _typeString;
@@ -51,9 +49,15 @@ public class BlackboardEntry : ScriptableObject
     private Type _type;
     public string uID;
     public Blackboard blackboard;
+    public EntryType entryType = EntryType.Local;
     public BlackboardEntry()
     {
         if (string.IsNullOrEmpty(uID)) uID = Guid.NewGuid().ToString("N");
     }
-
+    public enum EntryType
+    {
+        Local,
+        Shared,
+        Global
+    }
 }

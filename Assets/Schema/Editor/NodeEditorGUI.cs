@@ -159,14 +159,11 @@ namespace Schema.Editor
                 target.blackboard.entries[target.blackboard.entries.IndexOf(e)] = ScriptableObject.Instantiate(e);
             }
 
-            if (blackboardEditor && ((BlackboardEditor)blackboardEditor).selectedIndex != -1)
+            if (blackboardEditor && ((BlackboardEditor)blackboardEditor).selectedEntry != null)
             {
                 target.blackboard.entries.RemoveAll(x => x == null);
 
-                if (((BlackboardEditor)blackboardEditor).selectedIndex <= target.blackboard.entries.Count - 1)
-                {
-                    targets.Add(target.blackboard.entries[((BlackboardEditor)blackboardEditor).selectedIndex]);
-                }
+                targets.Add(((BlackboardEditor)blackboardEditor).selectedEntry);
             }
             else if (windowInfo.selectedDecorator != null)
             {

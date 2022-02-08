@@ -29,6 +29,9 @@ public static class NodeEditorResources
     private static Texture2D _minus;
     private static Texture2D _gridTexture;
     private static Texture2D _circle;
+    private static Texture2D _global;
+    private static Texture2D _local;
+    private static Texture2D _shared;
     public static Texture2D warnIcon => _warnIcon != null ? _warnIcon : _warnIcon = EditorGUIUtility.FindTexture("console.warnicon");
     public static Texture2D errorIcon => _errorIcon != null ? _errorIcon : _errorIcon = EditorGUIUtility.FindTexture("console.erroricon");
     public static Texture2D infoIcon => _infoIcon != null ? _infoIcon : _infoIcon = EditorGUIUtility.FindTexture("console.infoicon");
@@ -42,6 +45,9 @@ public static class NodeEditorResources
     public static Texture2D minus => _minus != null ? _minus : _minus = EditorGUIUtility.FindTexture("Toolbar Minus");
     public static Texture2D circle => _circle != null ? _circle : _circle = Resources.Load<Texture2D>("Circle");
     public static Texture2D solid => _solid != null ? _solid : _solid = GenerateSolid(Color.white, new Vector2Int(32, 32));
+    public static Texture2D local => _local != null ? _local : _local = (Texture2D)EditorGUIUtility.IconContent("ModelImporter Icon").image;
+    public static Texture2D global => _global != null ? _global : _global = EditorGUIUtility.FindTexture("Profiler.GlobalIllumination");
+    public static Texture2D shared => _shared != null ? _shared : _shared = EditorGUIUtility.FindTexture("Linked");
     public static Texture2D gridTexture
     {
         get

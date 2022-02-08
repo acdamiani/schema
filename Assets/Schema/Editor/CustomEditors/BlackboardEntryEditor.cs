@@ -3,6 +3,7 @@ using UnityEditor;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Schema.Editor;
 
 [CustomEditor(typeof(BlackboardEntry))]
 public class BlackboardEntryEditor : Editor
@@ -28,6 +29,8 @@ public class BlackboardEntryEditor : Editor
                 possibleTypes.Select(item => item.Name).ToArray()
                 )
         ].AssemblyQualifiedName;
+
+        entry.entryType = (BlackboardEntry.EntryType)EditorGUILayout.EnumPopup("Variable Type", entry.entryType);
 
         if (!newName.Equals(entry.Name))
             entry.Name = newName;

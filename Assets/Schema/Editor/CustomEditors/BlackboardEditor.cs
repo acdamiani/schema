@@ -1,15 +1,13 @@
 using UnityEngine;
 using UnityEditor;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-
-[CustomEditor(typeof(Blackboard))]
+using Schema.Utilities;
+using Schema.Editor;
 public class BlackboardEditor : Editor
 {
     private Blackboard blackboard;
     private Rect selectedRect;
-    public int selectedIndex = -1;
+    public BlackboardEntry selectedEntry;
     private string nameFieldControlName;
     public void OnEnable()
     {
@@ -20,17 +18,13 @@ public class BlackboardEditor : Editor
     {
         bool clickedAny = false;
 
-        if (selectedIndex > blackboard.entries.Count - 1)
-        {
-            selectedIndex = blackboard.entries.Count - 1;
-        }
-
         GUILayout.BeginHorizontal();
 
         if (GUILayout.Button(NodeEditorResources.plus, GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16))) ShowContext();
+
         GUILayout.FlexibleSpace();
 
-        EditorGUI.BeginDisabledGroup(selectedIndex == -1);
+        EditorGUI.BeginDisabledGroup(selectedEntry == null);
         if (GUILayout.Button(NodeEditorResources.minus, GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16))) RemoveSelected();
         EditorGUI.EndDisabledGroup();
 
@@ -42,34 +36,43 @@ public class BlackboardEditor : Editor
 
         for (int i = 0; i < blackboard.entries.Count; i++)
         {
+            BlackboardEntry entry = blackboard.entries[i];
+
             GUI.color = GUI.skin.settings.selectionColor;
-            if (selectedIndex == i)
+            if (selectedEntry == entry)
                 GUI.Box(selectedRect, "", NodeEditorResources.styles.node);
 
             GUI.color = Color.white;
 
-            DrawEntry(blackboard.entries[i]);
+            DrawEntry(entry);
 
             Rect r = GUILayoutUtility.GetLastRect();
 
-            if (selectedIndex == i && Event.current.type == EventType.Repaint)
+            if (selectedEntry == entry && Event.current.type == EventType.Repaint)
             {
                 selectedRect = r;
             }
 
             if (r.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
-                if (selectedIndex != i)
+                if (selectedEntry != entry)
                     GUI.FocusControl("");
 
-                selectedIndex = i;
+                selectedEntry = entry;
                 selectedRect = r;
                 clickedAny = true;
             }
         }
 
+        EditorGUILayout.LabelField("Global Variables", EditorStyles.boldLabel);
+
+        foreach (BlackboardEntry e in NodeEditor.globalBlackboard.entries)
+        {
+            DrawEntry(e);
+        }
+
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
-            selectedIndex = -1;
+            selectedEntry = null;
 
         if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
             GUI.FocusControl("");
@@ -94,11 +97,14 @@ public class BlackboardEditor : Editor
     }
     private void RemoveSelected()
     {
-        blackboard.RemoveEntry(selectedIndex);
-        selectedIndex--;
-        selectedIndex = selectedIndex > 0 ? selectedIndex : 0;
+        blackboard.RemoveEntry(selectedEntry, false);
+        int i = blackboard.entries.IndexOf(selectedEntry) - 1;
+        i = i > 0 ? i : 0;
 
-        if (blackboard.entries.Count == 0) selectedIndex = -1;
+        if (blackboard.entries.Count > 0)
+            selectedEntry = blackboard.entries[i];
+        else
+            selectedEntry = null;
     }
     private void DrawEntry(BlackboardEntry entry)
     {
@@ -112,12 +118,22 @@ public class BlackboardEditor : Editor
 
         GUILayout.Space(8f);
 
-        GUI.color = Blackboard.typeColors[entry.type];
-        Rect imgRect = GUILayoutUtility.GetRect(new GUIContent(NodeEditorResources.circle), GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16));
-        GUI.DrawTexture(imgRect, NodeEditorResources.circle);
-        GUI.color = Color.white;
+        Rect r = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none, GUILayout.Height(16f), GUILayout.Width(16f));
 
-        GUILayout.Space(8f);
+        switch (entry.entryType)
+        {
+            case BlackboardEntry.EntryType.Local:
+                GUI.Label(r, new GUIContent(NodeEditorResources.local, "Local Variable"), GUIStyle.none);
+                break;
+            case BlackboardEntry.EntryType.Global:
+                GUI.Label(r, new GUIContent(NodeEditorResources.global, "Global Variable"), GUIStyle.none);
+                break;
+            case BlackboardEntry.EntryType.Shared:
+                GUI.Label(r, new GUIContent(NodeEditorResources.shared, "Shared Variable"), GUIStyle.none);
+                break;
+        }
+
+        GUILayout.Space(4f);
 
         if (nameFieldControlName == entry.uID)
         {
@@ -126,7 +142,7 @@ public class BlackboardEditor : Editor
         }
         else
         {
-            GUILayout.Label(entry.Name, NodeEditorResources.styles.nameField);
+            GUILayout.Label(new GUIContent(entry.Name, entry.description), NodeEditorResources.styles.nameField);
         }
 
         Rect last = GUILayoutUtility.GetLastRect();
@@ -144,15 +160,30 @@ public class BlackboardEditor : Editor
         }
 
         GUILayout.FlexibleSpace();
-        GUILayout.Label(entry.type.Name, EditorStyles.miniLabel);
-        GUILayout.Space(8f);
+        GUILayout.Label(NameAliases.GetAliasForType(entry.type), EditorStyles.miniLabel);
 
-        Vector2 typeLabelSize = EditorStyles.miniLabel.CalcSize(new GUIContent(entry.type.Name));
+        GUILayout.Space(4f);
+
+        GUI.color = Blackboard.typeColors[entry.type];
+        Rect imgRect = GUILayoutUtility.GetRect(new GUIContent(NodeEditorResources.circle), GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16));
+        GUI.DrawTexture(imgRect, NodeEditorResources.circle);
+        GUI.color = Color.white;
 
         GUILayout.Space(8f);
 
         GUILayout.EndHorizontal();
         GUILayout.Space(8f);
         GUILayout.EndVertical();
+    }
+}
+
+[CustomEditor(typeof(Blackboard))]
+public class BlackboardInspectorEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        EditorGUI.BeginDisabledGroup(true);
+        base.OnInspectorGUI();
+        EditorGUI.EndDisabledGroup();
     }
 }

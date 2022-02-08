@@ -16,8 +16,8 @@ public class ConeCheck : Decorator
     public bool visualize = true;
     public bool precisionMode;
     public Vector3 offset;
-    public BlackboardGameObject parentObject;
-    public BlackboardGameObject gameObjectKey;
+    public BlackboardEntrySelector<GameObject> parentObject;
+    public BlackboardEntrySelector<GameObject> gameObjectKey;
     [Tooltip("The tags to filter from. Only these tags will be considered when checking the cone")]
     public TagFilter tagFilter;
     [Info]

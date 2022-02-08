@@ -10,9 +10,9 @@ public class GetScale : Action
     [Tooltip("Use the current Game Object rather than a Blackboard Key")]
     public bool useSelf;
     [Tooltip("GameObject to get scale from")]
-    public BlackboardGameObject gameObject;
+    public BlackboardEntrySelector<GameObject> gameObject;
     [Tooltip("Key to store scale in")]
-    public BlackboardVector3 scaleKey;
+    public BlackboardEntrySelector<Vector3> scaleKey;
     [Tooltip("When toggled, will use local scale (relative to parent) instead of lossy scale")]
     public bool local;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

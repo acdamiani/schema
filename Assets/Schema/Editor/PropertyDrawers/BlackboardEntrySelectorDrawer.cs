@@ -2,92 +2,90 @@ using UnityEngine;
 using UnityEditor;
 using Schema.Utilities;
 using System;
+using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
-
-// A word of warning if you happen to be reading this code.
-// This has gone through three iterations, all in an attempt to simply allow a dropdown with BlackboardEntries
-// Unity's way of handling custom Properties is extremely difficult to work through, leading to the mess you see below
-// If anyone has a better way of doing this, please contact me
 
 [CustomPropertyDrawer(typeof(BlackboardEntrySelector), true)]
 public class BlackboardEntrySelectorDrawer : PropertyDrawer
 {
-    [Serializable]
-    struct EntryData
-    {
-        public string name;
-        public string id;
-        public Type type;
-        public EntryData(string name, string id, Type type)
-        {
-            this.name = name;
-            this.id = id;
-            this.type = type;
-        }
-    }
-    [SerializeField] private EntryData[] entryData;
-    private string[] entryByteStrings;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         SerializedProperty mask = property.FindPropertyRelative("mask");
         SerializedProperty entryID = property.FindPropertyRelative("entryID");
         SerializedProperty entryName = property.FindPropertyRelative("entryName");
+        SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
 
-        //If the entryNames changes, recalculate the mask, and the cached array as well
-        if (entryData == null || entryByteStrings == null || !entryByteStrings.SequenceEqual(Blackboard.instance.entryByteStrings))
-        {
-            Debug.Log("recalculating");
+        SerializedProperty value = property.FindPropertyRelative("_value");
 
-            mask.intValue = Blackboard.instance.GetMask(GetFilters(property.FindPropertyRelative("filters")));
+        bool lastWideMode = EditorGUIUtility.wideMode;
+        EditorGUIUtility.wideMode = true;
 
-            entryData = new EntryData[Blackboard.instance.entryByteStrings.Length];
+        Rect enumRect = new Rect(position.x, position.y, position.width - 19, position.height);
+        Rect buttonRect = new Rect(position.xMax - 19, position.y, 19, Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
 
-            for (int i = 0; i < entryData.Length; i++)
-            {
-                string name = GetName(Blackboard.instance.entryByteStrings[i]);
-                string id = GetID(Blackboard.instance.entryByteStrings[i]);
-                entryData[i] = new EntryData(name, id, null);
-            }
-
-            if (entryByteStrings == null || entryByteStrings.Length != Blackboard.instance.entryByteStrings.Length)
-                entryByteStrings = new string[Blackboard.instance.entryByteStrings.Length];
-
-            Array.Copy(Blackboard.instance.entryByteStrings, entryByteStrings, Blackboard.instance.entryByteStrings.Length);
-        }
-
-        EntryData[] filteredOptions = HelperMethods.FilterArrayByMask(entryData, mask.intValue);
-
-        GUIContent[] contentOptions = new GUIContent[filteredOptions.Length + 1];
-        contentOptions[0] = new GUIContent("None");
-
-        int curIndex = 0;
-
-        for (int j = 0; j < filteredOptions.Length; j++)
-        {
-            if (filteredOptions[j].id == entryID.stringValue)
-                curIndex = j + 1;
-        }
-
-        for (int i = 1; i < contentOptions.Length; i++)
-            contentOptions[i] = new GUIContent(filteredOptions[i - 1].name);
+        Vector2 oldIconSize = EditorGUIUtility.GetIconSize();
+        EditorGUIUtility.SetIconSize(new Vector2(12, 12));
 
         EditorGUI.BeginProperty(position, label, property);
 
-        int newIndex = EditorGUI.Popup(position, label, curIndex, contentOptions);
+        bool doesHavePath = !String.IsNullOrEmpty(valuePathProp.stringValue);
 
-        EditorGUI.EndProperty();
+        if (doesHavePath)
+            label.tooltip = $"{(String.IsNullOrWhiteSpace(label.tooltip) ? "" : "\n")}Controlled by {valuePathProp.stringValue.Replace('/', '.')}";
 
-        if (newIndex == 0)
+        if (value != null)
         {
-            entryID.stringValue = "";
-            entryName.stringValue = "";
+            EditorGUI.BeginDisabledGroup(doesHavePath);
+
+            EditorGUI.PropertyField(enumRect, value, label, true);
+
+            EditorGUI.EndDisabledGroup();
+
+            GUIStyle t = new GUIStyle("ObjectFieldButton");
+            if (property.propertyPath.EndsWith("]"))
+                t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight) - 2;
+            else
+                t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
+
+            t.margin.Remove(buttonRect);
+            t.normal.textColor = Color.white;
+
+            GUI.Label(buttonRect, "", t);
+
+            if (Event.current.type == EventType.MouseDown && buttonRect.Contains(Event.current.mousePosition))
+            {
+                GenericMenu menu = GenerateMenu(property);
+
+                menu.DropDown(buttonRect);
+            }
         }
         else
         {
-            entryID.stringValue = filteredOptions[newIndex - 1].id;
-            entryName.stringValue = filteredOptions[newIndex - 1].name;
+            Rect controlRect = EditorGUI.PrefixLabel(position, label);
+
+            if (EditorGUI.DropdownButton(controlRect, new GUIContent("Hello World"), FocusType.Passive))
+            {
+                GenericMenu menu = GenerateMenu(property);
+
+                menu.DropDown(controlRect);
+            }
         }
+
+        EditorGUI.EndProperty();
+
+        EditorGUIUtility.SetIconSize(oldIconSize);
+
+        EditorGUIUtility.wideMode = lastWideMode;
+    }
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    {
+        SerializedProperty valueProp = property.FindPropertyRelative("_value");
+
+        if (valueProp != null)
+            return EditorGUI.GetPropertyHeight(valueProp, label, true);
+        else
+            return base.GetPropertyHeight(property, label);
     }
     private List<string> GetFilters(SerializedProperty property)
     {
@@ -120,5 +118,119 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             idBytes[i] = bytes[i];
 
         return System.Text.Encoding.ASCII.GetString(idBytes);
+    }
+
+    private GenericMenu GenerateMenu(SerializedProperty property)
+    {
+        SerializedProperty idProp = property.FindPropertyRelative("entryID");
+        SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
+        SerializedProperty typeMask = property.FindPropertyRelative("blackboardTypesMask");
+
+        GenericMenu menu = new GenericMenu();
+
+        menu.AddItem("None", String.IsNullOrEmpty(idProp.stringValue), () => GenericMenuSelectOption(property, ""), false);
+
+        List<Type> filtered = HelperMethods.FilterArrayByMask(Blackboard.typeColors.Keys.Reverse().ToArray(), typeMask.intValue).ToList();
+
+        Debug.Log(Convert.ToString(typeMask.intValue, toBase: 2));
+
+        foreach (string s in Blackboard.instance.entryByteStrings)
+        {
+            string entryID = GetID(s);
+            BlackboardEntry entry = Blackboard.instance.GetEntry(entryID);
+
+            IEnumerable<string> props = PrintProperties(
+                entry.type,
+                entry.type,
+                filtered,
+                entry.Name
+            );
+
+            foreach (string ss in props)
+            {
+                menu.AddItem(
+                    ss,
+                    valuePathProp.stringValue.Equals(ss),
+                    () => GenericMenuSelectOption(property, entryID, ss),
+                    false
+                );
+            }
+        }
+
+        return menu;
+    }
+    private void GenericMenuSelectOption(SerializedProperty property, string id, string path = "")
+    {
+        SerializedProperty idProperty = property.FindPropertyRelative("entryID");
+        SerializedProperty valuePathProperty = property.FindPropertyRelative("valuePath");
+
+        idProperty.stringValue = id;
+        valuePathProperty.stringValue = path;
+        property.serializedObject.ApplyModifiedProperties();
+    }
+    private IEnumerable<string> PrintProperties(Type baseType, Type type, List<Type> targets, string basePath)
+    {
+        if (targets.Contains(type))
+        {
+            yield return basePath;
+            yield break;
+        }
+
+        HashSet<Type> nonRecursiveTypes = new HashSet<Type> {
+                typeof(sbyte),
+                typeof(byte),
+                typeof(short),
+                typeof(ushort),
+                typeof(int),
+                typeof(uint),
+                typeof(long),
+                typeof(ulong),
+                typeof(char),
+                typeof(float),
+                typeof(double),
+                typeof(decimal),
+                typeof(bool),
+                typeof(string),
+                typeof(Enum)
+            };
+
+        foreach (PropertyInfo field in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            ObsoleteAttribute obsoleteAttribute = field.GetCustomAttribute<ObsoleteAttribute>();
+
+            if (obsoleteAttribute != null)
+                continue;
+
+            if (field.Name == "Item")
+                continue;
+
+            if (targets.Contains(field.PropertyType))
+            {
+                yield return basePath + "/" + field.Name;
+            }
+            else if (field.PropertyType != type && field.PropertyType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.PropertyType)))
+            {
+                foreach (string s in PrintProperties(baseType, field.PropertyType, targets, basePath + "/" + field.Name))
+                    yield return s;
+            }
+        }
+
+        foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+        {
+            ObsoleteAttribute obsoleteAttribute = field.GetCustomAttribute<ObsoleteAttribute>();
+
+            if (obsoleteAttribute != null)
+                continue;
+
+            if (targets.Contains(field.FieldType))
+            {
+                yield return basePath + "/" + field.Name;
+            }
+            else if (field.FieldType != type && field.FieldType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.FieldType)))
+            {
+                foreach (string s in PrintProperties(baseType, field.FieldType, targets, basePath + "/" + field.Name))
+                    yield return s;
+            }
+        }
     }
 }

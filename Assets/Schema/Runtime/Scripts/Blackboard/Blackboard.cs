@@ -1,25 +1,45 @@
 using UnityEngine;
 using System;
+using System.Reflection;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using Schema.Utilities;
+using UnityEditor;
 
 [Serializable]
 public class Blackboard : ScriptableObject
 {
     public static Blackboard instance;
+    public delegate void EntryListChangedCallback(Blackboard changed);
+    public static event EntryListChangedCallback entryListChanged;
+    public static readonly Type[] blackboardTypes = {
+        typeof(int),
+        typeof(string),
+        typeof(float),
+        typeof(bool),
+        typeof(Enum),
+        typeof(Quaternion),
+        typeof(Vector2),
+        typeof(Vector3),
+        typeof(Matrix4x4),
+        typeof(Type),
+        typeof(GameObject),
+        typeof(AnimationCurve)
+    };
     public static readonly Dictionary<Type, Color> typeColors = new Dictionary<Type, Color>() {
-        { typeof(int), Color.black },
-        { typeof(string), Color.black },
-        { typeof(float), Color.black },
-        { typeof(bool), Color.black },
-        { typeof(Enum), Color.black },
-        { typeof(Quaternion), Color.black },
-        { typeof(Vector2), Color.black },
-        { typeof(Vector3), Color.black },
-        { typeof(Matrix4x4), Color.black },
-        { typeof(Type), Color.black },
-        { typeof(GameObject), Color.black }
+        { typeof(int),            Color.black },
+        { typeof(string),         Color.black },
+        { typeof(float),          Color.black },
+        { typeof(bool),           Color.black },
+        { typeof(Enum),           Color.black },
+        { typeof(Quaternion),     Color.black },
+        { typeof(Vector2),        Color.black },
+        { typeof(Vector3),        Color.black },
+        { typeof(Matrix4x4),      Color.black },
+        { typeof(Type),           Color.black },
+        { typeof(GameObject),     Color.black },
+        { typeof(AnimationCurve), Color.black }
     };
     public List<BlackboardEntry> entries = new List<BlackboardEntry>();
     public string[] entryByteStrings { get; private set; }
@@ -37,54 +57,33 @@ public class Blackboard : ScriptableObject
             entry.blackboard = this;
 
         entryByteStrings = GetEntryByteStrings();
-    }
-    public void ConnectSelector(BlackboardEntrySelector selector)
-    {
-        if (!selectors.Contains(selector))
-        {
-            selectors.Add(selector);
 
-            selector.mask = GetMask(selector.filters);
-            selector.UpdateEntry(this);
-        }
-    }
-    public void UpdateSelectors()
-    {
-        //Remove any selectors that were removed since last update
-        selectors.RemoveAll(selector => selector == null);
-
-        foreach (BlackboardEntrySelector selector in selectors)
-        {
-            selector.UpdateEntry(this);
-            selector.mask = GetMask(selector.filters);
-        }
-
-        if (typeArrays == null)
-            typeArrays = new Dictionary<Type, BlackboardEntry[]>();
-
-        foreach (Type t in typeColors.Keys)
-        {
-            IEnumerable<BlackboardEntry> entriesForType = entries.FindAll(entry => Type.GetType(entry.typeString) == t);
-            typeArrays[t] = entriesForType.ToArray();
-        }
-
-        entryByteStrings = GetEntryByteStrings();
+        entryListChanged?.Invoke(this);
     }
     //Returns a bit mask given specific filters
-    public int GetMask(List<string> filters)
+    public System.Tuple<int, int> GetMask(List<string> filters)
     {
         List<Type> typeArray = filters.Select(s => Type.GetType(s)).ToList();
 
-        int ret = 0;
+        int ret1 = 0;
         for (int i = entries.Count - 1; i >= 0; i--)
         {
             bool entryIncluded = typeArray.Contains(Type.GetType(entries[i].typeString));
 
             if (entryIncluded)
-                ret |= 1 << i;
+                ret1 |= 1 << i;
         }
 
-        return ret;
+        int ret2 = 0;
+        for (int i = blackboardTypes.Length - 1; i >= 0; i--)
+        {
+            bool entryIncluded = typeArray.Contains(blackboardTypes[i]);
+
+            if (entryIncluded)
+                ret2 |= 1 << i;
+        }
+
+        return new System.Tuple<int, int>(ret1, ret2);
     }
     public BlackboardEntry GetEntry(string uID)
     {
@@ -103,11 +102,10 @@ public class Blackboard : ScriptableObject
 
         entry.hideFlags = HideFlags.HideAndDontSave;
 
-        //Adding entry
-
         entries.Add(entry);
 
-        UpdateSelectors();
+        entryByteStrings = GetEntryByteStrings();
+        entryListChanged?.Invoke(this);
     }
     private string UniqueName(string desiredName, List<string> names)
     {
@@ -120,6 +118,16 @@ public class Blackboard : ScriptableObject
 
         return desiredName + (i == 0 ? "" : i.ToString());
     }
+    public void RemoveEntry(BlackboardEntry entry, bool preserve)
+    {
+        entries.Remove(entry);
+
+        if (!preserve)
+            DestroyImmediate(entry);
+
+        entryByteStrings = GetEntryByteStrings();
+        entryListChanged?.Invoke(this);
+    }
     public void RemoveEntry(int index)
     {
         if (index > entries.Count - 1) return;
@@ -128,7 +136,8 @@ public class Blackboard : ScriptableObject
         entries.Remove(obj);
         DestroyImmediate(obj);
 
-        UpdateSelectors();
+        entryByteStrings = GetEntryByteStrings();
+        entryListChanged?.Invoke(this);
     }
     private string[] GetEntryByteStrings()
     {

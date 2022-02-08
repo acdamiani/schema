@@ -10,9 +10,9 @@ public class GetPosition : Action
     [Tooltip("Use the current Game Object rather than a Blackboard Key")]
     public bool useSelf;
     [Tooltip("GameObject to get position from")]
-    public BlackboardGameObject gameObject;
+    public BlackboardEntrySelector<GameObject> gameObject;
     [Tooltip("Key to store position in")]
-    public BlackboardVector3 positionKey;
+    public BlackboardEntrySelector<Vector3> positionKey;
     [Tooltip("When toggled, will use local position (relative to parent) instead of world position")]
     public bool local;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

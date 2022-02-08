@@ -284,7 +284,7 @@ namespace Schema.Editor
                     {
                         if (windowInfo.hoveredType != Window.Hovering.Inspector && blackboardEditor)
                         {
-                            ((BlackboardEditor)blackboardEditor).selectedIndex = -1;
+                            ((BlackboardEditor)blackboardEditor).selectedEntry = null;
                         }
 
                         if (windowInfo.hoveredType != Window.Hovering.Inspector) GUI.FocusControl(null);

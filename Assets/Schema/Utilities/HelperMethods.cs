@@ -2,6 +2,9 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using UnityEngine;
 using UnityEditor;
 using Schema.Runtime;
@@ -56,31 +59,6 @@ namespace Schema.Utilities
                 count++;
             }
             return count;
-        }
-        public static Texture2D Invert(this Texture2D texture)
-        {
-            if (!texture.isReadable)
-            {
-                Debug.LogWarning(
-                        "When importing custom icons for nodes, be sure to import them with the \"Read/Write Enabled\" checkbox checked. Otherwise, colors will not be modified for light/dark mode"
-                        );
-                return texture;
-            }
-
-            Texture2D tex = new Texture2D(texture.width, texture.height);
-
-            for (int y = 0; y < texture.height; y++)
-            {
-                for (int x = 0; x < texture.width; x++)
-                {
-                    Color pixel = texture.GetPixel(x, y);
-
-                    tex.SetPixel(x, y, new Color(1f - pixel.r, 1f - pixel.g, 1f - pixel.b, pixel.a));
-                }
-            }
-
-            tex.Apply();
-            return tex;
         }
         public static void Move<T>(this List<T> list, T item, int newIndex)
         {

@@ -33,7 +33,7 @@ public class SetBlackboardValueEditor : Editor
 
         if (entry == null) return;
 
-        Type t = Type.GetType(entry.typeString);
+        Type t = entry.type;
         switch (Type.GetTypeCode(t))
         {
             case TypeCode.String:

@@ -276,19 +276,29 @@ namespace Schema.Editor
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
-            EditorApplication.delayCall += () =>
+            int width = (int)editor.position.width;
+            int height = (int)editor.position.height;
+
+            Color[] pixels = UnityEditorInternal.InternalEditorUtility.ReadScreenPixel(new Vector2(editor.position.position.x, editor.position.position.y + 22f), width, height);
+
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGB24, false);
+            tex.SetPixels(pixels);
+
+            byte[] bytes = tex.EncodeToPNG();
+            File.WriteAllBytes(path + "/Screenshot " + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss.fff") + ".png", bytes);
+        }
+        public static void SaveBlackboard(Blackboard blackboard, string path)
+        {
+            blackboard.hideFlags = HideFlags.None;
+            foreach (BlackboardEntry entry in blackboard.entries)
             {
-                int width = (int)editor.position.width;
-                int height = (int)editor.position.height;
+                entry.hideFlags = HideFlags.HideInHierarchy;
+                AssetDatabase.AddObjectToAsset(entry, path);
+            }
 
-                Color[] pixels = UnityEditorInternal.InternalEditorUtility.ReadScreenPixel(editor.position.position, width, height);
-
-                Texture2D tex = new Texture2D(width, height, TextureFormat.RGB24, false);
-                tex.SetPixels(pixels);
-
-                byte[] bytes = tex.EncodeToPNG();
-                File.WriteAllBytes(path + "/Screenshot " + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss.fff") + ".png", bytes);
-            };
+            EditorUtility.SetDirty(blackboard);
+            AssetDatabase.SaveAssetIfDirty(blackboard);
         }
     }
 }
+

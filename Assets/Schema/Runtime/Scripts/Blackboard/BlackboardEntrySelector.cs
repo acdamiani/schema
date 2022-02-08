@@ -3,41 +3,57 @@ using System.Collections.Generic;
 using UnityEngine;
 using Schema.Runtime;
 using Schema.Utilities;
+using System.IO;
 using System.Linq;
 
-/// <summary>
-///	Field to accept Blackboard Keys as inputs
-/// </summary>
+[Serializable]
+public class BlackboardEntrySelector<T> : BlackboardEntrySelector
+{
+    public T value
+    {
+        get { return _value; }
+        set { _value = value; }
+    }
+    [SerializeField] private T _value;
+    public BlackboardEntrySelector() : base(typeof(T)) { }
+}
+
 [Serializable]
 public class BlackboardEntrySelector
 {
     private Blackboard blackboard;
     public int mask;
+    public int blackboardTypesMask;
     public string entryName;
     public string entryID;
+    public string valuePath;
+    public object rawValue { get; set; }
     public List<string> filters;
     public bool empty => String.IsNullOrEmpty(entryID);
     public BlackboardEntrySelector(params Type[] filters)
     {
         this.filters = filters.Select(x => x.AssemblyQualifiedName).ToList();
 
-        if (Blackboard.instance != null)
-            Blackboard.instance.ConnectSelector(this);
+        Blackboard.entryListChanged += BlackboardChangedCallback;
     }
     public BlackboardEntrySelector()
     {
         this.filters = new List<string>();
 
-        if (Blackboard.instance != null)
-            Blackboard.instance.ConnectSelector(this);
+        Blackboard.entryListChanged += BlackboardChangedCallback;
     }
-    public void UpdateEntry(Blackboard blackboard)
+    private void BlackboardChangedCallback(Blackboard changed)
     {
-        if (blackboard.entries.FindIndex(entry => entry.uID == entryID) == -1)
-        {
+        VerifyResults(changed);
+
+        System.Tuple<int, int> masks = changed.GetMask(filters);
+        mask = masks.Item1;
+        blackboardTypesMask = masks.Item2;
+    }
+    public void VerifyResults(Blackboard changed)
+    {
+        if (!changed.entries.Find(entry => entry.uID == entryID))
             entryID = "";
-            entryName = "";
-        }
     }
     /// <summary>
     /// Gets the referenced Blackboard Entry by this selector. This is only available in the Editor. 
@@ -86,7 +102,6 @@ public class BlackboardEntrySelector
     }
     public void AddGameObjectFilter()
     {
-        Debug.Log("Adding filter");
         AddFilter<GameObject>();
     }
     public void AddFilter<T>()
@@ -94,7 +109,9 @@ public class BlackboardEntrySelector
         if (Blackboard.typeColors.ContainsKey(typeof(T)) && !filters.Contains(typeof(T).AssemblyQualifiedName))
         {
             filters.Add(typeof(T).AssemblyQualifiedName);
-            mask = Blackboard.instance.GetMask(filters);
+            System.Tuple<int, int> masks = Blackboard.instance.GetMask(filters);
+            mask = masks.Item1;
+            blackboardTypesMask = masks.Item2;
         }
     }
     public void AddFilter(Type type)
@@ -102,7 +119,9 @@ public class BlackboardEntrySelector
         if (Blackboard.typeColors.ContainsKey(type) && !filters.Contains(type.AssemblyQualifiedName))
         {
             filters.Add(type.AssemblyQualifiedName);
-            mask = Blackboard.instance.GetMask(filters);
+            System.Tuple<int, int> masks = Blackboard.instance.GetMask(filters);
+            mask = masks.Item1;
+            blackboardTypesMask = masks.Item2;
         }
     }
     public void AddAllFilters()
@@ -139,24 +158,5 @@ public class BlackboardEntrySelector
     public void AddQuaternionFilter()
     {
         AddFilter<Quaternion>();
-    }
-}
-[System.AttributeUsage(AttributeTargets.Field)]
-public class EntryFiltersAttribute : System.Attribute
-{
-    public Type[] validTypes;
-    public EntryFiltersAttribute(params Type[] types)
-    {
-        List<Type> vT = new List<Type>();
-
-        for (int i = 0; i < types.Length; i++)
-        {
-            if (Blackboard.typeColors.ContainsKey(types[i]) && !vT.Contains(types[i]))
-            {
-                vT.Add(types[i]);
-            }
-        }
-
-        validTypes = vT.ToArray();
     }
 }

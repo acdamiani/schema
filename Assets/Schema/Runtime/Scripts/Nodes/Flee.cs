@@ -10,7 +10,7 @@ using Schema.Runtime;
 public class Flee : Action
 {
     [Tooltip("The enemy GameObject")]
-    public BlackboardGameObject enemy;
+    public BlackboardEntrySelector<GameObject> enemy;
     [Tooltip("The NavMesh surfaces the agent is allowed to choose points on")]
     public NavMeshAreaMask areaMask;
     [Range(10f, 180f)]

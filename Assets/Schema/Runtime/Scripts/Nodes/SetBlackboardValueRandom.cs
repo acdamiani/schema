@@ -5,7 +5,7 @@ using Schema.Runtime;
 
 public class SetBlackboardValueRandom : Action
 {
-    public BlackboardNumber selector;
+    public BlackboardEntrySelector selector = new BlackboardEntrySelector(typeof(float), typeof(int));
     [SerializeField] private float floatMin;
     [SerializeField] private float floatMax;
     [SerializeField] private int intMin;

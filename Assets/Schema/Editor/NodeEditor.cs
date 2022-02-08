@@ -14,10 +14,34 @@ namespace Schema.Editor
     //This class contains the basic information about the EditorWindow, including various preferences and basic methods (Delete, Select, etc.)
     public partial class NodeEditor : EditorWindow, IHasCustomMenu
     {
-        private static NodeEditor instance;
+        public static NodeEditor instance;
         private static Dictionary<Type, List<Type>> nodeTypes;
         private static Type[] decoratorTypes;
         private static List<UnityEngine.Object> copyBuffer = new List<UnityEngine.Object>();
+        public static Blackboard globalBlackboard
+        {
+            get
+            {
+                if (_globalBlackboard == null)
+                {
+                    Blackboard loaded = (Blackboard)AssetDatabase.LoadAssetAtPath("Schema/GlobalBlackboard.asset", typeof(Blackboard));
+
+                    if (loaded == null)
+                    {
+                        _globalBlackboard = ScriptableObject.CreateInstance<Blackboard>();
+                        AssetDatabase.CreateAsset(_globalBlackboard, "Assets/Schema/GlobalBlackboard.asset");
+                        AssetDatabase.SaveAssets();
+                    }
+                    else
+                    {
+                        _globalBlackboard = loaded;
+                    }
+                }
+
+                return _globalBlackboard;
+            }
+        }
+        private static Blackboard _globalBlackboard;
         public Node requestingConnection;
         private Node orphanNode;
         public Graph original;
@@ -112,7 +136,6 @@ namespace Schema.Editor
 
             Undo.ClearAll();
 
-            UpdateSelectors();
             Blackboard.instance = target.blackboard;
             GetViewRect(100f, true);
         }
@@ -172,90 +195,6 @@ namespace Schema.Editor
             return AggregateErrors(errors);
         }
 
-        void UpdateSelectors()
-        {
-            List<BlackboardEntrySelector> toConnect = new List<BlackboardEntrySelector>();
-
-            //Connect all entry selectors here
-            foreach (Node node in target.nodes)
-            {
-                toConnect.AddRange(GetSelectors(node));
-
-                foreach (Decorator d in node.decorators)
-                {
-                    toConnect.AddRange(GetSelectors(d));
-                }
-            }
-
-            foreach (BlackboardEntrySelector s in toConnect)
-            {
-                target.blackboard.ConnectSelector(s);
-            }
-
-        }
-        IEnumerable<BlackboardEntrySelector> GetSelectors(object obj)
-        {
-            jk++;
-
-            if (jk > 1000) yield break;
-
-            HashSet<Type> nonRecursiveTypes = new HashSet<Type> {
-                typeof(sbyte),
-                typeof(byte),
-                typeof(short),
-                typeof(ushort),
-                typeof(int),
-                typeof(uint),
-                typeof(long),
-                typeof(ulong),
-                typeof(char),
-                typeof(float),
-                typeof(double),
-                typeof(decimal),
-                typeof(bool),
-                typeof(string),
-                typeof(Enum)
-            };
-
-            HashSet<string> invalidNames = new HashSet<string> {
-                "parent",
-                "children",
-                "decorators",
-        		//! This will cause the editor to crash if removed
-        		"graph",
-                "position",
-                "node",
-                "_icon"
-            };
-
-            if (obj == null) yield break;
-
-            foreach (FieldInfo field in obj.GetType().GetFields())
-            {
-                if (!nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.FieldType)) && !invalidNames.Contains(field.Name))
-                {
-                    if (typeof(BlackboardEntrySelector).IsAssignableFrom(field.FieldType))
-                    {
-                        yield return (BlackboardEntrySelector)field.GetValue(obj);
-                    }
-                    else if (typeof(IEnumerable<BlackboardEntrySelector>).IsAssignableFrom(field.FieldType))
-                    {
-                        IEnumerable<BlackboardEntrySelector> l = (IEnumerable<BlackboardEntrySelector>)field.GetValue(obj);
-
-                        if (l != null)
-                        {
-                            foreach (BlackboardEntrySelector s in l)
-                                yield return s;
-                        }
-                    }
-                    else
-                    {
-                        foreach (BlackboardEntrySelector s in GetSelectors(field.GetValue(obj)))
-                            yield return s;
-                    }
-                }
-            }
-        }
         void UndoPerformed()
         {
             windowInfo.treeDirty = true;
@@ -802,8 +741,6 @@ namespace Schema.Editor
                     instance.node = node;
                 }
             }
-
-            UpdateSelectors();
         }
         private void AddNode(Type nodeType, Vector2 position, bool asChild)
         {
@@ -870,8 +807,6 @@ namespace Schema.Editor
                 Select(node, true);
 
                 Undo.CollapseUndoOperations(groupIndex);
-
-                UpdateSelectors();
             }
 
             TraverseTree();
@@ -907,7 +842,6 @@ namespace Schema.Editor
 
             Undo.CollapseUndoOperations(groupIndex);
 
-            UpdateSelectors();
             GetViewRect(100f, true);
         }
         private void MoveDecorator(Decorator decorator, Node node)
