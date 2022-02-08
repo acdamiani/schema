@@ -19,3 +19,4 @@
 *.asset.meta
 *.controller.meta
 *.shader.meta
+*.cs.meta
