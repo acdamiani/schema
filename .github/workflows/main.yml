@@ -11,7 +11,7 @@ jobs:
       - id: "zip"
         uses: montudor/action-zip@v1.0.0
         with:
-          args: zip -qq -r dir.zip .
+          args: zip -r dir.zip .
     
       - id: "upload"
         uses: google-github-actions/upload-cloud-storage@v0.5.0
