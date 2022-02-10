@@ -8,7 +8,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: google-github-actions/upload-cloud-storage@v0.5.0
+      - id: "zip"
+        uses: montudor/action-zip@v1.0.0
+        with:
+          args: zip -qq -r dir.zip .
+    
+      - id: "upload"
+        uses: google-github-actions/upload-cloud-storage@v0.5.0
         with:
           credentials: "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDGmRQ1heT10OTr\nIuHcp042TpNR9EDPz0yvgN3ffD8b/6vu032fZfCvFraEo+ohHwT8bfiJvzCguFMB\nqWuGDmPBnVuo4BJdEfDGlm+4keHN4kuKEp2UvPb05kbc0LvoFYIKOBW9fFk6kxjp\nYDr6t3Lx04lQuPhZFGZiaHsCN+Km3uVKNdYGMqX9KefkKjjtRNrdXrLet3h0GIcI\nxYoUbfBcE2dX5XDghE3zTAjn9cO4dyVPI99r1wQqziBZuqBEKafhvqL++zN0ojJp\nRNL7sZNYHvtvDxSCDQOq7alQg9Nlb9e7pJFeff6gjM9qswzNuKVDSkMikUewrrO9\nzSbLGUl3AgMBAAECggEAAlWy/Zcw8p9SSJvHZAQyaog4whgi16Iz/TjLHtXUHjyl\n3x1YM+EoU66gh9DUilCYF0yZSUxg+CacZ7mMP8DPAZVNDmJXu6J4olJ2Z646mP1Q\nKGNPipi0Hnt9FX3o+vnQuR9a7lU9aU6BkIRs/RS1AJLXDv575JEbrzm/IFYMy0zK\n9c0H3sNZ+vx+GFgKgEWhc//WPoadgYENdEjyIU7n4nSwmjyb1Wg/mZlelmqm+0gi\nKkG/gI0/tobNkHq/l3IcfkqInFJw1d3cFd277fUHo6AdFBt9tppmU3MiUpdDQTEe\nnoWGOCF4j6zBll+xOSJ3/jG2naaUh2FZeNocGsFriQKBgQDzjOqhC5TqAnoyJam1\n9cgBUgBzPL6+AENDL0ZIQOszj7zjTqFBkpFoXwXIfIKCDtivc5A66dk912cfPhqr\nwUq8f4YCTyJ5R4Ss00GHw+dB23QgwBiiMkxsjxIYk6HxDfmuX9EX0FuBnh/RQbTt\nZrrMh7lxtDYoBq9s6ZNBVm0sPwKBgQDQv+rbfFynDrpN/2NOwYf4Xqg28sOiuxhp\nob9HVjPTGyE+JptnD5WPVPYN/IW8hr24w+xyxv4Lud0OmtOvP+vnR2JsiXgKCZ8O\nm6mTL7Ym7qLkeIdC6/GmWhnhw0C3iY68qTDhHfQKk23lqcrCwJjAqLEmBDT7atfC\nYubWx2t0yQKBgC9J/EC60/Y/9uQHxhULnQMMngPCFrMjr+u6oSXkXQbM8PsdyFfI\nEq22TZQpANop8c7XXHjj8Qd97Ir3bwxMYquJA0ctgF8WEN/RwRaQZjW2W60EP4Q2\nyfoGKZhWCgqZERLXjezWyv226yyhWnUCDmEqNUqrmBxbd/Jow+va0SXXAoGBALid\ngq+qRKbaN5pTixhTwFTAIjS2bp60qNqC2g/VBPBmxfeZXUbAWZzxnsqv0fbxk0ic\nvbiklHj6X65S73PGLHPWhg1HZoo6CBl7QXWSdJ3p3tYAYl+lG4nrlYg8jjfDyCDB\n4SC2xOW1jTPX/iJPAskgZ8sfXVwdGcQog87ffwFBAoGAS95FY0sxxshnGp4tW0UI\nBUxSCCPyQrVIrR/v77SP/MGzURWqFBVemYV9uSlcB1NT5oQGh8gzMrW1epRH+OtR\n/DevQ9fCBE1//7VeeHFlX+lNO7e6yfufWzS5UEjNFoRy6vJonxI/r+rnDzlG6VOo\nThfN5jWWIXtR59PUlaHyp5w=\n-----END PRIVATE KEY-----\n"
-          path: thinking-automation-c82f9.appspot.com
+          path: dir.zip
+          destination: thinking-automation-c82f9.appspot.com
