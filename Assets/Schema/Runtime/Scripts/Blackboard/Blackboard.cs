@@ -68,7 +68,7 @@ public class Blackboard : ScriptableObject
         int ret1 = 0;
         for (int i = entries.Count - 1; i >= 0; i--)
         {
-            bool entryIncluded = typeArray.Contains(Type.GetType(entries[i].typeString));
+            bool entryIncluded = typeArray.Contains(entries[i].type);
 
             if (entryIncluded)
                 ret1 |= 1 << i;

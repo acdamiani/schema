@@ -11,7 +11,6 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 {
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        SerializedProperty mask = property.FindPropertyRelative("mask");
         SerializedProperty entryID = property.FindPropertyRelative("entryID");
         SerializedProperty entryName = property.FindPropertyRelative("entryName");
         SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
@@ -128,11 +127,23 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         GenericMenu menu = new GenericMenu();
 
+        if (typeMask.intValue == -1)
+        {
+            List<string> filtersList = new List<string>();
+
+            SerializedProperty filters = property.FindPropertyRelative("filters");
+
+            for (int i = 0; i < filters.arraySize; i++)
+            {
+                filtersList.Add(filters.GetArrayElementAtIndex(i).stringValue);
+            }
+
+            typeMask.intValue = Blackboard.instance.GetMask(filtersList).Item2;
+        }
+
         menu.AddItem("None", String.IsNullOrEmpty(idProp.stringValue), () => GenericMenuSelectOption(property, ""), false);
 
         List<Type> filtered = HelperMethods.FilterArrayByMask(Blackboard.typeColors.Keys.Reverse().ToArray(), typeMask.intValue).ToList();
-
-        Debug.Log(Convert.ToString(typeMask.intValue, toBase: 2));
 
         foreach (string s in Blackboard.instance.entryByteStrings)
         {

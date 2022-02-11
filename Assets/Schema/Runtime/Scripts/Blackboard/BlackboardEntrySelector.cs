@@ -23,7 +23,7 @@ public class BlackboardEntrySelector
 {
     private Blackboard blackboard;
     public int mask;
-    public int blackboardTypesMask;
+    public int blackboardTypesMask = -1;
     public string entryName;
     public string entryID;
     public string valuePath;

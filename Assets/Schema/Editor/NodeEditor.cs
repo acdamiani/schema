@@ -18,34 +18,11 @@ namespace Schema.Editor
         private static Dictionary<Type, List<Type>> nodeTypes;
         private static Type[] decoratorTypes;
         private static List<UnityEngine.Object> copyBuffer = new List<UnityEngine.Object>();
-        public static Blackboard globalBlackboard
-        {
-            get
-            {
-                if (_globalBlackboard == null)
-                {
-                    Blackboard loaded = (Blackboard)AssetDatabase.LoadAssetAtPath("Schema/GlobalBlackboard.asset", typeof(Blackboard));
-
-                    if (loaded == null)
-                    {
-                        _globalBlackboard = ScriptableObject.CreateInstance<Blackboard>();
-                        AssetDatabase.CreateAsset(_globalBlackboard, "Assets/Schema/GlobalBlackboard.asset");
-                        AssetDatabase.SaveAssets();
-                    }
-                    else
-                    {
-                        _globalBlackboard = loaded;
-                    }
-                }
-
-                return _globalBlackboard;
-            }
-        }
-        private static Blackboard _globalBlackboard;
         public Node requestingConnection;
         private Node orphanNode;
         public Graph original;
         public Graph target;
+        public Blackboard globalBlackboard;
         public Window windowInfo;
         public GUIData guiData;
         private int nodeCount;

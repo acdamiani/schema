@@ -66,11 +66,6 @@ public class BlackboardEditor : Editor
 
         EditorGUILayout.LabelField("Global Variables", EditorStyles.boldLabel);
 
-        foreach (BlackboardEntry e in NodeEditor.globalBlackboard.entries)
-        {
-            DrawEntry(e);
-        }
-
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
             selectedEntry = null;
 
