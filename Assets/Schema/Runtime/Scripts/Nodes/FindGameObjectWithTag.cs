@@ -6,6 +6,7 @@ using UnityEngine;
 public class FindGameObjectWithTag : Action
 {
     public TagList gameObjectTag;
+    [WriteOnly]
     [Tooltip("The Blackboard Key in which to store the found object")]
     public BlackboardEntrySelector<GameObject> gameObject;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

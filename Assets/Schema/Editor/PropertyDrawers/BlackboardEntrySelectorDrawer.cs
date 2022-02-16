@@ -9,13 +9,16 @@ using System.Collections.Generic;
 [CustomPropertyDrawer(typeof(BlackboardEntrySelector), true)]
 public class BlackboardEntrySelectorDrawer : PropertyDrawer
 {
+    private bool? isWriteOnly;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         SerializedProperty entryID = property.FindPropertyRelative("entryID");
         SerializedProperty entryName = property.FindPropertyRelative("entryName");
         SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
-
         SerializedProperty value = property.FindPropertyRelative("_value");
+
+        if (isWriteOnly == null)
+            isWriteOnly = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
 
         bool lastWideMode = EditorGUIUtility.wideMode;
         EditorGUIUtility.wideMode = true;
@@ -33,7 +36,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         if (doesHavePath)
             label.tooltip = $"{(String.IsNullOrWhiteSpace(label.tooltip) ? "" : "\n")}Controlled by {valuePathProp.stringValue.Replace('/', '.')}";
 
-        if (value != null)
+        if (value != null && isWriteOnly == false)
         {
             EditorGUI.BeginDisabledGroup(doesHavePath);
 
@@ -63,7 +66,9 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         {
             Rect controlRect = EditorGUI.PrefixLabel(position, label);
 
-            if (EditorGUI.DropdownButton(controlRect, new GUIContent("Hello World"), FocusType.Passive))
+            string path = valuePathProp.stringValue;
+
+            if (EditorGUI.DropdownButton(controlRect, new GUIContent(String.IsNullOrEmpty(path) ? "None" : path), FocusType.Passive))
             {
                 GenericMenu menu = GenerateMenu(property);
 

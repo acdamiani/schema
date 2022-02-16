@@ -38,7 +38,6 @@ namespace Schema.Editor
                 nodeTypes.Add(t, test.ToList());
             }
             decoratorTypes = HelperMethods.GetEnumerableOfType(typeof(Decorator)).ToArray();
-
         }
 
         [MenuItem("Window/AI/Behavior Editor")]

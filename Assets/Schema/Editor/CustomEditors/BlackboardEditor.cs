@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Schema.Utilities;
 using Schema.Editor;
 public class BlackboardEditor : Editor
@@ -9,6 +11,7 @@ public class BlackboardEditor : Editor
     private Rect selectedRect;
     public BlackboardEntry selectedEntry;
     private string nameFieldControlName;
+    private bool clickedAny = false;
     public void OnEnable()
     {
         if (target != null && target.GetType() == typeof(Blackboard))
@@ -16,7 +19,6 @@ public class BlackboardEditor : Editor
     }
     public override void OnInspectorGUI()
     {
-        bool clickedAny = false;
 
         GUILayout.BeginHorizontal();
 
@@ -34,10 +36,28 @@ public class BlackboardEditor : Editor
 
         GUILayout.Space(10);
 
-        for (int i = 0; i < blackboard.entries.Count; i++)
-        {
-            BlackboardEntry entry = blackboard.entries[i];
+        IEnumerable<BlackboardEntry> globals = blackboard.entries.FindAll(entry => entry.entryType == BlackboardEntry.EntryType.Global);
+        IEnumerable<BlackboardEntry> locals = blackboard.entries.Except(globals);
 
+        DrawEntryList(locals);
+
+        EditorGUILayout.LabelField("Global Variables", EditorStyles.boldLabel);
+        DrawEntryList(globals);
+
+        if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
+            selectedEntry = null;
+
+        if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
+            GUI.FocusControl("");
+
+        clickedAny = false;
+
+        serializedObject.ApplyModifiedProperties();
+    }
+    private void DrawEntryList(IEnumerable<BlackboardEntry> entries)
+    {
+        foreach (BlackboardEntry entry in entries)
+        {
             GUI.color = GUI.skin.settings.selectionColor;
             if (selectedEntry == entry)
                 GUI.Box(selectedRect, "", NodeEditorResources.styles.node);
@@ -63,16 +83,6 @@ public class BlackboardEditor : Editor
                 clickedAny = true;
             }
         }
-
-        EditorGUILayout.LabelField("Global Variables", EditorStyles.boldLabel);
-
-        if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
-            selectedEntry = null;
-
-        if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
-            GUI.FocusControl("");
-
-        serializedObject.ApplyModifiedProperties();
     }
     private void ShowContext()
     {
@@ -92,8 +102,8 @@ public class BlackboardEditor : Editor
     }
     private void RemoveSelected()
     {
-        blackboard.RemoveEntry(selectedEntry, false);
         int i = blackboard.entries.IndexOf(selectedEntry) - 1;
+        blackboard.RemoveEntry(selectedEntry, false);
         i = i > 0 ? i : 0;
 
         if (blackboard.entries.Count > 0)

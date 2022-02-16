@@ -53,7 +53,10 @@ public class BlackboardEntrySelector
     public void VerifyResults(Blackboard changed)
     {
         if (!changed.entries.Find(entry => entry.uID == entryID))
+        {
             entryID = "";
+            valuePath = "";
+        }
     }
     /// <summary>
     /// Gets the referenced Blackboard Entry by this selector. This is only available in the Editor. 
@@ -160,3 +163,5 @@ public class BlackboardEntrySelector
         AddFilter<Quaternion>();
     }
 }
+[System.AttributeUsage(AttributeTargets.Field)]
+public class WriteOnlyAttribute : System.Attribute { }
