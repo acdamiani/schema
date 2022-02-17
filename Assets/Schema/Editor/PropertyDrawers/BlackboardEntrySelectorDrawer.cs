@@ -86,7 +86,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     {
         SerializedProperty valueProp = property.FindPropertyRelative("_value");
 
-        if (valueProp != null)
+        if (valueProp != null && isWriteOnly == false)
             return EditorGUI.GetPropertyHeight(valueProp, label, true);
         else
             return base.GetPropertyHeight(property, label);
@@ -155,21 +155,32 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             string entryID = GetID(s);
             BlackboardEntry entry = Blackboard.instance.GetEntry(entryID);
 
-            IEnumerable<string> props = PrintProperties(
-                entry.type,
-                entry.type,
-                filtered,
-                entry.Name
-            );
+            IEnumerable<string> props = null;
 
-            foreach (string ss in props)
+            if (fieldInfo.GetCustomAttribute<DisableDynamicBindingAttribute>() != null)
             {
-                menu.AddItem(
-                    ss,
-                    valuePathProp.stringValue.Equals(ss),
-                    () => GenericMenuSelectOption(property, entryID, ss),
-                    false
+                if (!filtered.Contains(entry.type))
+                    continue;
+
+                menu.AddItem(entry.Name, valuePathProp.stringValue.Equals(entry.Name), () => GenericMenuSelectOption(property, entryID, entry.Name), false);
+            }
+            else
+            {
+                props = PrintProperties(
+                    entry.type,
+                    entry.type,
+                    filtered,
+                    entry.Name
                 );
+                foreach (string ss in props)
+                {
+                    menu.AddItem(
+                        ss,
+                        valuePathProp.stringValue.Equals(ss),
+                        () => GenericMenuSelectOption(property, entryID, ss),
+                        false
+                    );
+                }
             }
         }
 

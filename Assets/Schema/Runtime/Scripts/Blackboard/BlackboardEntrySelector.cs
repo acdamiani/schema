@@ -165,3 +165,5 @@ public class BlackboardEntrySelector
 }
 [System.AttributeUsage(AttributeTargets.Field)]
 public class WriteOnlyAttribute : System.Attribute { }
+[System.AttributeUsage(AttributeTargets.Field)]
+public class DisableDynamicBindingAttribute : System.Attribute { }

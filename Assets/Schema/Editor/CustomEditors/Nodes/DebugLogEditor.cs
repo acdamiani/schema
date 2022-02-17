@@ -28,7 +28,7 @@ public class DebugLogEditor : Editor
 
         string[] names = new string[0];
         if (debugLog != null && debugLog.keys != null)
-            names = debugLog.keys.Select(key => key.entryName).ToArray();
+            names = debugLog.keys.Select(key => key.valuePath).ToArray();
 
         serializedObject.Update();
 

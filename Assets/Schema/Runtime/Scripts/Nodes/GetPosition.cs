@@ -11,6 +11,8 @@ public class GetPosition : Action
     public bool useSelf;
     [Tooltip("GameObject to get position from")]
     public BlackboardEntrySelector<GameObject> gameObject;
+    [WriteOnly]
+    [DisableDynamicBinding]
     [Tooltip("Key to store position in")]
     public BlackboardEntrySelector<Vector3> positionKey;
     [Tooltip("When toggled, will use local position (relative to parent) instead of world position")]
