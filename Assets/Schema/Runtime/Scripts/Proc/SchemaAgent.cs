@@ -30,9 +30,12 @@ public class SchemaAgent : MonoBehaviour
     private bool ticked;
     private int count;
     private int callerIndex;
+    private string uID;
     NodeStatus context;
     private void Start()
     {
+        uID = Guid.NewGuid().ToString("N");
+
         if (!target) return;
         graph = SchemaManager.LoadGraph(target, false);
 
@@ -85,6 +88,8 @@ public class SchemaAgent : MonoBehaviour
     }
     void Update()
     {
+        SchemaManager.pid = uID;
+
         EvaluateDecorators();
         Tick();
     }

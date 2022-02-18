@@ -5,11 +5,13 @@ using UnityEditor;
 public class GetPositionEditor : Editor
 {
     SerializedProperty useSelf;
+    SerializedProperty local;
     SerializedProperty gameObjectKey;
     SerializedProperty positionKey;
     void OnEnable()
     {
         useSelf = serializedObject.FindProperty("useSelf");
+        local = serializedObject.FindProperty("local");
         gameObjectKey = serializedObject.FindProperty("gameObject");
         positionKey = serializedObject.FindProperty("positionKey");
     }
@@ -18,6 +20,7 @@ public class GetPositionEditor : Editor
         serializedObject.Update();
 
         EditorGUILayout.PropertyField(useSelf);
+        EditorGUILayout.PropertyField(local);
 
         if (!useSelf.boolValue)
             EditorGUILayout.PropertyField(gameObjectKey);

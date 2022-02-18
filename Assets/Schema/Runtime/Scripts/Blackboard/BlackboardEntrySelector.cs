@@ -9,15 +9,25 @@ using System.Linq;
 [Serializable]
 public class BlackboardEntrySelector<T> : BlackboardEntrySelector
 {
-    public T value
+    public new T value
     {
-        get { return _value; }
-        set { _value = value; }
+        get
+        {
+            if (_value != null)
+                return _value;
+            else if (String.IsNullOrEmpty(valuePath))
+                return default(T);
+
+            return (T)base.value;
+        }
+        set
+        {
+            base.value = value;
+        }
     }
     [SerializeField] private T _value;
     public BlackboardEntrySelector() : base(typeof(T)) { }
 }
-
 [Serializable]
 public class BlackboardEntrySelector
 {
@@ -27,7 +37,20 @@ public class BlackboardEntrySelector
     public string entryName;
     public string entryID;
     public string valuePath;
-    public object rawValue { get; set; }
+    public object value
+    {
+        get
+        {
+            if (String.IsNullOrEmpty(valuePath))
+                return null;
+
+            return GlobalBlackboard.dict[SchemaManager.pid + entryID];
+        }
+        set
+        {
+            GlobalBlackboard.dict[SchemaManager.pid + entryID] = value;
+        }
+    }
     public List<string> filters;
     public bool empty => String.IsNullOrEmpty(entryID);
     public BlackboardEntrySelector(params Type[] filters)

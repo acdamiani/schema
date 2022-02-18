@@ -27,7 +27,7 @@ public class DebugLog : Action
     }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        object[] values = keys.Select(key => agent.blackboard.GetValue(key.entryID)).ToArray();
+        object[] values = keys.Select(key => key.value).ToArray();
 
         try
         {

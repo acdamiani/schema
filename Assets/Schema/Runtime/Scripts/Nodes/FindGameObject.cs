@@ -7,6 +7,7 @@ public class FindGameObject : Action
 {
     public string gameObjectName;
     [WriteOnly]
+    [DisableDynamicBinding]
     [Tooltip("The Blackboard Key in which to store the found object")]
     public BlackboardEntrySelector<GameObject> gameObject;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

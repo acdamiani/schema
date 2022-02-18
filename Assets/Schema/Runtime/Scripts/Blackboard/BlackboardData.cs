@@ -122,3 +122,21 @@ public class BlackboardData
         return values[id];
     }
 }
+
+internal static class GlobalBlackboard
+{
+    public static Dictionary<string, object> dict
+    {
+        get
+        {
+            if (!UnityEngine.Application.isPlaying)
+                return null;
+
+            if (_dict == null)
+                _dict = new Dictionary<string, object>();
+
+            return _dict;
+        }
+    }
+    private static Dictionary<string, object> _dict;
+}
