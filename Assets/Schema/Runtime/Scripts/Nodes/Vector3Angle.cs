@@ -19,22 +19,14 @@ public class Vector3Angle : Action
     {
         float angle;
 
-        Vector3 v1 = agent.blackboard.GetType(vectorOne) == typeof(Vector3) ?
-            agent.blackboard.GetValue<Vector3>(vectorOne) :
-            (Vector3)agent.blackboard.GetValue<Vector2>(vectorOne);
-
-        Vector3 v2 = agent.blackboard.GetType(vectorTwo) == typeof(Vector3) ?
-            agent.blackboard.GetValue<Vector3>(vectorTwo) :
-            (Vector3)agent.blackboard.GetValue<Vector2>(vectorTwo);
-
         if (signed)
-            angle = Vector3.SignedAngle(v1, v2, Vector3.up);
+            angle = Vector3.SignedAngle(vectorOne.value, vectorTwo.value, Vector3.up);
         else
-            angle = Vector3.Angle(v1, v2);
+            angle = Vector3.Angle(vectorOne.value, vectorTwo.value);
 
         angle = radians ? Mathf.Deg2Rad * angle : angle;
 
-        agent.blackboard.SetValue<float>(angleKey, angle);
+        angleKey.value = angle;
 
         return NodeStatus.Success;
     }

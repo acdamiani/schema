@@ -27,36 +27,16 @@ public class GetRotation : Action
         if (local)
         {
             if (eulerAngles)
-            {
-                agent.blackboard.SetValue<Vector3>(
-                    eulerKey,
-                    useSelf ? agent.transform.localEulerAngles : agent.blackboard.GetValue<GameObject>(gameObject).transform.localEulerAngles
-                );
-            }
+                eulerKey.value = useSelf ? agent.transform.localEulerAngles : gameObject.value.transform.localEulerAngles;
             else
-            {
-                agent.blackboard.SetValue<Quaternion>(
-                    quaternionKey,
-                    useSelf ? agent.transform.localRotation : agent.blackboard.GetValue<GameObject>(gameObject).transform.localRotation
-                );
-            }
+                quaternionKey.value = useSelf ? agent.transform.localRotation : gameObject.value.transform.localRotation;
         }
         else
         {
             if (eulerAngles)
-            {
-                agent.blackboard.SetValue<Vector3>(
-                    eulerKey,
-                    useSelf ? agent.transform.eulerAngles : agent.blackboard.GetValue<GameObject>(gameObject).transform.eulerAngles
-                );
-            }
+                eulerKey.value = useSelf ? agent.transform.eulerAngles : gameObject.value.transform.eulerAngles;
             else
-            {
-                agent.blackboard.SetValue<Quaternion>(
-                    quaternionKey,
-                    useSelf ? agent.transform.rotation : agent.blackboard.GetValue<GameObject>(gameObject).transform.rotation
-                );
-            }
+                quaternionKey.value = useSelf ? agent.transform.rotation : gameObject.value.transform.rotation;
         }
 
         return NodeStatus.Success;

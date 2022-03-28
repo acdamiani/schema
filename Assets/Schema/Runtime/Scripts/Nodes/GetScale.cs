@@ -21,19 +21,9 @@ public class GetScale : Action
             return NodeStatus.Failure;
 
         if (local)
-        {
-            agent.blackboard.SetValue<Vector3>(
-                scaleKey,
-                useSelf ? agent.transform.lossyScale : agent.blackboard.GetValue<GameObject>(gameObject).transform.lossyScale
-            );
-        }
+            scaleKey.value = gameObject.value.transform.lossyScale;
         else
-        {
-            agent.blackboard.SetValue<Vector3>(
-                scaleKey,
-                useSelf ? agent.transform.localScale : agent.blackboard.GetValue<GameObject>(gameObject).transform.localScale
-            );
-        }
+            scaleKey.value = gameObject.value.transform.localScale;
 
         return NodeStatus.Success;
     }

@@ -41,14 +41,11 @@ public class BlackboardEntrySelector
     {
         get
         {
-            if (String.IsNullOrEmpty(valuePath))
-                return null;
-
-            return GlobalBlackboard.dict[SchemaManager.pid + entryID];
+            return BlackboardDataContainer.Get(entryID, SchemaManager.pid);
         }
         set
         {
-            GlobalBlackboard.dict[SchemaManager.pid + entryID] = value;
+            BlackboardDataContainer.Set(entryID, SchemaManager.pid, value);
         }
     }
     public List<string> filters;

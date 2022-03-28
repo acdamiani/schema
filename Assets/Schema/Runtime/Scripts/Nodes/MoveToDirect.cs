@@ -21,11 +21,10 @@ internal class MoveToDirect : Action
         selector.AddVector2Filter();
         selector.AddVector3Filter();
     }
-    private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
+    private Vector3 GetPoint(BlackboardEntrySelector selector)
     {
-        BlackboardData.EntryData entryData = data.GetEntry(selector.entryID);
-        System.Type t = entryData.type;
-        object value = data.GetValue(selector.entryID);
+        object value = selector.value;
+        System.Type t = value.GetType();
 
         //Not ideal to run every frame, so will be cached in the node state	
         if (t == typeof(GameObject))
@@ -58,7 +57,7 @@ internal class MoveToDirect : Action
         if (string.IsNullOrEmpty(selector.entryID))
         {
             MoveToDirectMemory memory = (MoveToDirectMemory)nodeMemory;
-            memory.point = GetPoint(selector, agent.blackboard);
+            memory.point = GetPoint(selector);
 
             if (rotateTowardsTarget)
             {

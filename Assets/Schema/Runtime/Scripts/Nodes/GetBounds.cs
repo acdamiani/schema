@@ -13,7 +13,7 @@ public class GetBounds : Action
     public BlackboardEntrySelector<Vector3> boundsKey;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        GameObject obj = useSelf ? agent.gameObject : agent.blackboard.GetValue<GameObject>(gameObject);
+        GameObject obj = useSelf ? agent.gameObject : gameObject.value;
 
         if (obj == null || boundsKey == null)
             return NodeStatus.Failure;
@@ -25,7 +25,7 @@ public class GetBounds : Action
 
         Vector3 objectSize = Vector3.Scale(obj.transform.localScale, mesh.bounds.size);
 
-        agent.blackboard.SetValue<Vector3>(boundsKey, objectSize);
+        boundsKey.value = objectSize;
 
         return NodeStatus.Success;
     }

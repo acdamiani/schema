@@ -55,7 +55,6 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEntryEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Components/PatrolRouteEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/ConeCheckEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetBlackboardValueEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntryDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/AnimatorVariableValueDrawer.cs" />

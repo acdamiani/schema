@@ -13,7 +13,6 @@ public class SchemaAgent : MonoBehaviour
     private int currentIndex;
     private bool firstCall = true;
     private List<Node> calledNodes = new List<Node>();
-    public BlackboardData blackboard { get; private set; }
 #if UNITY_EDITOR
     [NonSerialized]
     public Node editorTarget;
@@ -21,7 +20,6 @@ public class SchemaAgent : MonoBehaviour
 #endif
     private Dictionary<string, object> agentState = new Dictionary<string, object>();
     private Dictionary<OptimizedDecorator, bool> decoratorState = new Dictionary<OptimizedDecorator, bool>();
-    // Start is called before the first frame update
     // TODO: Implement
     public bool restartOnComplete;
     public bool logTaskChanges;
@@ -30,16 +28,18 @@ public class SchemaAgent : MonoBehaviour
     private bool ticked;
     private int count;
     private int callerIndex;
-    private string uID;
+    private static int pidInc;
+    private int pid;
     NodeStatus context;
     private void Start()
     {
-        uID = Guid.NewGuid().ToString("N");
+        pid = pidInc;
+        pidInc++;
 
         if (!target) return;
         graph = SchemaManager.LoadGraph(target, false);
 
-        blackboard = new BlackboardData(target.blackboard);
+        BlackboardDataContainer.Initialize(target.blackboard);
 
         foreach (OptimizedNode oNode in graph.nodes)
         {
@@ -88,7 +88,7 @@ public class SchemaAgent : MonoBehaviour
     }
     void Update()
     {
-        SchemaManager.pid = uID;
+        SchemaManager.pid = pid;
 
         EvaluateDecorators();
         Tick();

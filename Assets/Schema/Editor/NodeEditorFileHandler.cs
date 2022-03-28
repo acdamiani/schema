@@ -37,6 +37,7 @@ namespace Schema.Editor
             editor.original = Duplicate(editor.target);
 
             List<ScriptableObject> blackboardAndKeys = new List<ScriptableObject> { editor.original.blackboard };
+            editor.original.blackboard.SaveGlobals();
             blackboardAndKeys.AddRange(editor.original.blackboard.entries);
 
             if (editor.original.blackboard.entries != null) blackboardAndKeys.AddRange(editor.original.blackboard.entries);
@@ -243,6 +244,7 @@ namespace Schema.Editor
             editor.windowInfo.selected.RemoveAll(node => node == null);
 
             List<ScriptableObject> blackboardAndKeys = new List<ScriptableObject> { editor.target.blackboard };
+            editor.target.blackboard.LoadGlobals();
             blackboardAndKeys.AddRange(editor.target.blackboard.entries);
 
             List<ScriptableObject> nodes = new List<ScriptableObject>(editor.target.nodes);

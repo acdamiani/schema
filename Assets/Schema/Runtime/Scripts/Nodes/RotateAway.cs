@@ -20,10 +20,10 @@ public class RotateAway : Schema.Runtime.Action
         selector.AddVector3Filter();
         selector.AddGameObjectFilter();
     }
-    private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
+    private Vector3 GetPoint(BlackboardEntrySelector selector)
     {
-        System.Type t = data.GetEntryType(selector.entryID);
-        object value = data.GetValue(selector.entryID);
+        object value = selector.value;
+        System.Type t = value.GetType();
 
         if (value == null) return Vector3.zero;
 
@@ -65,7 +65,7 @@ public class RotateAway : Schema.Runtime.Action
     {
         RotateToMemory memory = (RotateToMemory)nodeMemory;
 
-        Vector3 point = GetPoint(selector, agent.blackboard);
+        Vector3 point = GetPoint(selector);
         Quaternion rotation = Quaternion.FromToRotation(memory.forwardInitial, (agent.transform.position - point).normalized);
         float angleDiff = Vector3.Angle(agent.transform.forward, (agent.transform.position - point).normalized);
 

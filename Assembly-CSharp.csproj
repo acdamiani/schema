@@ -9,10 +9,10 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{9054b1a5-af7f-8b1f-9368-7b8fde6e19b0}</ProjectGuid>
+    <ProjectGuid>{be634a71-0e1d-c1b8-4732-5d11c4159c15}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Schema</AssemblyName>
+    <AssemblyName>Assembly-CSharp</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <BaseDirectory>.</BaseDirectory>
@@ -36,74 +36,7 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Flee.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandomWeighted.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntry.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/CustomAction.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Components/CoverVolume.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/BlackboardCompare.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlaySound.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardData.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObject.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Cross.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetRotation.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wait.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/SoundHeard.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveTo.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Base/Action.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Proc/SchemaAgent.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Cooldown.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetPosition.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Selector.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/ConeCheck.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetScale.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateAway.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetBlackboardValueRandom.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/TriggerAnimator.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Proc/SchemaManager.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagList.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/DisableOnPlayAttribute.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Base/Graph.cs" />
-     <Compile Include="Assets/Schema/Utilities/NameAliases.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Base/Flow.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/NavMeshAreaMask.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AddForce.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Patrol.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/ReturnResult.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/DebugLog.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Blackboard.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObjectWithTag.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Dot.cs" />
-     <Compile Include="Assets/Schema/Utilities/HelperMethods.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToRandom.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Timer.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlayAnimation.cs" />
-     <Compile Include="Assets/Schema/DownloadIcon.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Sequence.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/PatrolRoute.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLayerWeight.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Base/Decorator.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Base/Root.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/WaitBlackboardTime.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Angle.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Loop.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorVariable.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/ScriptableDictionary.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetBounds.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wander.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/BlackboardCondition.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntrySelector.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/RequireAgentComponentAttribute.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Base/Node.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/Raycast.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandom.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Distance.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorLookAt.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToDirect.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
-     <None Include="Assets/Schema/Schema.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.25f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
@@ -322,24 +255,6 @@
     </Reference>
     <Reference Include="UnityEditor.UnityConnectModule">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.25f1/Editor/Data/Managed/UnityEngine/UnityEditor.UnityConnectModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor.Graphs">
-        <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.25f1/Editor/Data/Managed/UnityEditor.Graphs.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor.LinuxStandalone.Extensions">
-        <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.25f1/Editor/Data/PlaybackEngines/LinuxStandaloneSupport/UnityEditor.LinuxStandalone.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Plastic.Newtonsoft.Json">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.15.4/Lib/Editor/PlasticSCM/Unity.Plastic.Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Plastic.Antlr3.Runtime">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.15.4/Lib/Editor/PlasticSCM/Unity.Plastic.Antlr3.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="unityplastic">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.15.4/Lib/Editor/PlasticSCM/unityplastic.dll</HintPath>
-    </Reference>
-    <Reference Include="log4netPlastic">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.15.4/Lib/Editor/PlasticSCM/log4netPlastic.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.nuget.newtonsoft-json@2.0.0/Runtime/Newtonsoft.Json.dll</HintPath>
@@ -689,14 +604,46 @@
     <Reference Include="mscorlib">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.25f1/Editor/Data/NetStandard/compat/2.0.0/shims/netfx/mscorlib.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.VSCode.Editor">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro.Editor">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.VisualStudio.Editor">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.VisualStudio.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Timeline.Editor">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Timeline">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEditor.UI">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.PlasticSCM.Editor">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.PlasticSCM.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Rider.Editor">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Schema.csproj">
+      <Project>{9054b1a5-af7f-8b1f-9368-7b8fde6e19b0}</Project>
+      <Name>Schema</Name>
+    </ProjectReference>
+    <ProjectReference Include="SchemaEditor.csproj">
+      <Project>{68d4eea3-7d8b-610e-111e-dec82510ea5d}</Project>
+      <Name>SchemaEditor</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

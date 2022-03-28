@@ -6,7 +6,7 @@ using Schema.Runtime;
 public static class SchemaManager
 {
     private static Dictionary<Graph, OptimizedGraph> map = new Dictionary<Graph, OptimizedGraph>();
-    public static string pid;
+    public static int pid;
     public static OptimizedGraph LoadGraph(Graph graph, bool reload)
     {
         if (!map.ContainsKey(graph) || reload)

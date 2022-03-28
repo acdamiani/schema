@@ -23,7 +23,7 @@ public class WaitBlackboardTime : Action
 
         if (string.IsNullOrEmpty(number.entryID)) return NodeStatus.Failure;
 
-        if (Time.time - memory.startTime >= agent.blackboard.GetValue<float>(number.entryID))
+        if (Time.time - memory.startTime >= (float)number.value)
         {
             return NodeStatus.Success;
         }

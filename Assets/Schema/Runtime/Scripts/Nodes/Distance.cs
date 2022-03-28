@@ -15,18 +15,10 @@ public class Distance : Action
     public bool squared;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        Vector3 v1 = agent.blackboard.GetType(vectorOne) == typeof(Vector3) ?
-            agent.blackboard.GetValue<Vector3>(vectorOne) :
-            (Vector3)agent.blackboard.GetValue<Vector2>(vectorOne);
-
-        Vector3 v2 = agent.blackboard.GetType(vectorTwo) == typeof(Vector3) ?
-            agent.blackboard.GetValue<Vector3>(vectorTwo) :
-            (Vector3)agent.blackboard.GetValue<Vector2>(vectorTwo);
-
-        Vector3 diff = v1 - v2;
+        Vector3 diff = vectorOne.value - vectorTwo.value;
         float dist = squared ? diff.sqrMagnitude : diff.magnitude;
 
-        agent.blackboard.SetValue<float>(distance, dist);
+        distance.value = dist;
 
         return NodeStatus.Success;
     }

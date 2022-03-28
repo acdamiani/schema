@@ -57,8 +57,76 @@ public class Blackboard : ScriptableObject
             entry.blackboard = this;
 
         entryByteStrings = GetEntryByteStrings();
+        //
+    }
+    public void LoadGlobals()
+    {
+        Blackboard global = AssetDatabase.LoadAssetAtPath<Blackboard>("Assets/Schema/GlobalBlackboard.asset");
 
-        entryListChanged?.Invoke(this);
+        if (global == null)
+        {
+            global = ScriptableObject.CreateInstance<Blackboard>();
+            AssetDatabase.CreateAsset(global, "Assets/Schema/GlobalBlackboard.asset");
+
+            return;
+        }
+
+        List<BlackboardEntry> globalEntries = global.entries;
+
+        foreach (BlackboardEntry b in globalEntries)
+        {
+            BlackboardEntry copy = ScriptableObject.Instantiate(b);
+            copy.hideFlags = HideFlags.HideAndDontSave;
+
+            entries.Add(copy);
+        }
+    }
+    public void SaveGlobals()
+    {
+        Blackboard global = AssetDatabase.LoadAssetAtPath<Blackboard>("Assets/Schema/GlobalBlackboard.asset");
+
+        if (global == null)
+        {
+            global = ScriptableObject.CreateInstance<Blackboard>();
+            AssetDatabase.CreateAsset(global, "Assets/Schema/GlobalBlackboard.asset");
+        }
+
+        List<BlackboardEntry> globalEntries = entries.FindAll(entry => entry.entryType == BlackboardEntry.EntryType.Global);
+
+        foreach (BlackboardEntry globalEntry in global.entries)
+        {
+            DestroyImmediate(globalEntry, true);
+        }
+
+        global.entries.Clear();
+
+        foreach (BlackboardEntry entry in globalEntries)
+        {
+            BlackboardEntry copy = ScriptableObject.Instantiate(entry);
+            copy.hideFlags = HideFlags.HideInHierarchy;
+
+            AssetDatabase.AddObjectToAsset(copy, "Assets/Schema/GlobalBlackboard.asset");
+
+            global.entries.Add(copy);
+
+            entries.Remove(entry);
+            DestroyImmediate(entry);
+        }
+
+        foreach (BlackboardEntry entry in global.entries)
+        {
+            if (entries.Find(e => e.uID == entry.uID))
+            {
+                global.entries.Remove(entry);
+                AssetDatabase.RemoveObjectFromAsset(entry);
+                DestroyImmediate(entry);
+            }
+        }
+
+        EditorUtility.SetDirty(global);
+        AssetDatabase.SaveAssets();
+
+        Debug.Log(global.entries);
     }
     //Returns a bit mask given specific filters
     public System.Tuple<int, int> GetMask(List<string> filters)
@@ -120,6 +188,8 @@ public class Blackboard : ScriptableObject
     }
     public void RemoveEntry(BlackboardEntry entry, bool preserve)
     {
+        Debug.Log("removed entry " + entry.Name);
+
         entries.Remove(entry);
 
         if (!preserve)

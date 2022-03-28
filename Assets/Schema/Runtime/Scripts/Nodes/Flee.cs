@@ -41,7 +41,7 @@ public class Flee : Action
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
         FleeMemory memory = (FleeMemory)nodeMemory;
-        GameObject enemyObject = agent.blackboard.GetValue<GameObject>(enemy);
+        GameObject enemyObject = enemy.value;
 
         if (enemyObject == null)
         {

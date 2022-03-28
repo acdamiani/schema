@@ -23,7 +23,7 @@ public class Raycast : Decorator
         if (string.IsNullOrEmpty(point.entryID))
             return false;
 
-        return TestCone(agent, agent.blackboard);
+        return TestCone(agent);
     }
     public override void DrawGizmos(SchemaAgent agent)
     {
@@ -33,7 +33,7 @@ public class Raycast : Decorator
         Vector3 rotatedOffset = agent.transform.rotation * offset;
         Vector3 rotatedDir = agent.transform.rotation * (Quaternion.Euler(direction) * Vector3.forward);
 
-        if (TestCone(agent, null))
+        if (TestCone(agent))
             Gizmos.color = Color.green;
         else
             Gizmos.color = Color.white;
@@ -42,7 +42,7 @@ public class Raycast : Decorator
 
         Gizmos.color = col;
     }
-    private bool TestCone(SchemaAgent agent, BlackboardData data)
+    private bool TestCone(SchemaAgent agent)
     {
         RaycastHit[] hits;
 
@@ -55,18 +55,16 @@ public class Raycast : Decorator
         }
         else
         {
-            if (data == null) return false;
-
-            Vector3 p = GetPoint(point, data);
+            Vector3 p = GetPoint(point);
             hits = Physics.RaycastAll(agent.transform.position, (p - agent.transform.position).normalized);
         }
 
         return hits.Any(hit => tagFilter.tags.Contains(hit.transform.tag));
     }
-    private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
+    private Vector3 GetPoint(BlackboardEntrySelector selector)
     {
-        System.Type t = data.GetEntryType(selector.entryID);
-        object value = data.GetValue(selector.entryID);
+        object value = selector.value;
+        System.Type t = value.GetType();
 
         if (value == null) return Vector3.zero;
 

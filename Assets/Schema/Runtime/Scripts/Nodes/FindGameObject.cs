@@ -12,8 +12,6 @@ public class FindGameObject : Action
     public BlackboardEntrySelector<GameObject> gameObject;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        BlackboardData.EntryData entry = agent.blackboard.GetEntry(gameObject.entryID);
-
         if (!string.IsNullOrEmpty(gameObject.entryID))
         {
             GameObject found = GameObject.Find(gameObjectName);
@@ -24,7 +22,7 @@ public class FindGameObject : Action
             }
             else
             {
-                agent.blackboard.SetValue<GameObject>(gameObject.entryID, found);
+                gameObject.value = found;
                 return NodeStatus.Success;
             }
         }

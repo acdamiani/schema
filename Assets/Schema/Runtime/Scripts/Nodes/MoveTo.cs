@@ -19,16 +19,10 @@ public class MoveTo : Action
     [Tooltip("How fast the agent can turn to look at a target, given in deg/sec")]
     public float angularSpeed = 120f;
     public BlackboardEntrySelector<Vector3> selector;
-    private Vector3 GetPoint(BlackboardEntrySelector selector, BlackboardData data)
+    private Vector3 GetPoint(BlackboardEntrySelector selector)
     {
-        BlackboardData.EntryData entryData = data.GetEntry(selector.entryID);
-        System.Type t = entryData.type;
-        object value = data.GetValue(selector.entryID);
-
-        Debug.Log(selector.entryID);
-
-        Debug.Log(value.GetType());
-        Debug.Log(t);
+        object value = selector.value;
+        System.Type t = value.GetType();
 
         if (value == null) return Vector3.zero;
 
@@ -74,7 +68,7 @@ public class MoveTo : Action
             return NodeStatus.Failure;
 
         MoveToMemory memory = (MoveToMemory)nodeMemory;
-        memory.point = GetPoint(selector, agent.blackboard);
+        memory.point = GetPoint(selector);
         memory.agent.speed = speed;
         memory.agent.stoppingDistance = acceptableRadius;
         memory.agent.angularSpeed = angularSpeed;

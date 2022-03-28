@@ -13,17 +13,9 @@ public class Vector3Cross : Action
     public BlackboardEntrySelector<Vector3> angleKey;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        Vector3 v1 = agent.blackboard.GetType(vectorOne) == typeof(Vector3) ?
-            agent.blackboard.GetValue<Vector3>(vectorOne) :
-            (Vector3)agent.blackboard.GetValue<Vector2>(vectorOne);
+        Vector3 cross = Vector3.Cross(vectorOne.value, vectorTwo.value);
 
-        Vector3 v2 = agent.blackboard.GetType(vectorTwo) == typeof(Vector3) ?
-            agent.blackboard.GetValue<Vector3>(vectorTwo) :
-            (Vector3)agent.blackboard.GetValue<Vector2>(vectorTwo);
-
-        Vector3 cross = Vector3.Cross(v1, v2);
-
-        agent.blackboard.SetValue<Vector3>(angleKey, cross);
+        angleKey.value = cross;
 
         return NodeStatus.Success;
     }

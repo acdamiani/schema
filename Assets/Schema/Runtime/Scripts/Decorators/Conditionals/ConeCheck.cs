@@ -41,13 +41,13 @@ public class ConeCheck : Decorator
         GameObject go = TestCone(agent);
         if (go)
         {
-            agent.blackboard.SetValue<GameObject>(gameObjectKey.entryID, go);
+            gameObjectKey.value = go;
 
             return true;
         }
         else
         {
-            agent.blackboard.SetValue<GameObject>(gameObjectKey.entryID, null);
+            gameObjectKey.value = null;
 
             return false;
         }

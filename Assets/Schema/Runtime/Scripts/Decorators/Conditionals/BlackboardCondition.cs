@@ -22,7 +22,7 @@ public class BlackboardCondition : Decorator
     }
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
-        object val = agent.blackboard.GetValue(blackboardKey.entryID);
+        object val = blackboardKey.value;
         bool isSet = val != null;
 
         bool ret = conditionType == ConditionType.IsSet ? isSet : !isSet;
