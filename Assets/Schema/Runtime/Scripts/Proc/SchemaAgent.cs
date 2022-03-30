@@ -40,6 +40,9 @@ public class SchemaAgent : MonoBehaviour
         graph = SchemaManager.LoadGraph(target, false);
 
         BlackboardDataContainer.Initialize(target.blackboard);
+        Blackboard global = Resources.Load<Blackboard>("GlobalBlackboard");
+        if (global)
+            BlackboardDataContainer.Initialize(global);
 
         foreach (OptimizedNode oNode in graph.nodes)
         {

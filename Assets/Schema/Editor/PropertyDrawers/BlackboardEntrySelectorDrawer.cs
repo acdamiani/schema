@@ -68,7 +68,9 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
             string path = valuePathProp.stringValue;
 
-            if (EditorGUI.DropdownButton(controlRect, new GUIContent(String.IsNullOrEmpty(path) ? "None" : path), FocusType.Passive))
+            GUIContent buttonValue = new GUIContent(String.IsNullOrEmpty(entryID.stringValue) ? "None" : path.Replace('/', '.'));
+
+            if (EditorGUI.DropdownButton(controlRect, buttonValue, FocusType.Passive))
             {
                 GenericMenu menu = GenerateMenu(property);
 
@@ -86,10 +88,19 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     {
         SerializedProperty valueProp = property.FindPropertyRelative("_value");
 
+        bool lastWideMode = EditorGUIUtility.wideMode;
+        EditorGUIUtility.wideMode = true;
+
+        float height;
+
         if (valueProp != null && isWriteOnly == false)
-            return EditorGUI.GetPropertyHeight(valueProp, label, true);
+            height = EditorGUI.GetPropertyHeight(valueProp, label, true);
         else
-            return base.GetPropertyHeight(property, label);
+            height = base.GetPropertyHeight(property, label);
+
+        EditorGUIUtility.wideMode = lastWideMode;
+
+        return height;
     }
     private List<string> GetFilters(SerializedProperty property)
     {
@@ -162,7 +173,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                 if (!filtered.Contains(entry.type))
                     continue;
 
-                menu.AddItem(entry.Name, valuePathProp.stringValue.Equals(entry.Name), () => GenericMenuSelectOption(property, entryID, entry.Name), false);
+                menu.AddItem(entry.Name, idProp.stringValue == entryID, () => GenericMenuSelectOption(property, entryID, entry.type, "/"), false);
             }
             else
             {
@@ -170,14 +181,17 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                     entry.type,
                     entry.type,
                     filtered,
-                    entry.Name
+                    ""
                 );
+
                 foreach (string ss in props)
                 {
+                    Debug.Log("adding 2");
+
                     menu.AddItem(
-                        ss,
+                        entry.Name + ss,
                         valuePathProp.stringValue.Equals(ss),
-                        () => GenericMenuSelectOption(property, entryID, ss),
+                        () => GenericMenuSelectOption(property, entryID, entry.type, ss),
                         false
                     );
                 }
@@ -186,13 +200,18 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         return menu;
     }
-    private void GenericMenuSelectOption(SerializedProperty property, string id, string path = "")
+    private void GenericMenuSelectOption(SerializedProperty property, string id, Type type = null, string path = "")
     {
         SerializedProperty idProperty = property.FindPropertyRelative("entryID");
+        SerializedProperty entryTypeProperty = property.FindPropertyRelative("entryTypeString");
         SerializedProperty valuePathProperty = property.FindPropertyRelative("valuePath");
 
         idProperty.stringValue = id;
         valuePathProperty.stringValue = path;
+
+        if (type != null)
+            entryTypeProperty.stringValue = type.AssemblyQualifiedName;
+
         property.serializedObject.ApplyModifiedProperties();
     }
     private IEnumerable<string> PrintProperties(Type baseType, Type type, List<Type> targets, string basePath)

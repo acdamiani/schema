@@ -12,10 +12,7 @@ public class SetBlackboardValueRandom : Action
     [SerializeField] private int intMax;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        object value = selector.value;
-        System.Type valueType = value.GetType();
-
-        switch (System.Type.GetTypeCode(valueType))
+        switch (System.Type.GetTypeCode(selector.entryType))
         {
             case System.TypeCode.Single:
                 selector.value = Random.Range(floatMin, floatMax);

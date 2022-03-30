@@ -45,6 +45,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlaySound.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardData.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObject.cs" />
+     <Compile Include="Assets/Schema/Utilities/DynamicPropertyBuilder.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Cross.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetRotation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wait.cs" />
@@ -73,8 +74,10 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/DebugLog.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Blackboard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObjectWithTag.cs" />
+     <Compile Include="Assets/Schema/Utilities/DynamicProperty.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Dot.cs" />
      <Compile Include="Assets/Schema/Utilities/HelperMethods.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Subtract.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToRandom.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Timer.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlayAnimation.cs" />
@@ -90,6 +93,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetAnimatorVariable.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/ScriptableDictionary.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetBounds.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetTime.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wander.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/BlackboardCondition.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntrySelector.cs" />
@@ -103,7 +107,10 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetMatrixValue.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
+     <None Include="Assets/Schema/Utilities/ClassTemplate.txt" />
+     <None Include="Assets/Schema/Utilities/MethodTemplate.txt" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2020.3.25f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>

@@ -18,12 +18,11 @@ public class Blackboard : ScriptableObject
         typeof(string),
         typeof(float),
         typeof(bool),
-        typeof(Enum),
         typeof(Quaternion),
         typeof(Vector2),
         typeof(Vector3),
+        typeof(Vector4),
         typeof(Matrix4x4),
-        typeof(Type),
         typeof(GameObject),
         typeof(AnimationCurve)
     };
@@ -32,12 +31,11 @@ public class Blackboard : ScriptableObject
         { typeof(string),         Color.black },
         { typeof(float),          Color.black },
         { typeof(bool),           Color.black },
-        { typeof(Enum),           Color.black },
         { typeof(Quaternion),     Color.black },
         { typeof(Vector2),        Color.black },
         { typeof(Vector3),        Color.black },
+        { typeof(Vector4), Color.black},
         { typeof(Matrix4x4),      Color.black },
-        { typeof(Type),           Color.black },
         { typeof(GameObject),     Color.black },
         { typeof(AnimationCurve), Color.black }
     };
@@ -61,12 +59,12 @@ public class Blackboard : ScriptableObject
     }
     public void LoadGlobals()
     {
-        Blackboard global = AssetDatabase.LoadAssetAtPath<Blackboard>("Assets/Schema/GlobalBlackboard.asset");
+        Blackboard global = Resources.Load<Blackboard>("GlobalBlackboard");
 
         if (global == null)
         {
             global = ScriptableObject.CreateInstance<Blackboard>();
-            AssetDatabase.CreateAsset(global, "Assets/Schema/GlobalBlackboard.asset");
+            AssetDatabase.CreateAsset(global, "Resources/GlobalBlackboard.asset");
 
             return;
         }
@@ -80,15 +78,17 @@ public class Blackboard : ScriptableObject
 
             entries.Add(copy);
         }
+
+        entryByteStrings = GetEntryByteStrings();
     }
     public void SaveGlobals()
     {
-        Blackboard global = AssetDatabase.LoadAssetAtPath<Blackboard>("Assets/Schema/GlobalBlackboard.asset");
+        Blackboard global = Resources.Load<Blackboard>("GlobalBlackboard");
 
         if (global == null)
         {
             global = ScriptableObject.CreateInstance<Blackboard>();
-            AssetDatabase.CreateAsset(global, "Assets/Schema/GlobalBlackboard.asset");
+            AssetDatabase.CreateAsset(global, "Resources/GlobalBlackboard.asset");
         }
 
         List<BlackboardEntry> globalEntries = entries.FindAll(entry => entry.entryType == BlackboardEntry.EntryType.Global);
@@ -105,7 +105,7 @@ public class Blackboard : ScriptableObject
             BlackboardEntry copy = ScriptableObject.Instantiate(entry);
             copy.hideFlags = HideFlags.HideInHierarchy;
 
-            AssetDatabase.AddObjectToAsset(copy, "Assets/Schema/GlobalBlackboard.asset");
+            AssetDatabase.AddObjectToAsset(copy, "Resources/GlobalBlackboard.asset");
 
             global.entries.Add(copy);
 

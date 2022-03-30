@@ -4,7 +4,7 @@ using UnityEngine;
 [Category("Movement")]
 public class RotateTo : Schema.Runtime.Action
 {
-    public BlackboardEntrySelector selector = new BlackboardEntrySelector();
+    public BlackboardEntrySelector<Vector3> selector;
     [Tooltip("Speed of rotation, in deg/sec")]
     public float speed;
     [Tooltip("Enable smooth interpolation")]
@@ -14,45 +14,6 @@ public class RotateTo : Schema.Runtime.Action
         public Vector3 forwardInitial;
         public Quaternion rotationInitial;
         public float t;
-    }
-    void OnEnable()
-    {
-        selector.AddVector2Filter();
-        selector.AddVector3Filter();
-        selector.AddGameObjectFilter();
-    }
-    private Vector3 GetPoint(BlackboardEntrySelector selector)
-    {
-        object value = selector.value;
-        System.Type t = value.GetType();
-
-        if (value == null) return Vector3.zero;
-
-        //Not ideal to run every frame, so will be cached in the node state	
-        if (t == typeof(GameObject))
-        {
-            return ((GameObject)value).transform.position;
-        }
-        else if (t == typeof(Vector2))
-        {
-            return (Vector2)value;
-        }
-        else if (t == typeof(Vector2Int))
-        {
-            return (Vector2)value;
-        }
-        else if (t == typeof(Vector3))
-        {
-            return (Vector3)value;
-        }
-        else if (t == typeof(Vector3Int))
-        {
-            return (Vector3)value;
-        }
-        else
-        {
-            return Vector3.zero;
-        }
     }
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
@@ -66,7 +27,10 @@ public class RotateTo : Schema.Runtime.Action
     {
         RotateToMemory memory = (RotateToMemory)nodeMemory;
 
-        Vector3 point = GetPoint(selector);
+        Vector3 point = selector.value;
+
+        Debug.Log(point);
+
         Quaternion rotation = Quaternion.FromToRotation(memory.forwardInitial, (point - agent.transform.position).normalized);
         float angleDiff = Vector3.Angle(agent.transform.forward, (point - agent.transform.position).normalized);
 

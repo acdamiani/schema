@@ -29,7 +29,7 @@ public class SetBlackboardValueRandomEditor : Editor
 
         GUILayout.BeginHorizontal();
 
-        Type t = Type.GetType(entry.typeString);
+        Type t = entry.type;
         switch (Type.GetTypeCode(t))
         {
             case TypeCode.Single:

@@ -45,7 +45,7 @@ public class DebugLogEditor : Editor
         {
             EditorGUILayout.HelpBox(e.Message, MessageType.Warning);
         }
-        EditorGUILayout.TextArea(m, boxStyle);
+        EditorGUILayout.SelectableLabel(m, boxStyle);
 
         serializedObject.ApplyModifiedProperties();
     }

@@ -13,10 +13,8 @@ public class BlackboardEntrySelector<T> : BlackboardEntrySelector
     {
         get
         {
-            if (_value != null)
-                return _value;
-            else if (String.IsNullOrEmpty(valuePath))
-                return default(T);
+            if (_value != null && String.IsNullOrEmpty(entryID))
+                return (T)_value;
 
             return (T)base.value;
         }
@@ -37,11 +35,28 @@ public class BlackboardEntrySelector
     public string entryName;
     public string entryID;
     public string valuePath;
+    public Type entryType
+    {
+        get
+        {
+            return Type.GetType(entryTypeString);
+        }
+        set
+        {
+            entryTypeString = value.AssemblyQualifiedName;
+        }
+    }
+    [SerializeField] private string entryTypeString;
     public object value
     {
         get
         {
-            return BlackboardDataContainer.Get(entryID, SchemaManager.pid);
+            object obj = BlackboardDataContainer.Get(entryID, SchemaManager.pid);
+
+            if (!String.IsNullOrEmpty(valuePath))
+                return DynamicProperty.Get(obj, valuePath);
+            else
+                return obj;
         }
         set
         {

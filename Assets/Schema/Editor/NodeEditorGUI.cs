@@ -838,26 +838,46 @@ namespace Schema.Editor
                     dividerInput.Contains(Event.current.mousePosition);
 
                 Rect inspector = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding, 0f, inspectorWidth, windowInfo.dividerPos);
-                GUILayout.BeginArea(inspector);
+                Rect inspectorContainer = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2, 0f, inspectorWidth + GUIData.sidebarPadding * 2, windowInfo.dividerPos);
+
+                GUILayout.BeginArea(inspectorContainer);
                 windowInfo.inspectorScroll = GUILayout.BeginScrollView(windowInfo.inspectorScroll);
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(GUIData.nodePadding);
+                GUILayout.BeginVertical();
                 DrawInspectorWindow();
+                GUILayout.EndVertical();
+                GUILayout.Space(GUIData.nodePadding);
+                GUILayout.EndHorizontal();
                 GUILayout.EndScrollView();
                 GUILayout.EndArea();
-                Rect blackboard = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding,
-                    windowInfo.dividerPos, inspectorWidth, position.height - windowInfo.dividerPos);
+                Rect blackboard = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2f,
+                    windowInfo.dividerPos, inspectorWidth + GUIData.sidebarPadding * 2f, position.height - windowInfo.dividerPos);
                 GUILayout.BeginArea(blackboard);
                 windowInfo.blackboardScroll = GUILayout.BeginScrollView(windowInfo.blackboardScroll);
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(GUIData.nodePadding);
+                GUILayout.BeginVertical();
                 DrawBlackboard(target.blackboard);
+                GUILayout.EndVertical();
+                GUILayout.Space(GUIData.nodePadding);
+                GUILayout.EndHorizontal();
                 GUILayout.EndScrollView();
                 GUILayout.EndArea();
             }
             else
             {
-                Rect prefsWindow = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding, 0f, inspectorWidth, position.height);
+                Rect prefsWindow = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2f, 0f, inspectorWidth + GUIData.sidebarPadding * 2f, position.height);
 
                 GUILayout.BeginArea(prefsWindow);
                 windowInfo.inspectorScroll = GUILayout.BeginScrollView(windowInfo.inspectorScroll);
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(GUIData.nodePadding);
+                GUILayout.BeginVertical();
                 DrawPreferencesWindow();
+                GUILayout.EndVertical();
+                GUILayout.Space(GUIData.nodePadding);
+                GUILayout.EndHorizontal();
                 GUILayout.EndScrollView();
                 GUILayout.EndArea();
             }

@@ -1376,6 +1376,11 @@ namespace Schema.Editor
 
             instance.MoveDecoratorInNode(instance.windowInfo.selectedDecorator, false);
         }
+        [Shortcut("Schema/Test", KeyCode.J, ShortcutModifiers.Action | ShortcutModifiers.Shift)]
+        private static void TestCommand()
+        {
+            DynamicPropertyBuilder.Build();
+        }
         internal static class NodeEditorPrefs
         {
             public static bool saveOnClose
