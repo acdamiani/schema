@@ -33,10 +33,16 @@ public class BlackboardEntryEditor : Editor
         entry.entryType = (BlackboardEntry.EntryType)EditorGUILayout.EnumPopup("Variable Type", entry.entryType);
 
         if (!newName.Equals(entry.Name))
+        {
             entry.Name = newName;
+            BlackboardEntrySelectorDrawer.names[entry.uID] = newName;
+        }
 
         if (!newType.Equals(entry.typeString))
+        {
             entry.typeString = newType;
+            Blackboard.InvokeEntryTypeChanged(entry);
+        }
 
         EditorGUILayout.LabelField("Description");
         EditorStyles.textField.wordWrap = true;

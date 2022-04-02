@@ -24,7 +24,11 @@ public class SetMatrixValueEditor : Editor
     {
         serializedObject.Update();
 
-        Rect reserved = GUILayoutUtility.GetRect(100f, Single.MaxValue, 0f, 16f * 4 + padding * 3 + 5f);
+        EditorGUILayout.PropertyField(t);
+
+        GUILayout.Box("", GUILayout.Height(20 * 4 + padding * 5), GUILayout.ExpandWidth(true));
+
+        Rect reserved = GUILayoutUtility.GetLastRect();
 
         for (int y = 0; y < 4; y++)
         {
@@ -32,16 +36,14 @@ public class SetMatrixValueEditor : Editor
             {
                 Rect r = new Rect(
                     reserved.x + reserved.width / 4f * x + padding / 2f,
-                    reserved.y + 16f * y + padding * y,
+                    reserved.y + 20 * y + padding * y + padding,
                     (reserved.width - padding * 3) / 4f,
-                    16f
+                    20
                 );
 
                 EditorGUI.PropertyField(r, matrix[x, y], GUIContent.none, false);
             }
         }
-
-        EditorGUILayout.PropertyField(t);
 
         serializedObject.ApplyModifiedProperties();
     }

@@ -143,7 +143,12 @@ public class BlackboardEditor : Editor
         if (nameFieldControlName == entry.uID)
         {
             GUI.SetNextControlName(entry.uID);
+            EditorGUI.BeginChangeCheck();
+
             entry.Name = GUILayout.TextField(entry.Name, NodeEditorResources.styles.nameField);
+
+            if (EditorGUI.EndChangeCheck())
+                BlackboardEntrySelectorDrawer.names[entry.uID] = entry.Name;
         }
         else
         {

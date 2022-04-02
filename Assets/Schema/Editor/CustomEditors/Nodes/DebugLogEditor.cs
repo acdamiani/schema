@@ -18,7 +18,7 @@ public class DebugLogEditor : Editor
     }
     public override void OnInspectorGUI()
     {
-        DebugLog debugLog = (DebugLog)targets[0];
+        DebugLog debugLog = (DebugLog)target;
 
         if (boxStyle == null)
         {
@@ -28,7 +28,14 @@ public class DebugLogEditor : Editor
 
         string[] names = new string[0];
         if (debugLog != null && debugLog.keys != null)
-            names = debugLog.keys.Select(key => key.valuePath).ToArray();
+        {
+            names = debugLog.keys.Select(key =>
+            {
+                BlackboardEntrySelectorDrawer.names.TryGetValue(key.entryID, out string name);
+
+                return name;
+            }).ToArray();
+        }
 
         serializedObject.Update();
 

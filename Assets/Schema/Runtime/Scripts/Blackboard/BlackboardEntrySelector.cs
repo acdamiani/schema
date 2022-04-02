@@ -70,12 +70,14 @@ public class BlackboardEntrySelector
         this.filters = filters.Select(x => x.AssemblyQualifiedName).ToList();
 
         Blackboard.entryListChanged += BlackboardChangedCallback;
+        Blackboard.entryTypeChanged += VerifyType;
     }
     public BlackboardEntrySelector()
     {
         this.filters = new List<string>();
 
         Blackboard.entryListChanged += BlackboardChangedCallback;
+        Blackboard.entryTypeChanged += VerifyType;
     }
     private void BlackboardChangedCallback(Blackboard changed)
     {
@@ -87,8 +89,19 @@ public class BlackboardEntrySelector
     }
     public void VerifyResults(Blackboard changed)
     {
-        if (!changed.entries.Find(entry => entry.uID == entryID))
+        BlackboardEntry e = changed.entries.Find(entry => entry.uID == entryID);
+
+        if (e == null)
         {
+            entryID = "";
+            valuePath = "";
+        }
+    }
+    private void VerifyType(BlackboardEntry entry)
+    {
+        if (entryID == entry.uID && !filters.Contains(entry.typeString))
+        {
+            Debug.Log("resetting");
             entryID = "";
             valuePath = "";
         }

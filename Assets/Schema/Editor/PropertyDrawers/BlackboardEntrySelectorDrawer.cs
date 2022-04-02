@@ -10,6 +10,7 @@ using System.Collections.Generic;
 public class BlackboardEntrySelectorDrawer : PropertyDrawer
 {
     private bool? isWriteOnly;
+    public static Dictionary<string, string> names = new Dictionary<string, string>();
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         SerializedProperty entryID = property.FindPropertyRelative("entryID");
@@ -35,6 +36,11 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         if (doesHavePath)
             label.tooltip = $"{(String.IsNullOrWhiteSpace(label.tooltip) ? "" : "\n")}Controlled by {valuePathProp.stringValue.Replace('/', '.')}";
+
+        if (!String.IsNullOrEmpty(entryID.stringValue) && !names.ContainsKey(entryID.stringValue))
+        {
+            names[entryID.stringValue] = Blackboard.instance.GetEntry(entryID.stringValue).Name;
+        }
 
         if (value != null && isWriteOnly == false)
         {
@@ -67,8 +73,9 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             Rect controlRect = EditorGUI.PrefixLabel(position, label);
 
             string path = valuePathProp.stringValue;
+            names.TryGetValue(entryID.stringValue, out string idName);
 
-            GUIContent buttonValue = new GUIContent(String.IsNullOrEmpty(entryID.stringValue) ? "None" : path.Replace('/', '.'));
+            GUIContent buttonValue = new GUIContent(String.IsNullOrEmpty(idName) ? "None" : idName);
 
             if (EditorGUI.DropdownButton(controlRect, buttonValue, FocusType.Passive))
             {
@@ -186,11 +193,9 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
                 foreach (string ss in props)
                 {
-                    Debug.Log("adding 2");
-
                     menu.AddItem(
                         entry.Name + ss,
-                        valuePathProp.stringValue.Equals(ss),
+                        valuePathProp.stringValue.Equals(ss) && idProp.stringValue == entryID,
                         () => GenericMenuSelectOption(property, entryID, entry.type, ss),
                         false
                     );

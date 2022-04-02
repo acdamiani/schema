@@ -12,7 +12,9 @@ public class Blackboard : ScriptableObject
 {
     public static Blackboard instance;
     public delegate void EntryListChangedCallback(Blackboard changed);
+    public delegate void EntryTypeChangedCallback(BlackboardEntry changed);
     public static event EntryListChangedCallback entryListChanged;
+    public static event EntryTypeChangedCallback entryTypeChanged;
     public static readonly Type[] blackboardTypes = {
         typeof(int),
         typeof(string),
@@ -41,8 +43,6 @@ public class Blackboard : ScriptableObject
     };
     public List<BlackboardEntry> entries = new List<BlackboardEntry>();
     public string[] entryByteStrings { get; private set; }
-    private List<BlackboardEntrySelector> selectors = new List<BlackboardEntrySelector>();
-    public Dictionary<Type, BlackboardEntry[]> typeArrays { get; private set; }
     void OnEnable()
     {
         Dictionary<Type, Color> copy = new Dictionary<Type, Color>(typeColors);
@@ -226,5 +226,9 @@ public class Blackboard : ScriptableObject
         }
 
         return ret;
+    }
+    public static void InvokeEntryTypeChanged(BlackboardEntry entry)
+    {
+        entryTypeChanged?.Invoke(entry);
     }
 }
