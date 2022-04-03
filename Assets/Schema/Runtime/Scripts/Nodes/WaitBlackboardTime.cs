@@ -11,7 +11,7 @@ public class WaitBlackboardTime : Action
     {
         public float startTime;
     }
-    public BlackboardEntrySelector number = new BlackboardEntrySelector(typeof(int), typeof(float));
+    public BlackboardEntrySelector<float> number;
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
         WaitBlackboardTimeMemory memory = (WaitBlackboardTimeMemory)nodeMemory;

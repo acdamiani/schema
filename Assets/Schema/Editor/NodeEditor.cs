@@ -600,9 +600,7 @@ namespace Schema.Editor
             List<UnityEngine.Object> toRecord = new List<UnityEngine.Object> { node };
             if (node.parent != null) toRecord.Add(node.parent);
             toRecord.AddRange(node.children);
-            // Remove the node
             Undo.RecordObjects(toRecord.ToArray(), "Delete Node");
-            //so order changes will not cause errors
             Undo.RegisterCompleteObjectUndo(target, "Delete Node");
             target.RemoveNode(node);
 
@@ -778,7 +776,7 @@ namespace Schema.Editor
                 }
 
                 if (asChild)
-                    AddConnection(operators[i], node);
+                    AddConnection(operators[i], node, false);
 
                 Select(node, true);
 
@@ -876,10 +874,11 @@ namespace Schema.Editor
             int decoratorIndex = d.node.decorators.IndexOf(d);
             d.node.decorators.Move(d, index);
         }
-        private void AddConnection(Node n1, Node n2)
+        private void AddConnection(Node n1, Node n2, bool recordUndo)
         {
             windowInfo.treeDirty = true;
-            Undo.RecordObjects(new UnityEngine.Object[] { n1, n2 }, "Add Connection");
+            if (recordUndo)
+                Undo.RecordObjects(new UnityEngine.Object[] { n1, n2 }, "Add Connection");
             if (!n1.children.Contains(n2))
             {
                 n1.children.Add(n2);

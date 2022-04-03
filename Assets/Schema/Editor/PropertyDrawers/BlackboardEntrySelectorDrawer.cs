@@ -9,8 +9,9 @@ using System.Collections.Generic;
 [CustomPropertyDrawer(typeof(BlackboardEntrySelector), true)]
 public class BlackboardEntrySelectorDrawer : PropertyDrawer
 {
-    private bool? isWriteOnly;
     public static Dictionary<string, string> names = new Dictionary<string, string>();
+    private static Dictionary<SerializedProperty, bool> writeOnly = new Dictionary<SerializedProperty, bool>();
+    private Vector2 scroll;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         SerializedProperty entryID = property.FindPropertyRelative("entryID");
@@ -18,13 +19,14 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
         SerializedProperty value = property.FindPropertyRelative("_value");
 
-        if (isWriteOnly == null)
-            isWriteOnly = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
+        if (!writeOnly.ContainsKey(property))
+            writeOnly[property] = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
 
         bool lastWideMode = EditorGUIUtility.wideMode;
         EditorGUIUtility.wideMode = true;
 
-        Rect enumRect = new Rect(position.x, position.y, position.width - 19, position.height);
+        Rect enumRect = new Rect(position.x, position.y, position.width - 19, position.height - 18);
+        Rect textRect = new Rect(position.x, position.y + position.height - 18, position.width, 18);
         Rect buttonRect = new Rect(position.xMax - 19, position.y, 19, Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
 
         Vector2 oldIconSize = EditorGUIUtility.GetIconSize();
@@ -32,23 +34,34 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         EditorGUI.BeginProperty(position, label, property);
 
-        bool doesHavePath = !String.IsNullOrEmpty(valuePathProp.stringValue);
-
-        if (doesHavePath)
-            label.tooltip = $"{(String.IsNullOrWhiteSpace(label.tooltip) ? "" : "\n")}Controlled by {valuePathProp.stringValue.Replace('/', '.')}";
+        bool doesHavePath = !String.IsNullOrEmpty(entryID.stringValue);
 
         if (!String.IsNullOrEmpty(entryID.stringValue) && !names.ContainsKey(entryID.stringValue))
-        {
             names[entryID.stringValue] = Blackboard.instance.GetEntry(entryID.stringValue).Name;
-        }
 
-        if (value != null && isWriteOnly == false)
+        if (value != null && !writeOnly[property])
         {
             EditorGUI.BeginDisabledGroup(doesHavePath);
 
             EditorGUI.PropertyField(enumRect, value, label, true);
 
             EditorGUI.EndDisabledGroup();
+            // Hack to get context rect
+            if (!String.IsNullOrEmpty(entryID.stringValue))
+            {
+                Rect p = EditorGUI.PrefixLabel(textRect, new GUIContent("\0"));
+                Vector2 size = EditorStyles.miniLabel.CalcSize(new GUIContent($"Using {names[entryID.stringValue]}{valuePathProp.stringValue.Replace('/', '.')}"));
+                GUI.BeginClip(p, scroll, Vector2.zero, false);
+                GUI.Label(new Rect(0f, 0f, size.x, 20f), $"Using {names[entryID.stringValue]}{valuePathProp.stringValue.Replace('/', '.')}", EditorStyles.miniLabel);
+                GUI.EndClip();
+
+                if (size.x > p.width && p.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
+                {
+                    scroll = new Vector2(Mathf.Clamp(scroll.x + Event.current.delta.y * 4, -(size.x - p.width), 0f), 0f);
+                }
+            }
+
+            GUIContent c = EditorGUIUtility.ObjectContent(null, typeof(Transform));
 
             GUIStyle t = new GUIStyle("ObjectFieldButton");
             if (property.propertyPath.EndsWith("]"))
@@ -100,8 +113,11 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         float height;
 
-        if (valueProp != null && isWriteOnly == false)
-            height = EditorGUI.GetPropertyHeight(valueProp, label, true);
+        if (!writeOnly.ContainsKey(property))
+            writeOnly[property] = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
+
+        if (valueProp != null && !writeOnly[property])
+            height = EditorGUI.GetPropertyHeight(valueProp, label, true) + 18;
         else
             height = base.GetPropertyHeight(property, label);
 

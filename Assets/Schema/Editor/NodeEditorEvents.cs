@@ -165,7 +165,7 @@ namespace Schema.Editor
                             {
                                 windowInfo.hoveredNode.parent.children.Remove(windowInfo.hoveredNode);
                             }
-                            AddConnection(requestingConnection, windowInfo.hoveredNode);
+                            AddConnection(requestingConnection, windowInfo.hoveredNode, true);
                             RecalculatePriorities(windowInfo.hoveredNode.parent);
                             TraverseTree();
                             requestingConnection = null;
