@@ -32,6 +32,12 @@ public class Flee : Action
         public GameObject enemy;
         public Vector3 point;
     }
+    void OnValidate()
+    {
+        maxDistance = Mathf.Clamp(maxDistance, 0, float.MaxValue);
+        minDistance = Mathf.Clamp(minDistance, 0, maxDistance);
+        safeDistance = Mathf.Clamp(safeDistance, 0, float.MaxValue);
+    }
     public override void OnInitialize(object nodeMemory, SchemaAgent agent)
     {
         FleeMemory memory = (FleeMemory)nodeMemory;
@@ -108,6 +114,8 @@ public class Flee : Action
     public override void DrawGizmos(SchemaAgent agent)
     {
         if (!visualize) return;
+
+        Debug.Log("hey");
 
         Vector3 dir = (new Vector3(agent.transform.position.x, 0f, agent.transform.position.z) - Vector3.zero).normalized;
         Quaternion rot = Quaternion.LookRotation(dir, Vector3.up);

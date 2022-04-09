@@ -206,6 +206,10 @@ public class BlackboardEntrySelector
     {
         AddFilter<Vector3>();
     }
+    public void AddVector4Filter()
+    {
+        AddFilter<Vector4>();
+    }
     public void AddQuaternionFilter()
     {
         AddFilter<Quaternion>();

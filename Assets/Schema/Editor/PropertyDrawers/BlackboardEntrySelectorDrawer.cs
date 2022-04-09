@@ -10,17 +10,41 @@ using System.Collections.Generic;
 public class BlackboardEntrySelectorDrawer : PropertyDrawer
 {
     public static Dictionary<string, string> names = new Dictionary<string, string>();
-    private static Dictionary<SerializedProperty, bool> writeOnly = new Dictionary<SerializedProperty, bool>();
-    private Vector2 scroll;
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    private static Dictionary<string, SelectorPropertyInfo> info = new Dictionary<string, SelectorPropertyInfo>();
+    private class SelectorPropertyInfo
+    {
+        public bool writeOnly;
+        public float scroll;
+    }
+    public static void DoSelectorMenu(Rect position, SerializedProperty property, FieldInfo fieldInfo)
+    {
+        GUIStyle t = new GUIStyle("ObjectFieldButton");
+
+        t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
+        t.margin.Remove(position);
+
+        GUI.Label(position, "", t);
+
+        if (Event.current.type == EventType.MouseDown && position.Contains(Event.current.mousePosition))
+        {
+            GenericMenu menu = GenerateMenu(property, fieldInfo);
+
+            menu.DropDown(position);
+        }
+    }
+    public static void DoSelectorDrawer(Rect position, SerializedProperty property, GUIContent label, Type fieldType, FieldInfo fieldInfo)
     {
         SerializedProperty entryID = property.FindPropertyRelative("entryID");
         SerializedProperty entryName = property.FindPropertyRelative("entryName");
         SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
         SerializedProperty value = property.FindPropertyRelative("_value");
 
-        if (!writeOnly.ContainsKey(property))
-            writeOnly[property] = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
+        if (!info.ContainsKey(property.propertyPath))
+        {
+            SelectorPropertyInfo pi = new SelectorPropertyInfo();
+            pi.writeOnly = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
+            info[property.propertyPath] = pi;
+        }
 
         bool lastWideMode = EditorGUIUtility.wideMode;
         EditorGUIUtility.wideMode = true;
@@ -39,44 +63,42 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         if (!String.IsNullOrEmpty(entryID.stringValue) && !names.ContainsKey(entryID.stringValue))
             names[entryID.stringValue] = Blackboard.instance.GetEntry(entryID.stringValue).Name;
 
-        if (value != null && !writeOnly[property])
+        if (value != null && !info[property.propertyPath].writeOnly)
         {
             EditorGUI.BeginDisabledGroup(doesHavePath);
 
             EditorGUI.PropertyField(enumRect, value, label, true);
 
             EditorGUI.EndDisabledGroup();
-            // Hack to get context rect
+
             if (!String.IsNullOrEmpty(entryID.stringValue))
             {
                 Rect p = EditorGUI.PrefixLabel(textRect, new GUIContent("\0"));
                 Vector2 size = EditorStyles.miniLabel.CalcSize(new GUIContent($"Using {names[entryID.stringValue]}{valuePathProp.stringValue.Replace('/', '.')}"));
-                GUI.BeginClip(p, scroll, Vector2.zero, false);
+                GUI.BeginClip(p, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
                 GUI.Label(new Rect(0f, 0f, size.x, 20f), $"Using {names[entryID.stringValue]}{valuePathProp.stringValue.Replace('/', '.')}", EditorStyles.miniLabel);
                 GUI.EndClip();
 
                 if (size.x > p.width && p.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
                 {
-                    scroll = new Vector2(Mathf.Clamp(scroll.x + Event.current.delta.y * 4, -(size.x - p.width), 0f), 0f);
+                    info[property.propertyPath].scroll = Mathf.Clamp(info[property.propertyPath].scroll - Event.current.delta.y * 10, -(size.x - p.width), 0f);
+                    // Prevent scroll
+                    Event.current.delta = Vector2.zero;
                 }
             }
 
             GUIContent c = EditorGUIUtility.ObjectContent(null, typeof(Transform));
 
             GUIStyle t = new GUIStyle("ObjectFieldButton");
-            if (property.propertyPath.EndsWith("]"))
-                t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight) - 2;
-            else
-                t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
 
+            t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
             t.margin.Remove(buttonRect);
-            t.normal.textColor = Color.white;
 
             GUI.Label(buttonRect, "", t);
 
             if (Event.current.type == EventType.MouseDown && buttonRect.Contains(Event.current.mousePosition))
             {
-                GenericMenu menu = GenerateMenu(property);
+                GenericMenu menu = GenerateMenu(property, fieldInfo);
 
                 menu.DropDown(buttonRect);
             }
@@ -92,7 +114,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
             if (EditorGUI.DropdownButton(controlRect, buttonValue, FocusType.Passive))
             {
-                GenericMenu menu = GenerateMenu(property);
+                GenericMenu menu = GenerateMenu(property, fieldInfo);
 
                 menu.DropDown(controlRect);
             }
@@ -104,20 +126,29 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         EditorGUIUtility.wideMode = lastWideMode;
     }
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    {
+        DoSelectorDrawer(position, property, label, null, fieldInfo);
+    }
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         SerializedProperty valueProp = property.FindPropertyRelative("_value");
+        SerializedProperty entryID = property.FindPropertyRelative("entryID");
 
         bool lastWideMode = EditorGUIUtility.wideMode;
         EditorGUIUtility.wideMode = true;
 
         float height;
 
-        if (!writeOnly.ContainsKey(property))
-            writeOnly[property] = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
+        if (!info.ContainsKey(property.propertyPath))
+        {
+            SelectorPropertyInfo pi = new SelectorPropertyInfo();
+            pi.writeOnly = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
+            info[property.propertyPath] = pi;
+        }
 
-        if (valueProp != null && !writeOnly[property])
-            height = EditorGUI.GetPropertyHeight(valueProp, label, true) + 18;
+        if (valueProp != null && !info[property.propertyPath].writeOnly)
+            height = EditorGUI.GetPropertyHeight(valueProp, label, true) + (!String.IsNullOrEmpty(entryID.stringValue) ? EditorGUIUtility.singleLineHeight : 0);
         else
             height = base.GetPropertyHeight(property, label);
 
@@ -125,29 +156,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         return height;
     }
-    private List<string> GetFilters(SerializedProperty property)
-    {
-        List<string> filters = new List<string>();
-
-        for (int i = 0; i < property.arraySize; i++)
-        {
-            SerializedProperty propAtIndex = property.GetArrayElementAtIndex(i);
-            filters.Add(propAtIndex.stringValue);
-        }
-
-        return filters;
-    }
-    private string GetName(string s)
-    {
-        byte[] bytes = Convert.FromBase64String(s);
-        byte[] nameBytes = new byte[bytes.Length - 32];
-
-        for (int i = 32; i < bytes.Length; i++)
-            nameBytes[i - 32] = bytes[i];
-
-        return System.Text.Encoding.ASCII.GetString(nameBytes);
-    }
-    private string GetID(string s)
+    private static string GetID(string s)
     {
         byte[] bytes = Convert.FromBase64String(s);
         byte[] idBytes = new byte[32];
@@ -158,7 +167,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         return System.Text.Encoding.ASCII.GetString(idBytes);
     }
 
-    private GenericMenu GenerateMenu(SerializedProperty property)
+    private static GenericMenu GenerateMenu(SerializedProperty property, FieldInfo fieldInfo)
     {
         SerializedProperty idProp = property.FindPropertyRelative("entryID");
         SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
@@ -166,19 +175,25 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         GenericMenu menu = new GenericMenu();
 
-        if (typeMask.intValue == -1)
-        {
-            List<string> filtersList = new List<string>();
+        List<string> filtersList = new List<string>();
 
+        SerializedProperty valueProp = property.FindPropertyRelative("_value");
+        if (valueProp != null)
+        {
+            filtersList.Add(FromPropertyType(valueProp.propertyType).AssemblyQualifiedName);
+            Debug.Log(valueProp.propertyType);
+        }
+        else
+        {
             SerializedProperty filters = property.FindPropertyRelative("filters");
 
             for (int i = 0; i < filters.arraySize; i++)
             {
                 filtersList.Add(filters.GetArrayElementAtIndex(i).stringValue);
             }
-
-            typeMask.intValue = Blackboard.instance.GetMask(filtersList).Item2;
         }
+
+        typeMask.intValue = Blackboard.instance.GetMask(filtersList).Item2;
 
         menu.AddItem("None", String.IsNullOrEmpty(idProp.stringValue), () => GenericMenuSelectOption(property, ""), false);
 
@@ -204,7 +219,8 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                     entry.type,
                     entry.type,
                     filtered,
-                    ""
+                    "",
+                    info.ContainsKey(property.propertyPath) && info[property.propertyPath].writeOnly
                 );
 
                 foreach (string ss in props)
@@ -221,7 +237,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         return menu;
     }
-    private void GenericMenuSelectOption(SerializedProperty property, string id, Type type = null, string path = "")
+    private static void GenericMenuSelectOption(SerializedProperty property, string id, Type type = null, string path = "")
     {
         SerializedProperty idProperty = property.FindPropertyRelative("entryID");
         SerializedProperty entryTypeProperty = property.FindPropertyRelative("entryTypeString");
@@ -235,7 +251,57 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         property.serializedObject.ApplyModifiedProperties();
     }
-    private IEnumerable<string> PrintProperties(Type baseType, Type type, List<Type> targets, string basePath)
+    private static Type FromPropertyType(SerializedPropertyType type)
+    {
+        switch (type)
+        {
+            case SerializedPropertyType.Integer:
+                return typeof(Int32);
+            case SerializedPropertyType.Boolean:
+                return typeof(Boolean);
+            case SerializedPropertyType.Float:
+                return typeof(Single);
+            case SerializedPropertyType.String:
+                return typeof(String);
+            case SerializedPropertyType.Color:
+                return typeof(Color);
+            case SerializedPropertyType.ExposedReference:
+            case SerializedPropertyType.ManagedReference:
+            case SerializedPropertyType.ObjectReference:
+                return typeof(GameObject);
+            case SerializedPropertyType.LayerMask:
+                return typeof(LayerMask);
+            case SerializedPropertyType.Enum:
+                return typeof(Enum);
+            case SerializedPropertyType.Vector2:
+                return typeof(Vector2);
+            case SerializedPropertyType.Vector3:
+                return typeof(Vector3);
+            case SerializedPropertyType.Vector4:
+                return typeof(Vector4);
+            case SerializedPropertyType.Rect:
+                return typeof(Rect);
+            case SerializedPropertyType.AnimationCurve:
+                return typeof(AnimationCurve);
+            case SerializedPropertyType.Bounds:
+                return typeof(Bounds);
+            case SerializedPropertyType.Gradient:
+                return typeof(Gradient);
+            case SerializedPropertyType.Quaternion:
+                return typeof(Quaternion);
+            case SerializedPropertyType.Vector2Int:
+                return typeof(Vector2Int);
+            case SerializedPropertyType.Vector3Int:
+                return typeof(Vector3Int);
+            case SerializedPropertyType.RectInt:
+                return typeof(RectInt);
+            case SerializedPropertyType.BoundsInt:
+                return typeof(BoundsInt);
+            default:
+                return typeof(object);
+        }
+    }
+    private static IEnumerable<string> PrintProperties(Type baseType, Type type, List<Type> targets, string basePath, bool needsGetter)
     {
         if (targets.Contains(type))
         {
@@ -273,11 +339,12 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
             if (targets.Contains(field.PropertyType))
             {
-                yield return basePath + "/" + field.Name;
+                if (!needsGetter || field.SetMethod != null)
+                    yield return basePath + "/" + field.Name;
             }
             else if (field.PropertyType != type && field.PropertyType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.PropertyType)))
             {
-                foreach (string s in PrintProperties(baseType, field.PropertyType, targets, basePath + "/" + field.Name))
+                foreach (string s in PrintProperties(baseType, field.PropertyType, targets, basePath + "/" + field.Name, needsGetter))
                     yield return s;
             }
         }
@@ -295,7 +362,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             }
             else if (field.FieldType != type && field.FieldType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.FieldType)))
             {
-                foreach (string s in PrintProperties(baseType, field.FieldType, targets, basePath + "/" + field.Name))
+                foreach (string s in PrintProperties(baseType, field.FieldType, targets, basePath + "/" + field.Name, needsGetter))
                     yield return s;
             }
         }

@@ -51,16 +51,18 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/GraphEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/BlackboardCompareEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Resources/a.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetBoundsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEntryEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Components/PatrolRouteEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/ConeCheckEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntryDrawer.cs" />
-     <Compile Include="Assets/Schema/Editor/PropertyDrawers/AnimatorVariableValueDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/PlaySoundEditor.cs" />
      <Compile Include="Assets/Schema/Editor/ShortcutManager.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultDecoratorEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogFormatEditor.cs" />
      <Compile Include="Assets/Schema/Editor/EditorInspector.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomWeightedEditor.cs" />
@@ -77,6 +79,7 @@
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagFilterDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetBlackboardValueRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/PropertyDrawers/ComponentSelectorDrawer.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
     <Reference Include="UnityEngine">

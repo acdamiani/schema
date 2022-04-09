@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AI;
 using Schema.Runtime;
 
@@ -15,8 +16,7 @@ public class Patrol : Action
         public PatrolRoute route;
         public int currentIndex = 0;
     }
-    public float speed;
-    public float acceptableRadius;
+    public List<BlackboardEntrySelector<Vector3>> points;
     public override void OnInitialize(object nodeMemory, SchemaAgent agent)
     {
         PatrolMemory memory = (PatrolMemory)nodeMemory;
@@ -28,21 +28,18 @@ public class Patrol : Action
     {
         PatrolMemory memory = (PatrolMemory)nodeMemory;
 
-        memory.agent.SetDestination(memory.route.points[memory.currentIndex]);
+        memory.agent.SetDestination(points[memory.currentIndex].value);
     }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         PatrolMemory memory = (PatrolMemory)nodeMemory;
-
-        memory.agent.speed = speed;
-        memory.agent.stoppingDistance = acceptableRadius;
 
         if (!memory.agent.pathPending &&
             (memory.agent.remainingDistance <= memory.agent.stoppingDistance) &&
             (!memory.agent.hasPath || memory.agent.velocity.sqrMagnitude == 0f))
         {
             memory.currentIndex++;
-            memory.currentIndex = memory.currentIndex > memory.route.points.Count - 1 ? 0 : memory.currentIndex;
+            memory.currentIndex = memory.currentIndex > points.Count - 1 ? 0 : memory.currentIndex;
 
             return NodeStatus.Success;
         }

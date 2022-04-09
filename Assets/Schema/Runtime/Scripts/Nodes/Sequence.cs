@@ -5,6 +5,7 @@ using UnityEngine;
 
 [DarkIcon("Dark/Sequence")]
 [LightIcon("Light/Sequence")]
+[Description("Executes a series of nodes one after another")]
 public class Sequence : Flow
 {
     public override int Tick(NodeStatus status, int index)

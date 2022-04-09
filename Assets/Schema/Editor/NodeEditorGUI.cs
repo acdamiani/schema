@@ -314,6 +314,18 @@ namespace Schema.Editor
             else if (IsNotLayoutEvent(current))
                 windowInfo.hoveredType = Window.Hovering.None;
 
+            if (windowInfo.selected.Count == 1)
+            {
+                string stringContent = windowInfo.selected[0].description;
+
+                if (!String.IsNullOrEmpty(stringContent))
+                {
+                    GUIContent content = new GUIContent(stringContent);
+                    Vector2 size = EditorStyles.boldLabel.CalcSize(content);
+                    GUI.Label(new Rect(new Vector2(GUIData.nodePadding, position.height - GUIData.nodePadding - size.y), size), content, EditorStyles.boldLabel);
+                }
+            }
+
             BeginZoomed(window, windowInfo.zoom, tabHeight);
 
             List<Node> nodes = target.nodes;

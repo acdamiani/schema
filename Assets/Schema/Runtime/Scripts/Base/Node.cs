@@ -20,6 +20,21 @@ namespace Schema.Runtime
         [HideInInspector, TextArea] public string comment;
         [Tooltip("Toggle the status indicator for this node"), HideInInspector] public bool enableStatusIndicator = true;
         [SerializeField, HideInInspector, DisableOnPlay] private string _name;
+        private string _description;
+        private bool didGetDescriptionAttribute;
+        public string description
+        {
+            get
+            {
+                if (!didGetDescriptionAttribute)
+                {
+                    didGetDescriptionAttribute = true;
+                    _description = GetType().GetCustomAttribute<DescriptionAttribute>()?.description;
+                }
+
+                return _description;
+            }
+        }
         public Type GetMemoryType()
         {
             Type[] types = GetType().GetTypeInfo().DeclaredNestedTypes.ToArray();
@@ -89,20 +104,6 @@ namespace Schema.Runtime
             Root,
             Composite,
             Task
-        }
-        private void OnEnable()
-        {
-            name = Name;
-
-            //Get attributes for BlackboardEntrySelector fields
-            /* 			Type t = GetType();
-
-						FieldInfo[] fields = t.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-
-						foreach (FieldInfo f in fields)
-						{
-							EntryFiltersAttribute filters = f.GetCustomAttribute<EntryFiltersAttribute>();
-						} */
         }
         public virtual List<Error> GetErrors() { return new List<Error>(); }
 
@@ -229,6 +230,15 @@ namespace Schema.Runtime
             public LightIconAttribute(string location)
             {
                 this.location = location;
+            }
+        }
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class DescriptionAttribute : System.Attribute
+        {
+            public string description;
+            public DescriptionAttribute(string description)
+            {
+                this.description = description;
             }
         }
     }

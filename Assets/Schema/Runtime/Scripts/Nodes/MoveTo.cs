@@ -19,6 +19,8 @@ public class MoveTo : Action
     [Tooltip("How fast the agent can turn to look at a target, given in deg/sec")]
     public float angularSpeed = 120f;
     public BlackboardEntrySelector<Vector3> selector;
+    public System.Collections.Generic.List<BlackboardEntrySelector<float>> selector2;
+    public BlackboardEntrySelector<float> selector3;
     private Vector3 GetPoint(BlackboardEntrySelector selector)
     {
         object value = selector.value;
