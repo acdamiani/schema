@@ -32,6 +32,7 @@ public static class NodeEditorResources
     private static Texture2D _global;
     private static Texture2D _local;
     private static Texture2D _shared;
+    private static Texture2D _preAudioLoopOff;
     public static Texture2D warnIcon => _warnIcon != null ? _warnIcon : _warnIcon = EditorGUIUtility.FindTexture("console.warnicon");
     public static Texture2D errorIcon => _errorIcon != null ? _errorIcon : _errorIcon = EditorGUIUtility.FindTexture("console.erroricon");
     public static Texture2D infoIcon => _infoIcon != null ? _infoIcon : _infoIcon = EditorGUIUtility.FindTexture("console.infoicon");
@@ -48,6 +49,7 @@ public static class NodeEditorResources
     public static Texture2D local => _local != null ? _local : _local = (Texture2D)EditorGUIUtility.IconContent("ModelImporter Icon").image;
     public static Texture2D global => _global != null ? _global : _global = EditorGUIUtility.FindTexture("Profiler.GlobalIllumination");
     public static Texture2D shared => _shared != null ? _shared : _shared = EditorGUIUtility.FindTexture("Linked");
+    public static Texture2D preAudioLoopOff => _preAudioLoopOff != null ? _preAudioLoopOff : _preAudioLoopOff = EditorGUIUtility.FindTexture("preAudioLoopOff@2x");
     public static Texture2D gridTexture
     {
         get

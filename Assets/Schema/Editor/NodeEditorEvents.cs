@@ -230,7 +230,8 @@ namespace Schema.Editor
                     {
                         foreach (Node node in windowInfo.selected)
                         {
-                            node.position += current.delta * windowInfo.zoom;
+                            Vector2 rawMove = current.delta * windowInfo.zoom;
+                            node.position += rawMove;
 
                             if (node.parent == null) continue;
 
@@ -256,6 +257,10 @@ namespace Schema.Editor
                         windowInfo.isPanning = false;
                     break;
             }
+        }
+        private float GridSnap(float number, float size)
+        {
+            return Mathf.Round(number / size) * size;
         }
 
         private void MouseDown()

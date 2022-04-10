@@ -16,6 +16,13 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         public bool writeOnly;
         public float scroll;
     }
+    public static string GetNameForID(string id)
+    {
+        if (!String.IsNullOrEmpty(id) && !names.ContainsKey(id))
+            names[id] = Blackboard.instance.GetEntry(id).Name;
+
+        return String.IsNullOrEmpty(id) ? "" : names[id];
+    }
     public static void DoSelectorMenu(Rect position, SerializedProperty property, FieldInfo fieldInfo)
     {
         GUIStyle t = new GUIStyle("ObjectFieldButton");

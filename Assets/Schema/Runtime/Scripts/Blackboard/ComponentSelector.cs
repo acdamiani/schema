@@ -2,25 +2,34 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public class ComponentSelector<T> : Schema.Internal.ComponentSelector where T : Component
+public class ComponentSelector<T> : Schema.Internal.ComponentSelectorBase where T : Component
 {
-    [SerializeField] public bool useSelf;
+    [SerializeField] private bool useSelf = true;
     [SerializeField] private T fieldValue;
     [SerializeField] private string fieldValueType = typeof(T).AssemblyQualifiedName;
+    private T cache;
     public T GetValue(SchemaAgent agent)
     {
-        T component;
-        if (useSelf)
-            component = agent.GetComponent<T>();
+        if (cache == null)
+        {
+            if (useSelf)
+                cache = agent.GetComponent<T>();
+            else if (fieldValue != null)
+                cache = fieldValue;
+            else
+                return value?.GetComponent<T>();
+        }
         else
-            component = value.GetComponent<T>();
+        {
+            return cache;
+        }
 
-        return component;
+        return cache;
     }
 }
 
 namespace Schema.Internal
 {
     [Serializable]
-    public class ComponentSelector : BlackboardEntrySelector<GameObject> { }
+    public class ComponentSelectorBase : BlackboardEntrySelector<GameObject> { }
 }

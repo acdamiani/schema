@@ -6,37 +6,34 @@ using UnityEngine;
 [LightIcon("Light/SetAnimatorVariable")]
 public class SetAnimatorVariable : Action
 {
-    public ComponentSelector<BoxCollider> animator;
+    public ComponentSelector<Animator> animator;
     public AnimatorControllerParameterType type = AnimatorControllerParameterType.Float;
     public BlackboardEntrySelector<string> parameterName;
     public BlackboardEntrySelector<float> floatValue;
     public BlackboardEntrySelector<int> intValue;
     public BlackboardEntrySelector<bool> boolValue;
-    class SetAnimatorVariableMemory
-    {
-        public Animator animator;
-    }
-    public override void OnInitialize(object nodeMemory, SchemaAgent agent)
-    {
-        ((SetAnimatorVariableMemory)nodeMemory).animator = agent.GetComponent<Animator>();
-    }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        SetAnimatorVariableMemory memory = (SetAnimatorVariableMemory)nodeMemory;
+        Animator anim = animator.GetValue(agent);
+
+        Debug.Log(anim);
+
+        if (anim == null)
+            return NodeStatus.Failure;
 
         switch (type)
         {
             case AnimatorControllerParameterType.Int:
-                memory.animator.SetInteger(parameterName.value, intValue.value);
+                anim.SetInteger(parameterName.value, intValue.value);
                 break;
             case AnimatorControllerParameterType.Float:
-                memory.animator.SetFloat(parameterName.value, floatValue.value);
+                anim.SetFloat(parameterName.value, floatValue.value);
                 break;
             case AnimatorControllerParameterType.Bool:
-                memory.animator.SetBool(parameterName.value, boolValue.value);
+                anim.SetBool(parameterName.value, boolValue.value);
                 break;
             case AnimatorControllerParameterType.Trigger:
-                memory.animator.SetTrigger(parameterName.value);
+                anim.SetTrigger(parameterName.value);
                 break;
         }
 

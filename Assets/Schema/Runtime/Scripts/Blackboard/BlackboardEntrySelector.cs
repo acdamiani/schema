@@ -16,7 +16,9 @@ public class BlackboardEntrySelector<T> : BlackboardEntrySelector
             if (_value != null && String.IsNullOrEmpty(entryID))
                 return (T)_value;
 
-            return (T)base.value;
+            T v = (T)base.value;
+
+            return v;
         }
         set
         {

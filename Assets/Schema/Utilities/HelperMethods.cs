@@ -213,5 +213,24 @@ namespace Schema.Utilities
             (list[indexA], list[indexB]) = (list[indexB], list[indexA]);
             return list;
         }
+        public static FieldInfo GetFieldFromPath(this Type type, string path)
+        {
+            List<string> pathParts = path.Split('.').ToList();
+            FieldInfo current = null;
+
+            while (pathParts.Count > 0)
+            {
+                string part = pathParts[0];
+
+                current = (current == null ? type : current.FieldType).GetField(part, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                if (current == null)
+                    return null;
+
+                pathParts.RemoveAt(0);
+            }
+
+            return current;
+        }
     }
 }
