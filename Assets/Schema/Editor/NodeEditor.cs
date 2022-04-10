@@ -26,7 +26,6 @@ namespace Schema.Editor
         public Window windowInfo;
         public GUIData guiData;
         private int nodeCount;
-        private int jk;
         [DidReloadScripts]
         static void Init()
         {
@@ -118,7 +117,7 @@ namespace Schema.Editor
         void IHasCustomMenu.AddItemsToMenu(GenericMenu menu)
         {
             menu.AddItem("Preferences", windowInfo.settingsShown, () => TogglePrefs(), false);
-            menu.AddItem("Documentation", false, () => OpenUrl("https://www.google.com"), false);
+            menu.AddItem("Documentation", false, () => OpenUrl("https://thinking-automation.com/docs/getting-started"), false);
         }
         void TogglePrefs()
         {

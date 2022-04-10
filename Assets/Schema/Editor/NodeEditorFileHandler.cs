@@ -253,7 +253,7 @@ namespace Schema.Editor
             editor.target.hideFlags = HideFlags.HideAndDontSave;
             HelperMethods.SetHideFlags(HideFlags.HideAndDontSave, blackboardAndKeys, nodes, decorators);
         }
-        public static void Load(NodeEditor editor)
+        public static void Load(this NodeEditor editor)
         {
             string path = EditorUtility.OpenFilePanel("Open Graph", "", "asset");
 
