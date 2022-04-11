@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
-using Schema.Runtime;
+using Schema;
 
 [DarkIcon("Dark/CustomAction")]
 [LightIcon("Light/CustomAction")]

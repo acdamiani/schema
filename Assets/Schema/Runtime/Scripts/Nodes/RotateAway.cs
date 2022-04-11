@@ -1,7 +1,7 @@
-﻿using Schema.Runtime;
+﻿using Schema;
 using UnityEngine;
 
-public class RotateAway : Schema.Runtime.Action
+public class RotateAway : Schema.Action
 {
     public BlackboardEntrySelector selector = new BlackboardEntrySelector();
     [Tooltip("Speed of rotation, in deg/sec")]

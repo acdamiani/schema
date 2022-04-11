@@ -5,23 +5,65 @@ using System.Reflection;
 using System.Collections.Generic;
 using UnityEditor;
 
-namespace Schema.Runtime
+namespace Schema
 {
+    /// <summary>
+    /// Base class for all Schema nodes.
+    /// </summary>
+
     [Serializable]
     public abstract class Node : ScriptableObject
     {
-        [HideInInspector] public Node parent;
-        [HideInInspector] public List<Node> children;
-        [HideInInspector] public List<Decorator> decorators;
-        [HideInInspector] public string uID;
-        [HideInInspector] public Vector2 position;
-        [HideInInspector] public int priority;
-        [HideInInspector] public Graph graph;
-        [HideInInspector, TextArea] public string comment;
-        [Tooltip("Toggle the status indicator for this node"), HideInInspector] public bool enableStatusIndicator = true;
-        [SerializeField, HideInInspector, DisableOnPlay] private string _name;
+        /// <summary>
+        /// The parent of this node
+        /// </summary>
+        public Node parent { get { return m_parent; } private set { m_parent = value; } }
+        [SerializeField, HideInInspector] private Node m_parent;
+        /// <summary>
+        /// An array containing the children of this node
+        /// </summary>
+        public Node[] children { get { return m_children; } private set { m_children = value; } }
+        [SerializeField, HideInInspector] private Node[] m_children = Array.Empty<Node>();
+        /// <summary>
+        /// An array containing the decorators for this node
+        /// </summary>
+        public Decorator[] decorators { get { return m_decorators; } private set { m_decorators = value; } }
+        [SerializeField, HideInInspector] private Decorator[] m_decorators = Array.Empty<Decorator>();
+        /// <summary>
+        /// The GUID for the node
+        /// </summary>
+        public string uID { get { return m_uID; } private set { m_uID = value; } }
+        [SerializeField, HideInInspector] private string m_uID;
+        /// <summary>
+        /// Position of the Node in the graph
+        /// </summary>
+        public Vector2 position { get { return m_position; } set { m_position = value; } }
+        [SerializeField, HideInInspector] private Vector2 m_position;
+        /// <summary>
+        /// Priority for the node
+        /// </summary>
+        public int priority { get { return m_priority; } internal set { m_priority = value; } }
+        [SerializeField, HideInInspector] private int m_priority;
+        /// <summary>
+        /// Graph for this node
+        /// </summary>
+        public Graph graph { get { return m_graph; } internal set { m_graph = value; } }
+        [SerializeField, HideInInspector] private Graph m_graph;
+        /// <summary>
+        /// Comment for this node
+        /// </summary>
+        public string comment { get { return m_comment; } internal set { m_comment = value; } }
+        [SerializeField, HideInInspector, TextArea] private string m_comment;
+        /// <summary>
+        /// Whether to allow the status indicator for this node in the editor
+        /// </summary>
+        public bool enableStatusIndicator { get { return m_enableStatusIndicator; } private set { m_enableStatusIndicator = value; } }
+        [Tooltip("Toggle the status indicator for this node"), HideInInspector, SerializeField] private bool m_enableStatusIndicator;
         private string _description;
         private bool didGetDescriptionAttribute;
+        /// <summary>
+        /// Description for this node, given by the Description attribute
+        /// </summary>
         public string description
         {
             get
@@ -35,7 +77,7 @@ namespace Schema.Runtime
                 return _description;
             }
         }
-        public Type GetMemoryType()
+        internal Type GetMemoryType()
         {
             Type[] types = GetType().GetTypeInfo().DeclaredNestedTypes.ToArray();
 
@@ -47,116 +89,230 @@ namespace Schema.Runtime
             return types[0];
         }
         /// <summary>
+        /// Determine whether the Node can have more children attached to it
+        /// </summary>
+        public bool CanHaveChildren()
+        {
+            return maxChildren > 0 && m_children.Length < maxChildren;
+        }
+        /// <summary>
         ///	Override to allow for Gizmo visualization in the scene view. This will be called only for the currently selected SchemaAgent. 
         /// </summary>
         public virtual void DrawGizmos(SchemaAgent agent) { }
-        public string Name
+        /// <summary>
+        /// Whether a parent node is allowed for this node:w
+        /// </summary>
+        public virtual bool canHaveParent { get { return true; } }
+        /// <summary>
+        /// The maximum allowed number of children for this node
+        /// </summary>
+        public virtual int maxChildren { get { return Int32.MaxValue; } }
+        void OnEnable()
         {
-            get
-            {
-                if (String.IsNullOrEmpty(_name))
-                    _name = String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
-
-                return _name;
-            }
-            set
-            {
-                name = value;
-                _name = value;
-            }
-        }
-        public bool canHaveParent
-        {
-            get
-            {
-                return (parent == null) && _canHaveParent;
-            }
-        }
-        public bool canHaveChildren
-        {
-            get
-            {
-                return children.Count + 1 <= _maxChildren;
-            }
-        }
-        public bool drawInConnection { get { return _canHaveParent; } }
-        public bool drawOutConnection { get { return _maxChildren > 0; } }
-
-        public virtual bool _canHaveParent { get { return true; } }
-        public virtual int _maxChildren { get { return Int32.MaxValue; } }
-        public Node()
-        {
-            if (children == null)
-            {
-                children = new List<Node>();
-            }
-
-            if (decorators == null)
-            {
-                decorators = new List<Decorator>();
-            }
+            if (String.IsNullOrEmpty(name))
+                name = String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
 
             if (string.IsNullOrEmpty(uID)) uID = Guid.NewGuid().ToString("N");
         }
-
-        public enum NodeType
+        /// <summary>
+        /// Add a connection to another node
+        /// </summary>
+        /// <param name="to">Node to connect to</param>
+        /// <param name="actionName">Name of the undo action</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        public void AddConnection(Node to, string actionName = "Add Connection", bool undo = true)
         {
-            Root,
-            Composite,
-            Task
+            if (undo)
+            {
+                Undo.RegisterCompleteObjectUndo(this, actionName);
+                Undo.RegisterCompleteObjectUndo(to, actionName);
+            }
+
+            if (!m_children.Contains(to))
+                ArrayUtility.Add(ref m_children, to);
+            to.parent = this;
         }
+        /// <summary>
+        /// Disconnect from another child node
+        /// </summary>
+        /// <param name="from">Node to disconnect from. Must be a child of this node</param>
+        /// <param name="actionName">Name of the undo action</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        public void RemoveConnection(Node from, string actionName = "Remove Connection", bool undo = true)
+        {
+            if (undo)
+            {
+                Undo.RegisterCompleteObjectUndo(this, actionName);
+                Undo.RegisterCompleteObjectUndo(from, actionName);
+            }
+
+            if (m_children.Contains(from))
+                ArrayUtility.Remove(ref m_children, from);
+            from.parent = null;
+        }
+        /// <summary>
+        /// Remove the connection between this node and its parent
+        /// </summary>
+        /// <param name="actionName">Name of the undo action</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        public void RemoveParent(string actionName = "Remove Parent Connection", bool undo = true)
+        {
+            if (undo)
+            {
+                Undo.RegisterCompleteObjectUndo(this, actionName);
+                Undo.RegisterCompleteObjectUndo(parent, actionName);
+            }
+
+            parent.RemoveConnection(this, actionName, undo);
+        }
+        /// <summary>
+        /// Remove connections between this node and its children
+        /// </summary>
+        /// <param name="actionName">Name of the undo action</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        public void RemoveChildren(string actionName = "Remove Child Connections", bool undo = true)
+        {
+            if (undo)
+            {
+                Undo.RegisterCompleteObjectUndo(this, actionName);
+
+                foreach (Node child in children)
+                    Undo.RegisterCompleteObjectUndo(child, actionName);
+            }
+
+            foreach (Node child in children)
+                RemoveConnection(child, actionName, undo);
+        }
+        /// <summary>
+        /// Breaks connections between this node and its parents and children
+        /// </summary>
+        public void BreakConnections()
+        {
+            Undo.IncrementCurrentGroup();
+            int groupIndex = Undo.GetCurrentGroup();
+
+            parent.RemoveConnection(this, actionName: "");
+
+            foreach (Node child in children)
+                RemoveConnection(child, actionName: "");
+
+            Undo.SetCurrentGroupName("Break Connections");
+            Undo.CollapseUndoOperations(groupIndex);
+        }
+        /// <summary>
+        /// Add a decorator to this node
+        /// </summary>
+        /// <param name="decoratorType">Type of decorator to add. Must inherit from type Decorator</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        /// <returns>Created decorator</returns>
+        /// <exception cref="ArgumentException">decoratorType does not inherit from Decorator</exception>
+        public Decorator AddDecorator(Type decoratorType, bool undo = true)
+        {
+            if (!typeof(Decorator).IsAssignableFrom(decoratorType))
+                throw new ArgumentException("decoratorType does not inherit from type Node");
+
+            Decorator decorator = (Decorator)ScriptableObject.CreateInstance(decoratorType);
+            decorator.hideFlags = HideFlags.HideInHierarchy;
+            decorator.node = this;
+
+            string path = AssetDatabase.GetAssetPath(this);
+
+            if (!String.IsNullOrEmpty(path))
+                AssetDatabase.AddObjectToAsset(decorator, path);
+
+            if (undo)
+            {
+                Undo.RegisterCreatedObjectUndo(decorator, "Decorator Created");
+                Undo.RegisterCompleteObjectUndo(this, "Decorator Added");
+                ArrayUtility.Add(ref m_decorators, decorator);
+            }
+            else
+            {
+                ArrayUtility.Add(ref m_decorators, decorator);
+            }
+
+            return decorator;
+        }
+        public void RemoveDecorator(Decorator decorator, string actionName = "Remove Decorator", bool undo = true)
+        {
+            if (!ArrayUtility.Contains(m_decorators, decorator))
+            {
+                Debug.LogWarning($"Decorator {decorator.name} does not exit on node {name}");
+                return;
+            }
+
+            if (undo)
+            {
+                Undo.RegisterCompleteObjectUndo(this, actionName);
+                ArrayUtility.Remove(ref m_decorators, decorator);
+                Undo.DestroyObjectImmediate(decorator);
+            }
+            else
+            {
+                ArrayUtility.Remove(ref m_decorators, decorator);
+                ScriptableObject.DestroyImmediate(decorator, true);
+            }
+        }
+        /// <summary>
+        /// The current errors for this node
+        /// </summary>
+        /// <returns>A list of errors to display in the editor</returns>
         public virtual List<Error> GetErrors() { return new List<Error>(); }
-
-        [System.AttributeUsage(System.AttributeTargets.Class)]
-        protected class CategoryAttribute : System.Attribute
+        /// <summary>
+        /// Where Schema should load the dark mode icon within a resources folder
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class DarkIconAttribute : System.Attribute
         {
-            public string category;
-            public CategoryAttribute(string category)
+            public string location;
+            /// <summary>
+            /// Where Schema should load the dark mode icon within a resources folder
+            /// </summary>
+            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
+            public DarkIconAttribute(string location)
             {
-                this.category = category;
+                this.location = location;
             }
         }
-        private bool? hasCategory = null;
-        private CategoryAttribute categoryAttribute;
-        public string category
+        /// <summary>
+        /// Where Schema should load the light mode icon within a resources folder
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class LightIconAttribute : System.Attribute
         {
-            get
+            public string location;
+            /// <summary>
+            /// Where Schema should load the light mode icon within a resources folder
+            /// </summary>
+            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
+            public LightIconAttribute(string location)
             {
-                if (hasCategory == null)
-                {
-                    Attribute a = Attribute.GetCustomAttribute(GetType(), typeof(CategoryAttribute));
-
-                    if (a != null)
-                    {
-                        categoryAttribute = (CategoryAttribute)a;
-                        hasCategory = true;
-
-                        return categoryAttribute.category;
-                    }
-                    else
-                    {
-                        hasCategory = false;
-                        return "";
-                    }
-                }
-                else
-                {
-                    if (hasCategory == true)
-                    {
-                        return categoryAttribute.category;
-                    }
-                    else
-                    {
-                        return "";
-                    }
-                }
+                this.location = location;
             }
         }
-
+        /// <summary>
+        /// Attribute for adding a description to a node in the Editor
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class DescriptionAttribute : System.Attribute
+        {
+            public string description;
+            /// <summary>
+            /// Attribute for adding a description to a node in the Editor
+            /// </summary>
+            /// <param name="description">Description for the node</param>
+            public DescriptionAttribute(string description)
+            {
+                this.description = description;
+            }
+        }
 #if UNITY_EDITOR
         private Texture2D _icon;
         private string _darkIconLocation;
         private string _lightIconLocation;
+        /// <summary>
+        /// Icon of the node (editor only)
+        /// </summary>
         public Texture2D icon
         {
             get
@@ -200,46 +356,6 @@ namespace Schema.Runtime
             }
         }
         private bool usingProTextures;
-
-        //initializes node as a "working copy"
-        public void WorkingNode()
-        {
-            foreach (Decorator d in decorators)
-            {
-                d.hideFlags = HideFlags.HideAndDontSave;
-            }
-
-            hideFlags = HideFlags.HideAndDontSave;
-        }
-        [NonSerialized] public bool dirty;
 #endif
-
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class DarkIconAttribute : System.Attribute
-        {
-            public string location;
-            public DarkIconAttribute(string location)
-            {
-                this.location = location;
-            }
-        }
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class LightIconAttribute : System.Attribute
-        {
-            public string location;
-            public LightIconAttribute(string location)
-            {
-                this.location = location;
-            }
-        }
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class DescriptionAttribute : System.Attribute
-        {
-            public string description;
-            public DescriptionAttribute(string description)
-            {
-                this.description = description;
-            }
-        }
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
-using Schema.Runtime;
+using System.Runtime;
+using Schema;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,17 +18,14 @@ public class SelectRandomWeighted : Flow
     }
     public override int Tick(NodeStatus status, int index)
     {
-        if (index > -1) return -1;           
-        
+        if (index > -1) return -1;
+
         int ranWeight = Random.Range(1, weights.Values.Sum() + 1);
 
         foreach (Node child in children)
         {
             if (ranWeight <= weights[child.uID])
-            {
-                
-                return children.IndexOf(child);
-            }
+                return System.Array.IndexOf(children, child);
 
             ranWeight -= weights[child.uID];
         }

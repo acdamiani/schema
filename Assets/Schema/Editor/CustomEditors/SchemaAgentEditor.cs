@@ -11,7 +11,7 @@ public class SchemaAgentEditor : Editor
         SchemaAgent agent = (SchemaAgent)target;
 
         EditorGUI.BeginChangeCheck();
-        agent.target = (Schema.Runtime.Graph)EditorGUILayout.ObjectField("Target", agent.target, typeof(Schema.Runtime.Graph), false);
+        agent.target = (Schema.Graph)EditorGUILayout.ObjectField("Target", agent.target, typeof(Schema.Graph), false);
         if (EditorGUI.EndChangeCheck())
         {
             agent.VerifyComponents();

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 public static class SchemaManager
 {
     private static Dictionary<Graph, OptimizedGraph> map = new Dictionary<Graph, OptimizedGraph>();
@@ -26,51 +26,52 @@ public static class SchemaManager
     }
     public static Graph LoadIntoMemory(Graph graph)
     {
-        Graph ret = ScriptableObject.Instantiate(graph);
-        List<Node> topLevel = graph.nodes.Where(node => node.parent == null).ToList();
+        // Graph ret = ScriptableObject.Instantiate(graph);
+        // List<Node> topLevel = graph.nodes.Where(node => node.parent == null).ToList();
 
-        ret.nodes.Clear();
+        // ret.nodes.Clear();
 
-        for (int i = 0; i < topLevel.Count; i++)
-        {
-            DuplicateRecursive(ret.nodes, null, topLevel[i]);
-        }
+        // for (int i = 0; i < topLevel.Count; i++)
+        // {
+        //     DuplicateRecursive(ret.nodes, null, topLevel[i]);
+        // }
 
-        ret.root = (Root)ret.nodes.Find(node => node.GetType() == typeof(Root));
+        // ret.root = (Root)ret.nodes.Find(node => node.GetType() == typeof(Root));
 
-        try
-        {
-            ret.blackboard = ScriptableObject.Instantiate(graph.blackboard);
-            ret.blackboard.name = "Blackboard";
-            ret.blackboard.entries = graph.blackboard.entries.Select(entry =>
-            {
-                BlackboardEntry cache = ScriptableObject.Instantiate(entry);
-                cache.name = cache.Name;
-                return cache;
-            }).ToList();
-        }
-        catch { }
+        // try
+        // {
+        //     ret.blackboard = ScriptableObject.Instantiate(graph.blackboard);
+        //     ret.blackboard.name = "Blackboard";
+        //     ret.blackboard.entries = graph.blackboard.entries.Select(entry =>
+        //     {
+        //         BlackboardEntry cache = ScriptableObject.Instantiate(entry);
+        //         cache.name = cache.Name;
+        //         return cache;
+        //     }).ToList();
+        // }
+        // catch { }
 
-        return ret;
+        // return ret;
+
+        return graph;
     }
-    private static Node DuplicateRecursive(List<Node> graph, Node parent, Node dupl)
-    {
-        Node ret = ScriptableObject.Instantiate(dupl);
+    // private static Node DuplicateRecursive(List<Node> graph, Node parent, Node dupl)
+    // {
+    //     Node ret = ScriptableObject.Instantiate(dupl);
 
-        for (int i = 0; i < ret.decorators.Count; i++)
-        {
-            ret.decorators[i] = ScriptableObject.Instantiate(ret.decorators[i]);
-            ret.decorators[i].node = ret;
-        }
+    //     for (int i = 0; i < ret.decorators.Count; i++)
+    //     {
+    //         ret.decorators[i] = ScriptableObject.Instantiate(ret.decorators[i]);
+    //         ret.decorators[i].node = ret;
+    //     }
 
-        ret.parent = parent;
-        ret.children = ret.children.Select(node => DuplicateRecursive(graph, ret, node)).ToList();
+    //     ret.parent = parent;
+    //     ret.children = ret.children.Select(node => DuplicateRecursive(graph, ret, node)).ToList();
 
-        graph.Add(ret);
+    //     graph.Add(ret);
 
-        return ret;
-    }
-
+    //     return ret;
+    // }
     private static OptimizedNode[] Flatten(this List<Node> nodes)
     {
         return Flatten(nodes.ToArray());
@@ -95,7 +96,7 @@ public static class SchemaManager
             optimizedNode.parent = nodes.ToList().IndexOf(node.parent);
             optimizedNode.index = i;
             optimizedNode.children = node.children.Select(node => node.priority - 1).ToArray();
-            optimizedNode.relativeIndex = node.parent != null ? node.parent.children.IndexOf(node) : -1;
+            optimizedNode.relativeIndex = node.parent != null ? Array.IndexOf(node.parent.children, node) : -1;
 
             if (typeof(Root).IsAssignableFrom(node.GetType()))
             {
@@ -105,7 +106,7 @@ public static class SchemaManager
             {
                 optimizedNode.typeCode = OptimizedNode.TypeCode.Flow;
             }
-            else if (typeof(Schema.Runtime.Action).IsAssignableFrom(node.GetType()))
+            else if (typeof(Schema.Action).IsAssignableFrom(node.GetType()))
             {
                 optimizedNode.typeCode = OptimizedNode.TypeCode.Action;
             }
@@ -160,7 +161,7 @@ public class OptimizedNode
     {
         this.node = node;
 
-        decorators = new OptimizedDecorator[node.decorators.Count];
+        decorators = new OptimizedDecorator[node.decorators.Length];
         for (int i = 0; i < decorators.Length; i++)
         {
             decorators[i] = new OptimizedDecorator();

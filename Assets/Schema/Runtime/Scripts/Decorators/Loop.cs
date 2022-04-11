@@ -1,5 +1,5 @@
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
 [AllowOnlyOne]
 public class Loop : Decorator

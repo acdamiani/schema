@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
 public class Vector3Angle : Action
 {

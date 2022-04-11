@@ -11,6 +11,8 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 {
     public static Dictionary<string, string> names = new Dictionary<string, string>();
     private static Dictionary<string, SelectorPropertyInfo> info = new Dictionary<string, SelectorPropertyInfo>();
+    private delegate void GUIDelayCall(SerializedProperty property);
+    private static event GUIDelayCall guiDelayCall;
     private class SelectorPropertyInfo
     {
         public bool writeOnly;
@@ -126,6 +128,13 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                 menu.DropDown(controlRect);
             }
         }
+
+        if (guiDelayCall != null)
+        {
+            property.FindPropertyRelative("entryTypeString").stringValue = "sdfjsiodf";
+        }
+
+        guiDelayCall?.Invoke(property);
 
         EditorGUI.EndProperty();
 
@@ -256,7 +265,16 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         if (type != null)
             entryTypeProperty.stringValue = type.AssemblyQualifiedName;
 
+        guiDelayCall += UpdateChanged;
+
         property.serializedObject.ApplyModifiedProperties();
+    }
+    // Reorderable list resize fix
+    private static void UpdateChanged(SerializedProperty property)
+    {
+        GUI.changed = true;
+
+        guiDelayCall -= UpdateChanged;
     }
     private static Type FromPropertyType(SerializedPropertyType type)
     {

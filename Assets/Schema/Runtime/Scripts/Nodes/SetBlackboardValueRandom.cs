@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
 [Description("Sets a number to a random value in a given range")]
 public class SetBlackboardValueRandom : Action

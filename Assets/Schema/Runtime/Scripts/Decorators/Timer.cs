@@ -1,6 +1,6 @@
-using Schema.Runtime;
+using Schema;
 using UnityEngine;
-public class Timer : Schema.Runtime.Decorator
+public class Timer : Schema.Decorator
 {
     class TimerMemory
     {

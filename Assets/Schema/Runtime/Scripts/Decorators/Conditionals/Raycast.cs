@@ -1,5 +1,5 @@
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 using System.Collections.Generic;
 using System.Linq;
 

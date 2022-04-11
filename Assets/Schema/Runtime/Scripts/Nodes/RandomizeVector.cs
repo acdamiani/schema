@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
 [Description("Randomize the values of a vector within given ranges")]
 public class RandomizeVector : Action

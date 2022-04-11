@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
 [DarkIcon("Dark/Wait")]
 [LightIcon("Light/Wait")]
 [Description("Waits a given number of seconds, then resumes execution of the Behavior Tree")]
-public class Wait : Schema.Runtime.Action
+public class Wait : Schema.Action
 {
     class WaitMemory
     {

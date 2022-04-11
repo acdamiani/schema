@@ -1,4 +1,4 @@
-using Schema.Runtime;
+using Schema;
 using UnityEngine;
 
 [DarkIcon("Dark/FindGameObjectWithTag")]

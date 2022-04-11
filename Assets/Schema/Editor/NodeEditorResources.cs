@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-public static class NodeEditorResources
+internal static class Styles
 {
     //Colors
     public static Color windowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
@@ -33,6 +33,8 @@ public static class NodeEditorResources
     private static Texture2D _local;
     private static Texture2D _shared;
     private static Texture2D _preAudioLoopOff;
+    private static GUIContent _visibilityToggleOffContent;
+    private static GUIContent _visibilityToggleOnContent;
     public static Texture2D warnIcon => _warnIcon != null ? _warnIcon : _warnIcon = EditorGUIUtility.FindTexture("console.warnicon");
     public static Texture2D errorIcon => _errorIcon != null ? _errorIcon : _errorIcon = EditorGUIUtility.FindTexture("console.erroricon");
     public static Texture2D infoIcon => _infoIcon != null ? _infoIcon : _infoIcon = EditorGUIUtility.FindTexture("console.infoicon");
@@ -50,6 +52,8 @@ public static class NodeEditorResources
     public static Texture2D global => _global != null ? _global : _global = EditorGUIUtility.FindTexture("Profiler.GlobalIllumination");
     public static Texture2D shared => _shared != null ? _shared : _shared = EditorGUIUtility.FindTexture("Linked");
     public static Texture2D preAudioLoopOff => _preAudioLoopOff != null ? _preAudioLoopOff : _preAudioLoopOff = EditorGUIUtility.FindTexture("preAudioLoopOff@2x");
+    public static GUIContent visibilityToggleOffContent => _visibilityToggleOffContent != null ? _visibilityToggleOffContent : _visibilityToggleOffContent = new GUIContent(EditorGUIUtility.FindTexture("animationvisibilitytoggleoff"), "Toggle Inspector On");
+    public static GUIContent visibilityToggleOnContent => _visibilityToggleOnContent != null ? _visibilityToggleOnContent : _visibilityToggleOnContent = new GUIContent("", EditorGUIUtility.FindTexture("animationvisibilitytoggleon"), "Toggle Inspector Off");
     public static Texture2D gridTexture
     {
         get
@@ -67,8 +71,8 @@ public static class NodeEditorResources
             return _crossTexture;
         }
     }
-    private static Styles _styles;
-    public static Styles styles => _styles ??= new Styles();
+    private static StylesObj _styles;
+    public static StylesObj styles => _styles ??= new StylesObj();
 
     private static Texture2D GenerateGridTexture(Color line, Color bg)
     {
@@ -124,20 +128,20 @@ public static class NodeEditorResources
         tex.Apply();
         return tex;
     }
-    public class Styles
+    public class StylesObj
     {
         public readonly GUIStyle node, decorator, title, nodeLabel, nodeText, nodeSelected, newNode, addNodeWindow, backgroundBg, searchbar, searchResult, minimap, nameField;
         ///<summary>
         ///Generates Styles object which is used in the Node Editor GUI
         ///</summary>
-        public Styles()
+        public StylesObj()
         {
             //node style
             node = new GUIStyle
             {
                 normal =
                 {
-                    background = NodeEditorResources.node
+                    background = global::Styles.node
                 },
                 border = new RectOffset(8, 8, 8, 8),
                 padding = new RectOffset(16, 16, 16, 16)
@@ -148,7 +152,7 @@ public static class NodeEditorResources
             {
                 normal =
                 {
-                    background = NodeEditorResources.nodeSelected
+                    background = global::Styles.nodeSelected
                 },
                 border = new RectOffset(8, 8, 8, 8)
             };
@@ -157,7 +161,7 @@ public static class NodeEditorResources
             {
                 normal =
                 {
-                    background = NodeEditorResources.node
+                    background = global::Styles.node
                 },
                 border = new RectOffset(8, 8, 8, 8),
                 contentOffset = Vector2.zero,
@@ -191,7 +195,7 @@ public static class NodeEditorResources
             {
                 normal =
                 {
-                    background = NodeEditorResources.node,
+                    background = global::Styles.node,
                     textColor = Color.black
                 },
                 border = new RectOffset(32, 32, 32, 32),

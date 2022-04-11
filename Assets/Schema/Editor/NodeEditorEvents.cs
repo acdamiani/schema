@@ -1,12 +1,13 @@
 using UnityEditor;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Schema.Utilities;
-using Schema.Runtime;
+using Schema;
 
 //Handles all events for the NodeEditor window
-namespace Schema.Editor
+namespace SchemaEditor
 {
     public partial class NodeEditor
     {
@@ -140,12 +141,12 @@ namespace Schema.Editor
                     {
                         if (windowInfo.selectedDecorator.node != windowInfo.hoveredNode)
                         {
-                            MoveDecorator(windowInfo.selectedDecorator, windowInfo.hoveredNode);
+                            // MoveDecorator(windowInfo.selectedDecorator, windowInfo.hoveredNode);
                         }
                     }
                     if (windowInfo.lastClicked == Window.Hovering.InConnection && requestingConnection != null && orphanNode != null && !editingPaused)
                     {
-                        RemoveConnection(requestingConnection, orphanNode);
+                        requestingConnection.RemoveConnection(orphanNode);
                         orphanNode = null;
                     }
                     break;
@@ -157,17 +158,14 @@ namespace Schema.Editor
                         if (requestingConnection == null) break;
                         else notChild = !requestingConnection.GetAllParents().Contains(windowInfo.hoveredNode);
 
-                        if (orphanNode != null) RemoveConnection(requestingConnection, orphanNode);
+                        if (orphanNode != null) requestingConnection.RemoveConnection(orphanNode);
 
                         if (notChild)
                         {
-                            if (!windowInfo.hoveredNode.canHaveParent)
-                            {
-                                windowInfo.hoveredNode.parent.children.Remove(windowInfo.hoveredNode);
-                            }
-                            AddConnection(requestingConnection, windowInfo.hoveredNode, true);
+                            requestingConnection.AddConnection(windowInfo.hoveredNode);
+
                             RecalculatePriorities(windowInfo.hoveredNode.parent);
-                            TraverseTree();
+                            target.TraverseTree();
                             requestingConnection = null;
                         }
 
@@ -177,8 +175,9 @@ namespace Schema.Editor
                 case Window.Hovering.Window:
                     if (windowInfo.lastClicked == Window.Hovering.InConnection && requestingConnection != null && orphanNode != null && !editingPaused)
                     {
-                        RemoveConnection(requestingConnection, orphanNode);
+                        requestingConnection.RemoveConnection(orphanNode);
                         orphanNode = null;
+                        target.TraverseTree();
                     }
                     break;
                 case Window.Hovering.MinimapNode:
@@ -194,8 +193,6 @@ namespace Schema.Editor
                     }
                     break;
             }
-
-            if (windowInfo.movingDivider) windowInfo.movingDivider = false;
 
             requestingConnection = null;
             drawBox = false;
@@ -222,11 +219,7 @@ namespace Schema.Editor
                         break;
                     }
 
-                    if (windowInfo.movingDivider)
-                    {
-                        windowInfo.dividerPos = current.mousePosition.y;
-                    }
-                    else if (!drawBox && requestingConnection == null && inNodeEditor && windowInfo.lastClicked == Window.Hovering.Node && !editingPaused)
+                    if (!drawBox && requestingConnection == null && inNodeEditor && windowInfo.lastClicked == Window.Hovering.Node && !editingPaused)
                     {
                         foreach (Node node in windowInfo.selected)
                         {
@@ -235,12 +228,12 @@ namespace Schema.Editor
 
                             if (node.parent == null) continue;
 
-                            int lastOrder = node.parent.children.IndexOf(node);
+                            int lastOrder = Array.IndexOf(node.parent.children, node);
                             RecalculatePriorities(node.parent);
 
                             //recalculate tree priorities if the order of this node changed
-                            if (node.parent.children.IndexOf(node) != lastOrder)
-                                TraverseTree();
+                            if (Array.IndexOf(node.parent.children, node) != lastOrder)
+                                target.TraverseTree();
                         }
 
                         GetViewRect(100f, true);
@@ -282,9 +275,6 @@ namespace Schema.Editor
                         drawBox = false;
                         break;
                     }
-                case 0 when windowInfo.hoveringDivider:
-                    windowInfo.movingDivider = true;
-                    break;
                 case 0 when !windowInfo.didDragSinceMouseUp:
                     {
                         if (windowInfo.hoveredType != Window.Hovering.Inspector && blackboardEditor)
@@ -327,12 +317,11 @@ namespace Schema.Editor
                                 {
                                     requestingConnection = windowInfo.hoveredNode.parent;
                                     orphanNode = windowInfo.hoveredNode;
-                                    TraverseTree();
                                 }
 
                                 break;
                             case Window.Hovering.OutConnection:
-                                if (windowInfo.hoveredNode.canHaveChildren && !editingPaused)
+                                if (windowInfo.hoveredNode.CanHaveChildren() && !editingPaused)
                                 {
                                     requestingConnection = windowInfo.hoveredNode;
                                 }
@@ -398,7 +387,7 @@ namespace Schema.Editor
 
                     if (windowInfo.selectedDecorator != null)
                     {
-                        int index = windowInfo.selectedDecorator.node.decorators.IndexOf(windowInfo.selectedDecorator);
+                        int index = Array.IndexOf(windowInfo.selectedDecorator.node.decorators, windowInfo.selectedDecorator);
 
                         if (index - 1 < 0)
                             break;
@@ -423,14 +412,14 @@ namespace Schema.Editor
 
                     if (windowInfo.selectedDecorator != null)
                     {
-                        int index = windowInfo.selectedDecorator.node.decorators.IndexOf(windowInfo.selectedDecorator);
+                        int index = Array.IndexOf(windowInfo.selectedDecorator.node.decorators, windowInfo.selectedDecorator);
 
-                        if (index + 1 > windowInfo.selectedDecorator.node.decorators.Count - 1)
+                        if (index + 1 > windowInfo.selectedDecorator.node.decorators.Length - 1)
                             break;
 
                         Select(windowInfo.selectedDecorator.node.decorators[index + 1]);
                     }
-                    else if (windowInfo.selected.Count > 0 && windowInfo.selected[windowInfo.selected.Count - 1].children.Count > 0)
+                    else if (windowInfo.selected.Count > 0 && windowInfo.selected[windowInfo.selected.Count - 1].children.Length > 0)
                     {
                         next = windowInfo.selected[windowInfo.selected.Count - 1].children[0];
 
@@ -456,14 +445,14 @@ namespace Schema.Editor
             {
                 foreach (Node node in windowInfo.selected)
                 {
-                    if (node.parent)
-                        RemoveConnection(node.parent, node);
+                    // if (node.parent)
+                    //     RemoveConnection(node.parent, node);
 
-                    List<Node> ch = new List<Node>(node.children);
-                    foreach (Node c in ch)
-                    {
-                        RemoveConnection(node, c);
-                    }
+                    // List<Node> ch = new List<Node>(node.children);
+                    // foreach (Node c in ch)
+                    // {
+                    //     RemoveConnection(node, c);
+                    // }
                 }
             });
         }

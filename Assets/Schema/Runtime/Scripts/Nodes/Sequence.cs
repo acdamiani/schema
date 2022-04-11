@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Schema.Runtime;
+using Schema;
 using UnityEngine;
 
 [DarkIcon("Dark/Sequence")]
@@ -10,7 +10,7 @@ public class Sequence : Flow
 {
     public override int Tick(NodeStatus status, int index)
     {
-        if (index + 1 > children.Count - 1 || status == NodeStatus.Failure) return -1;
+        if (index + 1 > children.Length - 1 || status == NodeStatus.Failure) return -1;
         else return index + 1;
     }
 }

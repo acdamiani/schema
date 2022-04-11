@@ -54,6 +54,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/SoundHeard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Action.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/ComponentSelector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Proc/SchemaAgent.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Cooldown.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/AnimatorCrossFade.cs" />
@@ -113,7 +114,6 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/ComponentSelector.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
      <None Include="Assets/Schema/Utilities/ClassTemplate.txt" />
      <None Include="Assets/Schema/Utilities/MethodTemplate.txt" />

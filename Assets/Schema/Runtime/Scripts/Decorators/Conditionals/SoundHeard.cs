@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEditor;
-using Schema.Runtime;
+using Schema;
 
 public class SoundHeard : Decorator
 {
@@ -11,8 +11,6 @@ public class SoundHeard : Decorator
     public BlackboardEntrySelector<Vector3> hitPoint;
     [Tooltip("The tags to filter from. Only these tags will be considered when listening for noise")]
     public TagFilter tagFilter;
-    [Info]
-    public string willStore => $"Will store closest sound location in Vector3 {(hitPoint.GetEditorEntry() != null ? hitPoint.GetEditorEntry().Name : "null")}";
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
         return false;

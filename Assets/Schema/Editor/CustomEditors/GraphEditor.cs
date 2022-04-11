@@ -1,20 +1,20 @@
 using UnityEngine;
 using UnityEditor;
-using Schema.Runtime;
+using Schema;
 
 [CustomEditor(typeof(Graph))]
 public class GraphEditor : Editor
 {
-	public override void OnInspectorGUI()
-	{
-		Graph active = (Graph)target;
+    public override void OnInspectorGUI()
+    {
+        Graph active = (Graph)target;
 
-		int count = active.nodes == null ? 0 : active.nodes.Count;
+        int count = active.nodes == null ? 0 : active.nodes.Count;
 
-		GUILayout.Label(count + (count == 1 ? " node" : " nodes"));
-		GUILayout.Space(10);
+        GUILayout.Label(count + (count == 1 ? " node" : " nodes"));
+        GUILayout.Space(10);
 
-		if (GUILayout.Button("Open in Editor"))
-			AssetDatabase.OpenAsset(active.GetInstanceID());
-	}
+        if (GUILayout.Button("Open in Editor"))
+            AssetDatabase.OpenAsset(active.GetInstanceID());
+    }
 }

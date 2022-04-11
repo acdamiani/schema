@@ -1,7 +1,7 @@
 using System.Linq;
 using System;
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
 [Serializable]
 public class BlackboardCondition : Decorator

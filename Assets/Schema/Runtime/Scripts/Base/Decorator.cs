@@ -4,23 +4,11 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Schema.Runtime
+namespace Schema
 {
     [System.Serializable]
     public abstract class Decorator : ScriptableObject
     {
-        private string _name;
-        public string Name
-        {
-            get
-            {
-                return String.IsNullOrEmpty(_name) ? this.GetType().ToString() : _name;
-            }
-            set
-            {
-                _name = value;
-            }
-        }
         [HideInInspector] public string uID;
         [NonSerialized] public List<string> info;
         [HideInInspector] public Node node;
@@ -125,6 +113,11 @@ namespace Schema.Runtime
             }
 
             return types[0];
+        }
+        void OnEnable()
+        {
+            if (String.IsNullOrEmpty(name))
+                name = String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
         }
 
         [System.AttributeUsage(System.AttributeTargets.Field | System.AttributeTargets.Property)]

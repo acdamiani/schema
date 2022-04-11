@@ -2,12 +2,12 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.Collections.Generic;
-using Schema.Runtime;
+using Schema;
 using Schema.Utilities;
 using Schema.Editor.Utilities;
 using System.Linq;
 
-namespace Schema.Editor
+namespace SchemaEditor
 {
     public partial class NodeEditor
     {
@@ -35,7 +35,14 @@ namespace Schema.Editor
             {
                 if (Event.current.type == EventType.Layout) LayoutGUI();
 
-                window = new Rect(0f, 0f, position.width - GUIData.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
+                if (windowInfo.inspectorToggled)
+                    window = new Rect(0f, 0f, position.width - GUIData.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
+                else
+                    window = new Rect(0f, 0f, position.width, position.height);
+                windowInfo.selected.RemoveAll(node => node == null);
+
+                for (int i = 0; i < windowInfo.changedNodes.Count; i++)
+                    GetArea(windowInfo.changedNodes.Dequeue(), true);
 
                 DrawGrid(window, windowInfo.zoom, windowInfo.pan);
                 DrawConnections();
@@ -57,10 +64,10 @@ namespace Schema.Editor
                     GUI.Label(new Rect(position.width - size.x - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - size.y - 8f, size.x, size.y),
                      new GUIContent("Lower Priority Nodes"), EditorStyles.label);
 
-                    GUI.color = NodeEditorResources.lowerPriorityColor;
+                    GUI.color = Styles.lowerPriorityColor;
                     GUI.Label(new Rect(position.width - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - size.y / 2f - 16f, 16f, 16f),
                         "",
-                        NodeEditorResources.styles.decorator);
+                        Styles.styles.decorator);
                     GUI.color = Color.white;
 
                     float lastHeight = size.y + 16f;
@@ -70,10 +77,10 @@ namespace Schema.Editor
                     GUI.Label(new Rect(position.width - size.x - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - lastHeight - size.y - 8f, size.x, size.y),
                      new GUIContent("Self Nodes"), EditorStyles.label);
 
-                    GUI.color = NodeEditorResources.selfColor;
+                    GUI.color = Styles.selfColor;
                     GUI.Label(new Rect(position.width - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - lastHeight - size.y / 2f - 16f, 16f, 16f),
                         "",
-                        NodeEditorResources.styles.decorator);
+                        Styles.styles.decorator);
                     GUI.color = Color.white;
                 }
 
@@ -96,7 +103,6 @@ namespace Schema.Editor
                 ProcessEvents(Event.current);
 
                 if (windowInfo.isPanning) SetCursor(MouseCursor.Pan);
-                else if (windowInfo.hoveringDivider || windowInfo.movingDivider) SetCursor(MouseCursor.ResizeVertical);
 
                 if (windowInfo.treeDirty)
                 {
@@ -125,7 +131,7 @@ namespace Schema.Editor
                 const float height = 500f;
 
                 BeginWindows();
-                GUILayout.Window(1, new Rect(position.width / 2f - width / 2f, position.height / 2f - height / 2f, width, height), DoSplashWindow, "", NodeEditorResources.styles.addNodeWindow);
+                GUILayout.Window(1, new Rect(position.width / 2f - width / 2f, position.height / 2f - height / 2f, width, height), DoSplashWindow, "", Styles.styles.addNodeWindow);
                 EndWindows();
             }
 
@@ -196,7 +202,7 @@ namespace Schema.Editor
 
             if (Application.isPlaying)
             {
-                if (!activeAgent || (agent != null && agent != activeAgent && agent.target == original))
+                if (!activeAgent || (agent != null && agent != activeAgent && agent.target == target))
                 {
                     activeAgent = agent;
                     editingPaused = true;
@@ -256,19 +262,19 @@ namespace Schema.Editor
 
                     Handles.DrawBezier(
                         from,
-                        new Vector2(to.x, to.y - 8f),
+                        new Vector2(to.x, to.y - 8f * windowInfo.zoom),
                         from + Vector2.up * 50f,
                         to - Vector2.up * 50f,
                         Color.white,
                         null,
-                        4f
+                        3f * windowInfo.zoom
                     );
 
-                    Rect r = new Rect(to.x - 4f, to.y - 8f, 8f, 8f);
+                    Rect r = new Rect(to.x - 4f * windowInfo.zoom, to.y - 8f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom);
 
                     GUI.color = new Color(.85f, .85f, .85f, 1f);
 
-                    GUI.DrawTexture(r, NodeEditorResources.arrow);
+                    GUI.DrawTexture(r, Styles.arrow);
                 }
             }
 
@@ -280,7 +286,7 @@ namespace Schema.Editor
                 Vector2 from = GridToWindowPositionNoClipped(new Vector2(
                     node.position.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
                     node.position.y + nodeSize.y + GUIData.nodePadding * 2 + 16f));
-                Vector2 to = new Vector2(mousePos.x, mousePos.y - 8f);
+                Vector2 to = new Vector2(mousePos.x, mousePos.y - 8f * windowInfo.zoom);
 
                 Handles.DrawBezier(
                     from,
@@ -289,21 +295,17 @@ namespace Schema.Editor
                     to - Vector2.up * 50f,
                     Color.white,
                     null,
-                    4f
+                    3f * windowInfo.zoom
                 );
 
-                Rect r = new Rect(to.x - 4f, to.y, 8f, 8f);
+                Rect r = new Rect(to.x - 4f * windowInfo.zoom, to.y, 8f * windowInfo.zoom, 8f * windowInfo.zoom);
 
                 GUI.color = new Color(.85f, .85f, .85f, 1f);
 
-                GUI.DrawTexture(r, NodeEditorResources.arrow);
+                GUI.DrawTexture(r, Styles.arrow);
             }
             EndZoomed();
         }
-
-        ///<summary>
-        ///Draws the node in the Node Editor Window, including decorators. Also handles node gizmos
-        ///</summary>
         private void DrawNodes()
         {
             Event current = Event.current;
@@ -345,17 +347,15 @@ namespace Schema.Editor
                 {
                     Node node = nodes[i];
                     Vector2 positionNoClipped = GridToWindowPositionNoClipped(node.position);
-                    Vector2 size = GetArea(node, node.dirty);
-                    Vector2 sizeWithPadding = GetAreaWithPadding(node, node.dirty);
-                    node.dirty = false;
-                    node.graph = target;
+                    Vector2 size = GetArea(node, false);
+                    Vector2 sizeWithPadding = GetAreaWithPadding(node, false);
 
                     Rect contained = new Rect(positionNoClipped.x + GUIData.nodePadding, positionNoClipped.y + GUIData.nodePadding, size.x, size.y);
                     Rect rect = new Rect(positionNoClipped, new Vector2(sizeWithPadding.x, sizeWithPadding.y));
 
-                    GUI.color = NodeEditorResources.windowBackground;
+                    GUI.color = Styles.windowBackground;
 
-                    GUI.Box(rect, "", NodeEditorResources.styles.node);
+                    GUI.Box(rect, "", Styles.styles.node);
 
                     if (windowInfo.selected.Contains(node))
                         GUI.color = NodeEditorPrefs.selectionColor;
@@ -368,7 +368,7 @@ namespace Schema.Editor
                         windowInfo.selectedDecorator.abortsType == Decorator.ObserverAborts.Both
                         ) &&
                         IsSubTreeOf(windowInfo.selectedDecorator.node, node))
-                        GUI.color = NodeEditorResources.selfColor;
+                        GUI.color = Styles.selfColor;
                     else if (windowInfo.selectedDecorator &&
                         node.priority > 0 &&
                         windowInfo.selectedDecorator.node.priority > 0 &&
@@ -377,11 +377,11 @@ namespace Schema.Editor
                         ) &&
                         IsLowerPriority(windowInfo.selectedDecorator.node, node) &&
                         windowInfo.selectedDecorator.node.priority < node.priority)
-                        GUI.color = NodeEditorResources.lowerPriorityColor;
+                        GUI.color = Styles.lowerPriorityColor;
                     else if (EditorGUIUtility.isProSkin)
                         GUI.color = new Color32(80, 80, 80, 255);
 
-                    GUI.Box(rect, "", NodeEditorResources.styles.nodeSelected);
+                    GUI.Box(rect, "", Styles.styles.nodeSelected);
 
                     GUI.color = Color.white;
 
@@ -389,11 +389,11 @@ namespace Schema.Editor
 
                     if (node.priority > 0)
                     {
-                        Handles.color = NodeEditorResources.windowAccent;
+                        Handles.color = Styles.windowAccent;
                         Handles.DrawAAConvexPolygon(HelperMethods.Circle(new Vector2(rect.x, rect.center.y), 15f, 18));
                         Handles.color = Color.white;
 
-                        GUI.Label(new Rect(rect.x - 15f, rect.center.y - 15f, 30f, 30f), node.priority.ToString(), NodeEditorResources.styles.title);
+                        GUI.Label(new Rect(rect.x - 15f, rect.center.y - 15f, 30f, 30f), node.priority.ToString(), Styles.styles.title);
                     }
 
                     GUIContent error = GetErrors(node);
@@ -417,7 +417,7 @@ namespace Schema.Editor
 
                         GUI.Label(new Rect(rect.x + rect.width - iconSize / 2f, rect.y - iconSize / 2f, iconSize, iconSize),
                             "",
-                            NodeEditorResources.styles.decorator);
+                            Styles.styles.decorator);
                     }
 
                     GUI.color = Color.white;
@@ -427,7 +427,7 @@ namespace Schema.Editor
 
                     List<float> positions = new List<float>();
 
-                    for (int j = 0; j < node.decorators.Count; j++)
+                    for (int j = 0; j < node.decorators.Length; j++)
                     {
                         Decorator d = node.decorators[j];
 
@@ -435,17 +435,17 @@ namespace Schema.Editor
 
                         GUI.color = isSelected ? new Color(.6f, .6f, .1f, 1f) : new Color(.1f, .1f, .4f, 1f);
 
-                        GUILayout.BeginVertical(NodeEditorResources.styles.decorator);
+                        GUILayout.BeginVertical(Styles.styles.decorator);
 
                         GUI.color = Color.white;
 
-                        GUILayout.Label(d.Name, NodeEditorResources.styles.nodeLabel, GUILayout.Height(GUIData.labelHeight), GUILayout.Width(contained.width));
+                        GUILayout.Label(d.name, Styles.styles.nodeLabel, GUILayout.Height(GUIData.labelHeight), GUILayout.Width(contained.width));
 
                         d.info ??= d.GetValuesGUI();
 
                         foreach (string s in d.info)
                         {
-                            GUILayout.Label(s, NodeEditorResources.styles.nodeText, GUILayout.Height(GUIData.textHeight), GUILayout.Width(contained.width));
+                            GUILayout.Label(s, Styles.styles.nodeText, GUILayout.Height(GUIData.textHeight), GUILayout.Width(contained.width));
                         }
 
                         GUILayout.EndVertical();
@@ -468,7 +468,7 @@ namespace Schema.Editor
 
                         GUILayout.Space(GUIData.spacing);
 
-                        if (j == node.decorators.Count - 1)
+                        if (j == node.decorators.Length - 1)
                         {
                             //last item, add extra position to snap to
                             positions.Add(last.position.y + last.size.y + (GUIData.spacing / 2f));
@@ -476,7 +476,7 @@ namespace Schema.Editor
                     }
 
                     Rect toDraw = new Rect();
-                    bool draw = node.decorators.Count > 0 && (windowInfo.hoveredNode == node || windowInfo.hoveredType == Window.Hovering.Window) && IsNotLayoutEvent(Event.current);
+                    bool draw = node.decorators.Length > 0 && (windowInfo.hoveredNode == node || windowInfo.hoveredType == Window.Hovering.Window) && IsNotLayoutEvent(Event.current);
 
                     if (draw)
                     {
@@ -495,11 +495,11 @@ namespace Schema.Editor
                         toDraw = new Rect(new Vector2(0f, closest - GUIData.spacing / 8f), new Vector2(size.x, GUIData.spacing / 4f));
                     }
 
-                    GUI.color = NodeEditorResources.windowAccent;
+                    GUI.color = Styles.windowAccent;
 
                     float contentHeight = Mathf.Max((node.icon == null ? 0 : node.icon.height + 10f) + GUIData.labelHeight, GUIData.minContentHeight);
 
-                    GUILayout.BeginVertical(NodeEditorResources.styles.decorator, GUILayout.Height(contentHeight));
+                    GUILayout.BeginVertical(Styles.styles.decorator, GUILayout.Height(contentHeight));
 
                     GUI.color = Color.white;
 
@@ -513,7 +513,7 @@ namespace Schema.Editor
                         GUILayout.EndHorizontal();
                         GUILayout.Space(5f);
                     }
-                    GUILayout.Label(node.Name, NodeEditorResources.styles.nodeLabel, GUILayout.ExpandHeight(true));
+                    GUILayout.Label(node.name, Styles.styles.nodeLabel, GUILayout.ExpandHeight(true));
 
                     GUILayout.EndVertical();
 
@@ -528,7 +528,7 @@ namespace Schema.Editor
                         EditorGUI.DrawRect(toDraw, new Color32(200, 200, 200, 255));
                     }
 
-                    if (node.drawInConnection)
+                    if (node.canHaveParent)
                     {
                         float width = size.x - GUIData.nodePadding * 2;
                         Rect inConnection = new Rect(positionNoClipped.x + GUIData.nodePadding + size.x / 2f - width / 2f, positionNoClipped.y - 16f, width, 16f);
@@ -542,17 +542,17 @@ namespace Schema.Editor
                         if (windowInfo.hoveredType == Window.Hovering.InConnection && windowInfo.hoveredNode == node && !drawBox)
                             GUI.color = Color.white;
                         else
-                            GUI.color = NodeEditorResources.windowAccent;
+                            GUI.color = Styles.windowAccent;
 
-                        GUI.Box(inConnection, "", NodeEditorResources.styles.decorator);
+                        GUI.Box(inConnection, "", Styles.styles.decorator);
                     }
 
-                    if (node.drawOutConnection)
+                    if (node.maxChildren > 0)
                     {
                         float width = size.x - GUIData.nodePadding * 2;
                         Rect outConnection = new Rect(positionNoClipped.x + GUIData.nodePadding + size.x / 2f - width / 2f, positionNoClipped.y + size.y + GUIData.nodePadding * 2, width, 16f);
 
-                        if (outConnection.Contains(current.mousePosition) && node.canHaveChildren && IsNotLayoutEvent(current))
+                        if (outConnection.Contains(current.mousePosition) && IsNotLayoutEvent(current))
                         {
                             windowInfo.hoveredType = Window.Hovering.OutConnection;
                             windowInfo.hoveredNode = node;
@@ -561,9 +561,9 @@ namespace Schema.Editor
                         if (windowInfo.hoveredType == Window.Hovering.OutConnection && windowInfo.hoveredNode == node && !drawBox)
                             GUI.color = Color.white;
                         else
-                            GUI.color = NodeEditorResources.windowAccent;
+                            GUI.color = Styles.windowAccent;
 
-                        GUI.Box(outConnection, "", NodeEditorResources.styles.decorator);
+                        GUI.Box(outConnection, "", Styles.styles.decorator);
                     }
 
                     if (rect.Contains(current.mousePosition) && IsNotLayoutEvent(current))
@@ -633,14 +633,14 @@ namespace Schema.Editor
 
             //get size of contents
             float height = Mathf.Max((node.icon == null ? 0 : node.icon.height + 10f) + GUIData.labelHeight, GUIData.minContentHeight);
-            float width = Mathf.Max(NodeEditorResources.styles.nodeLabel.CalcSize(new GUIContent(node.Name)).x, node.icon == null ? 0 : node.icon.width);
+            float width = Mathf.Max(Styles.styles.nodeLabel.CalcSize(new GUIContent(node.name)).x, node.icon == null ? 0 : node.icon.width);
 
             foreach (Decorator decorator in node.decorators)
             {
                 //initialize decorator info array
                 decorator.info = decorator.GetValuesGUI();
 
-                float decoratorLabelWidth = NodeEditorResources.styles.nodeLabel.CalcSize(new GUIContent(decorator.Name)).x;
+                float decoratorLabelWidth = Styles.styles.nodeLabel.CalcSize(new GUIContent(decorator.name)).x;
 
                 width = Mathf.Max(width, decoratorLabelWidth);
                 height += GUIData.labelHeight;
@@ -648,7 +648,7 @@ namespace Schema.Editor
                 foreach (string s in decorator.info)
                 {
                     height += GUIData.textHeight;
-                    width = Mathf.Max(width, NodeEditorResources.styles.nodeText.CalcSize(new GUIContent(s)).x);
+                    width = Mathf.Max(width, Styles.styles.nodeText.CalcSize(new GUIContent(s)).x);
                 }
 
                 //The 4 is accounting for the area that GUILayout.BeginVertical adds when applying a background for decorators. Not sure why this happens.
@@ -722,10 +722,10 @@ namespace Schema.Editor
                     boxPos = new Rect(10f, EditorStyles.toolbar.fixedHeight + 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
                     break;
                 case 2:
-                    boxPos = new Rect(position.width - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 10f - NodeEditorPrefs.minimapWidth, position.height - minimapHeight - 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    boxPos = new Rect(window.width - 10f - NodeEditorPrefs.minimapWidth, position.height - minimapHeight - 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
                     break;
                 case 3:
-                    boxPos = new Rect(position.width - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 10f - NodeEditorPrefs.minimapWidth, EditorStyles.toolbar.fixedHeight + 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    boxPos = new Rect(window.width - 10f - NodeEditorPrefs.minimapWidth, EditorStyles.toolbar.fixedHeight + 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
                     break;
             }
 
@@ -754,7 +754,7 @@ namespace Schema.Editor
 
                 Rect nodeRect = new Rect(position, size);
 
-                Handles.DrawSolidRectangleWithOutline(nodeRect, NodeEditorResources.windowBackground, windowInfo.selected.Contains(node) ? Color.white : nodeOutlineColor);
+                Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.windowBackground, windowInfo.selected.Contains(node) ? Color.white : nodeOutlineColor);
 
                 if (nodeRect.Contains(Event.current.mousePosition))
                 {
@@ -770,7 +770,7 @@ namespace Schema.Editor
 
             Handles.DrawSolidRectangleWithOutline(gridViewRect, new Color(0f, 0f, 0f, 0f), Color.gray);
 
-            string names = String.Join(", ", windowInfo.selected.Select(node => node.Name));
+            string names = String.Join(", ", windowInfo.selected.Select(node => node.name));
             if (names.Length > 35)
                 names = names.Substring(0, 35) + "...";
             GUIContent content = new GUIContent(names);
@@ -783,8 +783,7 @@ namespace Schema.Editor
         }
         private void DrawToolbar()
         {
-            Rect toolbar = new Rect(0f, 0f, position.width - GUIData.inspectorWidth - GUIData.sidebarPadding * 2, EditorStyles.toolbar.fixedHeight);
-            GUI.color = NodeEditorResources.windowAccent;
+            Rect toolbar = new Rect(0f, 0f, window.width, EditorStyles.toolbar.fixedHeight);
             GUI.Box(toolbar, "", EditorStyles.toolbar);
 
             GUI.color = Color.white;
@@ -794,30 +793,22 @@ namespace Schema.Editor
             GUILayout.Button("View", EditorStyles.toolbarButton);
 
             Rect r = GUILayoutUtility.GetRect(new GUIContent("Add"), EditorStyles.toolbarButton);
-            if (GUI.Button(r, "Add", EditorStyles.toolbarButton))
-                GenerateAddMenu().ShowAsContext(r.x, r.y + r.height);
 
             r = GUILayoutUtility.GetRect(new GUIContent("Node"), EditorStyles.toolbarButton);
             if (GUI.Button(r, "Node", EditorStyles.toolbarButton))
                 GenerateNodeContextMenu().ShowAsContext(r.x, r.y + r.height);
 
-            if (GUILayout.Button("Prettify", EditorStyles.toolbarButton))
-                BeautifyTree(new Vector2(50f, 150f));
+            GUILayout.Button("Prettify", EditorStyles.toolbarButton);
 
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Load", EditorStyles.toolbarButton, GUILayout.Width(75f)))
-                NodeEditorFileHandler.Load(this);
-            if (GUILayout.Button("Save As", EditorStyles.toolbarButton, GUILayout.Width(75f)))
-                NodeEditorFileHandler.SaveAs(this);
-            if (GUILayout.Button("Save", EditorStyles.toolbarButton, GUILayout.Width(75f)))
-                NodeEditorFileHandler.Save(this);
+            // if (GUILayout.Button("Prettify", EditorStyles.toolbarButton))
+            // BeautifyTree(new Vector2(50f, 150f));
 
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("Screenshot", EditorStyles.toolbarButton))
-            {
-                this.Screenshot();
-            }
+            GUILayout.FlexibleSpace();
+
+            if (!windowInfo.inspectorToggled && GUILayout.Button(Styles.visibilityToggleOffContent, EditorStyles.toolbarButton))
+                windowInfo.inspectorToggled = true;
 
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
@@ -828,50 +819,60 @@ namespace Schema.Editor
         ///</summary>
         private void DrawInspector()
         {
-            if (windowInfo.dividerPos < 0.0f) windowInfo.dividerPos = position.height / 2f;
+            if (!windowInfo.inspectorToggled)
+                return;
 
             float inspectorWidth = GUIData.inspectorWidth;
             Rect inspectorArea = new Rect(position.width - (inspectorWidth + GUIData.sidebarPadding * 2), 0f, inspectorWidth + GUIData.sidebarPadding * 2, position.height);
 
-            EditorGUI.DrawRect(inspectorArea, NodeEditorResources.windowBackground);
+            EditorGUI.DrawRect(inspectorArea, Styles.windowBackground);
 
             if (IsNotLayoutEvent(Event.current) && inspectorArea.Contains(Event.current.mousePosition)) windowInfo.hoveredType = Window.Hovering.Inspector;
 
             if (!windowInfo.settingsShown)
             {
-                //draw divider line
-                Rect divider = new Rect(position.width - (inspectorWidth + GUIData.sidebarPadding * 2), windowInfo.dividerPos - GUIData.dividerHeight / 2f,
-                    inspectorWidth + GUIData.sidebarPadding * 2, GUIData.dividerHeight);
-                Rect dividerInput = new Rect(position.width - inspectorWidth, windowInfo.dividerPos - (GUIData.dividerHeight * 5 / 2f),
-                    inspectorWidth, GUIData.dividerHeight * 5);
-                EditorGUI.DrawRect(divider, NodeEditorResources.windowAccent);
-
-                windowInfo.hoveringDivider =
-                    IsNotLayoutEvent(Event.current) &&
-                    dividerInput.Contains(Event.current.mousePosition);
-
-                Rect inspector = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding, 0f, inspectorWidth, windowInfo.dividerPos);
-                Rect inspectorContainer = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2, 0f, inspectorWidth + GUIData.sidebarPadding * 2, windowInfo.dividerPos);
+                Rect inspectorContainer = new Rect(
+                    position.width - inspectorWidth - GUIData.sidebarPadding * 2,
+                    0f,
+                    inspectorWidth + GUIData.sidebarPadding * 2,
+                    position.height
+                );
 
                 GUILayout.BeginArea(inspectorContainer);
+
+                GUILayout.BeginHorizontal(EditorStyles.toolbar);
+
+                string[] values = Enum.GetNames(typeof(Window.InspectorView));
+
+                for (int i = 0; i < values.Length; i++)
+                {
+                    if (GUILayout.Toggle((int)windowInfo.inspectorView == i, values[i], EditorStyles.toolbarButton))
+                        windowInfo.inspectorView = (Window.InspectorView)i;
+                }
+
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button(
+                    Styles.visibilityToggleOnContent,
+                    EditorStyles.toolbarButton
+                )) windowInfo.inspectorToggled = false;
+
+                GUILayout.EndHorizontal();
+
                 windowInfo.inspectorScroll = GUILayout.BeginScrollView(windowInfo.inspectorScroll);
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(GUIData.nodePadding);
                 GUILayout.BeginVertical();
-                DrawInspectorWindow();
-                GUILayout.EndVertical();
-                GUILayout.Space(GUIData.nodePadding);
-                GUILayout.EndHorizontal();
-                GUILayout.EndScrollView();
-                GUILayout.EndArea();
-                Rect blackboard = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2f,
-                    windowInfo.dividerPos, inspectorWidth + GUIData.sidebarPadding * 2f, position.height - windowInfo.dividerPos);
-                GUILayout.BeginArea(blackboard);
-                windowInfo.blackboardScroll = GUILayout.BeginScrollView(windowInfo.blackboardScroll);
-                GUILayout.BeginHorizontal();
-                GUILayout.Space(GUIData.nodePadding);
-                GUILayout.BeginVertical();
-                DrawBlackboard(target.blackboard);
+
+                switch (windowInfo.inspectorView)
+                {
+                    case Window.InspectorView.Inspector:
+                        DrawInspectorWindow();
+                        break;
+                    case Window.InspectorView.Blackboard:
+                        DrawBlackboard(target.blackboard);
+                        break;
+                }
                 GUILayout.EndVertical();
                 GUILayout.Space(GUIData.nodePadding);
                 GUILayout.EndHorizontal();
@@ -898,7 +899,7 @@ namespace Schema.Editor
         void DrawPreferencesWindow()
         {
             GUILayout.Space(GUIData.sidebarPadding);
-            GUILayout.Label("Preferences", NodeEditorResources.styles.title);
+            GUILayout.Label("Preferences", Styles.styles.title);
             GUILayout.Space(GUIData.sidebarPadding);
 
             EditorGUILayout.LabelField("General", EditorStyles.boldLabel);
@@ -952,7 +953,7 @@ namespace Schema.Editor
         void DrawInspectorWindow()
         {
             GUILayout.Space(GUIData.sidebarPadding);
-            GUILayout.Label("Inspector", NodeEditorResources.styles.title);
+            GUILayout.Label("Inspector", Styles.styles.title);
             GUILayout.Space(GUIData.sidebarPadding);
 
             if (distinctTypes.Count > 1)
@@ -966,15 +967,6 @@ namespace Schema.Editor
 
             if (editor != null)
             {
-                Dictionary<UnityEngine.Object, HideFlags> cache = new Dictionary<UnityEngine.Object, HideFlags>();
-
-                for (int i = 0; i < editor.targets.Count(); i++)
-                {
-                    UnityEngine.Object target = editor.targets[i];
-                    cache.Add(target, target.hideFlags);
-                    target.hideFlags = HideFlags.None;
-                }
-
                 bool isInspectingDecorator = editor.targets.OfType<Decorator>().Count() > 0;
 
                 EditorGUI.BeginChangeCheck();
@@ -1000,39 +992,25 @@ namespace Schema.Editor
                     else if (isInspectingDecorator)
                     {
                         Decorator decorator = ((Decorator)editor.targets.ToList().Find(obj => (typeof(Decorator)).IsAssignableFrom(obj.GetType())));
-                        decorator.node.dirty = true;
+                        windowInfo.changedNodes.Enqueue(decorator.node);
                         decorator.info = decorator.GetValuesGUI();
                     }
                     else
                     {
                         foreach (Node node in editor.targets)
-                        {
-                            node.dirty = true;
-                        }
+                            windowInfo.changedNodes.Enqueue(node);
                     }
 
                     SceneView.RepaintAll();
                 }
-
-                UpdateHideFlagsFromDictionary(cache);
             }
         }
         void DrawBlackboard(Blackboard blackboard)
         {
             EditorGUI.BeginDisabledGroup(editingPaused);
             GUILayout.Space(GUIData.sidebarPadding);
-            GUILayout.Label("Blackboard", NodeEditorResources.styles.title);
+            GUILayout.Label("Blackboard", Styles.styles.title);
             GUILayout.Space(GUIData.sidebarPadding);
-
-            Dictionary<UnityEngine.Object, HideFlags> cache = new Dictionary<UnityEngine.Object, HideFlags> { { blackboard, blackboard.hideFlags } };
-
-            blackboard.hideFlags = HideFlags.None;
-
-            foreach (BlackboardEntry entry in blackboard.entries)
-            {
-                cache.Add(entry, entry.hideFlags);
-                entry.hideFlags = HideFlags.None;
-            }
 
             GUILayout.Space(GUIData.sidebarPadding);
             if (!blackboardEditor || blackboardEditor.target != blackboard)
@@ -1044,7 +1022,6 @@ namespace Schema.Editor
                 windowInfo.treeDirty = true;
             }
 
-            UpdateHideFlagsFromDictionary(cache);
             EditorGUI.EndDisabledGroup();
         }
         private void ToggleSearch()
@@ -1069,7 +1046,7 @@ namespace Schema.Editor
         {
             BeginWindows();
 
-            Rect r = GUILayout.Window(1, rect, DoSearchWindow, "", NodeEditorResources.styles.addNodeWindow);
+            Rect r = GUILayout.Window(1, rect, DoSearchWindow, "", Styles.styles.addNodeWindow);
 
             EndWindows();
 
@@ -1095,48 +1072,41 @@ namespace Schema.Editor
                         if (results.Count > 0)
                         {
                             if (windowInfo.searchWantsNode)
-                                AddNode(current, WindowToGridPosition(window.size * 0.5f), windowInfo.searchAddChildren);
+                                target.AddNode(current, WindowToGridPosition(window.size * 0.5f));
                             else
-                                AddDecorator(current);
+                                target.AddDecorators(windowInfo.selected, current);
                         }
                         ToggleSearch();
                         break;
                     }
                 case EventType.KeyDown when Event.current.keyCode == KeyCode.UpArrow:
+                    if (results.Count > 0)
                     {
-                        if (results.Count > 0)
-                        {
-                            int nextIndex = results.IndexOf(current) - 1;
+                        int nextIndex = results.IndexOf(current) - 1;
 
-                            nextIndex = Mathf.Clamp(nextIndex, 0, results.Count - 1);
+                        nextIndex = Mathf.Clamp(nextIndex, 0, results.Count - 1);
 
-                            GUI.FocusControl(results[nextIndex].Name);
-                        }
-
-                        break;
+                        GUI.FocusControl(results[nextIndex].Name);
                     }
-                case EventType.KeyDown:
+
+                    break;
+                case EventType.KeyDown when Event.current.keyCode == KeyCode.DownArrow:
+                    if (results.Count > 0)
                     {
-                        if (Event.current.keyCode == KeyCode.DownArrow)
-                        {
-                            if (results.Count > 0)
-                            {
-                                int nextIndex = results.IndexOf(current) + 1;
+                        int nextIndex = results.IndexOf(current) + 1;
 
-                                nextIndex = Mathf.Clamp(nextIndex, 0, results.Count - 1);
+                        nextIndex = Mathf.Clamp(nextIndex, 0, results.Count - 1);
 
-                                GUI.FocusControl(results[nextIndex].Name);
-                            }
-                        }
-
-                        break;
+                        GUI.FocusControl(results[nextIndex].Name);
                     }
+
+                    break;
                 case EventType.MouseDown when Event.current.button == 0:
                     mouseClick = true;
                     break;
             }
 
-            GUILayout.BeginVertical(NodeEditorResources.styles.backgroundBg);
+            GUILayout.BeginVertical(Styles.styles.backgroundBg);
 
             GUILayout.Label(windowInfo.searchWantsNode ? "Add Node" : "Add Decorator", EditorStyles.whiteLargeLabel);
 
@@ -1144,12 +1114,12 @@ namespace Schema.Editor
             GUILayout.Space(8);
             GUILayout.BeginVertical(GUILayout.Width(24), GUILayout.Height(32));
             GUILayout.FlexibleSpace();
-            GUILayout.Label(new GUIContent(NodeEditorResources.searchIcon), NodeEditorResources.styles.searchbar, GUILayout.Height(24), GUILayout.Width(24));
+            GUILayout.Label(new GUIContent(Styles.searchIcon), Styles.styles.searchbar, GUILayout.Height(24), GUILayout.Width(24));
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
             GUILayout.Space(8);
             GUI.SetNextControlName("SearchTextField");
-            windowInfo.searchText = GUILayout.TextField(windowInfo.searchText, NodeEditorResources.styles.searchbar, GUILayout.ExpandHeight(true));
+            windowInfo.searchText = GUILayout.TextField(windowInfo.searchText, Styles.styles.searchbar, GUILayout.ExpandHeight(true));
             GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
@@ -1171,16 +1141,21 @@ namespace Schema.Editor
                     GUI.backgroundColor = i == 0 ? GUI.skin.settings.selectionColor : new Color(0f, 0f, 0f, 0f);
 
                 GUI.SetNextControlName(t.Name);
-                GUILayout.Box(t.Name, NodeEditorResources.styles.searchResult, GUILayout.ExpandWidth(true));
+                GUILayout.Box(t.Name, Styles.styles.searchResult, GUILayout.ExpandWidth(true));
 
                 if (mouseClick && GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition))
                 {
                     if (thisResultIsFocused)
                     {
                         if (windowInfo.searchWantsNode)
-                            AddNode(t, WindowToGridPosition(window.size * 0.5f), windowInfo.searchAddChildren);
+                        {
+                            target.AddNode(t, WindowToGridPosition(window.size * 0.5f));
+                        }
                         else
-                            AddDecorator(t);
+                        {
+                            target.AddDecorators(windowInfo.selected, t);
+                            windowInfo.selected.ForEach(n => windowInfo.changedNodes.Enqueue(n));
+                        }
                         ToggleSearch();
                     }
                     else
@@ -1209,7 +1184,7 @@ namespace Schema.Editor
                 mouseClick = true;
             }
 
-            Texture2D splash = NodeEditorResources.splashImage;
+            Texture2D splash = Styles.splashImage;
             float scale = 0.5f;
 
             Rect splashRect = GUILayoutUtility.GetRect(splash.width * scale, splash.height * scale);
@@ -1236,7 +1211,7 @@ namespace Schema.Editor
                     GUI.backgroundColor = new Color(0, 0, 0, 0);
 
                 GUI.SetNextControlName(s.Key);
-                GUILayout.Box(s.Value, NodeEditorResources.styles.searchResult, GUILayout.ExpandWidth(true));
+                GUILayout.Box(s.Value, Styles.styles.searchResult, GUILayout.ExpandWidth(true));
 
                 if (mouseClick && GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition))
                 {
@@ -1264,8 +1239,8 @@ namespace Schema.Editor
 
             if (GUILayout.Button("New Graph", GUILayout.Width(100f)))
             {
-                Graph graph = NodeEditorFileHandler.CreateNew();
-                OpenGraph(graph);
+                // Graph graph = NodeEditorFileHandler.CreateNew();
+                // OpenGraph(graph);
             }
 
             GUILayout.EndHorizontal();
@@ -1337,19 +1312,6 @@ namespace Schema.Editor
             }
             return d[n, m];
         }
-        void UpdateHideFlagsFromDictionary(Dictionary<UnityEngine.Object, HideFlags> cache)
-        {
-            foreach (KeyValuePair<UnityEngine.Object, HideFlags> kvp in cache)
-            {
-                if (kvp.Key == null)
-                {
-                    continue;
-                }
-
-                kvp.Key.hideFlags = kvp.Value;
-            }
-        }
-
         ///<summary>
         ///Helper functions to zoom and pan the UI (taken from the XNode framework with some modifications)
         ///</summary>
@@ -1404,8 +1366,8 @@ namespace Schema.Editor
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size * .5f;
-            Texture2D gridTex = NodeEditorResources.gridTexture;
-            Texture2D crossTex = NodeEditorResources.crossTexture;
+            Texture2D gridTex = Styles.gridTexture;
+            Texture2D crossTex = Styles.crossTexture;
 
             // Offset from origin in tile units
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
@@ -1424,20 +1386,11 @@ namespace Schema.Editor
             GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
         }
 
-        ///<summary>
-        ///Contains all the information about the window
-        ///</summary>
         [Serializable]
-        public class Window
+        internal class Window
         {
-            ///<summary>
-            ///The current NodeEditor that Window is describing
-            ///</summary>
             public NodeEditor editor;
-            private float _zoom;
-            ///<summary>
-            ///The current zoom level of the window
-            ///</summary>
+            private float _zoom = 1f;
             public float zoom
             {
                 get
@@ -1456,19 +1409,13 @@ namespace Schema.Editor
             }
             public Dictionary<string, float> alpha = new Dictionary<string, float>();
             public Dictionary<string, bool?> nodeStatus;
-            ///<summary>
-            ///Whether we are currently panning the view
-            ///</summary>
-            internal bool isPanning;
-            internal Vector2 nextPan;
-            internal float recordedTime;
-            internal float timeLastFrame;
-            internal float deltaTime => Time.realtimeSinceStartup - timeLastFrame;
+            public bool isPanning;
+            public Vector2 nextPan;
+            public float recordedTime;
+            public float timeLastFrame;
+            public float deltaTime => Time.realtimeSinceStartup - timeLastFrame;
             public float panDuration;
             private Vector2 _pan;
-            ///<summary>
-            ///The drag offset for the window
-            ///</summary>
             public Vector2 pan
             {
                 get
@@ -1485,89 +1432,29 @@ namespace Schema.Editor
                         editor.target.pan = value;
                 }
             }
-
-            ///<summary>
-            ///Where the mouse last clicked (used for the selection box)
-            ///</sumamry>
             public Vector2 mouseDownPos;
-
-            ///<summary>
-            ///The list of selected nodes in the window
-            ///</summary>
-            public List<Node> selected;
-
-            ///<summary>
-            ///Currently selected decorator
-            ///</summary>
+            public List<Node> selected = new List<Node>();
+            public Queue<Node> changedNodes = new Queue<Node>();
             public Decorator selectedDecorator;
-
-            ///<summary>
-            ///Node that is currently hovered
-            ///</summary>
             public Node hoveredNode;
-
-            ///<summary>
-            ///Decorator that is currently hovered
-            ///</summary>
             public Decorator hoveredDecorator;
-
-            ///<summary>
-            ///What we are currently hovering in the window
-            ///</summary>
             public Hovering hoveredType;
-
-            ///<summary>
-            ///What we last clicked on mouse down
-            ///</summary>
             public Hovering lastClicked;
-
-            ///<summary>
-            ///Whether the mouse has been dragged since we last released the mouse button
-            ///</summary>
             public bool didDragSinceMouseUp;
-
-            ///<summary>
-            ///The hovered decorator list position, used to swap decorators by clicking and dragging
-            ///</summary>
             public int hoveredDecoratorIndex;
-
-            ///<summary>
-            ///Whether we are hovering a divider
-            ///</summary>
-            public bool hoveringDivider;
-            ///<summary>
-            ///Whether we are currently moving a divider
-            ///</summary>
-            public bool movingDivider;
-            ///<summary>
-            ///Whether the current graph has been saved since the last edit
-            ///</summary>
             public bool graphSaved;
-            ///<summary>
-            ///Whether the node tree was edited this frame (used in edit mode for realtime updates)
-            ///</summary>
             public bool treeDirty;
             public Rect viewRect;
-            private float _dividerPos;
-            internal float dividerPos
-            {
-                get
-                {
-                    return Mathf.Clamp(_dividerPos, 50f, editor.position.height - 50f);
-                }
-                set
-                {
-                    _dividerPos = value;
-                }
-            }
-            internal Vector2 blackboardScroll;
-            internal Vector2 inspectorScroll;
-            internal bool searchIsShown = false;
-            internal bool searchWantsNode = true;
-            internal bool searchAddChildren = false;
-            internal float searchbarScroll = 0f;
-            internal string searchText;
-            internal float splashScroll;
+            public Vector2 blackboardScroll;
+            public Vector2 inspectorScroll;
+            public InspectorView inspectorView;
+            public bool inspectorToggled;
+            public bool searchIsShown = false;
+            public bool searchWantsNode = true;
+            public bool searchAddChildren = false;
+            public float searchbarScroll = 0f;
+            public string searchText;
+            public float splashScroll;
             public Rect minimapView;
             public bool settingsShown;
             [SerializeField] internal Rect searchRect = new Rect(0f, 0f, 250f, 350f);
@@ -1582,6 +1469,11 @@ namespace Schema.Editor
                 Minimap,
                 MinimapNode,
                 None
+            }
+            public enum InspectorView
+            {
+                Inspector,
+                Blackboard
             }
         }
         ///<summary>
@@ -1598,7 +1490,6 @@ namespace Schema.Editor
             public static readonly float spacing = 10f;
             public static readonly float minContentHeight = 75f;
             public static readonly float zoomSpeed = .05f;
-            public static readonly float dividerHeight = 1.0f;
             public static float inspectorWidth = 400f;
         }
     }

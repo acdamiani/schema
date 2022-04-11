@@ -1,7 +1,7 @@
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
-namespace Schema.Runtime
+namespace Schema
 {
     public abstract class Flow : Node
     {

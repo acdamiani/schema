@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using Schema.Runtime;
+using Schema;
 
 public class ConeCheck : Decorator
 {

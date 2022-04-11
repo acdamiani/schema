@@ -7,7 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using UnityEngine;
 using UnityEditor;
-using Schema.Runtime;
+using Schema;
 
 namespace Schema.Utilities
 {
@@ -75,7 +75,22 @@ namespace Schema.Utilities
                     list.Insert(newIndex, item);
                 }
             }
+        }
+        public static void Move<T>(this T[] array, T item, int newIndex)
+        {
+            if (item != null)
+            {
+                int oldIndex = Array.IndexOf(array, item);
 
+                if (oldIndex > -1)
+                {
+                    ArrayUtility.RemoveAt(ref array, oldIndex);
+
+                    if (newIndex > oldIndex) newIndex--;
+
+                    ArrayUtility.Insert(ref array, newIndex, item);
+                }
+            }
         }
         public static Vector3[] Circle(Vector2 center, float radius, int detail)
         {

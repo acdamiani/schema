@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
-using Schema.Runtime;
+using Schema;
 
-[Category("Movement")]
 [DarkIcon("Dark/MoveToDirect")]
 [LightIcon("Light/MoveToDirect")]
 internal class MoveToDirect : Action

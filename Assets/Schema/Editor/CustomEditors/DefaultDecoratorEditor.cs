@@ -3,7 +3,7 @@ using UnityEditor;
 using System;
 using System.Reflection;
 
-[CustomEditor(typeof(Schema.Runtime.Decorator))]
+[CustomEditor(typeof(Schema.Decorator))]
 public class DefaultDecoratorEditor : Editor
 {
     private bool shouldShowAborts = false;
@@ -14,7 +14,7 @@ public class DefaultDecoratorEditor : Editor
         {
             try
             {
-                Type targetType = ((Schema.Runtime.Decorator)target).GetType();
+                Type targetType = ((Schema.Decorator)target).GetType();
                 Type declaringType = targetType.GetMethod("Evaluate").DeclaringType;
 
                 shouldShowAborts = declaringType.Equals(targetType);
@@ -28,7 +28,7 @@ public class DefaultDecoratorEditor : Editor
     {
         serializedObject.Update();
 
-        Schema.Runtime.Decorator decorator = (Schema.Runtime.Decorator)target;
+        Schema.Decorator decorator = (Schema.Decorator)target;
 
         if (shouldShowAborts)
             EditorGUILayout.PropertyField(aborts);

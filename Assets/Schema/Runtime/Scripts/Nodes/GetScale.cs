@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
 [DarkIcon("c_TransformIcon")]
 [LightIcon("c_TransformIcon")]

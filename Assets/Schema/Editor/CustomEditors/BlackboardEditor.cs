@@ -22,12 +22,12 @@ public class BlackboardEditor : Editor
 
         GUILayout.BeginHorizontal();
 
-        if (GUILayout.Button(NodeEditorResources.plus, GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16))) ShowContext();
+        if (GUILayout.Button(Styles.plus, GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16))) ShowContext();
 
         GUILayout.FlexibleSpace();
 
         EditorGUI.BeginDisabledGroup(selectedEntry == null);
-        if (GUILayout.Button(NodeEditorResources.minus, GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16))) RemoveSelected();
+        if (GUILayout.Button(Styles.minus, GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16))) RemoveSelected();
         EditorGUI.EndDisabledGroup();
 
         GUILayout.EndHorizontal();
@@ -60,7 +60,7 @@ public class BlackboardEditor : Editor
         {
             GUI.color = GUI.skin.settings.selectionColor;
             if (selectedEntry == entry)
-                GUI.Box(selectedRect, "", NodeEditorResources.styles.node);
+                GUI.Box(selectedRect, "", Styles.styles.node);
 
             GUI.color = Color.white;
 
@@ -103,7 +103,7 @@ public class BlackboardEditor : Editor
     private void RemoveSelected()
     {
         int i = blackboard.entries.IndexOf(selectedEntry) - 1;
-        blackboard.RemoveEntry(selectedEntry, false);
+        blackboard.RemoveEntry(selectedEntry);
         i = i > 0 ? i : 0;
 
         if (blackboard.entries.Count > 0)
@@ -128,13 +128,13 @@ public class BlackboardEditor : Editor
         switch (entry.entryType)
         {
             case BlackboardEntry.EntryType.Local:
-                GUI.Label(r, new GUIContent(NodeEditorResources.local, "Local Variable"), GUIStyle.none);
+                GUI.Label(r, new GUIContent(Styles.local, "Local Variable"), GUIStyle.none);
                 break;
             case BlackboardEntry.EntryType.Global:
-                GUI.Label(r, new GUIContent(NodeEditorResources.global, "Global Variable"), GUIStyle.none);
+                GUI.Label(r, new GUIContent(Styles.global, "Global Variable"), GUIStyle.none);
                 break;
             case BlackboardEntry.EntryType.Shared:
-                GUI.Label(r, new GUIContent(NodeEditorResources.shared, "Shared Variable"), GUIStyle.none);
+                GUI.Label(r, new GUIContent(Styles.shared, "Shared Variable"), GUIStyle.none);
                 break;
         }
 
@@ -145,14 +145,14 @@ public class BlackboardEditor : Editor
             GUI.SetNextControlName(entry.uID);
             EditorGUI.BeginChangeCheck();
 
-            entry.Name = GUILayout.TextField(entry.Name, NodeEditorResources.styles.nameField);
+            entry.Name = GUILayout.TextField(entry.Name, Styles.styles.nameField);
 
             if (EditorGUI.EndChangeCheck())
                 BlackboardEntrySelectorDrawer.names[entry.uID] = entry.Name;
         }
         else
         {
-            GUILayout.Label(new GUIContent(entry.Name, entry.description), NodeEditorResources.styles.nameField);
+            GUILayout.Label(new GUIContent(entry.Name, entry.description), Styles.styles.nameField);
         }
 
         Rect last = GUILayoutUtility.GetLastRect();
@@ -175,8 +175,8 @@ public class BlackboardEditor : Editor
         GUILayout.Space(4f);
 
         GUI.color = Blackboard.typeColors[entry.type];
-        Rect imgRect = GUILayoutUtility.GetRect(new GUIContent(NodeEditorResources.circle), GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16));
-        GUI.DrawTexture(imgRect, NodeEditorResources.circle);
+        Rect imgRect = GUILayoutUtility.GetRect(new GUIContent(Styles.circle), GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16));
+        GUI.DrawTexture(imgRect, Styles.circle);
         GUI.color = Color.white;
 
         GUILayout.Space(8f);

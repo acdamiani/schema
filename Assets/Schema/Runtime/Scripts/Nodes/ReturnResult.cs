@@ -1,7 +1,7 @@
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
-public class ReturnResult : Schema.Runtime.Action
+public class ReturnResult : Schema.Action
 {
     public NodeStatus returnsStatus;
 

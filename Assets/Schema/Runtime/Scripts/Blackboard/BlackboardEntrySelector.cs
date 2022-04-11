@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 using Schema.Utilities;
 using System.IO;
 using System.Linq;

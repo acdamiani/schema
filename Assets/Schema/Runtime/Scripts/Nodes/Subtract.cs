@@ -1,5 +1,5 @@
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
 public class Subtract : Action
 {

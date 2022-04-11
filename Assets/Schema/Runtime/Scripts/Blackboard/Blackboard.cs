@@ -36,7 +36,7 @@ public class Blackboard : ScriptableObject
         { typeof(Quaternion),     Color.black },
         { typeof(Vector2),        Color.black },
         { typeof(Vector3),        Color.black },
-        { typeof(Vector4), Color.black},
+        { typeof(Vector4),        Color.black },
         { typeof(Matrix4x4),      Color.black },
         { typeof(GameObject),     Color.black },
         { typeof(AnimationCurve), Color.black }
@@ -47,9 +47,7 @@ public class Blackboard : ScriptableObject
     {
         Dictionary<Type, Color> copy = new Dictionary<Type, Color>(typeColors);
         foreach (Type key in copy.Keys)
-        {
             typeColors[key] = key.Name.GetHashCode().ToString().ToColor();
-        }
 
         foreach (BlackboardEntry entry in entries)
             entry.blackboard = this;
@@ -57,78 +55,6 @@ public class Blackboard : ScriptableObject
         entryByteStrings = GetEntryByteStrings();
         //
     }
-    public void LoadGlobals()
-    {
-        Blackboard global = Resources.Load<Blackboard>("GlobalBlackboard");
-
-        if (global == null)
-        {
-            global = ScriptableObject.CreateInstance<Blackboard>();
-            AssetDatabase.CreateAsset(global, "Resources/GlobalBlackboard.asset");
-
-            return;
-        }
-
-        List<BlackboardEntry> globalEntries = global.entries;
-
-        foreach (BlackboardEntry b in globalEntries)
-        {
-            BlackboardEntry copy = ScriptableObject.Instantiate(b);
-            copy.hideFlags = HideFlags.HideAndDontSave;
-
-            entries.Add(copy);
-        }
-
-        entryByteStrings = GetEntryByteStrings();
-    }
-    public void SaveGlobals()
-    {
-        Blackboard global = Resources.Load<Blackboard>("GlobalBlackboard");
-
-        if (global == null)
-        {
-            global = ScriptableObject.CreateInstance<Blackboard>();
-            AssetDatabase.CreateAsset(global, "Resources/GlobalBlackboard.asset");
-        }
-
-        List<BlackboardEntry> globalEntries = entries.FindAll(entry => entry.entryType == BlackboardEntry.EntryType.Global);
-
-        foreach (BlackboardEntry globalEntry in global.entries)
-        {
-            DestroyImmediate(globalEntry, true);
-        }
-
-        global.entries.Clear();
-
-        foreach (BlackboardEntry entry in globalEntries)
-        {
-            BlackboardEntry copy = ScriptableObject.Instantiate(entry);
-            copy.hideFlags = HideFlags.HideInHierarchy;
-
-            AssetDatabase.AddObjectToAsset(copy, "Resources/GlobalBlackboard.asset");
-
-            global.entries.Add(copy);
-
-            entries.Remove(entry);
-            DestroyImmediate(entry);
-        }
-
-        foreach (BlackboardEntry entry in global.entries)
-        {
-            if (entries.Find(e => e.uID == entry.uID))
-            {
-                global.entries.Remove(entry);
-                AssetDatabase.RemoveObjectFromAsset(entry);
-                DestroyImmediate(entry);
-            }
-        }
-
-        EditorUtility.SetDirty(global);
-        AssetDatabase.SaveAssets();
-
-        Debug.Log(global.entries);
-    }
-    //Returns a bit mask given specific filters
     public System.Tuple<int, int> GetMask(List<string> filters)
     {
         List<Type> typeArray = filters.Select(s => Type.GetType(s)).ToList();
@@ -160,15 +86,24 @@ public class Blackboard : ScriptableObject
         else
             return null;
     }
-    public void AddEntry(Type type)
+    /// <summary>
+    /// Add an entry to the Blackboard
+    /// </summary>
+    /// <param name="type">Type of entry to add</param>
+    /// <param name="actionName">Name of the undo action</param>
+    /// <param name="undo">Whether to register this operation in the undo stack</param>
+    public void AddEntry(Type type, string actionName = "Add Entry", bool undo = true)
     {
         BlackboardEntry entry = ScriptableObject.CreateInstance<BlackboardEntry>();
         entry.blackboard = this;
-
         entry.Name = UniqueName(type.Name + "Key", entries.Select(e => e.Name).ToList());
         entry.typeString = type.AssemblyQualifiedName;
 
-        entry.hideFlags = HideFlags.HideAndDontSave;
+        if (undo)
+        {
+            Undo.RegisterCreatedObjectUndo(entry, actionName);
+            Undo.RegisterCompleteObjectUndo(this, actionName);
+        }
 
         entries.Add(entry);
 
@@ -186,25 +121,40 @@ public class Blackboard : ScriptableObject
 
         return desiredName + (i == 0 ? "" : i.ToString());
     }
-    public void RemoveEntry(BlackboardEntry entry, bool preserve)
+    public void RemoveEntry(BlackboardEntry entry, string actionName = "Remove Entry", bool undo = true)
     {
-        Debug.Log("removed entry " + entry.Name);
-
-        entries.Remove(entry);
-
-        if (!preserve)
-            DestroyImmediate(entry);
+        if (undo)
+        {
+            Undo.RegisterCompleteObjectUndo(this, actionName);
+            entries.Remove(entry);
+            Undo.DestroyObjectImmediate(entry);
+        }
+        else
+        {
+            entries.Remove(entry);
+            ScriptableObject.DestroyImmediate(entry, true);
+        }
 
         entryByteStrings = GetEntryByteStrings();
         entryListChanged?.Invoke(this);
     }
-    public void RemoveEntry(int index)
+    public void RemoveEntry(int index, string actionName = "Remove Entry", bool undo = true)
     {
         if (index > entries.Count - 1) return;
 
-        BlackboardEntry obj = entries[index];
-        entries.Remove(obj);
-        DestroyImmediate(obj);
+        BlackboardEntry entry = entries[index];
+
+        if (undo)
+        {
+            Undo.RegisterCompleteObjectUndo(this, actionName);
+            entries.Remove(entry);
+            Undo.DestroyObjectImmediate(entry);
+        }
+        else
+        {
+            entries.Remove(entry);
+            ScriptableObject.DestroyImmediate(entry, true);
+        }
 
         entryByteStrings = GetEntryByteStrings();
         entryListChanged?.Invoke(this);

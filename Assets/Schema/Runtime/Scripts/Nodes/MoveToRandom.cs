@@ -1,10 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using Schema.Runtime;
+using Schema;
 using UnityEngine;
 using UnityEngine.AI;
 
-[Category("Movement")]
 public class MoveToRandom : Action
 {
     class MoveToRandomMemory

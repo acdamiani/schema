@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using Schema.Runtime;
+using Schema;
 
 [DarkIcon("Dark/Wander")]
 [LightIcon("Light/Wander")]

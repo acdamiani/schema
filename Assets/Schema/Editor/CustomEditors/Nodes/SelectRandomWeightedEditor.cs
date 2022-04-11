@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEditor;
-using Schema.Runtime;
+using Schema;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,18 +20,18 @@ public class SelectRandomWeightedEditor : Editor
         node.weights ??= new SerializableDictionary<string, int>();
 
         Dictionary<string, int> d = new Dictionary<string, int>(node.weights);
-        
+
         foreach (KeyValuePair<string, int> kvp in d)
         {
             if (!node.children.Any(x => x.uID.Equals(kvp.Key)))
                 node.weights.Remove(kvp.Key);
         }
-        
-        for (int i = 0; i < node.children.Count; i++)
+
+        for (int i = 0; i < node.children.Length; i++)
         {
             Node child = node.children[i];
 
-            EditorGUILayout.LabelField($"{i + 1} {child.Name}");
+            EditorGUILayout.LabelField($"{i + 1} {child.name}");
 
             node.weights[child.uID] = Mathf.Clamp(EditorGUILayout.IntField("Weight", node.weights.ContainsKey(child.uID) ? node.weights[child.uID] : 1), 0, System.Int32.MaxValue);
 

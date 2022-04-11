@@ -1,8 +1,7 @@
-using Schema.Runtime;
+using Schema;
 using UnityEngine;
 
-[Category("Movement")]
-public class RotateTo : Schema.Runtime.Action
+public class RotateTo : Schema.Action
 {
     public BlackboardEntrySelector<Vector3> selector;
     [Tooltip("Speed of rotation, in deg/sec")]

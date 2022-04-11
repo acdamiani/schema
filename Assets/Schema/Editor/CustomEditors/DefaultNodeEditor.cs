@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 
-[CustomEditor(typeof(Schema.Runtime.Node)), CanEditMultipleObjects]
+[CustomEditor(typeof(Schema.Node)), CanEditMultipleObjects]
 public class DefaultNodeEditor : Editor
 {
     SerializedProperty nodeName;
@@ -14,9 +14,9 @@ public class DefaultNodeEditor : Editor
         {
             try
             {
-                nodeName = serializedObject.FindProperty("_name");
-                comment = serializedObject.FindProperty("comment");
-                enableStatusIndicator = serializedObject.FindProperty("enableStatusIndicator");
+                nodeName = serializedObject.FindProperty("m_Name");
+                comment = serializedObject.FindProperty("m_comment");
+                enableStatusIndicator = serializedObject.FindProperty("m_enableStatusIndicator");
             }
             catch { }
         }

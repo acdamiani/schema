@@ -1,5 +1,5 @@
 using UnityEngine;
-using Schema.Runtime;
+using Schema;
 
 [DarkIcon("c_MeshFilter")]
 [LightIcon("c_MeshFilter")]

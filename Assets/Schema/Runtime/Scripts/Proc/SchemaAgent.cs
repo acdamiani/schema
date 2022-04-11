@@ -3,7 +3,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Reflection;
-using Schema.Runtime;
+using Schema;
 using Schema.Utilities;
 
 public class SchemaAgent : MonoBehaviour
@@ -71,7 +71,7 @@ public class SchemaAgent : MonoBehaviour
             switch (oNode.typeCode)
             {
                 case OptimizedNode.TypeCode.Action:
-                    ((Schema.Runtime.Action)oNode.node).OnInitialize(agentState[oNode.node.uID], this);
+                    ((Schema.Action)oNode.node).OnInitialize(agentState[oNode.node.uID], this);
                     break;
                 case OptimizedNode.TypeCode.Flow:
                     ((Flow)oNode.node).OnInitialize(agentState[oNode.node.uID], this);
@@ -228,7 +228,7 @@ public class SchemaAgent : MonoBehaviour
                     }
                     break;
                 case OptimizedNode.TypeCode.Action:
-                    Schema.Runtime.Action action = (Schema.Runtime.Action)node.node;
+                    Schema.Action action = (Schema.Action)node.node;
 
                     nodeCanRun = true;
 
@@ -242,7 +242,7 @@ public class SchemaAgent : MonoBehaviour
                             EnterNode(node, OptimizedNode.TypeCode.Action);
 
                         if (logTaskChanges)
-                            Debug.Log($"Task {action.Name} reached on Agent {name} ");
+                            Debug.Log($"Task {action.name} reached on Agent {name} ");
                     }
 
                     if (!nodeCanRun)
@@ -407,7 +407,7 @@ public class SchemaAgent : MonoBehaviour
                 flow.OnNodeEnter(agentState[flow.uID], this);
                 break;
             case OptimizedNode.TypeCode.Action:
-                Schema.Runtime.Action action = (Schema.Runtime.Action)node.node;
+                Schema.Action action = (Schema.Action)node.node;
 
                 action.OnNodeEnter(agentState[action.uID], this);
                 break;
@@ -457,7 +457,7 @@ public class SchemaAgent : MonoBehaviour
                 flow.OnNodeExit(agentState[flow.uID], this);
                 break;
             case OptimizedNode.TypeCode.Action:
-                Schema.Runtime.Action action = (Schema.Runtime.Action)node.node;
+                Schema.Action action = (Schema.Action)node.node;
 
                 action.OnNodeExit(agentState[action.uID], this);
                 break;
@@ -483,7 +483,7 @@ public class SchemaAgent : MonoBehaviour
     }
 }
 
-namespace Schema.Runtime
+namespace Schema
 {
     public enum NodeStatus
     {

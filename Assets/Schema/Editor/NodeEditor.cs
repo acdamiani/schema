@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
-using Schema.Runtime;
+using Schema;
 using Schema.Utilities;
 using UnityEditor.ShortcutManagement;
 
-namespace Schema.Editor
+namespace SchemaEditor
 {
     //This class contains the basic information about the EditorWindow, including various preferences and basic methods (Delete, Select, etc.)
     public partial class NodeEditor : EditorWindow, IHasCustomMenu
@@ -20,10 +20,9 @@ namespace Schema.Editor
         private static List<UnityEngine.Object> copyBuffer = new List<UnityEngine.Object>();
         public Node requestingConnection;
         private Node orphanNode;
-        public Graph original;
         public Graph target;
         public Blackboard globalBlackboard;
-        public Window windowInfo;
+        private Window windowInfo;
         public GUIData guiData;
         private int nodeCount;
         [DidReloadScripts]
@@ -45,7 +44,6 @@ namespace Schema.Editor
             NodeEditor window = GetWindow<NodeEditor>();
             window.Open(null);
         }
-
         public static void OpenGraph(Graph graphObj)
         {
             NodeEditor window = GetWindow<NodeEditor>();
@@ -55,11 +53,12 @@ namespace Schema.Editor
         {
             windowInfo = new Window();
             windowInfo.editor = this;
-            windowInfo.dividerPos = position.height / 2f;
             guiData = new GUIData();
             guiData.sizes = new SerializableDictionary<Node, Vector2>();
 
-            windowInfo.selected = new List<Node>();
+            target = graphObj;
+            windowInfo.zoom = target.zoom;
+            windowInfo.pan = target.pan;
 
             if (graphObj == null)
             {
@@ -67,10 +66,11 @@ namespace Schema.Editor
                 return;
             }
 
-            titleContent = new GUIContent(graphObj.name);
-            this.Load(graphObj);
+            target.Initialize();
 
-            string id = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(original)).ToString();
+            titleContent = new GUIContent(graphObj.name);
+
+            string id = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(target)).ToString();
             string last = EditorPrefs.GetString("Schema Recently Opened");
             List<string> lastFiles = last.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
@@ -101,14 +101,6 @@ namespace Schema.Editor
 
             Selection.activeObject = target;
 
-            if (target.root == null)
-            {
-                AddNode(typeof(Root), Vector2.zero, false);
-                target.root = (Root)target.nodes.Find(node => node.GetType() == typeof(Root));
-                target.root.graph = target;
-                TraverseTree();
-            }
-
             Undo.ClearAll();
 
             Blackboard.instance = target.blackboard;
@@ -134,13 +126,13 @@ namespace Schema.Editor
             switch (severity)
             {
                 case Error.Severity.Info:
-                    ret.image = NodeEditorResources.infoIcon;
+                    ret.image = Styles.infoIcon;
                     break;
                 case Error.Severity.Warning:
-                    ret.image = NodeEditorResources.warnIcon;
+                    ret.image = Styles.warnIcon;
                     break;
                 case Error.Severity.Error:
-                    ret.image = NodeEditorResources.errorIcon;
+                    ret.image = Styles.errorIcon;
                     break;
             }
 
@@ -162,10 +154,10 @@ namespace Schema.Editor
             List<Error> errors = new List<Error>(node.GetErrors());
 
             foreach (Decorator d in node.decorators)
-                errors.AddRange(d.GetErrors().Select(error => new Error($"{error.message} ({d.Name})", error.severity)));
+                errors.AddRange(d.GetErrors().Select(error => new Error($"{error.message} ({d.name})", error.severity)));
 
             if (node.priority < 1) errors.Add(new Error("Node not connected to root!", Error.Severity.Warning));
-            else if (node.children.Count == 0 && node.canHaveChildren) errors.Add(new Error("No child node attatched", Error.Severity.Warning));
+            else if (node.children.Length == 0 && node.CanHaveChildren()) errors.Add(new Error("No child node attatched", Error.Severity.Warning));
 
             return AggregateErrors(errors);
         }
@@ -175,12 +167,8 @@ namespace Schema.Editor
             windowInfo.treeDirty = true;
             windowInfo.selected.RemoveAll(node => node == null);
 
-            //set all nodes to dirty to recalculate sizes
             foreach (Node node in target.nodes)
-            {
-                Debug.Log(node.Name);
-                node.dirty = true;
-            }
+                windowInfo.changedNodes.Enqueue(node);
 
             List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
 
@@ -200,46 +188,13 @@ namespace Schema.Editor
 
             UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), null, ref editor);
 
-            ValidateConnections();
-            TraverseTree();
+            target.TraverseTree();
             GetViewRect(100f, true);
         }
         //Validates connections between nodes also resets HideFlags
-        void ValidateConnections()
-        {
-            foreach (Node node in target.nodes)
-            {
-                if (node.parent != null && !node.parent.children.Contains(node))
-                    node.parent.children.Add(node);
-
-                foreach (Node child in node.children)
-                {
-                    child.parent = node;
-                }
-
-                node.hideFlags = HideFlags.HideAndDontSave;
-            }
-        }
-        void UnloadChanges(PlayModeStateChange state)
-        {
-            //About to exit playmode, load saved file
-            if (!EditorApplication.isPlayingOrWillChangePlaymode &&
-     EditorApplication.isPlaying)
-            {
-                this.Load(original);
-            }
-            //About to enter playmode, save file
-            else if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying)
-            {
-                windowInfo.graphSaved = true;
-                titleContent = new GUIContent(original.name);
-                NodeEditorFileHandler.Save(this);
-            }
-        }
         void OnEnable()
         {
             Undo.undoRedoPerformed += UndoPerformed;
-            EditorApplication.playModeStateChanged += UnloadChanges;
             UnityEditor.ShortcutManagement.ShortcutManager.instance.activeProfileChanged += ResetShortcuts;
             RegisterShortcuts();
 
@@ -260,19 +215,9 @@ namespace Schema.Editor
         }
         void OnDestroy()
         {
-            if (NodeEditorPrefs.saveOnClose)
-                NodeEditorFileHandler.Save(this);
-
             Undo.undoRedoPerformed -= UndoPerformed;
-            EditorApplication.playModeStateChanged -= UnloadChanges;
             UnityEditor.ShortcutManagement.ShortcutManager.instance.activeProfileChanged -= ResetShortcuts;
             Undo.ClearAll();
-
-            if (target)
-            {
-                DestroyImmediate(target.blackboard);
-                DestroyImmediate(target);
-            }
 
             foreach (SchemaAgent agent in GameObject.FindObjectsOfType<SchemaAgent>())
             {
@@ -365,172 +310,151 @@ namespace Schema.Editor
             return count;
         }
         //This is slow, clunky, and confusing.
-        public void BeautifyTree(Vector2 spacing)
-        {
-            Node root = target.nodes.Find(node => node.GetType() == typeof(Root));
-            IEnumerable<Node> nodes = target.nodes.FindAll(node => IsSubTreeOf(root, node));
+        // public void BeautifyTree(Vector2 spacing)
+        // {
+        //     Node root = target.nodes.Find(node => node.GetType() == typeof(Root));
+        //     IEnumerable<Node> nodes = target.nodes.FindAll(node => IsSubTreeOf(root, node));
 
-            Node[][] arr = ConvertTo2DArray(nodes.ToList());
+        //     Node[][] arr = ConvertTo2DArray(nodes.ToList());
 
-            List<Node> alignToParent = new List<Node>();
-            List<Node> alignToChildren = new List<Node>();
+        //     List<Node> alignToParent = new List<Node>();
+        //     List<Node> alignToChildren = new List<Node>();
 
-            float y = 0f;
-            //Initial sorting step
-            foreach (Node[] row in arr)
-            {
-                float prevSize = 0f;
-                float height = 0f;
-                for (int i = 0; i < row.Length; i++)
-                {
-                    Node node = row[i];
+        //     float y = 0f;
+        //     //Initial sorting step
+        //     foreach (Node[] row in arr)
+        //     {
+        //         float prevSize = 0f;
+        //         float height = 0f;
+        //         for (int i = 0; i < row.Length; i++)
+        //         {
+        //             Node node = row[i];
 
-                    float x = prevSize + spacing.x * i;
+        //             float x = prevSize + spacing.x * i;
 
-                    Vector2 area = GetArea(node, false);
+        //             Vector2 area = GetArea(node, false);
 
-                    node.position = new Vector2(x, y);
+        //             node.position = new Vector2(x, y);
 
-                    prevSize += area.x;
-                    height = Mathf.Max(area.y, height);
-                }
-                y += height + spacing.y;
+        //             prevSize += area.x;
+        //             height = Mathf.Max(area.y, height);
+        //         }
+        //         y += height + spacing.y;
 
-                foreach (Node node in row)
-                {
-                    if (node.parent == null || node.priority - node.parent.priority != 1)
-                        continue;
+        //         foreach (Node node in row)
+        //         {
+        //             if (node.parent == null || node.priority - node.parent.priority != 1)
+        //                 continue;
 
-                    float diff = node.position.x - (node.parent.position.x + GetArea(node.parent, false).x / 2f - GetArea(node, false).x / 2f);
+        //             float diff = node.position.x - (node.parent.position.x + GetArea(node.parent, false).x / 2f - GetArea(node, false).x / 2f);
 
-                    if (Mathf.Abs(diff) > 0.01f)
-                        alignToParent.Add(node);
-                }
-            }
+        //             if (Mathf.Abs(diff) > 0.01f)
+        //                 alignToParent.Add(node);
+        //         }
+        //     }
 
-            Dictionary<Node, float> translated = new Dictionary<Node, float>();
+        //     Dictionary<Node, float> translated = new Dictionary<Node, float>();
 
-            int j = 0;
-            foreach (Node[] row in arr.Reverse())
-            {
-                List<Node> rowList = row.ToList();
+        //     int j = 0;
+        //     foreach (Node[] row in arr.Reverse())
+        //     {
+        //         List<Node> rowList = row.ToList();
 
-                foreach (Node node in row)
-                {
-                    if (alignToParent.Contains(node) || alignToChildren.Contains(node))
-                    {
-                        float diff = 0f;
-                        List<Node> exclude = new List<Node>();
+        //         foreach (Node node in row)
+        //         {
+        //             if (alignToParent.Contains(node) || alignToChildren.Contains(node))
+        //             {
+        //                 float diff = 0f;
+        //                 List<Node> exclude = new List<Node>();
 
-                        if (alignToChildren.Contains(node))
-                        {
-                            if (translated.ContainsKey(node))
-                            {
-                                MoveRow(
-                                    rowList,
-                                    new Vector2(node.position.x + translated[node], node.position.y),
-                                    rowList.IndexOf(node),
-                                    new List<Node>()
-                                );
-                                translated.Remove(node);
-                            }
+        //                 if (alignToChildren.Contains(node))
+        //                 {
+        //                     if (translated.ContainsKey(node))
+        //                     {
+        //                         MoveRow(
+        //                             rowList,
+        //                             new Vector2(node.position.x + translated[node], node.position.y),
+        //                             rowList.IndexOf(node),
+        //                             new List<Node>()
+        //                         );
+        //                         translated.Remove(node);
+        //                     }
 
 
-                            diff = node.position.x - (node.children[0].position.x + GetArea(node.children[0], false).x / 2f - GetArea(node, false).x / 2f);
-                            alignToChildren.Remove(node);
-                            exclude.AddRange(node.children);
+        //                     diff = node.position.x - (node.children[0].position.x + GetArea(node.children[0], false).x / 2f - GetArea(node, false).x / 2f);
+        //                     alignToChildren.Remove(node);
+        //                     exclude.AddRange(node.children);
 
-                            MoveRow(
-                                rowList,
-                                new Vector2(node.position.x - diff, node.position.y),
-                                rowList.IndexOf(node),
-                                exclude
-                            );
+        //                     MoveRow(
+        //                         rowList,
+        //                         new Vector2(node.position.x - diff, node.position.y),
+        //                         rowList.IndexOf(node),
+        //                         exclude
+        //                     );
 
-                            foreach (Node n in rowList.Skip(rowList.IndexOf(node)).ToList().FindAll(node => !translated.ContainsKey(node)))
-                                translated.Add(n, diff);
-                        }
+        //                     foreach (Node n in rowList.Skip(rowList.IndexOf(node)).ToList().FindAll(node => !translated.ContainsKey(node)))
+        //                         translated.Add(n, diff);
+        //                 }
 
-                        if (alignToParent.Contains(node))
-                        {
-                            if (translated.ContainsKey(node))
-                                translated.Remove(node);
+        //                 if (alignToParent.Contains(node))
+        //                 {
+        //                     if (translated.ContainsKey(node))
+        //                         translated.Remove(node);
 
-                            diff = node.position.x - (node.parent.position.x + GetArea(node.parent, false).x / 2f - GetArea(node, false).x / 2f);
-                            alignToParent.Remove(node);
+        //                     diff = node.position.x - (node.parent.position.x + GetArea(node.parent, false).x / 2f - GetArea(node, false).x / 2f);
+        //                     alignToParent.Remove(node);
 
-                            if (diff > 0f)
-                            {
-                                alignToChildren.Add(node.parent);
-                                continue;
-                            }
+        //                     if (diff > 0f)
+        //                     {
+        //                         alignToChildren.Add(node.parent);
+        //                         continue;
+        //                     }
 
-                            MoveRow(
-                                rowList,
-                                new Vector2(node.position.x - diff, node.position.y),
-                                rowList.IndexOf(node),
-                                exclude
-                            );
-                        }
-                    }
-                }
+        //                     MoveRow(
+        //                         rowList,
+        //                         new Vector2(node.position.x - diff, node.position.y),
+        //                         rowList.IndexOf(node),
+        //                         exclude
+        //                     );
+        //                 }
+        //             }
+        //         }
 
-                j++;
-            }
+        //         j++;
+        //     }
 
-            windowInfo.treeDirty = true;
-            GetViewRect(100f, true);
-        }
-        private void MoveRow(List<Node> row, Vector2 position, int startIndex, List<Node> exclude)
-        {
-            List<Node> rowModified = row.Skip(startIndex).ToList();
-            Vector2 diff = rowModified[0].position - position;
+        //     windowInfo.treeDirty = true;
+        //     GetViewRect(100f, true);
+        // }
+        // private void MoveRow(List<Node> row, Vector2 position, int startIndex, List<Node> exclude)
+        // {
+        //     List<Node> rowModified = row.Skip(startIndex).ToList();
+        //     Vector2 diff = rowModified[0].position - position;
 
-            foreach (Node node in rowModified)
-            {
-                if (!exclude.Contains(node))
-                    MoveNodeAndChildren(node, node.position - diff, exclude);
-            }
-        }
-        private void MoveNodeAndChildren(Node node, Vector2 pos, List<Node> exclude)
-        {
-            Vector2 diff = node.position - pos;
-            node.position -= diff;
-            foreach (Node child in node.children)
-            {
-                if (!exclude.Contains(child))
-                    MoveNodeAndChildren(child, child.position - diff, exclude);
-            }
-        }
-        private void TraverseTree()
-        {
-            foreach (Node node in target.nodes) node.priority = 0;
-
-            if (target.root == null) return;
-
-            TraverseSubtree(target.root, 1);
-        }
-
-        private int TraverseSubtree(Node node, int i)
-        {
-            node.priority = i;
-            int children = 0;
-            foreach (Node child in node.children)
-            {
-                int j = TraverseSubtree(child, i + 1);
-                children += j + 1;
-                i += j + 1;
-            }
-            return children;
-        }
+        //     foreach (Node node in rowModified)
+        //     {
+        //         if (!exclude.Contains(node))
+        //             MoveNodeAndChildren(node, node.position - diff, exclude);
+        //     }
+        // }
+        // private void MoveNodeAndChildren(Node node, Vector2 pos, List<Node> exclude)
+        // {
+        //     Vector2 diff = node.position - pos;
+        //     node.position -= diff;
+        //     foreach (Node child in node.children)
+        //     {
+        //         if (!exclude.Contains(child))
+        //             MoveNodeAndChildren(child, child.position - diff, exclude);
+        //     }
+        // }
         private bool IsLowerPriority(Node node, Node child)
 
         {
-            int index = node.parent.children.IndexOf(node);
+            int index = Array.IndexOf(node.parent.children, node);
 
             if (node == child)
                 return true;
-            if (index + 1 > node.parent.children.Count - 1)
+            if (index + 1 > node.parent.children.Length - 1)
                 return false;
 
             return !IsSubTreeOf(node, child) && IsSubTreeOf(node.parent, child);
@@ -568,7 +492,7 @@ namespace Schema.Editor
                 return x;
             });
 
-            node.children = prioritized.ToList();
+            // node.children = prioritized.ToArray();
         }
         private void Deselect(Node node)
         {
@@ -585,45 +509,12 @@ namespace Schema.Editor
 
             SceneView.RepaintAll();
         }
-        private void Delete(Decorator decorator)
-        {
-            Undo.RecordObjects(new UnityEngine.Object[] { decorator.node, decorator }, "Delete Decorator");
-            Undo.RegisterCompleteObjectUndo(target, "Delete Decorator");
-
-            decorator.node.decorators.Remove(decorator);
-
-            decorator.node.dirty = true;
-        }
-        private void Delete(Node node)
-        {
-            List<UnityEngine.Object> toRecord = new List<UnityEngine.Object> { node };
-            if (node.parent != null) toRecord.Add(node.parent);
-            toRecord.AddRange(node.children);
-            Undo.RecordObjects(toRecord.ToArray(), "Delete Node");
-            Undo.RegisterCompleteObjectUndo(target, "Delete Node");
-            target.RemoveNode(node);
-
-            if (node.parent != null)
-                node.parent.children.Remove(node);
-
-            foreach (Node child in node.children)
-                child.parent = null;
-
-            GetViewRect(100f, true);
-        }
-
         private void DeleteSelected()
         {
-            windowInfo.treeDirty = true;
+            target.DeleteNodes(windowInfo.selected);
 
-            Node[] toDelete = windowInfo.selected.FindAll(node => !node.GetType().Equals(typeof(Root))).ToArray();
-            windowInfo.selected.RemoveAll(node => !node.GetType().Equals(typeof(Root)));
-
-            foreach (Node node in toDelete) Delete(node);
-
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
-
-            TraverseTree();
+            target.TraverseTree();
+            windowInfo.selected.Clear();
         }
         private void Copy(List<Node> copies, bool clearSelected = true)
         {
@@ -676,171 +567,112 @@ namespace Schema.Editor
         }
         private void Paste()
         {
-            windowInfo.treeDirty = true;
+            // windowInfo.treeDirty = true;
 
-            if (copyBuffer.OfType<Node>().Count() > 0)
-            {
-                Undo.RegisterCompleteObjectUndo(target, "Paste Nodes");
+            // if (copyBuffer.OfType<Node>().Count() > 0)
+            // {
+            //     Undo.RegisterCompleteObjectUndo(target, "Paste Nodes");
 
-                windowInfo.selected.Clear();
-                List<Node> nodes = copyBuffer.OfType<Node>().ToList();
+            //     windowInfo.selected.Clear();
+            //     List<Node> nodes = copyBuffer.OfType<Node>().ToList();
 
-                copyBuffer.ForEach(x => Debug.Log(x));
+            //     copyBuffer.ForEach(x => Debug.Log(x));
 
-                foreach (Node node in nodes)
-                {
-                    target.nodes.Add(node);
-                    Select(node, true);
-                }
-                TraverseTree();
-                //Re-copy copy buffer so nodes references shared after first paste
-                Copy(nodes, false);
-            }
-            else if (copyBuffer.OfType<Decorator>().Count() > 0)
-            {
-                Undo.RegisterCompleteObjectUndo(target, "Paste Decorator");
+            //     foreach (Node node in nodes)
+            //     {
+            //         target.nodes.Add(node);
+            //         Select(node, true);
+            //     }
+            //     target.TraverseTree();
+            //     //Re-copy copy buffer so nodes references shared after first paste
+            //     Copy(nodes, false);
+            // }
+            // else if (copyBuffer.OfType<Decorator>().Count() > 0)
+            // {
+            //     Undo.RegisterCompleteObjectUndo(target, "Paste Decorator");
 
-                Decorator decorator = copyBuffer.OfType<Decorator>().ElementAt(0);
+            //     Decorator decorator = copyBuffer.OfType<Decorator>().ElementAt(0);
 
-                foreach (Node node in windowInfo.selected)
-                {
-                    Decorator instance = ScriptableObject.Instantiate(decorator);
+            //     foreach (Node node in windowInfo.selected)
+            //     {
+            //         Decorator instance = ScriptableObject.Instantiate(decorator);
 
-                    instance.name = decorator.name;
+            //         instance.name = decorator.name;
 
-                    instance.uID = Guid.NewGuid().ToString("N");
+            //         instance.uID = Guid.NewGuid().ToString("N");
 
-                    node.decorators.Add(instance);
-                    instance.node = node;
-                }
-            }
+            //         ArrayUtility.Add(ref node.decorators, instance);
+            //         instance.node = node;
+            //     }
+            // }
         }
         private void AddNode(Type nodeType, Vector2 position, bool asChild)
         {
             if (!typeof(Node).IsAssignableFrom(nodeType))
                 return;
 
-            List<Node> operators = new List<Node>(windowInfo.selected);
-            operators = operators.OrderBy(node => node.priority).ToList();
+            target.AddNode(nodeType, position);
 
-            windowInfo.selected.Clear();
+            // List<Node> operators = new List<Node>(windowInfo.selected);
+            // operators = operators.OrderBy(node => node.priority).ToList();
 
-            windowInfo.treeDirty = true;
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
+            // windowInfo.selected.Clear();
 
-            for (int i = 0; i < (asChild ? operators.Count : 1); i++)
-            {
-                if (asChild && !operators[i].canHaveChildren) continue;
+            // windowInfo.treeDirty = true;
 
-                Node node = (Node)ScriptableObject.CreateInstance(nodeType);
-                node.name = node.GetType().Name;
-                node.hideFlags = HideFlags.HideAndDontSave;
-                List<UnityEngine.Object> toRecord = new List<UnityEngine.Object> { node };
-                if (node.parent != null) toRecord.Add(node.parent);
-                toRecord.AddRange(node.children);
+            // for (int i = 0; i < (asChild ? operators.Count : 1); i++)
+            // {
+            //     if (asChild && !operators[i].canHaveChildren) continue;
 
-                if (asChild)
-                    toRecord.AddRange(operators);
+            //     Node node = (Node)ScriptableObject.CreateInstance(nodeType);
+            //     node.name = node.GetType().Name;
+            //     node.hideFlags = HideFlags.HideAndDontSave;
+            //     List<UnityEngine.Object> toRecord = new List<UnityEngine.Object> { node };
+            //     if (node.parent != null) toRecord.Add(node.parent);
+            //     toRecord.AddRange(node.children);
 
-                //Add the node
-                Undo.RecordObjects(toRecord.ToArray(), "Add Node");
-                //So order changes do not cause errors
-                Undo.RegisterCompleteObjectUndo(target, "Add Node");
-                node.WorkingNode();
-                target.nodes.Add(node);
-                node.graph = target;
+            //     if (asChild)
+            //         toRecord.AddRange(operators);
 
-                Vector2 size = GetArea(node, false);
+            //     //Add the node
+            //     Undo.RecordObjects(toRecord.ToArray(), "Add Node");
+            //     //So order changes do not cause errors
+            //     Undo.RegisterCompleteObjectUndo(target, "Add Node");
+            //     node.WorkingNode();
+            //     target.nodes.Add(node);
+            //     node.graph = target;
 
-                if (!asChild)
-                {
-                    node.position = position - GetAreaWithPadding(node, false) / 2f;
-                }
-                else
-                {
-                    if (operators[i].children.Count > 0)
-                    {
-                        Node farthest = operators[i].children[operators[i].children.Count - 1];
-                        Vector2 farthestSize = GetArea(farthest, false);
+            //     Vector2 size = GetArea(node, false);
 
-                        node.position = new Vector2(farthest.position.x + farthestSize.x + 50f, farthest.position.y);
-                    }
-                    else
-                    {
-                        Vector2 parentSize = GetArea(operators[i], false);
+            //     if (!asChild)
+            //     {
+            //         node.position = position - GetAreaWithPadding(node, false) / 2f;
+            //     }
+            //     else
+            //     {
+            //         if (operators[i].children.Count > 0)
+            //         {
+            //             Node farthest = operators[i].children[operators[i].children.Count - 1];
+            //             Vector2 farthestSize = GetArea(farthest, false);
 
-                        node.position = new Vector2(operators[i].position.x + parentSize.x / 2f - size.x / 2f, operators[i].position.y + parentSize.y + 150f);
-                    }
-                }
+            //             node.position = new Vector2(farthest.position.x + farthestSize.x + 50f, farthest.position.y);
+            //         }
+            //         else
+            //         {
+            //             Vector2 parentSize = GetArea(operators[i], false);
 
-                if (asChild)
-                    AddConnection(operators[i], node, false);
+            //             node.position = new Vector2(operators[i].position.x + parentSize.x / 2f - size.x / 2f, operators[i].position.y + parentSize.y + 150f);
+            //         }
+            //     }
 
-                Select(node, true);
+            //     if (asChild)
+            //         AddConnection(operators[i], node, false);
 
-                Undo.CollapseUndoOperations(groupIndex);
-            }
+            //     Select(node, true);
+            // }
 
-            TraverseTree();
+            target.TraverseTree();
             GetViewRect(100f, true);
-        }
-        private void AddDecorator(Type t)
-        {
-            if (!typeof(Decorator).IsAssignableFrom(t))
-                return;
-
-            windowInfo.treeDirty = true;
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
-
-            foreach (Node node in windowInfo.selected)
-            {
-                if (node.GetType().Equals(typeof(Root))) return;
-
-                Decorator d = (Decorator)ScriptableObject.CreateInstance(t);
-                d.hideFlags = HideFlags.HideAndDontSave;
-
-                Undo.RegisterCompleteObjectUndo(node, "Add Decorator");
-                Undo.RecordObject(d, "Add Decorator");
-
-                node.decorators.Add(d);
-                d.node = node;
-
-                Vector2 prevArea = GetArea(node, false);
-                Vector2 area = GetArea(node, true);
-
-                node.position -= new Vector2(area.x - prevArea.x, area.y - prevArea.y) / 2f;
-            }
-
-            Undo.CollapseUndoOperations(groupIndex);
-
-            GetViewRect(100f, true);
-        }
-        private void MoveDecorator(Decorator decorator, Node node)
-        {
-            if (decorator == null || node == null || node.GetType().Equals(typeof(Root))) return;
-
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
-
-            Undo.RegisterCompleteObjectUndo(decorator.node, "Move Decorator");
-            Undo.RecordObject(decorator, "Move Decorator");
-            Undo.RecordObject(node, "Move Decorator");
-
-            Node decoratorNode = decorator.node;
-
-            node.decorators.Add(decorator);
-            decoratorNode.decorators.Remove(decorator);
-
-            decorator.node = node;
-
-            GetArea(node, true);
-            GetArea(decoratorNode, true);
-
-            SceneView.RepaintAll();
-
-            Undo.CollapseUndoOperations(groupIndex);
         }
         private void MoveDecoratorInNode(Decorator d, bool up)
         {
@@ -854,12 +686,12 @@ namespace Schema.Editor
             Undo.RegisterCompleteObjectUndo(d.node, name);
             Undo.RecordObject(d, name);
 
-            int decoratorIndex = d.node.decorators.IndexOf(d);
+            int decoratorIndex = Array.IndexOf(d.node.decorators, d);
             d.node.decorators.Swap(decoratorIndex, up ? decoratorIndex - 1 : decoratorIndex + 1);
         }
         private void MoveDecoratorInNode(Decorator d, int index)
         {
-            if (d == null || index < 0 || index > d.node.decorators.Count) return;
+            if (d == null || index < 0 || index > d.node.decorators.Length) return;
             Debug.Log("Continuted");
 
             Undo.IncrementCurrentGroup();
@@ -870,31 +702,29 @@ namespace Schema.Editor
             Undo.RegisterCompleteObjectUndo(d.node, name);
             Undo.RecordObject(d, name);
 
-            int decoratorIndex = d.node.decorators.IndexOf(d);
+            int decoratorIndex = Array.IndexOf(d.node.decorators, d);
             d.node.decorators.Move(d, index);
         }
-        private void AddConnection(Node n1, Node n2, bool recordUndo)
-        {
-            windowInfo.treeDirty = true;
-            if (recordUndo)
-                Undo.RecordObjects(new UnityEngine.Object[] { n1, n2 }, "Add Connection");
-            if (!n1.children.Contains(n2))
-            {
-                n1.children.Add(n2);
-            }
-            n2.parent = n1;
-            orphanNode = null;
-        }
+        // private void AddConnection(Node n1, Node n2, bool recordUndo)
+        // {
+        //     windowInfo.treeDirty = true;
+        //     if (recordUndo)
+        //         Undo.RecordObjects(new UnityEngine.Object[] { n1, n2 }, "Add Connection");
+        //     if (!n1.children.Contains(n2))
+        //         ArrayUtility.Add(ref n1.children, n2);
+        //     n2.parent = n1;
+        //     orphanNode = null;
+        // }
 
-        private void RemoveConnection(Node n1, Node n2)
-        {
-            windowInfo.treeDirty = true;
-            Undo.RecordObjects(new UnityEngine.Object[] { n1, n2 }, "Remove Connection");
-            n1.children.Remove(n2);
-            n2.parent = null;
-            TraverseTree();
-            GetViewRect(100f, true);
-        }
+        // private void RemoveConnection(Node n1, Node n2)
+        // {
+        //     windowInfo.treeDirty = true;
+        //     Undo.RecordObjects(new UnityEngine.Object[] { n1, n2 }, "Remove Connection");
+        //     ArrayUtility.Remove(ref n1.children, n2);
+        //     n2.parent = null;
+        //     target.TraverseTree();
+        //     GetViewRect(100f, true);
+        // }
 
         public void Duplicate(List<Node> original, List<Node> tree, bool select, bool clearSelected = true)
         {
@@ -919,48 +749,51 @@ namespace Schema.Editor
             {
                 Node node = roots[i];
 
-                DuplicateRecursive(original, tree, node, null, select);
+                // DuplicateRecursive(original, tree, node, null, select);
             }
         }
-        private Node DuplicateRecursive(List<Node> toDuplicate, List<Node> tree, Node original, Node parent, bool select)
-        {
-            toDuplicate.ForEach(x => Debug.Log(x.Name));
-            Node node = Instantiate(original);
-            node.parent = parent;
-            node.uID = Guid.NewGuid().ToString("N");
-            node.hideFlags = HideFlags.HideAndDontSave;
+        // private Node DuplicateRecursive(List<Node> toDuplicate, List<Node> tree, Node original, Node parent, bool select)
+        // {
+        //     toDuplicate.ForEach(x => Debug.Log(x.name));
+        //     Node node = Instantiate(original);
+        //     node.parent = parent;
+        //     node.uID = Guid.NewGuid().ToString("N");
+        //     node.hideFlags = HideFlags.HideAndDontSave;
 
-            for (int i = 0; i < node.decorators.Count; i++)
-            {
-                node.decorators[i] = Instantiate(node.decorators[i]);
-                node.decorators[i].uID = Guid.NewGuid().ToString("N");
-                node.decorators[i].node = node;
-                node.hideFlags = HideFlags.HideAndDontSave;
-            }
+        //     for (int i = 0; i < node.decorators.Length; i++)
+        //     {
+        //         node.decorators[i] = Instantiate(node.decorators[i]);
+        //         node.decorators[i].uID = Guid.NewGuid().ToString("N");
+        //         node.decorators[i].node = node;
+        //         node.hideFlags = HideFlags.HideAndDontSave;
+        //     }
 
-            node.children.RemoveAll(n => !toDuplicate.Contains(n));
-            node.children = node.children.Select(n =>
-            {
-                Debug.Log(n.Name);
-                return DuplicateRecursive(toDuplicate, tree, n, node, select);
-            }).ToList();
+        //     List<Node> children = new List<Node>(node.children);
 
-            tree.Add(node);
+        //     children.RemoveAll(n => !toDuplicate.Contains(n));
+        //     children = children.Select(n =>
+        //     {
+        //         return DuplicateRecursive(toDuplicate, tree, n, node, select);
+        //     }).ToList();
 
-            if (select) Select(node, true);
-            return node;
-        }
+        //     node.children = children.ToArray();
+
+        //     tree.Add(node);
+
+        //     if (select) Select(node, true);
+        //     return node;
+        // }
         private Node GetSiblingNode(Node node, bool left)
         {
             if (node == null || node.parent == null)
                 return null;
 
             Node parent = node.parent;
-            int thisIndex = node.parent.children.IndexOf(node);
+            int thisIndex = Array.IndexOf(node.parent.children, node);
 
             if (left && thisIndex == 0)
                 return null;
-            else if (!left && thisIndex == parent.children.Count - 1)
+            else if (!left && thisIndex == parent.children.Length - 1)
                 return null;
 
             return parent.children[left ? thisIndex - 1 : thisIndex + 1];
@@ -975,16 +808,16 @@ namespace Schema.Editor
                     g = GenerateNodeContextMenu();
                     break;
                 case Window.Hovering.InConnection:
-                    g.AddItem("Break Connection", false, () => RemoveConnection(windowInfo.hoveredNode.parent, windowInfo.hoveredNode), editingPaused);
+                    g.AddItem("Break Connection", false, () => windowInfo.hoveredNode.RemoveParent(), editingPaused);
                     break;
                 case Window.Hovering.OutConnection:
-                    g.AddItem("Break Connection", false, () => { }, editingPaused);
+                    g.AddItem("Break Connection", false, () => windowInfo.hoveredNode.RemoveChildren(), editingPaused);
                     break;
                 case Window.Hovering.Decorator:
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Cut"), false, () => { }, editingPaused);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Copy"), false, () => { }, editingPaused);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => { }, editingPaused || copyBuffer.Count == 0);
-                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Delete"), false, () => Delete(windowInfo.selectedDecorator), editingPaused);
+                    // g.AddItem(GenerateMenuItem("Main Menu/Edit/Delete"), false, () => Delete(windowInfo.selectedDecorator), editingPaused);
                     g.AddItem("Move Up %UP", false, () => MoveUpCommand(), editingPaused);
                     g.AddItem("Move Down %DOWN", false, () => MoveDownCommand(), editingPaused);
                     break;
@@ -1054,56 +887,19 @@ namespace Schema.Editor
             {
                 foreach (Node node in windowInfo.selected)
                 {
-                    if (node.parent)
-                        RemoveConnection(node.parent, node);
+                    // if (node.parent)
+                    //     RemoveConnection(node.parent, node);
 
-                    List<Node> ch = new List<Node>(node.children);
-                    foreach (Node c in ch)
-                    {
-                        RemoveConnection(node, c);
-                    }
+                    // List<Node> ch = new List<Node>(node.children);
+                    // foreach (Node c in ch)
+                    // {
+                    //     RemoveConnection(node, c);
+                    // }
                 }
             }, editingPaused);
             g.AddSeparator("");
             g.AddItem(GenerateMenuItem("Schema/Add Decorator"), false, () => AddDecoratorCommand(), editingPaused);
-            g.AddItem(GenerateMenuItem("Schema/Add Child"), false, () => AddChildCommand(), !windowInfo.hoveredNode.canHaveChildren);
-
-            return g;
-        }
-        internal GenericMenu GenerateAddMenu()
-        {
-            GenericMenu g = new GenericMenu();
-
-            //Main loop, which has the current type that we are adding to the menu
-            foreach (KeyValuePair<Type, List<Type>> kvp in nodeTypes)
-            {
-                if (kvp.Value.Count == 0 && !kvp.Key.IsAbstract)
-                    g.AddItem(new GUIContent(kvp.Key.Name), false, () => AddNode(kvp.Key, Vector2.zero, true));
-
-                foreach (Type nodeType in kvp.Value)
-                {
-                    //this needs to be done to access overiden properties. Since we can't override constants (such as category),
-                    //they need to be readonly properties that we access thorugh an instance
-
-                    Node instance = (Node)ScriptableObject.CreateInstance(nodeType);
-
-                    string category = instance.category;
-
-                    string s = "";
-
-                    if (String.IsNullOrEmpty(category))
-                        s = kvp.Key.Name + "/";
-
-                    if (!String.IsNullOrEmpty(category)) s += category;
-                    if (s.Length > 0 && s.Substring(s.Length - 1) != "/") s += "/";
-
-                    s += nodeType.Name;
-
-                    g.AddItem(s, false, () => AddNode(nodeType, Vector2.zero, true), editingPaused);
-
-                    DestroyImmediate(instance);
-                }
-            }
+            // g.AddItem(GenerateMenuItem("Schema/Add Child"), false, () => AddChildCommand(), !windowInfo.hoveredNode.canHaveChildren);
 
             return g;
         }
@@ -1342,7 +1138,7 @@ namespace Schema.Editor
         [Shortcut("Schema/Add Child", KeyCode.N, ShortcutModifiers.Action | ShortcutModifiers.Alt)]
         private static void AddChildCommand()
         {
-            if (instance == null || instance.windowInfo.selected.Count == 0 || !instance.windowInfo.selected[0].canHaveChildren) return;
+            // if (instance == null || instance.windowInfo.selected.Count == 0 || !instance.windowInfo.selected[0].canHaveChildren) return;
 
             instance.windowInfo.searchWantsNode = true;
             instance.windowInfo.searchAddChildren = true;
