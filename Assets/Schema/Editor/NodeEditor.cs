@@ -109,7 +109,7 @@ namespace SchemaEditor
         void IHasCustomMenu.AddItemsToMenu(GenericMenu menu)
         {
             menu.AddItem("Preferences", windowInfo.settingsShown, () => TogglePrefs(), false);
-            menu.AddItem("Documentation", false, () => OpenUrl("https://thinking-automation.com/docs/getting-started"), false);
+            menu.AddItem("Documentation", false, () => OpenUrl("https://thinking-automation.vercel.app/docs/getting-started"), false);
         }
         void TogglePrefs()
         {
@@ -164,7 +164,6 @@ namespace SchemaEditor
 
         void UndoPerformed()
         {
-            windowInfo.treeDirty = true;
             windowInfo.selected.RemoveAll(node => node == null);
 
             foreach (Node node in target.nodes)
@@ -310,143 +309,151 @@ namespace SchemaEditor
             return count;
         }
         //This is slow, clunky, and confusing.
-        // public void BeautifyTree(Vector2 spacing)
-        // {
-        //     Node root = target.nodes.Find(node => node.GetType() == typeof(Root));
-        //     IEnumerable<Node> nodes = target.nodes.FindAll(node => IsSubTreeOf(root, node));
+        public void BeautifyTree(Vector2 spacing)
+        {
+            Undo.IncrementCurrentGroup();
+            int groupIndex = Undo.GetCurrentGroup();
 
-        //     Node[][] arr = ConvertTo2DArray(nodes.ToList());
+            Node root = target.nodes.Find(node => node.GetType() == typeof(Root));
+            IEnumerable<Node> nodes = target.nodes.FindAll(node => IsSubTreeOf(root, node));
 
-        //     List<Node> alignToParent = new List<Node>();
-        //     List<Node> alignToChildren = new List<Node>();
+            foreach (Node node in nodes)
+                Undo.RegisterCompleteObjectUndo(node, "");
 
-        //     float y = 0f;
-        //     //Initial sorting step
-        //     foreach (Node[] row in arr)
-        //     {
-        //         float prevSize = 0f;
-        //         float height = 0f;
-        //         for (int i = 0; i < row.Length; i++)
-        //         {
-        //             Node node = row[i];
+            Node[][] arr = ConvertTo2DArray(nodes.ToList());
 
-        //             float x = prevSize + spacing.x * i;
+            List<Node> alignToParent = new List<Node>();
+            List<Node> alignToChildren = new List<Node>();
 
-        //             Vector2 area = GetArea(node, false);
+            float y = 0f;
+            //Initial sorting step
+            foreach (Node[] row in arr)
+            {
+                float prevSize = 0f;
+                float height = 0f;
+                for (int i = 0; i < row.Length; i++)
+                {
+                    Node node = row[i];
 
-        //             node.position = new Vector2(x, y);
+                    float x = prevSize + spacing.x * i;
 
-        //             prevSize += area.x;
-        //             height = Mathf.Max(area.y, height);
-        //         }
-        //         y += height + spacing.y;
+                    Vector2 area = GetArea(node, false);
 
-        //         foreach (Node node in row)
-        //         {
-        //             if (node.parent == null || node.priority - node.parent.priority != 1)
-        //                 continue;
+                    node.position = new Vector2(x, y);
 
-        //             float diff = node.position.x - (node.parent.position.x + GetArea(node.parent, false).x / 2f - GetArea(node, false).x / 2f);
+                    prevSize += area.x;
+                    height = Mathf.Max(area.y, height);
+                }
+                y += height + spacing.y;
 
-        //             if (Mathf.Abs(diff) > 0.01f)
-        //                 alignToParent.Add(node);
-        //         }
-        //     }
+                foreach (Node node in row)
+                {
+                    if (node.parent == null || node.priority - node.parent.priority != 1)
+                        continue;
 
-        //     Dictionary<Node, float> translated = new Dictionary<Node, float>();
+                    float diff = node.position.x - (node.parent.position.x + GetArea(node.parent, false).x / 2f - GetArea(node, false).x / 2f);
 
-        //     int j = 0;
-        //     foreach (Node[] row in arr.Reverse())
-        //     {
-        //         List<Node> rowList = row.ToList();
+                    if (Mathf.Abs(diff) > 0.01f)
+                        alignToParent.Add(node);
+                }
+            }
 
-        //         foreach (Node node in row)
-        //         {
-        //             if (alignToParent.Contains(node) || alignToChildren.Contains(node))
-        //             {
-        //                 float diff = 0f;
-        //                 List<Node> exclude = new List<Node>();
+            Dictionary<Node, float> translated = new Dictionary<Node, float>();
 
-        //                 if (alignToChildren.Contains(node))
-        //                 {
-        //                     if (translated.ContainsKey(node))
-        //                     {
-        //                         MoveRow(
-        //                             rowList,
-        //                             new Vector2(node.position.x + translated[node], node.position.y),
-        //                             rowList.IndexOf(node),
-        //                             new List<Node>()
-        //                         );
-        //                         translated.Remove(node);
-        //                     }
+            int j = 0;
+            foreach (Node[] row in arr.Reverse())
+            {
+                List<Node> rowList = row.ToList();
+
+                foreach (Node node in row)
+                {
+                    if (alignToParent.Contains(node) || alignToChildren.Contains(node))
+                    {
+                        float diff = 0f;
+                        List<Node> exclude = new List<Node>();
+
+                        if (alignToChildren.Contains(node))
+                        {
+                            if (translated.ContainsKey(node))
+                            {
+                                MoveRow(
+                                    rowList,
+                                    new Vector2(node.position.x + translated[node], node.position.y),
+                                    rowList.IndexOf(node),
+                                    new List<Node>()
+                                );
+                                translated.Remove(node);
+                            }
 
 
-        //                     diff = node.position.x - (node.children[0].position.x + GetArea(node.children[0], false).x / 2f - GetArea(node, false).x / 2f);
-        //                     alignToChildren.Remove(node);
-        //                     exclude.AddRange(node.children);
+                            diff = node.position.x - (node.children[0].position.x + GetArea(node.children[0], false).x / 2f - GetArea(node, false).x / 2f);
+                            alignToChildren.Remove(node);
+                            exclude.AddRange(node.children);
 
-        //                     MoveRow(
-        //                         rowList,
-        //                         new Vector2(node.position.x - diff, node.position.y),
-        //                         rowList.IndexOf(node),
-        //                         exclude
-        //                     );
+                            MoveRow(
+                                rowList,
+                                new Vector2(node.position.x - diff, node.position.y),
+                                rowList.IndexOf(node),
+                                exclude
+                            );
 
-        //                     foreach (Node n in rowList.Skip(rowList.IndexOf(node)).ToList().FindAll(node => !translated.ContainsKey(node)))
-        //                         translated.Add(n, diff);
-        //                 }
+                            foreach (Node n in rowList.Skip(rowList.IndexOf(node)).ToList().FindAll(node => !translated.ContainsKey(node)))
+                                translated.Add(n, diff);
+                        }
 
-        //                 if (alignToParent.Contains(node))
-        //                 {
-        //                     if (translated.ContainsKey(node))
-        //                         translated.Remove(node);
+                        if (alignToParent.Contains(node))
+                        {
+                            if (translated.ContainsKey(node))
+                                translated.Remove(node);
 
-        //                     diff = node.position.x - (node.parent.position.x + GetArea(node.parent, false).x / 2f - GetArea(node, false).x / 2f);
-        //                     alignToParent.Remove(node);
+                            diff = node.position.x - (node.parent.position.x + GetArea(node.parent, false).x / 2f - GetArea(node, false).x / 2f);
+                            alignToParent.Remove(node);
 
-        //                     if (diff > 0f)
-        //                     {
-        //                         alignToChildren.Add(node.parent);
-        //                         continue;
-        //                     }
+                            if (diff > 0f)
+                            {
+                                alignToChildren.Add(node.parent);
+                                continue;
+                            }
 
-        //                     MoveRow(
-        //                         rowList,
-        //                         new Vector2(node.position.x - diff, node.position.y),
-        //                         rowList.IndexOf(node),
-        //                         exclude
-        //                     );
-        //                 }
-        //             }
-        //         }
+                            MoveRow(
+                                rowList,
+                                new Vector2(node.position.x - diff, node.position.y),
+                                rowList.IndexOf(node),
+                                exclude
+                            );
+                        }
+                    }
+                }
 
-        //         j++;
-        //     }
+                j++;
+            }
 
-        //     windowInfo.treeDirty = true;
-        //     GetViewRect(100f, true);
-        // }
-        // private void MoveRow(List<Node> row, Vector2 position, int startIndex, List<Node> exclude)
-        // {
-        //     List<Node> rowModified = row.Skip(startIndex).ToList();
-        //     Vector2 diff = rowModified[0].position - position;
+            Undo.SetCurrentGroupName("Prettify Tree");
+            Undo.CollapseUndoOperations(groupIndex);
 
-        //     foreach (Node node in rowModified)
-        //     {
-        //         if (!exclude.Contains(node))
-        //             MoveNodeAndChildren(node, node.position - diff, exclude);
-        //     }
-        // }
-        // private void MoveNodeAndChildren(Node node, Vector2 pos, List<Node> exclude)
-        // {
-        //     Vector2 diff = node.position - pos;
-        //     node.position -= diff;
-        //     foreach (Node child in node.children)
-        //     {
-        //         if (!exclude.Contains(child))
-        //             MoveNodeAndChildren(child, child.position - diff, exclude);
-        //     }
-        // }
+            GetViewRect(100f, true);
+        }
+        private void MoveRow(List<Node> row, Vector2 position, int startIndex, List<Node> exclude)
+        {
+            List<Node> rowModified = row.Skip(startIndex).ToList();
+            Vector2 diff = rowModified[0].position - position;
+
+            foreach (Node node in rowModified)
+            {
+                if (!exclude.Contains(node))
+                    MoveNodeAndChildren(node, node.position - diff, exclude);
+            }
+        }
+        private void MoveNodeAndChildren(Node node, Vector2 pos, List<Node> exclude)
+        {
+            Vector2 diff = node.position - pos;
+            node.position -= diff;
+            foreach (Node child in node.children)
+            {
+                if (!exclude.Contains(child))
+                    MoveNodeAndChildren(child, child.position - diff, exclude);
+            }
+        }
         private bool IsLowerPriority(Node node, Node child)
 
         {
@@ -567,7 +574,6 @@ namespace SchemaEditor
         }
         private void Paste()
         {
-            // windowInfo.treeDirty = true;
 
             // if (copyBuffer.OfType<Node>().Count() > 0)
             // {
@@ -618,7 +624,6 @@ namespace SchemaEditor
 
             // windowInfo.selected.Clear();
 
-            // windowInfo.treeDirty = true;
 
             // for (int i = 0; i < (asChild ? operators.Count : 1); i++)
             // {
@@ -707,7 +712,6 @@ namespace SchemaEditor
         }
         // private void AddConnection(Node n1, Node n2, bool recordUndo)
         // {
-        //     windowInfo.treeDirty = true;
         //     if (recordUndo)
         //         Undo.RecordObjects(new UnityEngine.Object[] { n1, n2 }, "Add Connection");
         //     if (!n1.children.Contains(n2))
@@ -718,7 +722,6 @@ namespace SchemaEditor
 
         // private void RemoveConnection(Node n1, Node n2)
         // {
-        //     windowInfo.treeDirty = true;
         //     Undo.RecordObjects(new UnityEngine.Object[] { n1, n2 }, "Remove Connection");
         //     ArrayUtility.Remove(ref n1.children, n2);
         //     n2.parent = null;
@@ -728,7 +731,6 @@ namespace SchemaEditor
 
         public void Duplicate(List<Node> original, List<Node> tree, bool select, bool clearSelected = true)
         {
-            windowInfo.treeDirty = true;
             //identify "root" nodes
             List<Node> roots = original.FindAll(node =>
             {
@@ -883,20 +885,7 @@ namespace SchemaEditor
             g.AddItem(GenerateMenuItem("Main Menu/Edit/Copy"), false, () => Copy(windowInfo.selected), editingPaused);
             g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => Paste(), editingPaused || copyBuffer.Count == 0);
             g.AddItem(GenerateMenuItem("Main Menu/Edit/Delete"), false, () => DeleteSelected(), editingPaused);
-            g.AddItem("Break Connections %b", false, () =>
-            {
-                foreach (Node node in windowInfo.selected)
-                {
-                    // if (node.parent)
-                    //     RemoveConnection(node.parent, node);
-
-                    // List<Node> ch = new List<Node>(node.children);
-                    // foreach (Node c in ch)
-                    // {
-                    //     RemoveConnection(node, c);
-                    // }
-                }
-            }, editingPaused);
+            g.AddItem("Break Connections %b", false, () => target.BreakConnections(windowInfo.selected), editingPaused);
             g.AddSeparator("");
             g.AddItem(GenerateMenuItem("Schema/Add Decorator"), false, () => AddDecoratorCommand(), editingPaused);
             // g.AddItem(GenerateMenuItem("Schema/Add Child"), false, () => AddChildCommand(), !windowInfo.hoveredNode.canHaveChildren);

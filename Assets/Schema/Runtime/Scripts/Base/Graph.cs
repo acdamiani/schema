@@ -122,7 +122,7 @@ namespace Schema
 
             foreach (Node node in nodes)
             {
-                node.parent.RemoveConnection(node, actionName: "");
+                node.parent?.RemoveConnection(node, actionName: "");
 
                 foreach (Node child in node.children)
                     node.RemoveConnection(child, actionName: "");

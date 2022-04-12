@@ -40,8 +40,8 @@ internal static class Styles
     public static Texture2D infoIcon => _infoIcon != null ? _infoIcon : _infoIcon = EditorGUIUtility.FindTexture("console.infoicon");
     public static Texture2D searchIcon => _searchIcon != null ? _searchIcon : _searchIcon = EditorGUIUtility.FindTexture("Search Icon");
     public static Texture2D splashImage => _splashImage != null ? _splashImage : _splashImage = Resources.Load<Texture2D>("splash");
-    private static Texture2D node => _node != null ? _node : _node = Resources.Load<Texture2D>("node");
-    private static Texture2D nodeSelected => _nodeSelected != null ? _nodeSelected : _nodeSelected = Resources.Load<Texture2D>("node_highlight");
+    public static Texture2D node => _node != null ? _node : _node = Resources.Load<Texture2D>("node");
+    public static Texture2D nodeSelected => _nodeSelected != null ? _nodeSelected : _nodeSelected = Resources.Load<Texture2D>("node_highlight");
     public static Texture2D arrow => _arrow != null ? _arrow : _arrow = Resources.Load<Texture2D>("arrow");
     public static Texture2D blackboardIcon => _blackboardIcon != null ? _blackboardIcon : _blackboardIcon = Resources.Load<Texture2D>("blackboard_key");
     public static Texture2D plus => _plus != null ? _plus : _plus = EditorGUIUtility.FindTexture("Toolbar Plus More");
@@ -130,7 +130,7 @@ internal static class Styles
     }
     public class StylesObj
     {
-        public readonly GUIStyle node, decorator, title, nodeLabel, nodeText, nodeSelected, newNode, addNodeWindow, backgroundBg, searchbar, searchResult, minimap, nameField;
+        public readonly GUIStyle node, nodeWithoutPadding, decorator, title, nodeLabel, nodeText, nodeSelected, newNode, addNodeWindow, backgroundBg, searchbar, searchResult, minimap, nameField;
         ///<summary>
         ///Generates Styles object which is used in the Node Editor GUI
         ///</summary>
@@ -145,6 +145,16 @@ internal static class Styles
                 },
                 border = new RectOffset(8, 8, 8, 8),
                 padding = new RectOffset(16, 16, 16, 16)
+            };
+
+            //node style (no padding)
+            nodeWithoutPadding = new GUIStyle
+            {
+                normal =
+                {
+                    background = global::Styles.node
+                },
+                border = new RectOffset(8, 8, 8, 8),
             };
 
             //selected node style
@@ -183,7 +193,7 @@ internal static class Styles
             nodeText = new GUIStyle
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 10,
+                fontSize = 12,
                 normal =
                 {
                     textColor = Color.white
@@ -249,8 +259,6 @@ internal static class Styles
             };
 
             nameField = new GUIStyle("PR TextField");
-            //TODO: Make this not magic
-            nameField.fixedWidth = 250f;
         }
     }
 }

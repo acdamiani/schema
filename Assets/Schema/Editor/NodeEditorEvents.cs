@@ -125,6 +125,7 @@ namespace SchemaEditor
             Event current = Event.current;
 
             windowInfo.isPanning = false;
+            windowInfo.resizingInspector = false;
 
             if (windowInfo.lastClicked == Window.Hovering.Decorator && windowInfo.didDragSinceMouseUp)
             {
@@ -229,7 +230,7 @@ namespace SchemaEditor
                             if (node.parent == null) continue;
 
                             int lastOrder = Array.IndexOf(node.parent.children, node);
-                            RecalculatePriorities(node.parent);
+                            node.parent.VerifyOrder();
 
                             //recalculate tree priorities if the order of this node changed
                             if (Array.IndexOf(node.parent.children, node) != lastOrder)
@@ -271,7 +272,7 @@ namespace SchemaEditor
                     break;
                 case 1:
                     {
-                        Rect r = new Rect(0f, 0f, position.width - GUIData.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
+                        Rect r = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
                         drawBox = false;
                         break;
                     }
@@ -279,7 +280,7 @@ namespace SchemaEditor
                     {
                         if (windowInfo.hoveredType != Window.Hovering.Inspector && blackboardEditor)
                         {
-                            ((BlackboardEditor)blackboardEditor).selectedEntry = null;
+                            ((BlackboardEditor)blackboardEditor).DeselectAll();
                         }
 
                         if (windowInfo.hoveredType != Window.Hovering.Inspector) GUI.FocusControl(null);

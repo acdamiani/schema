@@ -96,8 +96,12 @@ public class Blackboard : ScriptableObject
     {
         BlackboardEntry entry = ScriptableObject.CreateInstance<BlackboardEntry>();
         entry.blackboard = this;
-        entry.Name = UniqueName(type.Name + "Key", entries.Select(e => e.Name).ToList());
+        entry.name = UniqueName(type.Name + "Key", entries.Select(e => e.name).ToList());
         entry.typeString = type.AssemblyQualifiedName;
+        entry.hideFlags = HideFlags.HideInHierarchy;
+
+        if (!String.IsNullOrEmpty(AssetDatabase.GetAssetPath(this)))
+            AssetDatabase.AddObjectToAsset(entry, this);
 
         if (undo)
         {
@@ -115,9 +119,7 @@ public class Blackboard : ScriptableObject
         int i = 0;
 
         while (names.Contains(desiredName + (i == 0 ? "" : i.ToString())))
-        {
             i++;
-        }
 
         return desiredName + (i == 0 ? "" : i.ToString());
     }
@@ -168,7 +170,7 @@ public class Blackboard : ScriptableObject
             BlackboardEntry entry = entries[i];
 
             byte[] guidBytes = System.Text.Encoding.ASCII.GetBytes(entry.uID);
-            byte[] nameBytes = System.Text.Encoding.ASCII.GetBytes(entry.Name);
+            byte[] nameBytes = System.Text.Encoding.ASCII.GetBytes(entry.name);
 
             string s = Convert.ToBase64String(guidBytes.Concat(nameBytes).ToArray());
 

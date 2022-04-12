@@ -36,7 +36,7 @@ namespace SchemaEditor
                 if (Event.current.type == EventType.Layout) LayoutGUI();
 
                 if (windowInfo.inspectorToggled)
-                    window = new Rect(0f, 0f, position.width - GUIData.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
+                    window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
                 else
                     window = new Rect(0f, 0f, position.width, position.height);
                 windowInfo.selected.RemoveAll(node => node == null);
@@ -61,11 +61,11 @@ namespace SchemaEditor
                     //Draw legend here
 
                     size = EditorStyles.label.CalcSize(new GUIContent("Lower Priority Nodes"));
-                    GUI.Label(new Rect(position.width - size.x - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - size.y - 8f, size.x, size.y),
+                    GUI.Label(new Rect(position.width - size.x - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - size.y - 8f, size.x, size.y),
                      new GUIContent("Lower Priority Nodes"), EditorStyles.label);
 
                     GUI.color = Styles.lowerPriorityColor;
-                    GUI.Label(new Rect(position.width - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - size.y / 2f - 16f, 16f, 16f),
+                    GUI.Label(new Rect(position.width - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - size.y / 2f - 16f, 16f, 16f),
                         "",
                         Styles.styles.decorator);
                     GUI.color = Color.white;
@@ -74,11 +74,11 @@ namespace SchemaEditor
                     size = EditorStyles.label.CalcSize(new GUIContent("Self Nodes"));
 
                     //Draw legend here
-                    GUI.Label(new Rect(position.width - size.x - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - lastHeight - size.y - 8f, size.x, size.y),
+                    GUI.Label(new Rect(position.width - size.x - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - lastHeight - size.y - 8f, size.x, size.y),
                      new GUIContent("Self Nodes"), EditorStyles.label);
 
                     GUI.color = Styles.selfColor;
-                    GUI.Label(new Rect(position.width - (GUIData.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - lastHeight - size.y / 2f - 16f, 16f, 16f),
+                    GUI.Label(new Rect(position.width - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - lastHeight - size.y / 2f - 16f, 16f, 16f),
                         "",
                         Styles.styles.decorator);
                     GUI.color = Color.white;
@@ -103,12 +103,7 @@ namespace SchemaEditor
                 ProcessEvents(Event.current);
 
                 if (windowInfo.isPanning) SetCursor(MouseCursor.Pan);
-
-                if (windowInfo.treeDirty)
-                {
-                    windowInfo.graphSaved = false;
-                    titleContent = new GUIContent(target.name + "*");
-                }
+                else if (windowInfo.resizingInspector || windowInfo.hoverDivider) SetCursor(MouseCursor.ResizeHorizontal);
 
                 if (needsPan)
                 {
@@ -790,22 +785,24 @@ namespace SchemaEditor
             GUILayout.BeginArea(toolbar, EditorStyles.toolbar);
             GUILayout.BeginHorizontal();
 
-            GUILayout.Button("View", EditorStyles.toolbarButton);
+            if (GUILayout.Button("Add Node", EditorStyles.toolbarButton))
+            {
+                windowInfo.searchWantsNode = true;
+                ToggleSearch();
+            }
 
-            Rect r = GUILayoutUtility.GetRect(new GUIContent("Add"), EditorStyles.toolbarButton);
+            if (GUILayout.Button("Add Decorator", EditorStyles.toolbarButton))
+            {
+                windowInfo.searchWantsNode = false;
+                ToggleSearch();
+            }
 
-            r = GUILayoutUtility.GetRect(new GUIContent("Node"), EditorStyles.toolbarButton);
-            if (GUI.Button(r, "Node", EditorStyles.toolbarButton))
-                GenerateNodeContextMenu().ShowAsContext(r.x, r.y + r.height);
-
-            GUILayout.Button("Prettify", EditorStyles.toolbarButton);
-
-            // if (GUILayout.Button("Prettify", EditorStyles.toolbarButton))
-            // BeautifyTree(new Vector2(50f, 150f));
+            if (GUILayout.Button("Prettify", EditorStyles.toolbarButton))
+                BeautifyTree(new Vector2(50f, 150f));
 
             GUILayout.FlexibleSpace();
 
-            GUILayout.FlexibleSpace();
+            windowInfo.useLiveLink = GUILayout.Toggle(windowInfo.useLiveLink, "Live Link", EditorStyles.toolbarButton);
 
             if (!windowInfo.inspectorToggled && GUILayout.Button(Styles.visibilityToggleOffContent, EditorStyles.toolbarButton))
                 windowInfo.inspectorToggled = true;
@@ -822,10 +819,38 @@ namespace SchemaEditor
             if (!windowInfo.inspectorToggled)
                 return;
 
-            float inspectorWidth = GUIData.inspectorWidth;
+            float inspectorWidth = windowInfo.inspectorWidth;
             Rect inspectorArea = new Rect(position.width - (inspectorWidth + GUIData.sidebarPadding * 2), 0f, inspectorWidth + GUIData.sidebarPadding * 2, position.height);
 
+            Rect divider = new Rect(inspectorArea.x - 1f, EditorStyles.toolbar.fixedHeight, 1f, position.height - EditorStyles.toolbar.fixedHeight);
+            Rect dividerRegion = new Rect(divider.x - 4.5f, divider.y, 10f, position.height);
+
             EditorGUI.DrawRect(inspectorArea, Styles.windowBackground);
+
+            if (dividerRegion.Contains(Event.current.mousePosition))
+            {
+                windowInfo.hoveredType = Window.Hovering.Inspector;
+
+                windowInfo.hoverDivider = true;
+
+                if (Event.current.type == EventType.MouseDown)
+                {
+                    windowInfo.resizingInspector = true;
+                    windowInfo.resizeClickOffset = Event.current.mousePosition.x - divider.x;
+                }
+            }
+            else
+            {
+                windowInfo.hoverDivider = false;
+            }
+
+            if (windowInfo.resizingInspector)
+            {
+                float desired = Screen.width - Event.current.mousePosition.x - GUIData.sidebarPadding * 2 + windowInfo.resizeClickOffset;
+                windowInfo.inspectorWidth = desired;
+            }
+
+            EditorGUI.DrawRect(divider, Styles.windowAccent);
 
             if (IsNotLayoutEvent(Event.current) && inspectorArea.Contains(Event.current.mousePosition)) windowInfo.hoveredType = Window.Hovering.Inspector;
 
@@ -838,15 +863,17 @@ namespace SchemaEditor
                     position.height
                 );
 
-                GUILayout.BeginArea(inspectorContainer);
 
+                GUILayout.BeginArea(inspectorContainer);
                 GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
                 string[] values = Enum.GetNames(typeof(Window.InspectorView));
 
+                GUILayout.Space(10);
+
                 for (int i = 0; i < values.Length; i++)
                 {
-                    if (GUILayout.Toggle((int)windowInfo.inspectorView == i, values[i], EditorStyles.toolbarButton))
+                    if (GUILayout.Toggle((int)windowInfo.inspectorView == i, values[i], EditorStyles.toolbarButton, GUILayout.Width(100)))
                         windowInfo.inspectorView = (Window.InspectorView)i;
                 }
 
@@ -986,8 +1013,6 @@ namespace SchemaEditor
                 EditorGUI.EndDisabledGroup();
                 if (EditorGUI.EndChangeCheck())
                 {
-                    windowInfo.treeDirty = true;
-
                     if (editor.targets.OfType<BlackboardEntry>().Any()) { }
                     else if (isInspectingDecorator)
                     {
@@ -1015,12 +1040,7 @@ namespace SchemaEditor
             GUILayout.Space(GUIData.sidebarPadding);
             if (!blackboardEditor || blackboardEditor.target != blackboard)
                 UnityEditor.Editor.CreateCachedEditor(blackboard, typeof(BlackboardEditor), ref blackboardEditor);
-            EditorGUI.BeginChangeCheck();
             blackboardEditor.OnInspectorGUI();
-            if (EditorGUI.EndChangeCheck())
-            {
-                windowInfo.treeDirty = true;
-            }
 
             EditorGUI.EndDisabledGroup();
         }
@@ -1442,21 +1462,35 @@ namespace SchemaEditor
             public Hovering lastClicked;
             public bool didDragSinceMouseUp;
             public int hoveredDecoratorIndex;
-            public bool graphSaved;
-            public bool treeDirty;
             public Rect viewRect;
             public Vector2 blackboardScroll;
             public Vector2 inspectorScroll;
             public InspectorView inspectorView;
-            public bool inspectorToggled;
-            public bool searchIsShown = false;
+            public bool inspectorToggled = true;
+            public bool searchIsShown;
             public bool searchWantsNode = true;
-            public bool searchAddChildren = false;
+            public bool searchAddChildren;
             public float searchbarScroll = 0f;
             public string searchText;
             public float splashScroll;
             public Rect minimapView;
             public bool settingsShown;
+            public bool useLiveLink;
+            private float _inspectorWidth = 250f;
+            public float inspectorWidth
+            {
+                get
+                {
+                    return _inspectorWidth;
+                }
+                set
+                {
+                    _inspectorWidth = Mathf.Clamp(value, 250f, editor.position.width - 100f);
+                }
+            }
+            public bool resizingInspector;
+            public bool hoverDivider;
+            public float resizeClickOffset;
             [SerializeField] internal Rect searchRect = new Rect(0f, 0f, 250f, 350f);
             public enum Hovering
             {

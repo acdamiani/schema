@@ -19,9 +19,9 @@ public class BlackboardEntryEditor : Editor
     public override void OnInspectorGUI()
     {
         BlackboardEntry entry = (BlackboardEntry)target;
-        Type type = Type.GetType(entry.typeString);
+        Type type = entry.type;
 
-        string newName = EditorGUILayout.TextField("Name", entry.Name);
+        string newName = EditorGUILayout.TextField("Name", entry.name);
         string newType = possibleTypes[
             EditorGUILayout.Popup(
                 "Type",
@@ -32,9 +32,9 @@ public class BlackboardEntryEditor : Editor
 
         entry.entryType = (BlackboardEntry.EntryType)EditorGUILayout.EnumPopup("Variable Type", entry.entryType);
 
-        if (!newName.Equals(entry.Name))
+        if (!newName.Equals(entry.name))
         {
-            entry.Name = newName;
+            entry.name = newName;
             BlackboardEntrySelectorDrawer.names[entry.uID] = newName;
         }
 

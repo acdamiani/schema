@@ -211,6 +211,9 @@ namespace Schema
             if (!typeof(Decorator).IsAssignableFrom(decoratorType))
                 throw new ArgumentException("decoratorType does not inherit from type Node");
 
+            if (GetType() == typeof(Root))
+                return null;
+
             Decorator decorator = (Decorator)ScriptableObject.CreateInstance(decoratorType);
             decorator.hideFlags = HideFlags.HideInHierarchy;
             decorator.node = this;
@@ -232,6 +235,13 @@ namespace Schema
             }
 
             return decorator;
+        }
+        /// <summary>
+        /// Verifies the order of the child list by position
+        /// </summary>
+        public void VerifyOrder()
+        {
+            Array.Sort(m_children, (x, y) => x.position.x < y.position.x ? -1 : 1);
         }
         public void RemoveDecorator(Decorator decorator, string actionName = "Remove Decorator", bool undo = true)
         {

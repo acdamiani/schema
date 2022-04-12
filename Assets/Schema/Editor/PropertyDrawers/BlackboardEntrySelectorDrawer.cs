@@ -21,7 +21,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     public static string GetNameForID(string id)
     {
         if (!String.IsNullOrEmpty(id) && !names.ContainsKey(id))
-            names[id] = Blackboard.instance.GetEntry(id).Name;
+            names[id] = Blackboard.instance.GetEntry(id).name;
 
         return String.IsNullOrEmpty(id) ? "" : names[id];
     }
@@ -70,7 +70,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         bool doesHavePath = !String.IsNullOrEmpty(entryID.stringValue);
 
         if (!String.IsNullOrEmpty(entryID.stringValue) && !names.ContainsKey(entryID.stringValue))
-            names[entryID.stringValue] = Blackboard.instance.GetEntry(entryID.stringValue).Name;
+            names[entryID.stringValue] = Blackboard.instance.GetEntry(entryID.stringValue).name;
 
         if (value != null && !info[property.propertyPath].writeOnly)
         {
@@ -227,7 +227,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                 if (!filtered.Contains(entry.type))
                     continue;
 
-                menu.AddItem(entry.Name, idProp.stringValue == entryID, () => GenericMenuSelectOption(property, entryID, entry.type, "/"), false);
+                menu.AddItem(entry.name, idProp.stringValue == entryID, () => GenericMenuSelectOption(property, entryID, entry.type, "/"), false);
             }
             else
             {
@@ -242,7 +242,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                 foreach (string ss in props)
                 {
                     menu.AddItem(
-                        entry.Name + ss,
+                        entry.name + ss,
                         valuePathProp.stringValue.Equals(ss) && idProp.stringValue == entryID,
                         () => GenericMenuSelectOption(property, entryID, entry.type, ss),
                         false

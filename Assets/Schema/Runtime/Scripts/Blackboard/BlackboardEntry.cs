@@ -1,23 +1,13 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// ScriptableObject representation for BlackboardEntry
+/// </summary>
 [Serializable]
 public class BlackboardEntry : ScriptableObject
 {
-    public string Name
-    {
-        get
-        {
-            return _name;
-        }
-        set
-        {
-            _name = value;
-            name = value;
-        }
-    }
-    [SerializeField] private string _name;
-    public string description;
+    [UnityEngine.TextArea] public string description;
     public string typeString
     {
         get
