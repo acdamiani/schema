@@ -13,23 +13,20 @@ public class ComponentSelectorDrawer : PropertyDrawer
     private static Dictionary<string, float> scrolls = new Dictionary<string, float>();
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        SerializedProperty fieldValue = property.FindPropertyRelative("fieldValue");
+        SerializedProperty fieldValueType = property.FindPropertyRelative("fieldValueType");
 
-        if (fieldValue == null)
+        if (fieldValueType == null)
         {
             Debug.LogWarning("Use ComponentSelector<T> instead of ComponentSelectorBase");
             return;
         }
 
-        SerializedProperty fieldValueType = property.FindPropertyRelative("fieldValueType");
         SerializedProperty useSelf = property.FindPropertyRelative("useSelf");
         SerializedProperty entryID = property.FindPropertyRelative("entryID");
 
         if (!fieldTypes.ContainsKey(property.propertyPath))
         {
-            System.Type parentType = fieldValue.serializedObject.targetObject.GetType();
-            FieldInfo fi = parentType.GetFieldFromPath(fieldValue.propertyPath);
-            fieldTypes[property.propertyPath] = fi.FieldType;
+            fieldTypes[property.propertyPath] = Type.GetType(fieldValueType.stringValue);
         }
 
         if (!scrolls.ContainsKey(property.propertyPath))
@@ -39,11 +36,10 @@ public class ComponentSelectorDrawer : PropertyDrawer
 
         float buttonSize = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
 
-        Rect buttonRect = new Rect(r.x + r.width - buttonSize, r.y + EditorGUIUtility.singleLineHeight, buttonSize, buttonSize);
-        Rect fieldRect = new Rect(r.x, r.y + EditorGUIUtility.singleLineHeight, r.width - buttonSize, EditorGUIUtility.singleLineHeight);
+        Rect buttonRect = new Rect(r.x + r.width - buttonSize, r.y, buttonSize, buttonSize);
         Rect useSelfLabel = new Rect(r.x, r.y, 49f, EditorGUIUtility.singleLineHeight);
         Rect useSelfRect = new Rect(r.x + 54f, r.y, 72f, EditorGUIUtility.singleLineHeight);
-        Rect textRect = new Rect(r.x + 72f, r.y + 3f, r.width - 72f, EditorGUIUtility.singleLineHeight);
+        Rect textRect = new Rect(r.x + 72f, r.y + 3f, r.width - 72f - buttonSize, EditorGUIUtility.singleLineHeight);
 
         GUIContent c = EditorGUIUtility.ObjectContent(null, fieldTypes[property.propertyPath]);
 
@@ -53,16 +49,11 @@ public class ComponentSelectorDrawer : PropertyDrawer
         if (!useSelf.boolValue)
         {
             EditorGUI.BeginDisabledGroup(!String.IsNullOrEmpty(entryID.stringValue));
-            EditorGUI.PropertyField(fieldRect, fieldValue, GUIContent.none);
             EditorGUI.EndDisabledGroup();
             BlackboardEntrySelectorDrawer.DoSelectorMenu(buttonRect, property, fieldInfo);
         }
 
-        string name = !String.IsNullOrEmpty(entryID.stringValue) ?
-                        BlackboardEntrySelectorDrawer.GetNameForID(entryID.stringValue) :
-                        fieldValue.objectReferenceValue?.name;
-
-        name = String.IsNullOrEmpty(name) ? "null" : name;
+        string name = String.IsNullOrEmpty(entryID.stringValue) ? "null" : BlackboardEntrySelectorDrawer.GetNameForID(entryID.stringValue);
 
         string s = "{0} " + fieldTypes[property.propertyPath].Name + " on " + (useSelf.boolValue ? "self" : name);
 
@@ -81,14 +72,5 @@ public class ComponentSelectorDrawer : PropertyDrawer
             Event.current.delta = Vector2.zero;
         }
         EditorGUIUtility.SetIconSize(oldIconSize);
-    }
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    {
-        SerializedProperty useSelf = property.FindPropertyRelative("useSelf");
-
-        if (useSelf == null || useSelf.boolValue)
-            return EditorGUIUtility.singleLineHeight;
-        else
-            return EditorGUIUtility.singleLineHeight * 2;
     }
 }

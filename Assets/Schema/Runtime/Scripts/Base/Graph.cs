@@ -56,9 +56,7 @@ namespace Schema
             string path = AssetDatabase.GetAssetPath(this);
 
             if (!String.IsNullOrEmpty(path))
-            {
                 AssetDatabase.AddObjectToAsset(node, path);
-            }
 
             if (undo)
             {
@@ -69,6 +67,128 @@ namespace Schema
             nodes.Add(node);
 
             return node;
+        }
+        /// <summary>
+        /// Add an existing node to the tree
+        /// </summary>
+        /// <param name="node">Node to add to the tree</param>
+        /// <param name="position">Position of the node within the graph</param>
+        /// <param name="undo">Wehether to register this operation to undo</param>
+        public void AddNode(Node node, Vector2 position, bool undo = true)
+        {
+            string path = AssetDatabase.GetAssetPath(this);
+
+            node.hideFlags = HideFlags.HideInHierarchy;
+            node.position = position;
+            node.graph = this;
+
+            if (!String.IsNullOrEmpty(path))
+                AssetDatabase.AddObjectToAsset(node, path);
+
+            if (undo)
+                Undo.RegisterCompleteObjectUndo(this, "Node Added");
+
+            nodes.Add(node);
+        }
+        /// <summary>
+        /// Duplicates a given node and adds it to the tree.
+        /// </summary>
+        /// <param name="node">Node to use as the duplicate base</param>
+        /// <param name="newPosition">New position of the node within the graph</param>
+        /// <param name="undo">Whether to register this operation to undo</param>
+        /// <returns>Duplicated node</returns>
+        public Node Duplicate(Node node, Vector2 newPosition, bool undo = true)
+        {
+            Node duplicate = ScriptableObject.Instantiate<Node>(node);
+
+            duplicate.name = node.name;
+            duplicate.BreakConnectionsIsolated(undo: false);
+            duplicate.ResetGUID();
+            duplicate.hideFlags = HideFlags.HideInHierarchy;
+            duplicate.position = newPosition;
+            duplicate.graph = this;
+            duplicate.children = (Node[])node.children.Clone();
+
+            string path = AssetDatabase.GetAssetPath(this);
+
+            if (!String.IsNullOrEmpty(path))
+                AssetDatabase.AddObjectToAsset(duplicate, path);
+
+            if (undo)
+            {
+                Undo.RegisterCreatedObjectUndo(duplicate, "Node Duplicated");
+                Undo.RegisterCompleteObjectUndo(this, "Node Duplicated");
+            }
+
+            nodes.Add(duplicate);
+
+            return duplicate;
+        }
+        /// <summary>
+        /// Duplicate a list of nodes, preserving their connections
+        /// </summary>
+        /// <param name="nodes">Array or list of nodes to duplicate</param>
+        /// <param name="offset">Offset in position that duplicates will have</param>
+        /// <param name="undo">Whether to register this operation to undo</param>
+        /// <returns>The duplicated list of nodes</returns>
+        public IEnumerable<Node> Duplicate(IEnumerable<Node> nodes, Vector2 offset, bool undo = true)
+        {
+            int groupIndex = -1;
+
+            if (undo)
+            {
+                Undo.IncrementCurrentGroup();
+                groupIndex = Undo.GetCurrentGroup();
+            }
+
+            List<Node> original = new List<Node>(nodes);
+            List<Node> roots = original.FindAll(node =>
+                {
+                    if (node.GetType() == typeof(Root))
+                        return false;
+
+                    if (node.parent == null)
+                        return true;
+
+                    if (!original.Contains(node.parent))
+                        return true;
+
+                    return false;
+                }
+            );
+
+            List<Node> dupl = new List<Node>();
+
+            foreach (Node root in roots)
+                dupl.AddRange(DuplicateRecursive(nodes, root, offset, undo).GetAllChildren());
+
+            TraverseTree();
+
+            if (undo)
+            {
+                Undo.SetCurrentGroupName("Duplicate");
+                Undo.CollapseUndoOperations(groupIndex);
+            }
+
+            return dupl;
+        }
+        private Node DuplicateRecursive(IEnumerable<Node> toDuplicate, Node node, Vector2 offset, bool undo = true)
+        {
+            Node duplicate = Duplicate(node, node.position + offset, undo);
+
+            List<Node> duplicateChildren = duplicate.children.ToList();
+
+            duplicateChildren.RemoveAll(n => !toDuplicate.Contains(n));
+            duplicateChildren = duplicateChildren.Select(n => DuplicateRecursive(toDuplicate, n, offset, undo)).ToList();
+
+            duplicate.BreakConnectionsIsolated(undo: false);
+
+            foreach (Node child in duplicateChildren)
+                duplicate.AddConnection(child, undo: false);
+
+            node.decorators = node.decorators.Select(x => node.DuplciateDecorator(x, undo)).ToArray();
+
+            return duplicate;
         }
         /// <summary>
         /// Add a node to the tree
@@ -87,7 +207,7 @@ namespace Schema
         /// <param name="nodes">List to remove</param>
         public void DeleteNodes(IEnumerable<Node> nodes)
         {
-            IEnumerable<Node> nodesWithoutRoot = nodes.Where(node => node.GetType() != typeof(Root));
+            IEnumerable<Node> nodesWithoutRoot = nodes.Where(node => node.GetType() != typeof(Root)).OrderByDescending(node => node.priority);
 
             Undo.IncrementCurrentGroup();
             int groupIndex = Undo.GetCurrentGroup();
@@ -127,6 +247,8 @@ namespace Schema
                 foreach (Node child in node.children)
                     node.RemoveConnection(child, actionName: "");
             }
+
+            TraverseTree();
 
             Undo.SetCurrentGroupName("Break Connections");
             Undo.CollapseUndoOperations(groupIndex);

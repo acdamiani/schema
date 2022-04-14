@@ -22,17 +22,17 @@ namespace Schema
         /// <summary>
         /// An array containing the children of this node
         /// </summary>
-        public Node[] children { get { return m_children; } private set { m_children = value; } }
+        public Node[] children { get { return m_children; } internal set { m_children = value; } }
         [SerializeField, HideInInspector] private Node[] m_children = Array.Empty<Node>();
         /// <summary>
         /// An array containing the decorators for this node
         /// </summary>
-        public Decorator[] decorators { get { return m_decorators; } private set { m_decorators = value; } }
+        public Decorator[] decorators { get { return m_decorators; } internal set { m_decorators = value; } }
         [SerializeField, HideInInspector] private Decorator[] m_decorators = Array.Empty<Decorator>();
         /// <summary>
         /// The GUID for the node
         /// </summary>
-        public string uID { get { return m_uID; } private set { m_uID = value; } }
+        public string uID { get { return m_uID; } }
         [SerializeField, HideInInspector] private string m_uID;
         /// <summary>
         /// Position of the Node in the graph
@@ -58,7 +58,7 @@ namespace Schema
         /// Whether to allow the status indicator for this node in the editor
         /// </summary>
         public bool enableStatusIndicator { get { return m_enableStatusIndicator; } private set { m_enableStatusIndicator = value; } }
-        [Tooltip("Toggle the status indicator for this node"), HideInInspector, SerializeField] private bool m_enableStatusIndicator;
+        [Tooltip("Toggle the status indicator for this node"), HideInInspector, SerializeField] private bool m_enableStatusIndicator = true;
         private string _description;
         private bool didGetDescriptionAttribute;
         /// <summary>
@@ -112,7 +112,7 @@ namespace Schema
             if (String.IsNullOrEmpty(name))
                 name = String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
 
-            if (string.IsNullOrEmpty(uID)) uID = Guid.NewGuid().ToString("N");
+            if (string.IsNullOrEmpty(uID)) m_uID = Guid.NewGuid().ToString("N");
         }
         /// <summary>
         /// Add a connection to another node
@@ -130,6 +130,7 @@ namespace Schema
 
             if (!m_children.Contains(to))
                 ArrayUtility.Add(ref m_children, to);
+
             to.parent = this;
         }
         /// <summary>
@@ -184,20 +185,55 @@ namespace Schema
                 RemoveConnection(child, actionName, undo);
         }
         /// <summary>
-        /// Breaks connections between this node and its parents and children
+        /// Breaks connections between this node and its parent and children
         /// </summary>
-        public void BreakConnections()
+        /// <param name="actionName">Name of the undo action</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        public void BreakConnections(string actionName = "Break Connections", bool undo = true)
         {
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
+            int groupIndex = -1;
 
-            parent.RemoveConnection(this, actionName: "");
+            if (undo)
+            {
+                Undo.IncrementCurrentGroup();
+                groupIndex = Undo.GetCurrentGroup();
+            }
+
+            parent?.RemoveConnection(this, actionName: "", undo);
 
             foreach (Node child in children)
-                RemoveConnection(child, actionName: "");
+                RemoveConnection(child, actionName: "", undo);
 
-            Undo.SetCurrentGroupName("Break Connections");
-            Undo.CollapseUndoOperations(groupIndex);
+            if (undo)
+            {
+                Undo.SetCurrentGroupName(actionName);
+                Undo.CollapseUndoOperations(groupIndex);
+            }
+        }
+        /// <summary>
+        /// Breaks connections with parent and children without affecting them
+        /// </summary>
+        /// <param name="actionName">Name of the undo action</param>
+        /// <param name="undo">Whether to register this operation in the udno stack</param>
+        public void BreakConnectionsIsolated(string actionName = "Break Connections", bool undo = true)
+        {
+            int groupIndex = -1;
+
+            if (undo)
+            {
+                Undo.IncrementCurrentGroup();
+                groupIndex = Undo.GetCurrentGroup();
+                Undo.RegisterCompleteObjectUndo(this, actionName);
+            }
+
+            parent = null;
+            ArrayUtility.Clear(ref m_children);
+
+            if (undo)
+            {
+                Undo.SetCurrentGroupName(actionName);
+                Undo.CollapseUndoOperations(groupIndex);
+            }
         }
         /// <summary>
         /// Add a decorator to this node
@@ -227,14 +263,38 @@ namespace Schema
             {
                 Undo.RegisterCreatedObjectUndo(decorator, "Decorator Created");
                 Undo.RegisterCompleteObjectUndo(this, "Decorator Added");
-                ArrayUtility.Add(ref m_decorators, decorator);
-            }
-            else
-            {
-                ArrayUtility.Add(ref m_decorators, decorator);
             }
 
+            ArrayUtility.Add(ref m_decorators, decorator);
+
             return decorator;
+        }
+        /// <summary>
+        /// Duplicate a given decorator
+        /// </summary>
+        /// <param name="decorator">Decorator to duplicate</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        /// <returns>Duplciated decorator</returns>
+        public Decorator DuplciateDecorator(Decorator decorator, bool undo = true)
+        {
+            Decorator duplicate = ScriptableObject.Instantiate<Decorator>(decorator);
+            duplicate.hideFlags = HideFlags.HideAndDontSave;
+            decorator.node = this;
+
+            string path = AssetDatabase.GetAssetPath(this);
+
+            if (!String.IsNullOrEmpty(path))
+                AssetDatabase.AddObjectToAsset(duplicate, path);
+
+            if (undo)
+            {
+                Undo.RegisterCreatedObjectUndo(duplicate, "Decorator Duplicated");
+                Undo.RegisterCompleteObjectUndo(this, "Decorator Duplicated");
+            }
+
+            ArrayUtility.Add(ref m_decorators, duplicate);
+
+            return duplicate;
         }
         /// <summary>
         /// Verifies the order of the child list by position
@@ -243,6 +303,12 @@ namespace Schema
         {
             Array.Sort(m_children, (x, y) => x.position.x < y.position.x ? -1 : 1);
         }
+        /// <summary>
+        /// Deletes a decorator from this node
+        /// </summary>
+        /// <param name="decorator">Decorator to remove</param>
+        /// <param name="actionName">Name of the undo action</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
         public void RemoveDecorator(Decorator decorator, string actionName = "Remove Decorator", bool undo = true)
         {
             if (!ArrayUtility.Contains(m_decorators, decorator))
@@ -262,6 +328,25 @@ namespace Schema
                 ArrayUtility.Remove(ref m_decorators, decorator);
                 ScriptableObject.DestroyImmediate(decorator, true);
             }
+        }
+        /// <summary>
+        /// Gets a list of all children attached directly or indirectly to this node (including self)
+        /// </summary>
+        /// <returns>List of all children in subtree</returns>
+        public IEnumerable<Node> GetAllChildren()
+        {
+            List<Node> ret = new List<Node>();
+
+            foreach (Node child in children)
+                ret.AddRange(child.GetAllChildren());
+
+            ret.Add(this);
+
+            return ret;
+        }
+        internal void ResetGUID()
+        {
+            m_uID = Guid.NewGuid().ToString("N");
         }
         /// <summary>
         /// The current errors for this node

@@ -37,7 +37,7 @@ namespace SchemaEditor
                 case EventType.ValidateCommand:
                     if (!editingPaused)
                     {
-                        string[] possibleCommands = { "SoftDelete", "Delete", "FrameSelected", "Copy", "Paste", "SelectAll", "DeselectAll" };
+                        string[] possibleCommands = { "SoftDelete", "Delete", "FrameSelected", "Copy", "Paste", "SelectAll", "DeselectAll", "Duplicate" };
 
                         if (possibleCommands.Contains(e.commandName))
                             e.Use();
@@ -113,6 +113,11 @@ namespace SchemaEditor
 
                                 windowInfo.selected.Clear();
                                 break;
+                            case "Duplicate":
+                                e.Use();
+
+                                Duplicate();
+                                break;
                         }
 
                         Repaint();
@@ -165,7 +170,7 @@ namespace SchemaEditor
                         {
                             requestingConnection.AddConnection(windowInfo.hoveredNode);
 
-                            RecalculatePriorities(windowInfo.hoveredNode.parent);
+                            requestingConnection.VerifyOrder();
                             target.TraverseTree();
                             requestingConnection = null;
                         }
@@ -439,47 +444,6 @@ namespace SchemaEditor
             if (windowInfo.hoveredType != Window.Hovering.Inspector && windowInfo.hoveredType != Window.Hovering.None)
                 windowInfo.zoom += current.delta.y * GUIData.zoomSpeed;
             //windowInfo.zoom += (current.delta.y > 0 ? 1 : (current.delta.y < 0 ? -1 : 0)) * GUIData.zoomSpeed;
-        }
-        void RegisterShortcuts()
-        {
-            ShortcutManager.AddShortcut(KeyCode.B, EventModifiers.Control, () =>
-            {
-                foreach (Node node in windowInfo.selected)
-                {
-                    // if (node.parent)
-                    //     RemoveConnection(node.parent, node);
-
-                    // List<Node> ch = new List<Node>(node.children);
-                    // foreach (Node c in ch)
-                    // {
-                    //     RemoveConnection(node, c);
-                    // }
-                }
-            });
-        }
-        //Adds a builtin shortcut not registered as a command
-        void AddCommandShortcut(string commandName, UnityEngine.Events.UnityAction action)
-        {
-            UnityEditor.ShortcutManagement.KeyCombination keyCombination = GetCommandKeyCombination(commandName);
-
-            //Explicit cast is incorrect
-            //EventModifiers e = (EventModifiers)keyCombination.modifiers;
-
-            EventModifiers e = EventModifiers.None;
-
-            if (keyCombination.action)
-                e |= HelperMethods.IsMac() ? EventModifiers.Command : EventModifiers.Control;
-            if (keyCombination.alt)
-                e |= EventModifiers.Alt;
-            if (keyCombination.shift)
-                e |= EventModifiers.Shift;
-
-            ShortcutManager.AddShortcut(keyCombination.keyCode, e, action);
-        }
-        void ResetShortcuts(UnityEditor.ShortcutManagement.ActiveProfileChangedEventArgs args)
-        {
-            ShortcutManager.ClearShortcuts();
-            RegisterShortcuts();
         }
     }
 }

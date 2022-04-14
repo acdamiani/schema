@@ -5,7 +5,6 @@ using UnityEngine;
 public class ComponentSelector<T> : Schema.Internal.ComponentSelectorBase where T : Component
 {
     [SerializeField] private bool useSelf = true;
-    [SerializeField] private T fieldValue;
     [SerializeField] private string fieldValueType = typeof(T).AssemblyQualifiedName;
     private T cache;
     public T GetValue(SchemaAgent agent)
@@ -14,8 +13,6 @@ public class ComponentSelector<T> : Schema.Internal.ComponentSelectorBase where 
         {
             if (useSelf)
                 cache = agent.GetComponent<T>();
-            else if (fieldValue != null)
-                cache = fieldValue;
             else
                 return value?.GetComponent<T>();
         }

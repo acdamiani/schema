@@ -481,6 +481,17 @@ public class SchemaAgent : MonoBehaviour
             d.DrawGizmos(this);
         }
     }
+    /// <summary>
+    /// Get currently running node
+    /// </summary>
+    /// <returns>Currently running node</returns>
+    public Node GetRunningNode()
+    {
+        if (currentIndex < 0 || currentIndex > graph.nodes.Length - 1)
+            return null;
+
+        return graph.nodes[currentIndex].node;
+    }
 }
 
 namespace Schema

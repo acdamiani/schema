@@ -91,6 +91,13 @@ namespace SchemaEditor
                     GUI.Label(new Rect(8f, 32f, size.x, size.y), content, EditorStyles.boldLabel);
                 }
 
+                if (windowInfo.selected.Count == 1)
+                {
+                    string content = windowInfo.selected[0].position.ToString() + "\n" + GetAreaWithPadding(windowInfo.selected[0], false).ToString();
+                    size = EditorStyles.miniLabel.CalcSize(new GUIContent(content));
+                    GUI.Label(new Rect(8f, 32f, size.x, size.y), content, EditorStyles.miniLabel);
+                }
+
                 editingPaused = Application.isPlaying;
 
                 if (editingPaused)
@@ -255,21 +262,53 @@ namespace SchemaEditor
                         child.position.x + (childSize.x + GUIData.nodePadding * 2) / 2f,
                         child.position.y - 16f));
 
+                    Vector2 p0 = from;
+                    Vector2 p1 = from + Vector2.up * 50f;
+                    Vector2 p2 = to - Vector2.up * 50f;
+                    Vector2 p3 = new Vector2(to.x, to.y - 8f * windowInfo.zoom);
+
+                    Node active = activeAgent?.GetRunningNode();
+
+                    bool isActiveConnection = (EditorApplication.isPlaying
+                        || EditorApplication.isPaused)
+                        && active != null
+                        && IsSubTreeOf(node, active)
+                        && (child == active || IsSubTreeOf(child, active));
+
                     Handles.DrawBezier(
-                        from,
-                        new Vector2(to.x, to.y - 8f * windowInfo.zoom),
-                        from + Vector2.up * 50f,
-                        to - Vector2.up * 50f,
-                        Color.white,
+                        p0,
+                        p3,
+                        p1,
+                        p2,
+                        isActiveConnection ? NodeEditorPrefs.highlightColor : Color.white,
                         null,
                         3f * windowInfo.zoom
                     );
 
+                    if (isActiveConnection)
+                    {
+                        const float fac = 1.5f;
+                        const int points = 4;
+
+                        for (int i = 0; i < points; i++)
+                        {
+                            float t = (float)((EditorApplication.timeSinceStartup % fac) / fac);
+                            t += 1f / (float)points * i;
+                            t = t > 1 ? t % 1 : t;
+                            Vector2 p = CurveUtility.Position(t, p0, p1, p2, p3);
+
+                            GUI.color = NodeEditorPrefs.highlightColor;
+                            GUI.DrawTexture(new Rect(p.x - 4f * windowInfo.zoom, p.y - 4f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom), Styles.circle);
+                        }
+                    }
+
                     Rect r = new Rect(to.x - 4f * windowInfo.zoom, to.y - 8f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom);
 
-                    GUI.color = new Color(.85f, .85f, .85f, 1f);
+                    GUI.color = isActiveConnection ? NodeEditorPrefs.highlightColor : new Color(.85f, .85f, .85f, 1f);
 
                     GUI.DrawTexture(r, Styles.arrow);
+
+                    GUI.color = Color.white;
                 }
             }
 
@@ -331,9 +370,7 @@ namespace SchemaEditor
                 if (activeAgent != null)
                 {
                     foreach (Node node in activeAgent.GetCalledNodes())
-                    {
                         NodeTicked(node);
-                    }
 
                     windowInfo.nodeStatus = activeAgent.GetNodeStatus();
                 }
@@ -616,14 +653,14 @@ namespace SchemaEditor
         ///<summary>
         ///This function calculates the area of a node, based on its text and calculates decorators (based on contents themselves, does not factor in padding)
         ///</summary>
-        private Vector2 GetArea(Node node, bool recalculate)
+        internal static Vector2 GetArea(Node node, bool recalculate)
         {
             if (node == null) return Vector2.zero;
 
             //try to get from dictionary
-            if (guiData.sizes.ContainsKey(node) && !recalculate)
+            if (GUIData.sizes.ContainsKey(node) && !recalculate)
             {
-                return guiData.sizes[node];
+                return GUIData.sizes[node];
             }
 
             //get size of contents
@@ -653,13 +690,13 @@ namespace SchemaEditor
             Vector2 final = new Vector2(width + 40f, height);
 
             if (recalculate)
-                guiData.sizes[node] = final;
+                GUIData.sizes[node] = final;
             else
-                guiData.sizes.Add(node, final);
+                GUIData.sizes.Add(node, final);
 
             return final;
         }
-        private Vector2 GetAreaWithPadding(Node node, bool recalculate)
+        internal static Vector2 GetAreaWithPadding(Node node, bool recalculate)
         {
             return GetArea(node, recalculate) + Vector2.one * GUIData.nodePadding * 2;
         }
@@ -740,16 +777,44 @@ namespace SchemaEditor
             bool hoveredNode = false;
             for (int i = target.nodes.Count - 1; i >= 0; i--)
             {
+                Node active = activeAgent?.GetRunningNode();
+
                 Node node = target.nodes[i];
 
-                //I don't know if this is right
                 Vector2 size = GetAreaWithPadding(node, false) / viewRect.width * viewWidth;
                 Vector2 position = GridToMinimapPosition(node.position, viewWidth, minimapPadding);
                 position.x += boxPos.width / 2f - viewWidth / 2f;
 
+                foreach (Node child in node.children)
+                {
+                    bool isActiveConnection = (EditorApplication.isPlaying
+                        || EditorApplication.isPaused)
+                        && active != null
+                        && IsSubTreeOf(node, active)
+                        && (child == active || IsSubTreeOf(child, active));
+
+                    Vector2 childSize = GetAreaWithPadding(child, false) / viewRect.width * viewWidth;
+                    Vector2 childPosition = GridToMinimapPosition(child.position, viewWidth, minimapPadding);
+                    childPosition.x += boxPos.width / 2f - viewWidth / 2f;
+
+                    Color c = Handles.color;
+                    Handles.color = isActiveConnection ? NodeEditorPrefs.highlightColor : Color.white;
+                    Handles.DrawAAPolyLine(new Vector2(position.x + size.x / 2f, position.y + size.y), new Vector2(childPosition.x + childSize.x / 2f, childPosition.y));
+                    Handles.color = c;
+                }
+
                 Rect nodeRect = new Rect(position, size);
 
-                Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.windowBackground, windowInfo.selected.Contains(node) ? Color.white : nodeOutlineColor);
+                Color nodeColor;
+
+                if (windowInfo.selected.Contains(node))
+                    nodeColor = Color.white;
+                else if (active == node)
+                    nodeColor = NodeEditorPrefs.highlightColor;
+                else
+                    nodeColor = nodeOutlineColor;
+
+                Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.windowBackground, nodeColor);
 
                 if (nodeRect.Contains(Event.current.mousePosition))
                 {
@@ -798,7 +863,7 @@ namespace SchemaEditor
             }
 
             if (GUILayout.Button("Prettify", EditorStyles.toolbarButton))
-                BeautifyTree(new Vector2(50f, 150f));
+                GraphUtility.Prettify(target.nodes);
 
             GUILayout.FlexibleSpace();
 
@@ -1354,12 +1419,6 @@ namespace SchemaEditor
         public void EndZoomed()
         {
             GUI.EndClip();
-            /* GUIUtility.ScaleAroundPivot(Vector2.one * zoom, rect.size * 0.5f);
-            Vector3 offset = new Vector3(
-                (((rect.width * zoom) - rect.width) * 0.5f),
-                (((rect.height * zoom) - rect.height) * 0.5f) + (-topPadding * zoom) + topPadding,
-                0);
-            GUI.matrix = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one); */
             GUI.BeginClip(new Rect(0f, tabHeight, position.width, position.height));
             GUI.matrix = prevMatrix;
         }
@@ -1476,7 +1535,7 @@ namespace SchemaEditor
             public Rect minimapView;
             public bool settingsShown;
             public bool useLiveLink;
-            private float _inspectorWidth = 250f;
+            private float _inspectorWidth = 350f;
             public float inspectorWidth
             {
                 get
@@ -1485,7 +1544,7 @@ namespace SchemaEditor
                 }
                 set
                 {
-                    _inspectorWidth = Mathf.Clamp(value, 250f, editor.position.width - 100f);
+                    _inspectorWidth = Mathf.Clamp(value, 350f, editor.position.width - 100f);
                 }
             }
             public bool resizingInspector;
@@ -1514,9 +1573,9 @@ namespace SchemaEditor
         ///Contains utility info for the GUI
         ///</summary>
         [Serializable]
-        public class GUIData
+        internal static class GUIData
         {
-            public SerializableDictionary<Node, Vector2> sizes = new SerializableDictionary<Node, Vector2>();
+            public static SerializableDictionary<Node, Vector2> sizes = new SerializableDictionary<Node, Vector2>();
             public static readonly float nodePadding = 15f;
             public static readonly float sidebarPadding = 15f;
             public static readonly float labelHeight = 30f;
