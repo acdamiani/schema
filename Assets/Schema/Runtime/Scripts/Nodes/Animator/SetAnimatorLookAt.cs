@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Schema;
 
-[RequireAgentComponent(typeof(Animator))]
+[DarkIcon("c_Animator")]
+[LightIcon("c_Animator")]
 public class SetAnimatorLookAt : Action
 {
     class SetAnimatorLayerWeightMemory

@@ -10,7 +10,7 @@ public class DebugLogFormat : Action
 {
     [TextArea] public string message;
     public List<BlackboardEntrySelector> keys;
-    private void OnEnable()
+    protected override void OnNodeEnable()
     {
         if (keys != null)
         {

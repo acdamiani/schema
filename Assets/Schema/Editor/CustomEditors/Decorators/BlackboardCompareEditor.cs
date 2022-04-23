@@ -19,8 +19,8 @@ public class BlackboardCompareEditor : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("entryOne"), true);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("entryTwo"), true);
 
-        Type t1 = Type.GetType(obj.entryOne.GetEditorEntry()?.typeString);
-        Type t2 = Type.GetType(obj.entryTwo.GetEditorEntry()?.typeString);
+        Type t1 = obj.entryOne.entryType;
+        Type t2 = obj.entryTwo.entryType;
 
         if (t1 == null || t2 == null)
             return;

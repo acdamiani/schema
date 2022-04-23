@@ -143,6 +143,8 @@ public class SchemaAgent : MonoBehaviour
     }
     private void Tick()
     {
+        if (!target) return;
+
         calledNodes.Clear();
 
         ticked = false;
@@ -319,11 +321,14 @@ public class SchemaAgent : MonoBehaviour
 
     private void EvaluateDecorators()
     {
-        foreach (OptimizedDecorator d in decoratorState.Keys)
+        List<OptimizedDecorator> state = new List<OptimizedDecorator>(decoratorState.Keys);
+
+        foreach (OptimizedDecorator d in state)
         {
             bool result = d.decorator.Evaluate(agentState[d.decorator.uID], this);
             if (result == decoratorState[d]) continue;
             decoratorState[d] = result;
+            d.decorator.conditionalValue.value = result;
 
             if (currentIndex > d.node.index + d.node.breadth)
             {
@@ -359,6 +364,7 @@ public class SchemaAgent : MonoBehaviour
             result = d.Evaluate(agentState[d.uID], this);
 
             decoratorState[node.decorators[i]] = result;
+            d.conditionalValue.value = result;
 
             if (!result)
                 break;

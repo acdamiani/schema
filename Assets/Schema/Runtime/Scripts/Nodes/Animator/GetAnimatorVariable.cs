@@ -2,8 +2,8 @@ using Schema;
 using UnityEngine;
 
 [RequireAgentComponent(typeof(Animator))]
-[DarkIcon("Dark/SetAnimatorVariable")]
-[LightIcon("Light/SetAnimatorVariable")]
+[DarkIcon("c_Animator")]
+[LightIcon("c_Animator")]
 public class GetAnimatorVariable : Action
 {
     public GetAnimatorVariableType type;

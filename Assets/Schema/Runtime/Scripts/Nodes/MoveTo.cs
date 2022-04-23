@@ -63,7 +63,7 @@ public class MoveTo : Action
     }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (string.IsNullOrEmpty(selector.entryID))
+        if (selector.empty)
             return NodeStatus.Failure;
 
         MoveToMemory memory = (MoveToMemory)nodeMemory;

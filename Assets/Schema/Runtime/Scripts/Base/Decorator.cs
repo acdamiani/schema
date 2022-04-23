@@ -13,6 +13,10 @@ namespace Schema
         [NonSerialized] public List<string> info;
         [HideInInspector] public Node node;
         /// <summary>
+        /// Called during OnEnable(). Override this method instead of declaring an OnEnable method to avoid errors
+        /// </summary>
+        protected virtual void OnDecoratorEnable() { }
+        /// <summary>
         ///	Runs when the tree is first initialized, per agent 
         /// </summary>
         /// <param name="decoratorMemory">The memory object of the decorator, which can be safely cast into the decorator's memory type</param>
@@ -63,6 +67,24 @@ namespace Schema
         {
             if (string.IsNullOrEmpty(uID)) uID = Guid.NewGuid().ToString("N");
         }
+        private string _description;
+        private bool didGetDescriptionAttribute;
+        /// <summary>
+        /// Description for this node, given by the Description attribute
+        /// </summary>
+        public string description
+        {
+            get
+            {
+                if (!didGetDescriptionAttribute)
+                {
+                    didGetDescriptionAttribute = true;
+                    _description = GetType().GetCustomAttribute<DescriptionAttribute>()?.description;
+                }
+
+                return _description;
+            }
+        }
         public bool isConditional
         {
             get
@@ -96,6 +118,7 @@ namespace Schema
         }
         private bool? _allowOnlyOne;
         [HideInInspector] public ObserverAborts abortsType;
+        [Tooltip("Optional entry to store the result of this decorator in"), HideInInspector, WriteOnly] public BlackboardEntrySelector<bool> conditionalValue;
         public enum ObserverAborts
         {
             None,
@@ -116,8 +139,10 @@ namespace Schema
         }
         void OnEnable()
         {
-            if (String.IsNullOrEmpty(name))
+            if (String.IsNullOrWhiteSpace(name))
                 name = String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
+
+            OnDecoratorEnable();
         }
 
         [System.AttributeUsage(System.AttributeTargets.Field | System.AttributeTargets.Property)]
@@ -134,5 +159,21 @@ namespace Schema
         }
         [System.AttributeUsage(System.AttributeTargets.Class)]
         public class AllowOnlyOneAttribute : System.Attribute { }
+        /// <summary>
+        /// Attribute for adding a description to a decorator in the Editor
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class DescriptionAttribute : System.Attribute
+        {
+            public string description;
+            /// <summary>
+            /// Attribute for adding a description to a node in the Editor
+            /// </summary>
+            /// <param name="description">Description for the node</param>
+            public DescriptionAttribute(string description)
+            {
+                this.description = description;
+            }
+        }
     }
 }

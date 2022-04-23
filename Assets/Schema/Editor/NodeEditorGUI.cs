@@ -91,9 +91,22 @@ namespace SchemaEditor
                     GUI.Label(new Rect(8f, 32f, size.x, size.y), content, EditorStyles.boldLabel);
                 }
 
-                if (windowInfo.selected.Count == 1)
+                if (NodeEditorPrefs.enableDebugView && windowInfo != null)
                 {
-                    string content = windowInfo.selected[0].position.ToString() + "\n" + GetAreaWithPadding(windowInfo.selected[0], false).ToString();
+                    string content = @$"hoveredNode: {windowInfo.hoveredNode?.name}
+hoveredDecorator: {windowInfo.hoveredDecorator?.name}
+hoveredType: {windowInfo.hoveredType}
+
+";
+
+                    if (windowInfo.selected.Count == 1)
+                    {
+                        content += @$"Position: {windowInfo.selected[0].position.ToString()}
+Area: {GetAreaWithPadding(windowInfo.selected[0], false).ToString()}
+Parent: {windowInfo.selected[0].parent?.name}
+Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node.name))}";
+                    }
+
                     size = EditorStyles.miniLabel.CalcSize(new GUIContent(content));
                     GUI.Label(new Rect(8f, 32f, size.x, size.y), content, EditorStyles.miniLabel);
                 }
@@ -142,14 +155,11 @@ namespace SchemaEditor
             Repaint();
         }
 
-        //This method is called to initialize any elements that have a tendency to change between Event calls
-        //We cache these things so that we can avoid Unity GUI errors
         void LayoutGUI()
         {
             List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
             List<BlackboardEntry> duplicateEntries = new List<BlackboardEntry>();
 
-            //Check for duplicate items in entries
             for (int i = 0; i < target.blackboard.entries.Count; i++)
             {
                 for (int j = 0; j < target.blackboard.entries.Count; j++)
@@ -186,7 +196,7 @@ namespace SchemaEditor
 
             }
 
-            distinctTypes = targets.Select(x => x.GetType()).Distinct().ToList();
+            distinctTypes = targets.Where(x => x != null).Select(x => x.GetType()).Distinct().ToList();
 
             if (distinctTypes.Count > 1) return;
 
@@ -463,6 +473,9 @@ namespace SchemaEditor
                     {
                         Decorator d = node.decorators[j];
 
+                        if (d == null)
+                            continue;
+
                         bool isSelected = windowInfo.selectedDecorator == d;
 
                         GUI.color = isSelected ? new Color(.6f, .6f, .1f, 1f) : new Color(.1f, .1f, .4f, 1f);
@@ -669,6 +682,11 @@ namespace SchemaEditor
 
             foreach (Decorator decorator in node.decorators)
             {
+                Debug.Log(decorator);
+
+                if (decorator == null)
+                    continue;
+
                 //initialize decorator info array
                 decorator.info = decorator.GetValuesGUI();
 
@@ -721,9 +739,9 @@ namespace SchemaEditor
             if (windowInfo.searchIsShown)
                 windowInfo.searchRect = RenderSearch(windowInfo.searchRect);
 
-            if (windowInfo.selected.Count == 1)
+            if (windowInfo.selected.Count == 1 || windowInfo.selectedDecorator != null)
             {
-                string stringContent = windowInfo.selected[0].description;
+                string stringContent = windowInfo.selectedDecorator != null ? windowInfo.selectedDecorator.description : windowInfo.selected[0].description;
 
                 if (!String.IsNullOrEmpty(stringContent))
                 {
@@ -735,6 +753,9 @@ namespace SchemaEditor
         }
         private void DrawMinimap()
         {
+            if (!windowInfo.drawMinimap)
+                return;
+
             float minimapPadding = 100f;
 
             Rect viewRect = GetViewRect(minimapPadding, false);
@@ -856,6 +877,8 @@ namespace SchemaEditor
                 ToggleSearch();
             }
 
+            List<float> f = new List<float>();
+
             if (GUILayout.Button("Add Decorator", EditorStyles.toolbarButton))
             {
                 windowInfo.searchWantsNode = false;
@@ -863,11 +886,16 @@ namespace SchemaEditor
             }
 
             if (GUILayout.Button("Prettify", EditorStyles.toolbarButton))
+            {
                 GraphUtility.Prettify(target.nodes);
+                GetViewRect(100f, true);
+            }
 
             GUILayout.FlexibleSpace();
 
             windowInfo.useLiveLink = GUILayout.Toggle(windowInfo.useLiveLink, "Live Link", EditorStyles.toolbarButton);
+
+            windowInfo.drawMinimap = GUILayout.Toggle(windowInfo.drawMinimap, "Minimap", EditorStyles.toolbarButton);
 
             if (!windowInfo.inspectorToggled && GUILayout.Button(Styles.visibilityToggleOffContent, EditorStyles.toolbarButton))
                 windowInfo.inspectorToggled = true;
@@ -928,7 +956,6 @@ namespace SchemaEditor
                     position.height
                 );
 
-
                 GUILayout.BeginArea(inspectorContainer);
                 GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
@@ -976,6 +1003,18 @@ namespace SchemaEditor
                 Rect prefsWindow = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2f, 0f, inspectorWidth + GUIData.sidebarPadding * 2f, position.height);
 
                 GUILayout.BeginArea(prefsWindow);
+
+                GUILayout.BeginHorizontal(EditorStyles.toolbar);
+
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button(
+                    Styles.visibilityToggleOnContent,
+                    EditorStyles.toolbarButton
+                )) windowInfo.inspectorToggled = false;
+
+                GUILayout.EndHorizontal();
+
                 windowInfo.inspectorScroll = GUILayout.BeginScrollView(windowInfo.inspectorScroll);
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(GUIData.nodePadding);
@@ -1032,6 +1071,10 @@ namespace SchemaEditor
             NodeEditorPrefs.maxMinimapHeight = EditorGUILayout.FloatField("Max Minimap Height", NodeEditorPrefs.maxMinimapHeight);
             NodeEditorPrefs.minimapOpacity = EditorGUILayout.Slider("Minimap Opacity", NodeEditorPrefs.minimapOpacity, 0f, 1f);
             NodeEditorPrefs.minimapOutlineColor = EditorGUILayout.ColorField("Minimap Outline Color", NodeEditorPrefs.minimapOutlineColor);
+
+            EditorGUILayout.LabelField("");
+            EditorGUILayout.LabelField("Debug", EditorStyles.boldLabel);
+            NodeEditorPrefs.enableDebugView = EditorGUILayout.Toggle("Enable Debug View", NodeEditorPrefs.enableDebugView);
 
             EditorGUILayout.LabelField("");
 
@@ -1550,6 +1593,7 @@ namespace SchemaEditor
             public bool resizingInspector;
             public bool hoverDivider;
             public float resizeClickOffset;
+            public bool drawMinimap = true;
             [SerializeField] internal Rect searchRect = new Rect(0f, 0f, 250f, 350f);
             public enum Hovering
             {

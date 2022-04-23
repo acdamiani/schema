@@ -20,7 +20,7 @@ public class Raycast : Decorator
     }
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
-        if (string.IsNullOrEmpty(point.entryID))
+        if (point.empty)
             return false;
 
         return TestCone(agent);
@@ -98,7 +98,7 @@ public class Raycast : Decorator
     {
         List<Error> errors = new List<Error>();
 
-        if (type == RaycastType.Dynamic && string.IsNullOrEmpty(point.entryID))
+        if (type == RaycastType.Dynamic && point.empty)
             errors.Add(new Error("Raycast is marked as dynamic but no valid key picked", Error.Severity.Warning));
 
         return errors;

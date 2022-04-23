@@ -7,7 +7,9 @@ using System.Reflection;
 public class DefaultDecoratorEditor : Editor
 {
     private bool shouldShowAborts = false;
+    private SerializedProperty decoratorName;
     private SerializedProperty aborts;
+    private SerializedProperty conditionalValue;
     void OnEnable()
     {
         if (target != null && serializedObject != null)
@@ -17,9 +19,12 @@ public class DefaultDecoratorEditor : Editor
                 Type targetType = ((Schema.Decorator)target).GetType();
                 Type declaringType = targetType.GetMethod("Evaluate").DeclaringType;
 
+                decoratorName = serializedObject.FindProperty("m_Name");
+
                 shouldShowAborts = declaringType.Equals(targetType);
 
                 aborts = serializedObject.FindProperty("abortsType");
+                conditionalValue = serializedObject.FindProperty("conditionalValue");
             }
             catch { }
         }
@@ -30,8 +35,13 @@ public class DefaultDecoratorEditor : Editor
 
         Schema.Decorator decorator = (Schema.Decorator)target;
 
+        EditorGUILayout.PropertyField(decoratorName);
+
         if (shouldShowAborts)
+        {
             EditorGUILayout.PropertyField(aborts);
+            EditorGUILayout.PropertyField(conditionalValue);
+        }
 
         serializedObject.ApplyModifiedProperties();
     }

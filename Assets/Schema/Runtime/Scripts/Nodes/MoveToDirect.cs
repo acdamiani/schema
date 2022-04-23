@@ -53,7 +53,7 @@ internal class MoveToDirect : Action
     }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (string.IsNullOrEmpty(selector.entryID))
+        if (selector.empty)
         {
             MoveToDirectMemory memory = (MoveToDirectMemory)nodeMemory;
             memory.point = GetPoint(selector);

@@ -1,58 +1,47 @@
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 using Schema;
 
+[Description("Checks for playing AudioSources within a sphere. Note that these objects require a collider to be detected")]
 public class SoundHeard : Decorator
 {
-    [Tooltip("How sensitive the agent is to hearing sound, in dB. Anthing louder than this number will be considered heard")]
-    public float soundSensitivity = 60.0f;
-    [Tooltip("Display heard noises locations in the editor for the currently selected agent")]
-    public bool visualize = true;
-    public BlackboardEntrySelector<Vector3> hitPoint;
+    [Tooltip("Radius of the sphere that is registered as \"hearing\" a noise")]
+    public float radius = 60.0f;
     [Tooltip("The tags to filter from. Only these tags will be considered when listening for noise")]
     public TagFilter tagFilter;
+    [Tooltip("The entry to store the first heard GameObject to. When multiple audio sources are detected, it will store the closest one.")]
+    [WriteOnly] public BlackboardEntrySelector<GameObject> heard;
+    [Tooltip("Display heard noises locations in the editor for the currently selected agent")]
+    public bool visualize = true;
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
-        return false;
-    }
-    private Vector3[] GetAudio(SchemaAgent agent)
-    {
-        AudioSource[] sources = GameObject.FindObjectsOfType<AudioSource>();
+        Collider[] colliders = Physics.OverlapSphere(agent.transform.position, radius, -1, QueryTriggerInteraction.UseGlobal);
 
-        for (int i = 0; i < sources.Length; i++)
+        System.Tuple<AudioSource, float> closest = new System.Tuple<AudioSource, float>(null, float.MaxValue);
+
+        foreach (Collider c in colliders)
         {
-            AudioSource source = sources[i];
-
-            if (!source.isPlaying)
+            if (!tagFilter.tags.Contains(c.tag))
                 continue;
+
+            AudioSource source = c.GetComponent<AudioSource>();
+
+            if (source == null || !source.isPlaying)
+                continue;
+
+            Vector3 dir = c.transform.position - agent.transform.position;
+
+            if (dir.sqrMagnitude < closest.Item2)
+                closest = new System.Tuple<AudioSource, float>(source, dir.sqrMagnitude);
         }
 
-        return null;
+        heard.value = closest.Item1?.gameObject;
+
+        return closest.Item1 != null;
     }
-    private float GetPercievedLoudness(Vector3 point, AudioSource source)
-    {
-        source.GetCustomCurve(AudioSourceCurveType.CustomRolloff);
-        return 0f;
-    }
-#if UNITY_EDITOR
     public override void DrawGizmos(SchemaAgent agent)
     {
-        if (!visualize)
-            return;
-
-        Vector3[] audioPoints = GetAudio(agent);
-
-        Color handlesColor = Handles.color;
-
-        for (int i = 0; i < audioPoints.Length; i++)
-        {
-            Vector3 point = audioPoints[i];
-
-            Handles.color = new Color(0f, 1f, 0f, 0.25f);
-            Handles.DrawSolidDisc(point, SceneView.lastActiveSceneView.rotation * Vector3.forward, 1f);
-        }
-
-        Handles.color = handlesColor;
+        Gizmos.DrawWireSphere(agent.transform.position, radius);
     }
-#endif
 }

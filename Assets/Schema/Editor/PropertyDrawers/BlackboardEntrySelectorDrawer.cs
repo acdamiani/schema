@@ -43,7 +43,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     }
     public static void DoSelectorDrawer(Rect position, SerializedProperty property, GUIContent label, Type fieldType, FieldInfo fieldInfo)
     {
-        SerializedProperty entryID = property.FindPropertyRelative("entryID");
+        SerializedProperty entryID = property.FindPropertyRelative("m_entryID");
         SerializedProperty entryName = property.FindPropertyRelative("entryName");
         SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
         SerializedProperty value = property.FindPropertyRelative("_value");
@@ -149,7 +149,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         SerializedProperty valueProp = property.FindPropertyRelative("_value");
-        SerializedProperty entryID = property.FindPropertyRelative("entryID");
+        SerializedProperty entryID = property.FindPropertyRelative("m_entryID");
 
         bool lastWideMode = EditorGUIUtility.wideMode;
         EditorGUIUtility.wideMode = true;
@@ -185,7 +185,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
     private static GenericMenu GenerateMenu(SerializedProperty property, FieldInfo fieldInfo)
     {
-        SerializedProperty idProp = property.FindPropertyRelative("entryID");
+        SerializedProperty idProp = property.FindPropertyRelative("m_entryID");
         SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
         SerializedProperty typeMask = property.FindPropertyRelative("blackboardTypesMask");
 
@@ -255,7 +255,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     }
     private static void GenericMenuSelectOption(SerializedProperty property, string id, Type type = null, string path = "")
     {
-        SerializedProperty idProperty = property.FindPropertyRelative("entryID");
+        SerializedProperty idProperty = property.FindPropertyRelative("m_entryID");
         SerializedProperty entryTypeProperty = property.FindPropertyRelative("entryTypeString");
         SerializedProperty valuePathProperty = property.FindPropertyRelative("valuePath");
 

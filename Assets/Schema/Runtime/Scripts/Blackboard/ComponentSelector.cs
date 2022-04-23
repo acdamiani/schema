@@ -1,32 +1,65 @@
 using System;
 using UnityEngine;
 
-[Serializable]
-public class ComponentSelector<T> : Schema.Internal.ComponentSelectorBase where T : Component
+namespace Schema
 {
-    [SerializeField] private bool useSelf = true;
-    [SerializeField] private string fieldValueType = typeof(T).AssemblyQualifiedName;
-    private T cache;
-    public T GetValue(SchemaAgent agent)
+    [Serializable]
+    public sealed class ComponentSelector<T> : Schema.Internal.ComponentSelectorBase where T : Component
     {
-        if (cache == null)
+        public bool useSelf { get { return m_useSelf; } }
+        [SerializeField] private bool m_useSelf = true;
+        [SerializeField] private string m_fieldValueType = typeof(T).AssemblyQualifiedName;
+        private T cache;
+        public T GetValue(GameObject gameObject)
         {
-            if (useSelf)
-                cache = agent.GetComponent<T>();
+            if (cache == null)
+            {
+                if (useSelf)
+                    cache = gameObject.GetComponent<T>();
+                else
+                    return value?.GetComponent<T>();
+            }
             else
-                return value?.GetComponent<T>();
-        }
-        else
-        {
+            {
+                return cache;
+            }
+
             return cache;
         }
-
-        return cache;
+        public T GetValue(Component component)
+        {
+            return GetValue(component.gameObject);
+        }
+    }
+    public static class ComponentSelector
+    {
+        /// <summary>
+        /// Get component of type using a ComponentSelector
+        /// </summary>
+        /// <typeparam name="T">Type of component to retrieve. Must match type of selector</typeparam>
+        /// <param name="component">Component to retreive the other component from</param>
+        /// <param name="selector">Selector to use to get component</param>
+        /// <returns>Component retrived by the method</returns>
+        public static T GetComponent<T>(this Component component, ComponentSelector<T> selector) where T : Component
+        {
+            return selector.GetValue(component);
+        }
+        /// <summary>
+        /// Get component of type using a ComponentSelector
+        /// </summary>
+        /// <typeparam name="T">Type of component to retrieve. Must match type of selector</typeparam>
+        /// <param name="gameObject">GameObject to retreive the other component from</param>
+        /// <param name="selector">Selector to use to get component</param>
+        /// <returns>Component retrived by the method</returns>
+        public static T GetComponent<T>(this GameObject gameObject, ComponentSelector<T> selector) where T : Component
+        {
+            return selector.GetValue(gameObject);
+        }
     }
 }
 
 namespace Schema.Internal
 {
     [Serializable]
-    public class ComponentSelectorBase : BlackboardEntrySelector<GameObject> { }
+    public abstract class ComponentSelectorBase : BlackboardEntrySelector<GameObject> { }
 }

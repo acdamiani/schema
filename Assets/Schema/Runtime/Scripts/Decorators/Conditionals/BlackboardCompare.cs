@@ -16,9 +16,7 @@ public class BlackboardCompare : Decorator
     }
     private void OnValidate()
     {
-        BlackboardEntry entryOneEditor = entryOne.GetEditorEntry();
-
-        if (entryOneEditor != null && Type.GetType(entryOneEditor.typeString).IsNumeric())
+        if (entryOne.entryType.IsNumeric())
         {
             entryTwo.ClearFilters();
             entryTwo.AddNumericFilter();

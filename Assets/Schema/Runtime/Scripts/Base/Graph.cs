@@ -282,7 +282,10 @@ namespace Schema
         /// </summary>
         public void TraverseTree()
         {
-            foreach (Node node in nodes) node.priority = 0;
+            IEnumerable<Node> nodeList = nodes.Where(node => node != null);
+
+            foreach (Node node in nodeList)
+                node.priority = 0;
 
             TraverseSubtree(root, 1);
         }

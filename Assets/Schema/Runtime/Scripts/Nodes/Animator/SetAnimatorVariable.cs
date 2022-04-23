@@ -2,8 +2,8 @@ using Schema;
 using UnityEngine;
 
 [RequireAgentComponent(typeof(Animator))]
-[DarkIcon("Dark/SetAnimatorVariable")]
-[LightIcon("Light/SetAnimatorVariable")]
+[DarkIcon("c_Animator")]
+[LightIcon("c_Animator")]
 public class SetAnimatorVariable : Action
 {
     public ComponentSelector<Animator> animator;
@@ -15,8 +15,6 @@ public class SetAnimatorVariable : Action
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Animator anim = animator.GetValue(agent);
-
-        Debug.Log(anim);
 
         if (anim == null)
             return NodeStatus.Failure;

@@ -96,6 +96,10 @@ namespace Schema
             return maxChildren > 0 && m_children.Length < maxChildren;
         }
         /// <summary>
+        /// Called during OnEnable(). Override this method instead of declaring an OnEnable method to avoid errors
+        /// </summary>
+        protected virtual void OnNodeEnable() { }
+        /// <summary>
         ///	Override to allow for Gizmo visualization in the scene view. This will be called only for the currently selected SchemaAgent. 
         /// </summary>
         public virtual void DrawGizmos(SchemaAgent agent) { }
@@ -109,10 +113,16 @@ namespace Schema
         public virtual int maxChildren { get { return Int32.MaxValue; } }
         void OnEnable()
         {
+            NameAttribute attribute = GetType().GetCustomAttribute<NameAttribute>();
+
             if (String.IsNullOrEmpty(name))
-                name = String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
+                name = attribute != null ? attribute.name : String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
 
             if (string.IsNullOrEmpty(uID)) m_uID = Guid.NewGuid().ToString("N");
+
+            OnNodeEnable();
+
+            GenerateIcon();
         }
         /// <summary>
         /// Add a connection to another node
@@ -348,6 +358,45 @@ namespace Schema
         {
             m_uID = Guid.NewGuid().ToString("N");
         }
+        private void GenerateIcon()
+        {
+            if (String.IsNullOrEmpty(_darkIconLocation))
+            {
+                DarkIconAttribute attribute = (DarkIconAttribute)Attribute.GetCustomAttribute(GetType(), typeof(DarkIconAttribute));
+
+                if (attribute == null)
+                    _darkIconLocation = "NOT FOUND";
+                else
+                    _darkIconLocation = attribute.location;
+            }
+            if (String.IsNullOrEmpty(_lightIconLocation))
+            {
+                LightIconAttribute attribute = (LightIconAttribute)Attribute.GetCustomAttribute(GetType(), typeof(LightIconAttribute));
+
+                if (attribute == null)
+                    _lightIconLocation = "NOT FOUND";
+                else
+                    _lightIconLocation = attribute.location;
+            }
+
+            //Use dark texture
+            if (EditorGUIUtility.isProSkin && !_darkIconLocation.Equals("NOT FOUND"))
+            {
+                Type iconType = _darkIconLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType("UnityEngine." + _darkIconLocation.Substring(2)) : null;
+
+                Debug.Log(iconType);
+
+                _icon = iconType != null ? (Texture2D)EditorGUIUtility.ObjectContent(null, iconType).image : Resources.Load<Texture2D>(_darkIconLocation);
+            }
+            else if (!String.IsNullOrEmpty(_lightIconLocation) && !_lightIconLocation.Equals("NOT FOUND"))
+            {
+                Type iconType = _lightIconLocation.StartsWith("c_") ? Type.GetType(_lightIconLocation.Substring(2)) : null;
+
+                _icon = iconType != null ? (Texture2D)EditorGUIUtility.ObjectContent(null, iconType).image : Resources.Load<Texture2D>(_lightIconLocation);
+            }
+
+            usingProTextures = EditorGUIUtility.isProSkin;
+        }
         /// <summary>
         /// The current errors for this node
         /// </summary>
@@ -401,6 +450,22 @@ namespace Schema
                 this.description = description;
             }
         }
+        /// <summary>
+        /// Attribute to override the default name of the node in the editor
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class NameAttribute : System.Attribute
+        {
+            public string name;
+            /// <summary>
+            /// Attribute to override the default name of the node in the edit or
+            /// </summary>
+            /// <param name="name">Default name of the node to use</param>
+            public NameAttribute(string name)
+            {
+                this.name = name;
+            }
+        }
 #if UNITY_EDITOR
         private Texture2D _icon;
         private string _darkIconLocation;
@@ -412,40 +477,8 @@ namespace Schema
         {
             get
             {
-                if (String.IsNullOrEmpty(_darkIconLocation))
-                {
-                    DarkIconAttribute attribute = (DarkIconAttribute)Attribute.GetCustomAttribute(GetType(), typeof(DarkIconAttribute));
-
-                    if (attribute == null)
-                        _darkIconLocation = "NOT FOUND";
-                    else
-                        _darkIconLocation = attribute.location;
-                }
-                if (String.IsNullOrEmpty(_lightIconLocation))
-                {
-                    LightIconAttribute attribute = (LightIconAttribute)Attribute.GetCustomAttribute(GetType(), typeof(LightIconAttribute));
-
-                    if (attribute == null)
-                        _lightIconLocation = "NOT FOUND";
-                    else
-                        _lightIconLocation = attribute.location;
-                }
-
-                //if icon is null or the skin has changed
-                if (_icon == null || usingProTextures != EditorGUIUtility.isProSkin)
-                {
-                    //Use dark texture
-                    if (EditorGUIUtility.isProSkin && !String.IsNullOrEmpty(_darkIconLocation) && !_darkIconLocation.Equals("NOT FOUND"))
-                    {
-                        _icon = Resources.Load<Texture2D>(_darkIconLocation);
-                    }
-                    else if (!String.IsNullOrEmpty(_lightIconLocation) && !_lightIconLocation.Equals("NOT FOUND"))
-                    {
-                        _icon = Resources.Load<Texture2D>(_lightIconLocation);
-                    }
-
-                    usingProTextures = EditorGUIUtility.isProSkin;
-                }
+                if (usingProTextures != EditorGUIUtility.isProSkin)
+                    GenerateIcon();
 
                 return _icon;
             }

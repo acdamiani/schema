@@ -1,14 +1,18 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+[ExecuteInEditMode]
 public class DownloadIcon : MonoBehaviour
 {
     public bool test;
+    void Awake()
+    {
+        Debug.Log("hey");
+        Download();
+    }
     public static void Download()
     {
-        GUIStyle s = GUI.skin.GetStyle("ObjectFieldButton");
-
-        Texture tex = (s.normal.background);
+        Texture tex = EditorGUIUtility.ObjectContent(null, typeof(Animator)).image;
 
         RenderTexture tmp = RenderTexture.GetTemporary(
                 tex.width,

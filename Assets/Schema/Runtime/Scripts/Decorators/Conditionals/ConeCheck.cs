@@ -20,8 +20,6 @@ public class ConeCheck : Decorator
     public BlackboardEntrySelector<GameObject> gameObjectKey;
     [Tooltip("The tags to filter from. Only these tags will be considered when checking the cone")]
     public TagFilter tagFilter;
-    [Info]
-    public string willStore => $"Will store hit object in GameObject {gameObjectKey.entryName}";
     private class RayRepresentation
     {
         public Vector3 start;
@@ -200,7 +198,7 @@ public class ConeCheck : Decorator
     }
     public override List<Error> GetErrors()
     {
-        if (string.IsNullOrEmpty(gameObjectKey.entryID))
+        if (gameObjectKey.empty)
         {
             return new List<Error>() { new Error("Node has no valid GameObject key in which to store the hit object", Error.Severity.Info) };
         }

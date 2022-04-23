@@ -13,7 +13,7 @@ public class ComponentSelectorDrawer : PropertyDrawer
     private static Dictionary<string, float> scrolls = new Dictionary<string, float>();
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        SerializedProperty fieldValueType = property.FindPropertyRelative("fieldValueType");
+        SerializedProperty fieldValueType = property.FindPropertyRelative("m_fieldValueType");
 
         if (fieldValueType == null)
         {
@@ -21,8 +21,8 @@ public class ComponentSelectorDrawer : PropertyDrawer
             return;
         }
 
-        SerializedProperty useSelf = property.FindPropertyRelative("useSelf");
-        SerializedProperty entryID = property.FindPropertyRelative("entryID");
+        SerializedProperty useSelf = property.FindPropertyRelative("m_useSelf");
+        SerializedProperty entryID = property.FindPropertyRelative("m_entryID");
 
         if (!fieldTypes.ContainsKey(property.propertyPath))
         {

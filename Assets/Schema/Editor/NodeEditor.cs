@@ -22,7 +22,7 @@ namespace SchemaEditor
         private Node orphanNode;
         public Graph target;
         public Blackboard globalBlackboard;
-        private Window windowInfo;
+        private Window windowInfo = new Window();
         private int nodeCount;
         [DidReloadScripts]
         static void Init()
@@ -105,11 +105,12 @@ namespace SchemaEditor
         }
         void IHasCustomMenu.AddItemsToMenu(GenericMenu menu)
         {
-            menu.AddItem("Preferences", windowInfo.settingsShown, () => TogglePrefs(), false);
+            menu.AddItem("Preferences", windowInfo.settingsShown, TogglePrefs, false);
             menu.AddItem("Documentation", false, () => OpenUrl("https://thinking-automation.vercel.app/docs/getting-started"), false);
         }
         void TogglePrefs()
         {
+            windowInfo.inspectorToggled = !windowInfo.settingsShown;
             windowInfo.settingsShown = !windowInfo.settingsShown;
             windowInfo.inspectorScroll = Vector2.zero;
         }
@@ -150,8 +151,8 @@ namespace SchemaEditor
         {
             List<Error> errors = new List<Error>(node.GetErrors());
 
-            foreach (Decorator d in node.decorators)
-                errors.AddRange(d.GetErrors().Select(error => new Error($"{error.message} ({d.name})", error.severity)));
+            // foreach (Decorator d in node.decorators)
+            //     errors.AddRange(d.GetErrors().Select(error => new Error($"{error.message} ({d.name})", error.severity)));
 
             if (node.priority < 1) errors.Add(new Error("Node not connected to root!", Error.Severity.Warning));
             else if (node.children.Length == 0 && node.CanHaveChildren()) errors.Add(new Error("No child node attatched", Error.Severity.Warning));
@@ -369,6 +370,8 @@ namespace SchemaEditor
             target.DeleteNodes(windowInfo.selected);
 
             target.TraverseTree();
+            if (windowInfo.selected.Contains(windowInfo.hoveredNode))
+                windowInfo.hoveredNode = null;
             windowInfo.selected.Clear();
         }
         private void Copy(List<Node> copies, bool clearSelected = true)
@@ -626,7 +629,11 @@ namespace SchemaEditor
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Cut"), false, () => { }, editingPaused);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Copy"), false, () => { }, editingPaused);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => { }, editingPaused || copyBuffer.Count == 0);
-                    // g.AddItem(GenerateMenuItem("Main Menu/Edit/Delete"), false, () => Delete(windowInfo.selectedDecorator), editingPaused);
+                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Delete"), false, () =>
+                    {
+                        Debug.Log(windowInfo.hoveredDecorator);
+                        windowInfo.hoveredDecorator.node.RemoveDecorator(windowInfo.hoveredDecorator);
+                    }, editingPaused);
                     g.AddItem("Move Up %UP", false, () => MoveUpCommand(), editingPaused);
                     g.AddItem("Move Down %DOWN", false, () => MoveDownCommand(), editingPaused);
                     break;
@@ -1030,6 +1037,11 @@ namespace SchemaEditor
             {
                 get => GetColor("SCHEMA_PREF__minimapOutlineColor", Color.gray);
                 set => SetColor("SCHEMA_PREF__minimapOutlineColor", value);
+            }
+            public static bool enableDebugView
+            {
+                get => EditorPrefs.GetBool("SCHEMA_PREF__enableDebugView", false);
+                set => EditorPrefs.SetBool("SCHEMA_PREF__enableDebugView", value);
             }
             private static Color GetColor(string key, Color defaultValue)
             {

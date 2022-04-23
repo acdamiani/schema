@@ -32,28 +32,45 @@ public class BlackboardEntrySelector<T> : BlackboardEntrySelector
 public class BlackboardEntrySelector
 {
     private Blackboard blackboard;
-    public int mask;
-    public int blackboardTypesMask = -1;
-    public string entryName;
-    public string entryID;
-    public string valuePath;
+    [SerializeField] private int mask;
+    [SerializeField] private int blackboardTypesMask = -1;
+    [SerializeField] private string entryName;
+    public string entryID
+    {
+        get { return m_entryID; }
+    }
+    [SerializeField] protected string m_entryID;
+    [SerializeField] private string valuePath;
     public Type entryType
     {
         get
         {
-            return Type.GetType(entryTypeString);
-        }
-        set
-        {
-            entryTypeString = value.AssemblyQualifiedName;
+            if (String.IsNullOrEmpty(entryID))
+                return null;
+
+            if (_entryType == null || lastEntryTypeString != entryTypeString)
+            {
+                _entryType = Type.GetType(entryTypeString);
+                lastEntryTypeString = entryTypeString;
+            }
+
+            return _entryType;
         }
     }
+    private Type _entryType;
+    private string lastEntryTypeString;
     [SerializeField] private string entryTypeString;
     public object value
     {
         get
         {
+            if (String.IsNullOrEmpty(entryID))
+                return null;
+
             object obj = BlackboardDataContainer.Get(entryID, SchemaManager.pid);
+
+            if (obj == null)
+                return null;
 
             if (!String.IsNullOrEmpty(valuePath))
                 return DynamicProperty.Get(obj, valuePath);
@@ -62,12 +79,18 @@ public class BlackboardEntrySelector
         }
         set
         {
-            BlackboardDataContainer.Set(entryID, SchemaManager.pid, value);
+            if (String.IsNullOrEmpty(entryID))
+                return;
+
+            if (!String.IsNullOrEmpty(valuePath))
+                DynamicProperty.Set(this.value, valuePath, value);
+            else
+                BlackboardDataContainer.Set(entryID, SchemaManager.pid, value);
         }
     }
     public List<string> filters;
     public bool empty => String.IsNullOrEmpty(entryID);
-    public BlackboardEntrySelector(params Type[] filters)
+    protected BlackboardEntrySelector(params Type[] filters)
     {
         this.filters = filters.Select(x => x.AssemblyQualifiedName).ToList();
 
@@ -95,54 +118,20 @@ public class BlackboardEntrySelector
 
         if (e == null)
         {
-            entryID = "";
+            m_entryID = "";
             valuePath = "";
         }
     }
     private void VerifyType(BlackboardEntry entry)
     {
+        entryTypeString = entry.typeString;
+        _entryType = null;
+
         if (entryID == entry.uID && !filters.Contains(entry.typeString))
         {
-            Debug.Log("resetting");
-            entryID = "";
+            m_entryID = "";
             valuePath = "";
         }
-    }
-    /// <summary>
-    /// Gets the referenced Blackboard Entry by this selector. This is only available in the Editor. 
-    /// To get values and other information during runtime, use the BlackboardData class.
-    /// </summary>
-    /// <returns>The Editor-only Blackboard Entry referenced by this selector</returns>
-    public BlackboardEntry GetEditorEntry()
-    {
-        return String.IsNullOrEmpty(entryID) ? null : blackboard?.GetEntry(entryID);
-    }
-    private string GetName(string s)
-    {
-        byte[] bytes = Convert.FromBase64String(s);
-        byte[] nameBytes = new byte[bytes.Length - 32];
-
-        for (int i = 32; i < bytes.Length; i++)
-            nameBytes[i - 32] = bytes[i];
-
-        return System.Text.Encoding.ASCII.GetString(nameBytes);
-    }
-    private string GetID(string s)
-    {
-        byte[] bytes = Convert.FromBase64String(s);
-        byte[] idBytes = new byte[32];
-
-        for (int i = 0; i < 32; i++)
-            idBytes[i] = bytes[i];
-
-        return System.Text.Encoding.ASCII.GetString(idBytes);
-    }
-    BlackboardEntry GetDefaultEntry(Blackboard blackboard)
-    {
-        List<BlackboardEntry> entries = blackboard.entries.FindAll(entry => filters.Select(item => Type.GetType(item)).Contains(Type.GetType(entry.typeString)));
-
-        if (entries.Count == 0) return null;
-        else return entries[0];
     }
     public void ClearFilters()
     {
