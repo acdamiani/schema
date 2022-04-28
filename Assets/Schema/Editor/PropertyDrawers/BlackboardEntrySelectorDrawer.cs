@@ -46,7 +46,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         SerializedProperty entryID = property.FindPropertyRelative("m_entryID");
         SerializedProperty entryName = property.FindPropertyRelative("entryName");
         SerializedProperty valuePathProp = property.FindPropertyRelative("valuePath");
-        SerializedProperty value = property.FindPropertyRelative("_value");
+        SerializedProperty value = property.FindPropertyRelative("m_inspectorValue");
 
         if (!info.ContainsKey(property.propertyPath))
         {
@@ -227,7 +227,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                 if (!filtered.Contains(entry.type))
                     continue;
 
-                menu.AddItem(entry.name, idProp.stringValue == entryID, () => GenericMenuSelectOption(property, entryID, entry.type, "/"), false);
+                menu.AddItem(entry.name + (filtered.Count > 1 ? " (" + entry.type.Name + ")" : ""), idProp.stringValue == entryID, () => GenericMenuSelectOption(property, entryID, entry.type, "/"), false);
             }
             else
             {
@@ -236,7 +236,8 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                     entry.type,
                     filtered,
                     "",
-                    info.ContainsKey(property.propertyPath) && info[property.propertyPath].writeOnly
+                    info.ContainsKey(property.propertyPath) && info[property.propertyPath].writeOnly,
+                    filtered.Count > 1
                 );
 
                 foreach (string ss in props)
@@ -326,7 +327,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                 return typeof(object);
         }
     }
-    private static IEnumerable<string> PrintProperties(Type baseType, Type type, List<Type> targets, string basePath, bool needsGetter)
+    private static IEnumerable<string> PrintProperties(Type baseType, Type type, List<Type> targets, string basePath, bool needsGetter, bool useType)
     {
         if (targets.Contains(type))
         {
@@ -365,11 +366,11 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             if (targets.Contains(field.PropertyType))
             {
                 if (!needsGetter || field.SetMethod != null)
-                    yield return basePath + "/" + field.Name;
+                    yield return basePath + "/" + field.Name + (useType ? " (" + field.PropertyType.Name + ")" : "");
             }
             else if (field.PropertyType != type && field.PropertyType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.PropertyType)))
             {
-                foreach (string s in PrintProperties(baseType, field.PropertyType, targets, basePath + "/" + field.Name, needsGetter))
+                foreach (string s in PrintProperties(baseType, field.PropertyType, targets, basePath + "/" + field.Name, needsGetter, useType))
                     yield return s;
             }
         }
@@ -383,11 +384,11 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
             if (targets.Contains(field.FieldType))
             {
-                yield return basePath + "/" + field.Name;
+                yield return basePath + "/" + field.Name + (useType ? " " + field.FieldType : "");
             }
             else if (field.FieldType != type && field.FieldType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.FieldType)))
             {
-                foreach (string s in PrintProperties(baseType, field.FieldType, targets, basePath + "/" + field.Name, needsGetter))
+                foreach (string s in PrintProperties(baseType, field.FieldType, targets, basePath + "/" + field.Name, needsGetter, useType))
                     yield return s;
             }
         }

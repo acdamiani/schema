@@ -168,6 +168,9 @@ namespace Schema
         /// <param name="undo">Whether to register this operation in the undo stack</param>
         public void RemoveParent(string actionName = "Remove Parent Connection", bool undo = true)
         {
+            if (parent == null)
+                return;
+
             if (undo)
             {
                 Undo.RegisterCompleteObjectUndo(this, actionName);

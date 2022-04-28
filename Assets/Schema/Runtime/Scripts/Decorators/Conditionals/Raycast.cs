@@ -3,21 +3,15 @@ using Schema;
 using System.Collections.Generic;
 using System.Linq;
 
+[Description("Cast a ray absolutely or dynamically towards an object or point")]
 public class Raycast : Decorator
 {
-    public Vector3 offset;
-    public Vector3 direction;
-    public float maxDistance;
-    public BlackboardEntrySelector point = new BlackboardEntrySelector();
+    [Tooltip("Offset of the ray")] public Vector3 offset;
+    [Tooltip("Direction of the ray, in euler angles")] public Vector3 direction;
+    [Tooltip("Maximum distance of the ray")] public float maxDistance;
+    [Tooltip("Point to cast ray towards")] public BlackboardEntrySelector<Vector3> point;
     public RaycastType type;
     public TagFilter tagFilter;
-    public bool visualize = true;
-    private void OnEnable()
-    {
-        point.AddGameObjectFilter();
-        point.AddVector2Filter();
-        point.AddVector3Filter();
-    }
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
         if (point.empty)
@@ -27,7 +21,7 @@ public class Raycast : Decorator
     }
     public override void DrawGizmos(SchemaAgent agent)
     {
-        if (!visualize || type == RaycastType.Dynamic) return;
+        if (type == RaycastType.Dynamic) return;
 
         Color col = Gizmos.color;
         Vector3 rotatedOffset = agent.transform.rotation * offset;
@@ -55,44 +49,11 @@ public class Raycast : Decorator
         }
         else
         {
-            Vector3 p = GetPoint(point);
+            Vector3 p = point.value;
             hits = Physics.RaycastAll(agent.transform.position, (p - agent.transform.position).normalized);
         }
 
         return hits.Any(hit => tagFilter.tags.Contains(hit.transform.tag));
-    }
-    private Vector3 GetPoint(BlackboardEntrySelector selector)
-    {
-        object value = selector.value;
-        System.Type t = value.GetType();
-
-        if (value == null) return Vector3.zero;
-
-        //Not ideal to run every frame, so will be cached in the node state	
-        if (t == typeof(GameObject))
-        {
-            return ((GameObject)value).transform.position;
-        }
-        else if (t == typeof(Vector2))
-        {
-            return (Vector2)value;
-        }
-        else if (t == typeof(Vector2Int))
-        {
-            return (Vector2)value;
-        }
-        else if (t == typeof(Vector3))
-        {
-            return (Vector3)value;
-        }
-        else if (t == typeof(Vector3Int))
-        {
-            return (Vector3)value;
-        }
-        else
-        {
-            return Vector3.zero;
-        }
     }
     public override List<Error> GetErrors()
     {

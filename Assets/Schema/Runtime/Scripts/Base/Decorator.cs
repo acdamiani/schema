@@ -139,8 +139,12 @@ namespace Schema
         }
         void OnEnable()
         {
+            Debug.Log("hey");
+
             if (String.IsNullOrWhiteSpace(name))
                 name = String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
+
+            Debug.Log(name);
 
             OnDecoratorEnable();
         }

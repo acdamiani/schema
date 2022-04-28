@@ -12,7 +12,6 @@ public class RaycastEditor : Editor
     private SerializedProperty maxDistance;
     private void OnEnable()
     {
-        visualize = serializedObject.FindProperty("visualize");
         offset = serializedObject.FindProperty("offset");
         direction = serializedObject.FindProperty("direction");
         point = serializedObject.FindProperty("point");
@@ -26,7 +25,6 @@ public class RaycastEditor : Editor
 
         raycast.type = (Raycast.RaycastType)GUILayout.Toolbar((int)raycast.type, new string[] { "Absolute", "Dynamic" });
 
-        EditorGUILayout.PropertyField(visualize);
         EditorGUILayout.PropertyField(tagFilter);
 
         if (raycast.type == Raycast.RaycastType.Absolute)

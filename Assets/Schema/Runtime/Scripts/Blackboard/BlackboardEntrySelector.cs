@@ -9,12 +9,15 @@ using System.Linq;
 [Serializable]
 public class BlackboardEntrySelector<T> : BlackboardEntrySelector
 {
+    /// <summary>
+    /// Value of this selector
+    /// </summary>
     public new T value
     {
         get
         {
-            if (_value != null && String.IsNullOrEmpty(entryID))
-                return (T)_value;
+            if (String.IsNullOrEmpty(entryID))
+                return (T)inspectorValue;
 
             T v = (T)base.value;
 
@@ -25,7 +28,11 @@ public class BlackboardEntrySelector<T> : BlackboardEntrySelector
             base.value = value;
         }
     }
-    [SerializeField] private T _value;
+    /// <summary>
+    /// Value of the field in the inspector. Can be used to override the given value (e.g. to restrict an int to a certain range)
+    /// </summary>
+    public T inspectorValue { get { return m_inspectorValue; } set { m_inspectorValue = value; } }
+    [SerializeField] private T m_inspectorValue;
     public BlackboardEntrySelector() : base(typeof(T)) { }
 }
 [Serializable]

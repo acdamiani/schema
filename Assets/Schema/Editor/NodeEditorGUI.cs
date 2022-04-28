@@ -160,6 +160,8 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
             List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
             List<BlackboardEntry> duplicateEntries = new List<BlackboardEntry>();
 
+            target.nodes.RemoveAll(node => node == null);
+
             for (int i = 0; i < target.blackboard.entries.Count; i++)
             {
                 for (int j = 0; j < target.blackboard.entries.Count; j++)

@@ -37,9 +37,11 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Flee.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Series.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/IsNull.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AnimationCurve/AddCurveKey.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandomWeighted.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RandomizeVector.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/Distance.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntry.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/CustomAction.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/SetAnimatorLayerWeight.cs" />
@@ -54,6 +56,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Cross.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetRotation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wait.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/AddForce.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/EmptyAction.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/SoundHeard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveTo.cs" />
@@ -65,6 +68,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Selector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/ConeCheck.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetScale.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/WaitForFrames.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateAway.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetBlackboardValueRandom.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/TriggerAnimator.cs" />
@@ -75,6 +79,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Graph.cs" />
      <Compile Include="Assets/Schema/Utilities/NameAliases.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Flow.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/AddTorque.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/NavMeshAreaMask.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Patrol.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/ReturnResult.cs" />
@@ -88,9 +93,12 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/GetAnimatorVariable.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Subtract.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToRandom.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/ComposeVector2.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/SetAnimatorVariable.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Timer.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlayAnimation.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AnimationCurve/SampleValue.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/ComposeVector3.cs" />
      <Compile Include="Assets/Schema/DownloadIcon.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Sequence.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/PatrolRoute.cs" />
@@ -99,6 +107,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/WaitBlackboardTime.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector3Angle.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Loop.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/ComposeVector4.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/ScriptableDictionary.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetBounds.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetTime.cs" />
@@ -112,16 +121,15 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandom.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/SetAnimatorIKRotation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/CoinFlip.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Distance.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SetMatrixValue.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AnimationCurve/RemoveCurveKey.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MoveToDirect.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/ForceSuccess.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AnimationCurve/Slope.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateTo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/SetAnimatorIKPositionWeight.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/AddForce.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/AddTorque.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/WaitForFrames.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/GetVectorComponents.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
      <None Include="Assets/Schema/Utilities/ClassTemplate.txt" />
      <None Include="Assets/Schema/Utilities/MethodTemplate.txt" />

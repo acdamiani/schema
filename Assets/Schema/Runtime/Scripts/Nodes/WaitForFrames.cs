@@ -11,6 +11,14 @@ public class WaitForFrames : Action
     {
         public int count;
     }
+    protected override void OnNodeEnable()
+    {
+        count.inspectorValue = 1;
+    }
+    void OnValidate()
+    {
+        count.inspectorValue = Mathf.Clamp(count.inspectorValue, 1, System.Int32.MaxValue);
+    }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         WaitForFramesMemory memory = (WaitForFramesMemory)nodeMemory;

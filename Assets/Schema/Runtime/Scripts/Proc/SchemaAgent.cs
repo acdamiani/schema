@@ -93,6 +93,9 @@ public class SchemaAgent : MonoBehaviour
     {
         SchemaManager.pid = pid;
 
+        if (target == null)
+            return;
+
         EvaluateDecorators();
         Tick();
     }
@@ -143,8 +146,6 @@ public class SchemaAgent : MonoBehaviour
     }
     private void Tick()
     {
-        if (!target) return;
-
         calledNodes.Clear();
 
         ticked = false;
