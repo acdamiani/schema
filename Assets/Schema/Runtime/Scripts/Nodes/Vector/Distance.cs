@@ -3,24 +3,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using Schema;
 
-[Description("Find the distance between two Vector3 values")]
-public class Distance : Action
+namespace Schema.Builtin.Nodes
 {
-    [Tooltip("Vector A")]
-    public BlackboardEntrySelector<Vector3> vectorOne;
-    [Tooltip("Vector B")]
-    public BlackboardEntrySelector<Vector3> vectorTwo;
-    [Tooltip("Blackboard variable to store the distance in"), WriteOnly]
-    public BlackboardEntrySelector<float> distance;
-    [Tooltip("Whether to get distance squred, which avoids the expensive square root operation")]
-    public bool squared;
-    public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
+    [Description("Find the distance between two Vector values")]
+    public class Distance : Action
     {
-        Vector3 diff = vectorOne.value - vectorTwo.value;
-        float dist = squared ? diff.sqrMagnitude : diff.magnitude;
+        [Tooltip("Vector A")]
+        public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
+        [Tooltip("Vector B")]
+        public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
+        [Tooltip("Blackboard variable to store the distance in"), WriteOnly]
+        public BlackboardEntrySelector<float> distance;
+        [Tooltip("Whether to get distance squared, which avoids the expensive square root operation")]
+        public bool squared;
+        protected override void OnNodeEnable()
+        {
+            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+            vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+        }
+        public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
+        {
+            Vector4 diff = (Vector4)vectorOne.value - (Vector4)vectorTwo.value;
+            float dist = squared ? diff.sqrMagnitude : diff.magnitude;
 
-        distance.value = dist;
+            distance.value = dist;
 
-        return NodeStatus.Success;
+            return NodeStatus.Success;
+        }
     }
 }

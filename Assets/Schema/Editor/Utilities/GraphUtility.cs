@@ -95,7 +95,7 @@ public static class GraphUtility
         if (node.children.Length > 0 && nodeIndex != 0)
             GetOverlapDist(node);
 
-        node.position = new Vector2(node.position.x, node.GetParentCount() * 300f);
+        node.position = new Vector2(node.position.x, node.GetParentSize() + 100f * node.GetParentCount());
     }
     private static void GetOverlapDist(Node node)
     {
@@ -110,11 +110,6 @@ public static class GraphUtility
         float shift = 0f;
 
         GetLeftContour(node, 0f, ref nodeContour);
-
-        if (node.GetType() == typeof(SelectRandomWeighted))
-        {
-            Debug.Log(String.Join(", ", nodeContour.Select(v => v.Key + ": " + v.Value)));
-        }
 
         for (int i = 0; i < nodeIndex; i++)
         {
@@ -220,6 +215,19 @@ public static class GraphUtility
 
             GetOverlapDist(left);
         }
+    }
+    private static float GetParentSize(this Node node)
+    {
+        float s = 0f;
+        Node current = node;
+
+        while (current.parent != null)
+        {
+            current = current.parent;
+            s += NodeEditor.GetAreaWithPadding(current, false).y;
+        }
+
+        return s;
     }
     private static int GetParentCount(this Node node)
     {

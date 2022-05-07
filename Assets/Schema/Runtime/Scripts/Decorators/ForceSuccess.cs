@@ -2,7 +2,7 @@ using Schema;
 using UnityEngine;
 
 [AllowOnlyOne]
-public class ForceSuccess : Decorator
+internal class ForceSuccess : Decorator
 {
     public override bool OnNodeProcessed(object decoratorMemory, SchemaAgent agent, ref NodeStatus status)
     {

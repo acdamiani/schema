@@ -7,43 +7,45 @@ using UnityEngine;
 [Serializable]
 public class BlackboardEntry : ScriptableObject
 {
-    [UnityEngine.TextArea] public string description;
-    public string typeString
-    {
-        get
-        {
-            return _typeString;
-        }
-        set
-        {
-            _typeString = value;
-            _type = Type.GetType(_typeString);
-        }
-    }
-    [SerializeField] private string _typeString;
+    /// <summary>
+    /// Description of this entry
+    /// </summary>
+    public string description { get { return m_description; } }
+    [SerializeField] private string m_description;
+    /// <summary>
+    /// Type string for this entry
+    /// </summary>
+    public string typeString { get { return m_typeString; } }
+    [SerializeField] private string m_typeString;
+    /// <summary>
+    /// Type of this entry
+    /// </summary>
     public Type type
     {
         get
         {
             if (_type == null)
-                _type = Type.GetType(_typeString);
+                _type = Type.GetType(m_typeString);
 
             return _type;
         }
         set
         {
-            _typeString = value.AssemblyQualifiedName;
+            m_typeString = value.AssemblyQualifiedName;
             _type = value;
         }
     }
     private Type _type;
-    public string uID;
-    public Blackboard blackboard;
-    public EntryType entryType = EntryType.Local;
-    public BlackboardEntry()
-    {
-        if (string.IsNullOrEmpty(uID)) uID = Guid.NewGuid().ToString("N");
-    }
+    /// <summary>
+    /// Blackboard that this entry is attached to
+    /// </summary>
+    public Blackboard blackboard { get { return m_blackboard; } internal set { m_blackboard = value; } }
+    [SerializeField] private Blackboard m_blackboard;
+    /// <summary>
+    /// Whether this entry is local, shared, or global
+    /// </summary>
+    public EntryType entryType { get { return m_entryType; } }
+    [SerializeField] private EntryType m_entryType = EntryType.Local;
     public enum EntryType
     {
         Local,

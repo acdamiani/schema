@@ -17,6 +17,8 @@ namespace SchemaEditor
             //Used to receive mouseUp events outside the window
             controlId = GUIUtility.GetControlID(FocusType.Passive);
 
+            windowInfo.shouldCheckConnectionHover = false;
+
             switch (e.rawType)
             {
                 case EventType.MouseDown:
@@ -155,6 +157,13 @@ namespace SchemaEditor
                         requestingConnection.RemoveConnection(orphanNode);
                         orphanNode = null;
                     }
+                    if (windowInfo.lastClicked == Window.Hovering.Node && windowInfo.hoveredConnection != null && windowInfo.selected.Count == 1 && !editingPaused)
+                    {
+                        windowInfo.hoveredConnection.parent.SplitConnection(windowInfo.selected[0], windowInfo.hoveredConnection);
+
+                        GetViewRect(100f, false);
+                        target.TraverseTree();
+                    }
                     break;
                 case Window.Hovering.InConnection:
                     if (!editingPaused)
@@ -227,6 +236,8 @@ namespace SchemaEditor
 
                     if (!drawBox && requestingConnection == null && inNodeEditor && windowInfo.lastClicked == Window.Hovering.Node && !editingPaused)
                     {
+                        windowInfo.shouldCheckConnectionHover = true;
+
                         foreach (Node node in windowInfo.selected)
                         {
                             Vector2 rawMove = current.delta * windowInfo.zoom;

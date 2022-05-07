@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(SetBlackboardValueRandom)), CanEditMultipleObjects]
+[CustomEditor(typeof(Schema.Builtin.Nodes.SetBlackboardValueRandom)), CanEditMultipleObjects]
 public class SetBlackboardValueRandomEditor : Editor
 {
     SerializedProperty selector;
@@ -25,7 +25,7 @@ public class SetBlackboardValueRandomEditor : Editor
         serializedObject.Update();
 
         EditorGUILayout.PropertyField(selector);
-        BlackboardEntry entry = Blackboard.instance.GetEntry(selector.FindPropertyRelative("entryID").stringValue);
+        BlackboardEntry entry = (BlackboardEntry)selector.FindPropertyRelative("m_entry").objectReferenceValue;
 
         if (entry == null) return;
 

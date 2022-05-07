@@ -12,7 +12,7 @@ public class IsNull : Decorator
     }
     protected override void OnDecoratorEnable()
     {
-        entry.AddAllFilters();
+        entry.ApplyAllFilters();
     }
     void OnValidate()
     {

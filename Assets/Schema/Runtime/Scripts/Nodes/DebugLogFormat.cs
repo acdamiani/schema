@@ -15,7 +15,7 @@ public class DebugLogFormat : Action
         if (keys != null)
         {
             foreach (BlackboardEntrySelector key in keys)
-                key.AddAllFilters();
+                key.ApplyAllFilters();
         }
     }
     private void OnValidate()
@@ -23,7 +23,7 @@ public class DebugLogFormat : Action
         if (keys != null)
         {
             foreach (BlackboardEntrySelector key in keys)
-                key.AddAllFilters();
+                key.ApplyAllFilters();
         }
     }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

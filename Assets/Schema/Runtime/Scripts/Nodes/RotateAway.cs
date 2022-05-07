@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class RotateAway : Schema.Action
 {
-    public BlackboardEntrySelector selector = new BlackboardEntrySelector();
+    public BlackboardEntrySelector<Vector3> point;
     [Tooltip("Speed of rotation, in deg/sec")]
     public float speed;
     [Tooltip("Enable smooth interpolation")]
@@ -13,45 +13,6 @@ public class RotateAway : Schema.Action
         public Vector3 forwardInitial;
         public Quaternion rotationInitial;
         public float t;
-    }
-    void OnEnable()
-    {
-        selector.AddVector2Filter();
-        selector.AddVector3Filter();
-        selector.AddGameObjectFilter();
-    }
-    private Vector3 GetPoint(BlackboardEntrySelector selector)
-    {
-        object value = selector.value;
-        System.Type t = value.GetType();
-
-        if (value == null) return Vector3.zero;
-
-        //Not ideal to run every frame, so will be cached in the node state	
-        if (t == typeof(GameObject))
-        {
-            return ((GameObject)value).transform.position;
-        }
-        else if (t == typeof(Vector2))
-        {
-            return (Vector2)value;
-        }
-        else if (t == typeof(Vector2Int))
-        {
-            return (Vector2)value;
-        }
-        else if (t == typeof(Vector3))
-        {
-            return (Vector3)value;
-        }
-        else if (t == typeof(Vector3Int))
-        {
-            return (Vector3)value;
-        }
-        else
-        {
-            return Vector3.zero;
-        }
     }
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
@@ -65,9 +26,8 @@ public class RotateAway : Schema.Action
     {
         RotateToMemory memory = (RotateToMemory)nodeMemory;
 
-        Vector3 point = GetPoint(selector);
-        Quaternion rotation = Quaternion.FromToRotation(memory.forwardInitial, (agent.transform.position - point).normalized);
-        float angleDiff = Vector3.Angle(agent.transform.forward, (agent.transform.position - point).normalized);
+        Quaternion rotation = Quaternion.FromToRotation(memory.forwardInitial, (agent.transform.position - point.value).normalized);
+        float angleDiff = Vector3.Angle(agent.transform.forward, (agent.transform.position - point.value).normalized);
 
         if (slerp)
             agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, memory.rotationInitial * rotation, Time.deltaTime * speed / angleDiff);

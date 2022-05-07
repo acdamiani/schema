@@ -9,11 +9,5 @@ namespace SchemaEditor
 {
     public static class EditorInspector
     {
-        public static List<string> GetValuesGUI(this Decorator decorator)
-        {
-            List<string> ret = new List<string>();
-
-            return ret;
-        }
     }
 }

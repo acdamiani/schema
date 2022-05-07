@@ -33,6 +33,8 @@ namespace SchemaEditor
         {
             if (target != null)
             {
+                ProcessEvents(Event.current);
+
                 if (Event.current.type == EventType.Layout) LayoutGUI();
 
                 if (windowInfo.inspectorToggled)
@@ -96,6 +98,7 @@ namespace SchemaEditor
                     string content = @$"hoveredNode: {windowInfo.hoveredNode?.name}
 hoveredDecorator: {windowInfo.hoveredDecorator?.name}
 hoveredType: {windowInfo.hoveredType}
+hoveredConnection: {windowInfo.hoveredConnection}
 
 ";
 
@@ -104,7 +107,7 @@ hoveredType: {windowInfo.hoveredType}
                         content += @$"Position: {windowInfo.selected[0].position.ToString()}
 Area: {GetAreaWithPadding(windowInfo.selected[0], false).ToString()}
 Parent: {windowInfo.selected[0].parent?.name}
-Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node.name))}";
+Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => node.name))}";
                     }
 
                     size = EditorStyles.miniLabel.CalcSize(new GUIContent(content));
@@ -119,8 +122,6 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
                     size = EditorStyles.boldLabel.CalcSize(new GUIContent(content));
                     GUI.Label(new Rect(8f, position.height - size.y - 8f, size.x, size.y), content, EditorStyles.boldLabel);
                 }
-
-                ProcessEvents(Event.current);
 
                 if (windowInfo.isPanning) SetCursor(MouseCursor.Pan);
                 else if (windowInfo.resizingInspector || windowInfo.hoverDivider) SetCursor(MouseCursor.ResizeHorizontal);
@@ -160,11 +161,9 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
             List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
             List<BlackboardEntry> duplicateEntries = new List<BlackboardEntry>();
 
-            target.nodes.RemoveAll(node => node == null);
-
-            for (int i = 0; i < target.blackboard.entries.Count; i++)
+            for (int i = 0; i < target.blackboard.entries.Length; i++)
             {
-                for (int j = 0; j < target.blackboard.entries.Count; j++)
+                for (int j = 0; j < target.blackboard.entries.Length; j++)
                 {
                     if (j == i || duplicateEntries.Contains(target.blackboard.entries[j]))
                         continue;
@@ -176,13 +175,11 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
 
             foreach (BlackboardEntry e in duplicateEntries)
             {
-                target.blackboard.entries[target.blackboard.entries.IndexOf(e)] = ScriptableObject.Instantiate(e);
+                target.blackboard.entries[Array.IndexOf(target.blackboard.entries, e)] = ScriptableObject.Instantiate(e);
             }
 
             if (blackboardEditor && ((BlackboardEditor)blackboardEditor).selectedEntry != null)
             {
-                target.blackboard.entries.RemoveAll(x => x == null);
-
                 targets.Add(((BlackboardEditor)blackboardEditor).selectedEntry);
             }
             else if (windowInfo.selectedDecorator != null)
@@ -279,6 +276,8 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
                     Vector2 p2 = to - Vector2.up * 50f;
                     Vector2 p3 = new Vector2(to.x, to.y - 8f * windowInfo.zoom);
 
+                    CurveUtility.Bezier bezier = new CurveUtility.Bezier(p0, p1, p2, p3);
+
                     Node active = activeAgent?.GetRunningNode();
 
                     bool isActiveConnection = (EditorApplication.isPlaying
@@ -287,12 +286,32 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
                         && IsSubTreeOf(node, active)
                         && (child == active || IsSubTreeOf(child, active));
 
+                    bool intersect = false;
+
+                    Node selected = null;
+
+                    if (windowInfo.selected.Count == 1)
+                        selected = windowInfo.selected[0];
+
+                    if (selected != null && selected.canHaveParent && selected.CanHaveChildren() && selected.parent != node && selected != node)
+                        intersect = bezier.Intersect(
+                            new Rect(
+                                GridToWindowPositionNoClipped(selected.position),
+                                GetAreaWithPadding(selected, false)
+                            )
+                        );
+
+                    if (intersect && windowInfo.hoveredConnection != child && windowInfo.shouldCheckConnectionHover)
+                        windowInfo.hoveredConnection = child;
+                    else if (!intersect && windowInfo.hoveredConnection == child && windowInfo.shouldCheckConnectionHover)
+                        windowInfo.hoveredConnection = null;
+
                     Handles.DrawBezier(
                         p0,
                         p3,
                         p1,
                         p2,
-                        isActiveConnection ? NodeEditorPrefs.highlightColor : Color.white,
+                        isActiveConnection ? NodeEditorPrefs.highlightColor : (windowInfo.hoveredConnection == child ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f)),
                         null,
                         3f * windowInfo.zoom
                     );
@@ -307,7 +326,7 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
                             float t = (float)((EditorApplication.timeSinceStartup % fac) / fac);
                             t += 1f / (float)points * i;
                             t = t > 1 ? t % 1 : t;
-                            Vector2 p = CurveUtility.Position(t, p0, p1, p2, p3);
+                            Vector2 p = bezier.Position(t);
 
                             GUI.color = NodeEditorPrefs.highlightColor;
                             GUI.DrawTexture(new Rect(p.x - 4f * windowInfo.zoom, p.y - 4f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom), Styles.circle);
@@ -316,7 +335,7 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
 
                     Rect r = new Rect(to.x - 4f * windowInfo.zoom, to.y - 8f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom);
 
-                    GUI.color = isActiveConnection ? NodeEditorPrefs.highlightColor : new Color(.85f, .85f, .85f, 1f);
+                    GUI.color = isActiveConnection ? NodeEditorPrefs.highlightColor : new Color(.5f, .5f, .5f, 1f);
 
                     GUI.DrawTexture(r, Styles.arrow);
 
@@ -365,7 +384,7 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
 
             BeginZoomed(window, windowInfo.zoom, tabHeight);
 
-            List<Node> nodes = target.nodes;
+            List<Node> nodes = target.nodes.ToList();
 
             if (nodes != null)
             {
@@ -486,14 +505,11 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
 
                         GUI.color = Color.white;
 
-                        GUILayout.Label(d.name, Styles.styles.nodeLabel, GUILayout.Height(GUIData.labelHeight), GUILayout.Width(contained.width));
+                        GUILayout.Label(d.name, Styles.styles.nodeLabel, GUILayout.Height(GUIData.labelHeight), GUILayout.ExpandWidth(true));
 
-                        d.info ??= d.GetValuesGUI();
+                        GUILayout.Label(d.GetInfoContent(), Styles.styles.nodeText);
 
-                        foreach (string s in d.info)
-                        {
-                            GUILayout.Label(s, Styles.styles.nodeText, GUILayout.Height(GUIData.textHeight), GUILayout.Width(contained.width));
-                        }
+                        GUILayout.Space(GUIData.spacing / 2f);
 
                         GUILayout.EndVertical();
 
@@ -689,22 +705,18 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
                 if (decorator == null)
                     continue;
 
-                //initialize decorator info array
-                decorator.info = decorator.GetValuesGUI();
-
                 float decoratorLabelWidth = Styles.styles.nodeLabel.CalcSize(new GUIContent(decorator.name)).x;
 
                 width = Mathf.Max(width, decoratorLabelWidth);
                 height += GUIData.labelHeight;
 
-                foreach (string s in decorator.info)
-                {
-                    height += GUIData.textHeight;
-                    width = Mathf.Max(width, Styles.styles.nodeText.CalcSize(new GUIContent(s)).x);
-                }
+                Vector2 infoSize = Styles.styles.nodeText.CalcSize(decorator.GetInfoContent());
+
+                height += infoSize.y;
+                width = Mathf.Max(width, infoSize.x);
 
                 //The 4 is accounting for the area that GUILayout.BeginVertical adds when applying a background for decorators. Not sure why this happens.
-                height += GUIData.spacing + 4;
+                height += GUIData.spacing * 1.5f + 4;
             }
 
             Vector2 final = new Vector2(width + 40f, height);
@@ -747,9 +759,14 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
 
                 if (!String.IsNullOrEmpty(stringContent))
                 {
+                    GUIStyle s = new GUIStyle(EditorStyles.boldLabel);
+                    s.fixedWidth = Mathf.Min(500f, window.width - GUIData.nodePadding * 2f);
+                    s.wordWrap = true;
+
                     GUIContent content = new GUIContent(stringContent);
-                    Vector2 size = EditorStyles.boldLabel.CalcSize(content);
-                    GUI.Label(new Rect(new Vector2(GUIData.nodePadding, position.height - GUIData.nodePadding - size.y), size), content, EditorStyles.boldLabel);
+                    float height = s.CalcHeight(content, s.fixedWidth);
+                    Vector2 size = new Vector2(s.fixedWidth, height);
+                    GUI.Label(new Rect(new Vector2(GUIData.nodePadding, position.height - GUIData.nodePadding - height), size), content, s);
                 }
             }
         }
@@ -798,7 +815,7 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
             Color nodeOutlineColor = new Color(0.15f, 0.15f, 0.15f, 1f);
 
             bool hoveredNode = false;
-            for (int i = target.nodes.Count - 1; i >= 0; i--)
+            for (int i = target.nodes.Length - 1; i >= 0; i--)
             {
                 Node active = activeAgent?.GetRunningNode();
 
@@ -1128,7 +1145,6 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
                     {
                         Decorator decorator = ((Decorator)editor.targets.ToList().Find(obj => (typeof(Decorator)).IsAssignableFrom(obj.GetType())));
                         windowInfo.changedNodes.Enqueue(decorator.node);
-                        decorator.info = decorator.GetValuesGUI();
                     }
                     else
                     {
@@ -1563,6 +1579,8 @@ Children: {String.Join(", ", windowInfo.selected[0].children.Select(node => node
             public Node hoveredNode;
             public Decorator hoveredDecorator;
             public Hovering hoveredType;
+            public Node hoveredConnection;
+            public bool shouldCheckConnectionHover;
             public Hovering lastClicked;
             public bool didDragSinceMouseUp;
             public int hoveredDecoratorIndex;

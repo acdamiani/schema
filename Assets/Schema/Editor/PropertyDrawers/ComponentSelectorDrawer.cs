@@ -22,7 +22,7 @@ public class ComponentSelectorDrawer : PropertyDrawer
         }
 
         SerializedProperty useSelf = property.FindPropertyRelative("m_useSelf");
-        SerializedProperty entryID = property.FindPropertyRelative("m_entryID");
+        SerializedProperty entry = property.FindPropertyRelative("m_entry");
 
         if (!fieldTypes.ContainsKey(property.propertyPath))
         {
@@ -48,12 +48,12 @@ public class ComponentSelectorDrawer : PropertyDrawer
 
         if (!useSelf.boolValue)
         {
-            EditorGUI.BeginDisabledGroup(!String.IsNullOrEmpty(entryID.stringValue));
-            EditorGUI.EndDisabledGroup();
+            // EditorGUI.BeginDisabledGroup(entry.objectReferenceValue == null);
+            // EditorGUI.EndDisabledGroup();
             BlackboardEntrySelectorDrawer.DoSelectorMenu(buttonRect, property, fieldInfo);
         }
 
-        string name = String.IsNullOrEmpty(entryID.stringValue) ? "null" : BlackboardEntrySelectorDrawer.GetNameForID(entryID.stringValue);
+        string name = entry.objectReferenceValue == null ? "null" : entry.objectReferenceValue.name;
 
         string s = "{0} " + fieldTypes[property.propertyPath].Name + " on " + (useSelf.boolValue ? "self" : name);
 

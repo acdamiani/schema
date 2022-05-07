@@ -22,6 +22,13 @@ namespace Schema.Utilities
 #endif
         }
         static Vector3[] toReturn = new Vector3[5];
+        public static void MoveItemAtIndexToFront<T>(this T[] array, int index)
+        {
+            T item = array[index];
+            for (int i = index; i > 0; i--)
+                array[i] = array[i - 1];
+            array[0] = item;
+        }
         public static void MoveItemAtIndexToFront<T>(this List<T> list, int index)
         {
             T item = list[index];

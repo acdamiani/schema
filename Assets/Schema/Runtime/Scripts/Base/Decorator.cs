@@ -10,8 +10,8 @@ namespace Schema
     public abstract class Decorator : ScriptableObject
     {
         [HideInInspector] public string uID;
-        [NonSerialized] public List<string> info;
-        [HideInInspector] public Node node;
+        public Node node { get { return m_node; } internal set { m_node = value; } }
+        [HideInInspector, SerializeField] private Node m_node;
         /// <summary>
         /// Called during OnEnable(). Override this method instead of declaring an OnEnable method to avoid errors
         /// </summary>
@@ -29,10 +29,7 @@ namespace Schema
         /// <param name="decoratorMemory">The memory object of the decorator, which can be safely cast into the decorator's memory type</param>
         /// <param name="agent">The agent calling this method</param>
         /// <returns>Whether this decorator in the stack will allow the node to run</returns>
-        public virtual bool Evaluate(object decoratorMemory, SchemaAgent agent)
-        {
-            return true;
-        }
+        public virtual bool Evaluate(object decoratorMemory, SchemaAgent agent) { return true; }
         /// <summary>
         /// Run when flow enters the node the decorator is attached to
         /// </summary>
@@ -63,6 +60,11 @@ namespace Schema
         /// </summary>
         /// <returns>The list of errors to display</returns>
         public virtual List<Error> GetErrors() { return new List<Error>(); }
+        /// <summary>
+        /// Get the info GUIContent for this decorator. Displayed in the editor
+        /// </summary>
+        /// <returns>GUIContent to be displayed in the node editor</returns>
+        public virtual GUIContent GetInfoContent() { return GUIContent.none; }
         public Decorator()
         {
             if (string.IsNullOrEmpty(uID)) uID = Guid.NewGuid().ToString("N");
@@ -147,19 +149,6 @@ namespace Schema
             Debug.Log(name);
 
             OnDecoratorEnable();
-        }
-
-        [System.AttributeUsage(System.AttributeTargets.Field | System.AttributeTargets.Property)]
-        public class InfoAttribute : System.Attribute { }
-
-        public bool IsInfoAttributeDefined(FieldInfo field)
-        {
-            return field.IsDefined(typeof(InfoAttribute));
-        }
-
-        public bool IsInfoAttributeDefined(PropertyInfo property)
-        {
-            return property.IsDefined(typeof(InfoAttribute));
         }
         [System.AttributeUsage(System.AttributeTargets.Class)]
         public class AllowOnlyOneAttribute : System.Attribute { }

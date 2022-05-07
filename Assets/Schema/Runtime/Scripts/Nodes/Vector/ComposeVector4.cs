@@ -1,18 +1,21 @@
 using UnityEngine;
 using Schema;
 
-[Description("Composes a Vector4 with given x, y, z, and w values")]
-public class ComposeVector4 : Action
+namespace Schema.Builtin.Nodes
 {
-    public BlackboardEntrySelector<float> x;
-    public BlackboardEntrySelector<float> y;
-    public BlackboardEntrySelector<float> z;
-    public BlackboardEntrySelector<float> w;
-    [Tooltip("Entry to store composed vector in"), WriteOnly] public BlackboardEntrySelector<Vector4> target;
-    public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
+    [Description("Composes a Vector4 with given x, y, z, and w values")]
+    public class ComposeVector4 : Action
     {
-        target.value = new Vector4(x.value, y.value, z.value, w.value);
+        public BlackboardEntrySelector<float> x;
+        public BlackboardEntrySelector<float> y;
+        public BlackboardEntrySelector<float> z;
+        public BlackboardEntrySelector<float> w;
+        [Tooltip("Entry to store composed vector in"), WriteOnly] public BlackboardEntrySelector<Vector4> target;
+        public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
+        {
+            target.value = new Vector4(x.value, y.value, z.value, w.value);
 
-        return NodeStatus.Success;
+            return NodeStatus.Success;
+        }
     }
 }

@@ -41,8 +41,11 @@ public class Blackboard : ScriptableObject
         { typeof(GameObject),     Color.black },
         { typeof(AnimationCurve), Color.black }
     };
-    public List<BlackboardEntry> entries = new List<BlackboardEntry>();
-    public string[] entryByteStrings { get; private set; }
+    /// <summary>
+    /// Array of entries for the Blackboard
+    /// </summary>
+    public BlackboardEntry[] entries { get { return m_entries; } }
+    [SerializeField] private BlackboardEntry[] m_entries = Array.Empty<BlackboardEntry>();
     void OnEnable()
     {
         Dictionary<Type, Color> copy = new Dictionary<Type, Color>(typeColors);
@@ -51,16 +54,13 @@ public class Blackboard : ScriptableObject
 
         foreach (BlackboardEntry entry in entries)
             entry.blackboard = this;
-
-        entryByteStrings = GetEntryByteStrings();
-        //
     }
     public System.Tuple<int, int> GetMask(List<string> filters)
     {
         List<Type> typeArray = filters.Select(s => Type.GetType(s)).ToList();
 
         int ret1 = 0;
-        for (int i = entries.Count - 1; i >= 0; i--)
+        for (int i = entries.Length - 1; i >= 0; i--)
         {
             bool entryIncluded = typeArray.Contains(entries[i].type);
 
@@ -79,13 +79,6 @@ public class Blackboard : ScriptableObject
 
         return new System.Tuple<int, int>(ret1, ret2);
     }
-    public BlackboardEntry GetEntry(string uID)
-    {
-        if (entries != null)
-            return entries.Find(x => x != null && x.uID.Equals(uID));
-        else
-            return null;
-    }
     /// <summary>
     /// Add an entry to the Blackboard
     /// </summary>
@@ -97,7 +90,7 @@ public class Blackboard : ScriptableObject
         BlackboardEntry entry = ScriptableObject.CreateInstance<BlackboardEntry>();
         entry.blackboard = this;
         entry.name = UniqueName(type.Name + "Key", entries.Select(e => e.name).ToList());
-        entry.typeString = type.AssemblyQualifiedName;
+        entry.type = type;
         entry.hideFlags = HideFlags.HideInHierarchy;
 
         if (!String.IsNullOrEmpty(AssetDatabase.GetAssetPath(this)))
@@ -109,9 +102,8 @@ public class Blackboard : ScriptableObject
             Undo.RegisterCompleteObjectUndo(this, actionName);
         }
 
-        entries.Add(entry);
+        ArrayUtility.Add(ref m_entries, entry);
 
-        entryByteStrings = GetEntryByteStrings();
         entryListChanged?.Invoke(this);
     }
     private string UniqueName(string desiredName, List<string> names)
@@ -128,56 +120,36 @@ public class Blackboard : ScriptableObject
         if (undo)
         {
             Undo.RegisterCompleteObjectUndo(this, actionName);
-            entries.Remove(entry);
+            ArrayUtility.Remove(ref m_entries, entry);
             Undo.DestroyObjectImmediate(entry);
         }
         else
         {
-            entries.Remove(entry);
+            ArrayUtility.Remove(ref m_entries, entry);
             ScriptableObject.DestroyImmediate(entry, true);
         }
 
-        entryByteStrings = GetEntryByteStrings();
         entryListChanged?.Invoke(this);
     }
     public void RemoveEntry(int index, string actionName = "Remove Entry", bool undo = true)
     {
-        if (index > entries.Count - 1) return;
+        if (index > entries.Length - 1) return;
 
         BlackboardEntry entry = entries[index];
 
         if (undo)
         {
             Undo.RegisterCompleteObjectUndo(this, actionName);
-            entries.Remove(entry);
+            ArrayUtility.Remove(ref m_entries, entry);
             Undo.DestroyObjectImmediate(entry);
         }
         else
         {
-            entries.Remove(entry);
+            ArrayUtility.Remove(ref m_entries, entry);
             ScriptableObject.DestroyImmediate(entry, true);
         }
 
-        entryByteStrings = GetEntryByteStrings();
         entryListChanged?.Invoke(this);
-    }
-    private string[] GetEntryByteStrings()
-    {
-        string[] ret = new string[entries.Count];
-
-        for (int i = ret.Length - 1; i >= 0; i--)
-        {
-            BlackboardEntry entry = entries[i];
-
-            byte[] guidBytes = System.Text.Encoding.ASCII.GetBytes(entry.uID);
-            byte[] nameBytes = System.Text.Encoding.ASCII.GetBytes(entry.name);
-
-            string s = Convert.ToBase64String(guidBytes.Concat(nameBytes).ToArray());
-
-            ret[ret.Length - i - 1] = s;
-        }
-
-        return ret;
     }
     public static void InvokeEntryTypeChanged(BlackboardEntry entry)
     {

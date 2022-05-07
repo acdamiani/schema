@@ -143,6 +143,25 @@ namespace Schema
 
             to.parent = this;
         }
+        public void SplitConnection(Node to, Node child, string actionName = "Split Connection", bool undo = true)
+        {
+            if (undo)
+            {
+                Undo.RegisterCompleteObjectUndo(this, actionName);
+                Undo.RegisterCompleteObjectUndo(child, actionName);
+                Undo.RegisterCompleteObjectUndo(to, actionName);
+            }
+
+            if (!m_children.Contains(child))
+                return;
+
+            int i = Array.IndexOf(m_children, child);
+            m_children[i] = to;
+
+            to.parent = this;
+            to.children = new Node[] { child };
+            child.parent = to;
+        }
         /// <summary>
         /// Disconnect from another child node
         /// </summary>

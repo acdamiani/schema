@@ -10,18 +10,37 @@ namespace Schema
     [Serializable]
     public class Graph : ScriptableObject
     {
-        public Root root;
-        public List<Node> nodes = new List<Node>();
-        public Blackboard blackboard;
-#if UNITY_EDITOR
-        public float zoom = 1f;
-        public Vector2 pan;
-#endif
+        /// <summary>
+        /// Root of graph
+        /// </summary>
+        public Root root { get { return m_root; } }
+        [SerializeField] private Root m_root;
+        /// <summary>
+        /// Blackboard for this entry
+        /// </summary>
+        public Blackboard blackboard { get { return m_blackboard; } }
+        [SerializeField] private Blackboard m_blackboard;
+        /// <summary>
+        /// Array of nodes for the graph
+        /// </summary>
+        public Node[] nodes { get { return m_nodes; } }
+        [SerializeField] private Node[] m_nodes = Array.Empty<Node>();
+        // public List<Node> nodes = new List<Node>();
+        /// <summary>
+        /// Zoom level of the graph view
+        /// </summary>
+        public float zoom { get { return m_zoom; } set { m_zoom = value; } }
+        [SerializeField] private float m_zoom = 1f;
+        /// <summary>
+        /// Pan vector of the graph view
+        /// </summary>
+        public Vector2 pan { get { return m_pan; } set { m_pan = value; } }
+        [SerializeField] private Vector2 m_pan;
         public void Initialize()
         {
             if (blackboard == null)
             {
-                blackboard = ScriptableObject.CreateInstance<Blackboard>();
+                m_blackboard = ScriptableObject.CreateInstance<Blackboard>();
                 blackboard.hideFlags = HideFlags.HideInHierarchy;
 
                 string path = AssetDatabase.GetAssetPath(this);
@@ -31,7 +50,7 @@ namespace Schema
             }
 
             if (root == null)
-                root = AddNode<Root>(Vector2.zero);
+                m_root = AddNode<Root>(Vector2.zero);
 
             TraverseTree();
         }
@@ -64,7 +83,7 @@ namespace Schema
                 Undo.RegisterCompleteObjectUndo(this, "Node Added");
             }
 
-            nodes.Add(node);
+            ArrayUtility.Add(ref m_nodes, node);
 
             return node;
         }
@@ -88,7 +107,7 @@ namespace Schema
             if (undo)
                 Undo.RegisterCompleteObjectUndo(this, "Node Added");
 
-            nodes.Add(node);
+            ArrayUtility.Add(ref m_nodes, node);
         }
         /// <summary>
         /// Duplicates a given node and adds it to the tree.
@@ -120,7 +139,7 @@ namespace Schema
                 Undo.RegisterCompleteObjectUndo(this, "Node Duplicated");
             }
 
-            nodes.Add(duplicate);
+            ArrayUtility.Add(ref m_nodes, duplicate);
 
             return duplicate;
         }
@@ -213,7 +232,7 @@ namespace Schema
             int groupIndex = Undo.GetCurrentGroup();
 
             Undo.RegisterCompleteObjectUndo(this, "Delete Nodes");
-            this.nodes = this.nodes.Except(nodesWithoutRoot).ToList();
+            this.m_nodes = this.nodes.Except(nodesWithoutRoot).ToArray();
 
             foreach (Node node in nodesWithoutRoot)
             {

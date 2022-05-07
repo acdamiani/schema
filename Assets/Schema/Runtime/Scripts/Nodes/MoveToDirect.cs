@@ -6,70 +6,25 @@ using Schema;
 [LightIcon("Light/MoveToDirect")]
 internal class MoveToDirect : Action
 {
-    class MoveToDirectMemory
-    {
-        public Vector3 point;
-        public object lastValue;
-    }
     public float speed = 1;
     public bool rotateTowardsTarget;
-    public BlackboardEntrySelector selector = new BlackboardEntrySelector();
-    private void OnEnable()
-    {
-        selector.AddGameObjectFilter();
-        selector.AddVector2Filter();
-        selector.AddVector3Filter();
-    }
-    private Vector3 GetPoint(BlackboardEntrySelector selector)
-    {
-        object value = selector.value;
-        System.Type t = value.GetType();
-
-        //Not ideal to run every frame, so will be cached in the node state	
-        if (t == typeof(GameObject))
-        {
-            return ((GameObject)value).transform.position;
-        }
-        else if (t == typeof(Vector2))
-        {
-            return (Vector2)value;
-        }
-        else if (t == typeof(Vector2Int))
-        {
-            return (Vector2)value;
-        }
-        else if (t == typeof(Vector3))
-        {
-            return (Vector3)value;
-        }
-        else if (t == typeof(Vector3Int))
-        {
-            return (Vector3)value;
-        }
-        else
-        {
-            return Vector3.zero;
-        }
-    }
+    public BlackboardEntrySelector<Vector3> point;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (selector.empty)
+        if (!point.empty)
         {
-            MoveToDirectMemory memory = (MoveToDirectMemory)nodeMemory;
-            memory.point = GetPoint(selector);
-
             if (rotateTowardsTarget)
             {
-                Vector3 target = (agent.transform.position - memory.point).normalized;
+                Vector3 target = (agent.transform.position - point.value).normalized;
                 Quaternion rotation = agent.transform.rotation * Quaternion.LookRotation(target);
                 agent.transform.rotation = rotation;
             }
 
-            if (Vector3.SqrMagnitude(agent.transform.position - memory.point) < 0.1f)
+            if (Vector3.SqrMagnitude(agent.transform.position - point.value) < 0.1f)
             {
                 return NodeStatus.Success;
             }
-            agent.transform.position = Vector3.MoveTowards(agent.transform.position, memory.point, speed * Time.deltaTime);
+            agent.transform.position = Vector3.MoveTowards(agent.transform.position, point.value, speed * Time.deltaTime);
             return NodeStatus.Running;
         }
         else

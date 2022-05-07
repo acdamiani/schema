@@ -23,7 +23,6 @@ public class DebugLogEditor : Editor
             boxStyle.richText = true;
         }
 
-
         serializedObject.Update();
 
         EditorGUILayout.PropertyField(message);

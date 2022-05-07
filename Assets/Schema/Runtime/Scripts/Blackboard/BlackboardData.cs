@@ -8,20 +8,20 @@ internal static class BlackboardDataContainer
     {
         foreach (BlackboardEntry entry in blackboard.entries)
         {
-            if (!values.ContainsKey(entry.uID))
-                values.Add(entry.uID, new EntryData(entry));
+            if (!values.ContainsKey(entry))
+                values.Add(entry, new EntryData(entry));
         }
     }
-    private static Dictionary<string, EntryData> values = new Dictionary<string, EntryData>();
-    public static object Get(string id, int pid)
+    private static Dictionary<BlackboardEntry, EntryData> values = new Dictionary<BlackboardEntry, EntryData>();
+    public static object Get(BlackboardEntry entry, int pid)
     {
-        values.TryGetValue(id, out EntryData data);
+        values.TryGetValue(entry, out EntryData data);
 
         return data?.GetValue(pid);
     }
-    public static void Set(string id, int pid, object value)
+    public static void Set(BlackboardEntry entry, int pid, object value)
     {
-        values.TryGetValue(id, out EntryData data);
+        values.TryGetValue(entry, out EntryData data);
 
         data?.SetValue(pid, value);
     }

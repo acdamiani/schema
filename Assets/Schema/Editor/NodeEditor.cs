@@ -262,7 +262,7 @@ namespace SchemaEditor
                 windowInfo.selected.Add(node);
             }
 
-            target.nodes.MoveItemAtIndexToFront(target.nodes.IndexOf(node));
+            target.nodes.MoveItemAtIndexToFront(Array.IndexOf(target.nodes, node));
 
             EditorApplication.delayCall += () => SceneView.RepaintAll();
         }
@@ -878,7 +878,7 @@ namespace SchemaEditor
         {
             if (recalculate)
             {
-                nodeCount = target.nodes.Count;
+                nodeCount = target.nodes.Length;
 
                 float xMax = target.nodes.Max(node => node.position.x + GetAreaWithPadding(node, false).x);
                 float xMin = target.nodes.Min(node => node.position.x);

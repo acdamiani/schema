@@ -14,11 +14,10 @@ public class BlackboardCondition : Decorator
         IsNotSet
     }
 
-    [Info]
     private string aborts => "Aborts " + abortsType.ToString();
     private void OnEnable()
     {
-        blackboardKey.AddAllFilters();
+        blackboardKey.ApplyAllFilters();
     }
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {

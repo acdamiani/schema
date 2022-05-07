@@ -26,16 +26,10 @@ public class DebugLogFormatEditor : Editor
             boxStyle.richText = true;
         }
 
-        string[] names = new string[0];
-        if (debugLog != null && debugLog.keys != null)
-        {
-            names = debugLog.keys.Select(key =>
-            {
-                BlackboardEntrySelectorDrawer.names.TryGetValue(key.entryID, out string name);
+        string[] names = null;
 
-                return name;
-            }).ToArray();
-        }
+        if (debugLog != null && debugLog.keys != null)
+            names = debugLog.keys.Select(key => key.entry?.name).ToArray();
 
         serializedObject.Update();
 

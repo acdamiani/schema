@@ -9,7 +9,7 @@ public class GraphEditor : Editor
     {
         Graph active = (Graph)target;
 
-        int count = active.nodes == null ? 0 : active.nodes.Count;
+        int count = active.nodes == null ? 0 : active.nodes.Length;
 
         GUILayout.Label(count + (count == 1 ? " node" : " nodes"));
         GUILayout.Space(10);

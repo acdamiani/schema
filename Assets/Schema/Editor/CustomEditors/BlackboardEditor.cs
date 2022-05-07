@@ -16,7 +16,7 @@ public class BlackboardEditor : Editor
     private SearchField searchField;
     private string searchValue = "";
     private Editor entryEditor;
-    private string editing;
+    private BlackboardEntry editing;
     public void OnEnable()
     {
         if (target != null && target.GetType() == typeof(Blackboard))
@@ -26,10 +26,11 @@ public class BlackboardEditor : Editor
     }
     public void DeselectAll()
     {
-        if (!String.IsNullOrEmpty(editing))
+        if (editing == null)
             Rename(selectedEntry, newEntryName);
+
         GUI.FocusControl("");
-        editing = "";
+        editing = null;
         selectedEntry = null;
     }
     public override void OnInspectorGUI()
@@ -56,7 +57,7 @@ public class BlackboardEditor : Editor
 
         scroll = GUILayout.BeginScrollView(scroll);
 
-        IEnumerable<BlackboardEntry> globals = blackboard.entries.FindAll(entry => entry.entryType == BlackboardEntry.EntryType.Global);
+        IEnumerable<BlackboardEntry> globals = Array.FindAll(blackboard.entries, entry => entry.entryType == BlackboardEntry.EntryType.Global);
         IEnumerable<BlackboardEntry> locals = blackboard.entries.Except(globals);
 
         DrawEntryList(locals);
@@ -66,11 +67,11 @@ public class BlackboardEditor : Editor
 
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
         {
-            if (!String.IsNullOrEmpty(editing))
+            if (editing == null)
                 Rename(selectedEntry, newEntryName);
             selectedEntry = null;
             GUI.FocusControl("");
-            editing = "";
+            editing = null;
         }
 
         if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
@@ -113,9 +114,9 @@ public class BlackboardEditor : Editor
             {
                 if (selectedEntry != entry)
                 {
-                    if (!String.IsNullOrEmpty(editing))
+                    if (editing == null)
                         Rename(selectedEntry, newEntryName);
-                    editing = "";
+                    editing = null;
                     GUI.FocusControl("");
                 }
 
@@ -134,7 +135,7 @@ public class BlackboardEditor : Editor
 
         foreach (Type key in keys)
         {
-            menu.AddItem(new GUIContent(key.Name), false, () =>
+            menu.AddItem(new GUIContent(NameAliases.GetAliasForType(key)), false, () =>
             {
                 blackboard.AddEntry(key);
             });
@@ -144,11 +145,11 @@ public class BlackboardEditor : Editor
     }
     private void RemoveSelected()
     {
-        int i = blackboard.entries.IndexOf(selectedEntry) - 1;
+        int i = Array.IndexOf(blackboard.entries, selectedEntry) - 1;
         blackboard.RemoveEntry(selectedEntry);
         i = i > 0 ? i : 0;
 
-        if (blackboard.entries.Count > 0)
+        if (blackboard.entries.Length > 0)
             selectedEntry = blackboard.entries[i];
         else
             selectedEntry = null;
@@ -160,7 +161,6 @@ public class BlackboardEditor : Editor
 
         Undo.RegisterCompleteObjectUndo(entry, "Rename Entry");
         entry.name = name;
-        BlackboardEntrySelectorDrawer.names[entry.uID] = entry.name;
     }
     private void DrawEntry(BlackboardEntry entry)
     {
@@ -204,30 +204,30 @@ public class BlackboardEditor : Editor
 
         Rect name;
 
-        GUIContent textContent = new GUIContent(entry.uID == editing ? newEntryName : entry.name);
+        GUIContent textContent = new GUIContent(entry == editing ? newEntryName : entry.name);
 
-        r = GUILayoutUtility.GetRect(textContent, entry.uID == editing ? Styles.styles.nameField : Styles.styles.nodeText);
+        r = GUILayoutUtility.GetRect(textContent, entry == editing ? Styles.styles.nameField : Styles.styles.nodeText);
         name = new Rect(r.x, r.y, r.width, 16f);
 
         if (current.clickCount == 2 && current.button == 0 && name.Contains(current.mousePosition))
         {
-            editing = entry.uID;
-            GUI.FocusControl(entry.uID);
+            editing = entry;
+            GUI.FocusControl(entry.name);
             newEntryName = entry.name;
         }
 
-        GUI.SetNextControlName(entry.uID);
+        GUI.SetNextControlName(entry.name);
 
-        if (entry.uID == editing)
+        if (entry == editing)
             newEntryName = GUI.TextField(name, textContent.text, Styles.styles.nameField);
         else
             GUI.Label(name, textContent, Styles.styles.nodeText);
 
-        if (entry.uID == editing && GUI.GetNameOfFocusedControl() != entry.uID)
+        if (entry == editing && GUI.GetNameOfFocusedControl() != entry.name)
         {
             Rename(entry, newEntryName);
             Debug.Log("done");
-            editing = "";
+            editing = null;
         }
 
         GUILayout.FlexibleSpace();

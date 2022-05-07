@@ -50,8 +50,8 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/EditorHelperMethods.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/GraphEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/BlackboardCompareEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Resources/a.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/VectorAngleEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/ComponentSelectorDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetBoundsEditor.cs" />
@@ -83,9 +83,9 @@
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntrySelectorDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/RaycastEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagFilterDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetBlackboardValueRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
     <Reference Include="UnityEngine">
