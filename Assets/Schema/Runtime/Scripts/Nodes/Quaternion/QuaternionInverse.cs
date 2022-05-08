@@ -7,16 +7,16 @@ namespace Schema.Builtin.Nodes
 {
     [DarkIcon("c_Transform")]
     [LightIcon("c_Transform")]
-    [Description("Normalize a Quaternion")]
-    public class NormalizeQuaternion : Action
+    [Description("Get the inverse of a quaternion rotation")]
+    public class QuaternionInverse : Action
     {
-        [Tooltip("Quaternion to normalize")]
+        [Tooltip("Rotation to invert")]
         public BlackboardEntrySelector<Quaternion> quaternion;
-        [Tooltip("Blackboard variable to store the normalized vector in"), WriteOnly]
-        public BlackboardEntrySelector<Quaternion> normalized;
+        [Tooltip("Blackboard variable to store the inverted rotation in"), WriteOnly]
+        public BlackboardEntrySelector<Quaternion> inverted;
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
-            normalized.value = Quaternion.Normalize(quaternion.value);
+            inverted.value = Quaternion.Inverse(quaternion.value);
 
             return NodeStatus.Success;
         }

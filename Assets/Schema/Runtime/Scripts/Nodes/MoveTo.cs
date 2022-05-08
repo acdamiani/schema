@@ -4,7 +4,7 @@ using Schema;
 
 [DarkIcon("Dark/MoveTo")]
 [LightIcon("Light/MoveTo")]
-[RequireAgentComponent(typeof(NavMeshAgent))]
+[Category("Movement")]
 public class MoveTo : Action
 {
     class MoveToMemory

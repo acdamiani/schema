@@ -277,8 +277,15 @@ namespace SchemaEditor
         {
             Event current = Event.current;
 
-            if (current.button == 0 && windowInfo.searchIsShown && !windowInfo.searchRect.Contains(current.mousePosition))
-                ToggleSearch();
+            // if (current.button == 0 && windowInfo.searchIsShown && !windowInfo.searchRect.Contains(current.mousePosition))
+            // {
+            //     ToggleSearch();
+            // }
+            if (windowInfo.searchIsShown)
+            {
+                return;
+            }
+
 
             switch (current.button)
             {

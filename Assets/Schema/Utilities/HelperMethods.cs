@@ -184,7 +184,7 @@ namespace Schema.Utilities
             //Gets all categories for Nodes
             return Assembly.GetAssembly(typeof(Node)).GetTypes().Where(type => type != typeof(Root) && type.IsClass && type.BaseType == typeof(Node));
         }
-        public static IEnumerable<Type> GetEnumerableOfType(Type type, params object[] constructorArgs)
+        public static IEnumerable<Type> GetEnumerableOfType(Type type)
         {
             List<Type> objects = new List<Type>();
             foreach (Type t in
@@ -194,6 +194,10 @@ namespace Schema.Utilities
                 objects.Add(t);
             }
             return objects;
+        }
+        public static bool ContentEqual(this GUIContent c1, GUIContent c2)
+        {
+            return c1.text == c2.text && c1.image == c2.image && c1.tooltip == c2.tooltip;
         }
         public static bool IsNumeric(this Type type)
         {

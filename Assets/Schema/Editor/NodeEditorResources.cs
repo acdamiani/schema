@@ -54,26 +54,54 @@ internal static class Styles
     public static Texture2D preAudioLoopOff => _preAudioLoopOff != null ? _preAudioLoopOff : _preAudioLoopOff = EditorGUIUtility.FindTexture("preAudioLoopOff@2x");
     public static GUIContent visibilityToggleOffContent => _visibilityToggleOffContent != null ? _visibilityToggleOffContent : _visibilityToggleOffContent = new GUIContent(EditorGUIUtility.FindTexture("animationvisibilitytoggleoff"), "Toggle Inspector On");
     public static GUIContent visibilityToggleOnContent => _visibilityToggleOnContent != null ? _visibilityToggleOnContent : _visibilityToggleOnContent = new GUIContent("", EditorGUIUtility.FindTexture("animationvisibilitytoggleon"), "Toggle Inspector Off");
-    public static Texture2D gridTexture
-    {
-        get
-        {
-            if (_gridTexture == null) _gridTexture = GenerateGridTexture(Color.grey, windowBackground);
-            return _gridTexture;
-        }
-    }
+    public static Texture2D gridTexture => _gridTexture == null ? _gridTexture = GenerateGridTexture(Color.grey, windowBackground) : _gridTexture;
     private static Texture2D _crossTexture;
-    public static Texture2D crossTexture
+    public static Texture2D crossTexture => _crossTexture == null ? _crossTexture = GenerateCrossTexture(Color.gray) : _crossTexture;
+    private static Texture2D _searchBackground;
+    public static Texture2D searchBackground
+    {
+        get { return _searchBackground == null ? _searchBackground = GenerateSolid(Styles.windowBackground, new Vector2Int(1, 1)) : _searchBackground; }
+    }
+    private static Texture2D _favorite;
+    public static Texture2D favorite => _favorite == null ? _favorite = FindTexture("Favorite On Icon") : _favorite;
+    private static Texture2D _folder;
+    public static Texture2D folder => _folder == null ? _folder = (Texture2D)EditorGUIUtility.IconContent("Folder Icon").image : _folder;
+    private static Texture2D _folderOpen;
+    public static Texture2D folderOpen => _folderOpen == null ? _folderOpen = FindTexture("FolderOpened Icon") : _folderOpen;
+    private static Texture2D _next;
+    public static Texture2D next => _next == null ? _next = (Texture2D)EditorGUIUtility.IconContent("d_tab_next").image : _next;
+    private static Texture2D _prev;
+    public static Texture2D prev => _prev == null ? _prev = (Texture2D)EditorGUIUtility.IconContent("d_tab_prev").image : _prev;
+    private static GUIStyle _quickSearch;
+    public static GUIStyle quickSearch
     {
         get
         {
-            if (_crossTexture == null) _crossTexture = GenerateCrossTexture(Color.grey);
-            return _crossTexture;
+            if (_quickSearch == null)
+            {
+                _quickSearch = new GUIStyle();
+                _quickSearch.normal.background = searchBackground;
+            }
+
+            return _quickSearch;
         }
     }
     private static StylesObj _styles;
     public static StylesObj styles => _styles ??= new StylesObj();
+    private static Texture2D FindTexture(string baseName)
+    {
+        bool darkMode = EditorGUIUtility.isProSkin;
+        string name = (darkMode ? "d_" : "") + baseName;
 
+        Texture2D tex = (Texture2D)EditorGUIUtility.IconContent(baseName).image;
+
+        if (tex != null)
+            return tex;
+
+        tex = EditorGUIUtility.FindTexture(baseName);
+
+        return tex;
+    }
     private static Texture2D GenerateGridTexture(Color line, Color bg)
     {
         Texture2D tex = new Texture2D(64, 64);
@@ -213,7 +241,7 @@ internal static class Styles
                 alignment = TextAnchor.MiddleCenter
             };
 
-            addNodeWindow = new GUIStyle
+            addNodeWindow = new GUIStyle(GUI.skin.window)
             {
                 normal =
                 {
@@ -222,7 +250,9 @@ internal static class Styles
                 onNormal =
                 {
                     background = GenerateSolid(windowAccent, Vector2Int.one * 32)
-                }
+                },
+                margin = new RectOffset(0, 0, 0, 0),
+                padding = new RectOffset(0, 0, 16, 0)
             };
 
             backgroundBg = new GUIStyle
@@ -255,7 +285,7 @@ internal static class Styles
                 hover =
                 {
                     textColor = Color.gray
-                }
+                },
             };
 
             nameField = new GUIStyle("PR TextField");

@@ -7,6 +7,7 @@ namespace Schema.Builtin.Nodes
 {
     [DarkIcon("c_Transform")]
     [LightIcon("c_Transform")]
+    [Category("Vector")]
     [Description("Take the dot product of two vectors")]
     public class VectorDot : Action
     {

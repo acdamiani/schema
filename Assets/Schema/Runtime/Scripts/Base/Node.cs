@@ -425,6 +425,82 @@ namespace Schema
         /// <returns>A list of errors to display in the editor</returns>
         public virtual List<Error> GetErrors() { return new List<Error>(); }
         /// <summary>
+        /// Define a custom category for a node
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class CategoryAttribute : System.Attribute
+        {
+            public string category;
+            /// <summary>
+            /// Define a custom category for a node
+            /// </summary>
+            /// <param name="category">Content to use for the category in the search menu</param>
+            public CategoryAttribute(string category)
+            {
+                this.category = category;
+            }
+        }
+        public static Dictionary<string, IEnumerable<Type>> GetNodeCategories()
+        {
+            Dictionary<string, List<Type>> dict = new Dictionary<string, List<Type>>();
+
+            foreach (Type nodeType in Schema.Utilities.HelperMethods.GetEnumerableOfType(typeof(Node)))
+            {
+                CategoryAttribute attribute = nodeType.GetCustomAttribute<CategoryAttribute>();
+
+                List<Type> t = null;
+
+                string key = attribute == null ? "" : attribute.category;
+
+                dict.TryGetValue(key, out t);
+
+                if (t == null)
+                    dict[key] = new List<Type>() { nodeType };
+                else
+                    t.Add(nodeType);
+            }
+
+            return dict.ToDictionary(x => x.Key, x => x.Value.AsEnumerable());
+        }
+        public static Texture2D GetNodeIcon(Type type)
+        {
+            string darkLocation;
+            string lightLocation;
+
+            DarkIconAttribute attribute = type.GetCustomAttribute<DarkIconAttribute>();
+            LightIconAttribute attribute1 = type.GetCustomAttribute<LightIconAttribute>();
+
+            if (attribute == null)
+                darkLocation = "NOT FOUND";
+            else
+                darkLocation = attribute.location;
+
+            if (attribute == null)
+                lightLocation = "NOT FOUND";
+            else
+                lightLocation = attribute.location;
+
+            //Use dark texture
+            if (EditorGUIUtility.isProSkin && !darkLocation.Equals("NOT FOUND"))
+            {
+                Type iconType = darkLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType("UnityEngine." + darkLocation.Substring(2)) : null;
+
+                Debug.Log(iconType);
+
+                return iconType != null ? (Texture2D)EditorGUIUtility.ObjectContent(null, iconType).image : Resources.Load<Texture2D>(darkLocation);
+            }
+            else if (!String.IsNullOrEmpty(lightLocation) && !lightLocation.Equals("NOT FOUND"))
+            {
+                Type iconType = lightLocation.StartsWith("c_") ? Type.GetType(lightLocation.Substring(2)) : null;
+
+                return iconType != null ? (Texture2D)EditorGUIUtility.ObjectContent(null, iconType).image : Resources.Load<Texture2D>(lightLocation);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        /// <summary>
         /// Where Schema should load the dark mode icon within a resources folder
         /// </summary>
         [System.AttributeUsage(AttributeTargets.Class)]

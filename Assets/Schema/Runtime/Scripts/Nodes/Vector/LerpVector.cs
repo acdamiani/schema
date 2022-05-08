@@ -5,6 +5,7 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [Category("Vector")]
     [Description("Linearly interpolate between two Vectors")]
     public class LerpVector : Action
     {

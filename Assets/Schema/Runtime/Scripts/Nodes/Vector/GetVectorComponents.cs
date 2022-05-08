@@ -5,7 +5,7 @@ namespace Schema.Builtin.Nodes
 {
     public class GetVectorComponents : Action
     {
-        [Tooltip("Vector to use to get components")] public BlackboardEntrySelector vector;
+        [Tooltip("Vector to use to get components")] public BlackboardEntrySelector vector = new BlackboardEntrySelector();
         [WriteOnly] public BlackboardEntrySelector<float> x;
         [WriteOnly] public BlackboardEntrySelector<float> y;
         [WriteOnly] public BlackboardEntrySelector<float> z;

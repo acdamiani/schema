@@ -12,7 +12,7 @@ public class DownloadIcon : MonoBehaviour
     }
     public static void Download()
     {
-        Texture tex = EditorGUIUtility.ObjectContent(null, typeof(Animator)).image;
+        Texture tex = (Texture2D)EditorGUIUtility.IconContent("d_Favorite Enabled Icon").image;
 
         RenderTexture tmp = RenderTexture.GetTemporary(
                 tex.width,
@@ -23,7 +23,6 @@ public class DownloadIcon : MonoBehaviour
                 );
 
         Graphics.Blit(tex, tmp);
-
 
         List<byte> test = new System.Collections.Generic.List<byte>();
         RenderTexture.active = tmp;
@@ -36,6 +35,5 @@ public class DownloadIcon : MonoBehaviour
         byte[] pixels = texture.EncodeToPNG();
 
         System.IO.File.WriteAllBytes(System.IO.Path.Combine(Application.dataPath, "Schema/test.png"), pixels);
-
     }
 }

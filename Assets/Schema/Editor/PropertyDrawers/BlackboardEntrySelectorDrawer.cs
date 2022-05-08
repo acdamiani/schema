@@ -76,9 +76,10 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             if (doesHavePath)
             {
                 Rect p = EditorGUI.PrefixLabel(textRect, new GUIContent("\0"));
-                Vector2 size = EditorStyles.miniLabel.CalcSize(new GUIContent($"Using {entryValue.name}"));
+                GUIContent content = new GUIContent($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
+                Vector2 size = EditorStyles.miniLabel.CalcSize(content);
                 GUI.BeginClip(p, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
-                GUI.Label(new Rect(0f, 0f, size.x, 20f), $"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}", EditorStyles.miniLabel);
+                GUI.Label(new Rect(0f, 0f, size.x, 20f), content, EditorStyles.miniLabel);
                 GUI.EndClip();
 
                 if (size.x > p.width && p.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
@@ -135,7 +136,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     }
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        SerializedProperty valueProp = property.FindPropertyRelative("_value");
+        SerializedProperty valueProp = property.FindPropertyRelative("m_inspectorValue");
         SerializedProperty entry = property.FindPropertyRelative("m_entry");
 
         bool lastWideMode = EditorGUIUtility.wideMode;
@@ -151,7 +152,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         }
 
         if (valueProp != null && !info[property.propertyPath].writeOnly)
-            height = EditorGUI.GetPropertyHeight(valueProp, label, true) + (entry.objectReferenceValue == null ? EditorGUIUtility.singleLineHeight : 0);
+            height = EditorGUI.GetPropertyHeight(valueProp, label, true) + (entry.objectReferenceValue != null ? EditorGUIUtility.singleLineHeight : 0);
         else
             height = base.GetPropertyHeight(property, label);
 

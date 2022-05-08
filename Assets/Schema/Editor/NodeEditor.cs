@@ -1043,7 +1043,7 @@ namespace SchemaEditor
                 get => EditorPrefs.GetBool("SCHEMA_PREF__enableDebugView", false);
                 set => EditorPrefs.SetBool("SCHEMA_PREF__enableDebugView", value);
             }
-            private static Color GetColor(string key, Color defaultValue)
+            public static Color GetColor(string key, Color defaultValue)
             {
                 float r = EditorPrefs.GetFloat(key + "_r", defaultValue.r);
                 float g = EditorPrefs.GetFloat(key + "_g", defaultValue.g);
@@ -1052,12 +1052,22 @@ namespace SchemaEditor
 
                 return new Color(r, g, b, a);
             }
-            private static void SetColor(string key, Color value)
+            public static void SetColor(string key, Color value)
             {
                 EditorPrefs.SetFloat(key + "_r", value.r);
                 EditorPrefs.SetFloat(key + "_g", value.g);
                 EditorPrefs.SetFloat(key + "_b", value.b);
                 EditorPrefs.SetFloat(key + "_a", value.a);
+            }
+            public static IEnumerable<string> GetList(string key)
+            {
+                string s = EditorPrefs.GetString(key, "");
+
+                return s.Split(',');
+            }
+            public static void SetList(string key, IEnumerable<string> values)
+            {
+                EditorPrefs.SetString(key, String.Join(",", values));
             }
             public static void ResetToDefault()
             {

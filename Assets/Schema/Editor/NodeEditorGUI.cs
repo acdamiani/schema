@@ -51,6 +51,10 @@ namespace SchemaEditor
                 DrawNodes();
                 DrawWindow();
                 DrawMinimap();
+
+                if (windowInfo.searchIsShown)
+                    QuickSearch.DoSearch(window, (float)EditorApplication.timeSinceStartup);
+
                 DrawToolbar();
                 DrawInspector();
 
@@ -151,8 +155,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 EndWindows();
             }
 
-            if (windowInfo != null)
+            if (windowInfo != null && Event.current.type == EventType.Repaint)
                 windowInfo.timeLastFrame = Time.realtimeSinceStartup;
+
             Repaint();
         }
 
@@ -750,9 +755,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 Handles.DrawSolidRectangleWithOutline(r, new Color(0, 0, 0, 0.1f), new Color(1, 1, 1, 0.6f));
             }
 
-            if (windowInfo.searchIsShown)
-                windowInfo.searchRect = RenderSearch(windowInfo.searchRect);
-
             if (windowInfo.selected.Count == 1 || windowInfo.selectedDecorator != null)
             {
                 string stringContent = windowInfo.selectedDecorator != null ? windowInfo.selectedDecorator.description : windowInfo.selected[0].description;
@@ -760,7 +762,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 if (!String.IsNullOrEmpty(stringContent))
                 {
                     GUIStyle s = new GUIStyle(EditorStyles.boldLabel);
-                    s.fixedWidth = Mathf.Min(500f, window.width - GUIData.nodePadding * 2f);
+                    s.fixedWidth = window.width - GUIData.nodePadding * 2f;
                     s.wordWrap = true;
 
                     GUIContent content = new GUIContent(stringContent);
@@ -1188,135 +1190,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 shouldFocusSearch = false;
             }
         }
-        private Rect RenderSearch(Rect rect)
-        {
-            BeginWindows();
-
-            Rect r = GUILayout.Window(1, rect, DoSearchWindow, "", Styles.styles.addNodeWindow);
-
-            EndWindows();
-
-            return r;
-        }
-        private void DoSearchWindow(int winID)
-        {
-            bool mouseClick = false;
-
-            List<Type> results = GetSearchResults(windowInfo.searchText);
-            Type current = results.Find(t => GUI.GetNameOfFocusedControl().Equals(t.Name));
-            if (results.Count > 0)
-                current ??= results[0];
-
-            switch (Event.current.type)
-            {
-                //Event checks must be done inside the window function
-                case EventType.KeyDown when Event.current.keyCode == KeyCode.Escape:
-                    ToggleSearch();
-                    break;
-                case EventType.KeyDown when Event.current.keyCode == KeyCode.Return:
-                    {
-                        if (results.Count > 0)
-                        {
-                            if (windowInfo.searchWantsNode)
-                                target.AddNode(current, WindowToGridPosition(window.size * 0.5f));
-                            else
-                                target.AddDecorators(windowInfo.selected, current);
-                        }
-                        ToggleSearch();
-                        break;
-                    }
-                case EventType.KeyDown when Event.current.keyCode == KeyCode.UpArrow:
-                    if (results.Count > 0)
-                    {
-                        int nextIndex = results.IndexOf(current) - 1;
-
-                        nextIndex = Mathf.Clamp(nextIndex, 0, results.Count - 1);
-
-                        GUI.FocusControl(results[nextIndex].Name);
-                    }
-
-                    break;
-                case EventType.KeyDown when Event.current.keyCode == KeyCode.DownArrow:
-                    if (results.Count > 0)
-                    {
-                        int nextIndex = results.IndexOf(current) + 1;
-
-                        nextIndex = Mathf.Clamp(nextIndex, 0, results.Count - 1);
-
-                        GUI.FocusControl(results[nextIndex].Name);
-                    }
-
-                    break;
-                case EventType.MouseDown when Event.current.button == 0:
-                    mouseClick = true;
-                    break;
-            }
-
-            GUILayout.BeginVertical(Styles.styles.backgroundBg);
-
-            GUILayout.Label(windowInfo.searchWantsNode ? "Add Node" : "Add Decorator", EditorStyles.whiteLargeLabel);
-
-            GUILayout.BeginHorizontal(GUILayout.Height(32));
-            GUILayout.Space(8);
-            GUILayout.BeginVertical(GUILayout.Width(24), GUILayout.Height(32));
-            GUILayout.FlexibleSpace();
-            GUILayout.Label(new GUIContent(Styles.searchIcon), Styles.styles.searchbar, GUILayout.Height(24), GUILayout.Width(24));
-            GUILayout.FlexibleSpace();
-            GUILayout.EndVertical();
-            GUILayout.Space(8);
-            GUI.SetNextControlName("SearchTextField");
-            windowInfo.searchText = GUILayout.TextField(windowInfo.searchText, Styles.styles.searchbar, GUILayout.ExpandHeight(true));
-            GUILayout.EndHorizontal();
-
-            GUILayout.EndVertical();
-
-            GUI.color = Color.white;
-
-            bool resultIsFocused = results.Any(t => GUI.GetNameOfFocusedControl().Equals(t.Name));
-
-            windowInfo.searchbarScroll = GUILayout.BeginScrollView(new Vector2(0f, windowInfo.searchbarScroll)).y;
-
-            for (int i = 0; i < results.Count; i++)
-            {
-                Type t = results[i];
-                bool thisResultIsFocused = GUI.GetNameOfFocusedControl().Equals(t.Name);
-
-                if (resultIsFocused)
-                    GUI.backgroundColor = thisResultIsFocused ? GUI.skin.settings.selectionColor : new Color(0f, 0f, 0f, 0f);
-                else
-                    GUI.backgroundColor = i == 0 ? GUI.skin.settings.selectionColor : new Color(0f, 0f, 0f, 0f);
-
-                GUI.SetNextControlName(t.Name);
-                GUILayout.Box(t.Name, Styles.styles.searchResult, GUILayout.ExpandWidth(true));
-
-                if (mouseClick && GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition))
-                {
-                    if (thisResultIsFocused)
-                    {
-                        if (windowInfo.searchWantsNode)
-                        {
-                            target.AddNode(t, WindowToGridPosition(window.size * 0.5f));
-                        }
-                        else
-                        {
-                            target.AddDecorators(windowInfo.selected, t);
-                            windowInfo.selected.ForEach(n => windowInfo.changedNodes.Enqueue(n));
-                        }
-                        ToggleSearch();
-                    }
-                    else
-                    {
-                        GUI.FocusControl(t.Name);
-                    }
-                }
-
-                GUI.backgroundColor = Color.white;
-            }
-
-            GUILayout.EndScrollView();
-
-            GUI.DragWindow();
-        }
         void DoSplashWindow(int winID)
         {
             if (windowInfo == null) return;
@@ -1598,6 +1471,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             public Rect minimapView;
             public bool settingsShown;
             public bool useLiveLink;
+            public UnityEditor.IMGUI.Controls.SearchField search;
             private float _inspectorWidth = 350f;
             public float inspectorWidth
             {
