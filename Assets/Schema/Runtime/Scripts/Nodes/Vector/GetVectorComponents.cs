@@ -3,6 +3,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [Description("Decompose a vector to get its components")]
+    [Category("Vector")]
     public class GetVectorComponents : Action
     {
         [Tooltip("Vector to use to get components")] public BlackboardEntrySelector vector = new BlackboardEntrySelector();

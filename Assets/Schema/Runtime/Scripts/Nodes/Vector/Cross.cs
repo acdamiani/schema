@@ -8,6 +8,7 @@ namespace Schema.Builtin.Nodes
     [DarkIcon("c_Transform")]
     [LightIcon("c_Transform")]
     [Description("Take the cross product of two Vector3 values")]
+    [Category("Vector")]
     public class Cross : Action
     {
         [Tooltip("LHS of the cross product")]

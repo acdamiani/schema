@@ -53,7 +53,10 @@ namespace SchemaEditor
                 DrawMinimap();
 
                 if (windowInfo.searchIsShown)
-                    QuickSearch.DoSearch(window, (float)EditorApplication.timeSinceStartup);
+                {
+                    if (QuickSearch.DoSearch(window, target, WindowToGridPosition(window.size * 0.5f), (float)EditorApplication.timeSinceStartup))
+                        windowInfo.searchIsShown = false;
+                }
 
                 DrawToolbar();
                 DrawInspector();
@@ -446,8 +449,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                         IsLowerPriority(windowInfo.selectedDecorator.node, node) &&
                         windowInfo.selectedDecorator.node.priority < node.priority)
                         GUI.color = Styles.lowerPriorityColor;
-                    else if (EditorGUIUtility.isProSkin)
-                        GUI.color = new Color32(80, 80, 80, 255);
+                    else
+                        GUI.color = EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : new Color32(176, 176, 176, 255);
 
                     GUI.Box(rect, "", Styles.styles.nodeSelected);
 
@@ -458,7 +461,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     if (node.priority > 0)
                     {
                         Handles.color = Styles.windowAccent;
-                        Handles.DrawAAConvexPolygon(HelperMethods.Circle(new Vector2(rect.x, rect.center.y), 15f, 18));
+                        Vector3[] circle = HelperMethods.Circle(new Vector2(rect.x, rect.center.y), 15f, 16);
+                        Handles.DrawAAConvexPolygon(circle);
                         Handles.color = Color.white;
 
                         GUI.Label(new Rect(rect.x - 15f, rect.center.y - 15f, 30f, 30f), node.priority.ToString(), Styles.styles.title);

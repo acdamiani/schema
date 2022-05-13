@@ -380,6 +380,10 @@ namespace SchemaEditor
 
             switch (current.keyCode)
             {
+                case KeyCode.Escape:
+                    windowInfo.searchIsShown = false;
+
+                    break;
                 case KeyCode.H:
                 case KeyCode.LeftArrow:
                     if (windowInfo.selected.Count == 0 || windowInfo.searchIsShown)
@@ -457,6 +461,11 @@ namespace SchemaEditor
         }
         private void ScrollWheel()
         {
+            if (windowInfo.searchIsShown)
+            {
+                return;
+            }
+
             Event current = Event.current;
 
             if (windowInfo.hoveredType != Window.Hovering.Inspector && windowInfo.hoveredType != Window.Hovering.None)

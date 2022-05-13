@@ -58,6 +58,7 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEntryEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Components/PatrolRouteEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/ConeCheckEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/QuickSearch.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorIKPositionEditor.cs" />
@@ -87,7 +88,6 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetBlackboardValueRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
-     <Compile Include="Assets/Schema/Editor/QuickSearch.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
     <Reference Include="UnityEngine">

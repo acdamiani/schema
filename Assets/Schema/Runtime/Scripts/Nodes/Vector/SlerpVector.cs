@@ -6,6 +6,7 @@ using Schema;
 namespace Schema.Builtin.Nodes
 {
     [Description("Spherically interpolate between two Vectors")]
+    [Category("Vector")]
     public class SlerpVector : Action
     {
         [Tooltip("Vector A")]

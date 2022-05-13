@@ -6,6 +6,7 @@ using Schema;
 namespace Schema.Builtin.Nodes
 {
     [Description("Find the distance between two Vector values")]
+    [Category("Vector")]
     public class Distance : Action
     {
         [Tooltip("Vector A")]

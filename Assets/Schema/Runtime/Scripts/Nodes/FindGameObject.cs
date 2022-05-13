@@ -1,8 +1,8 @@
 using Schema;
 using UnityEngine;
 
-[DarkIcon("Dark/FindGameObject")]
-[LightIcon("Light/FindGameObject")]
+[DarkIcon("c_Schema.Graph")]
+[LightIcon("c_Schema.Graph")]
 public class FindGameObject : Action
 {
     public string gameObjectName;

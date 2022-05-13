@@ -5,6 +5,7 @@ using Schema;
 
 [DarkIcon("c_Rigidbody")]
 [LightIcon("c_Rigidbody")]
+[Category("Rigidbody")]
 [RequireAgentComponent(typeof(Rigidbody))]
 public class AddForce : Action
 {

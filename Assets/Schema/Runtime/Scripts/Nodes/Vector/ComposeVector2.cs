@@ -5,6 +5,7 @@ namespace Schema.Builtin.Nodes
 {
     [DarkIcon("c_Transform")]
     [LightIcon("c_Transform")]
+    [Category("Vector")]
     [Description("Composes a Vector2 with given x and y values")]
     public class ComposeVector2 : Action
     {

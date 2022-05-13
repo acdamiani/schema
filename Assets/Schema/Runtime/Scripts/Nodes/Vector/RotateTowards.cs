@@ -6,6 +6,7 @@ using Schema;
 namespace Schema.Builtin.Nodes
 {
     [Description("Rotates a vector towards a target")]
+    [Category("Vector")]
     public class RotateTowards : Action
     {
         [Tooltip("Current managed vector")]

@@ -6,6 +6,7 @@ using Schema;
 namespace Schema.Builtin.Nodes
 {
     [Description("Reflects a vector off another vector")]
+    [Category("Vector")]
     public class ReflectVector : Action
     {
         [Tooltip("Vector A")]

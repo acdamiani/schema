@@ -120,9 +120,10 @@ namespace Schema
 
             if (string.IsNullOrEmpty(uID)) m_uID = Guid.NewGuid().ToString("N");
 
-            OnNodeEnable();
+            _icon = GetNodeIcon(GetType());
+            usingProSkin = EditorGUIUtility.isProSkin;
 
-            GenerateIcon();
+            OnNodeEnable();
         }
         /// <summary>
         /// Add a connection to another node
@@ -404,20 +405,28 @@ namespace Schema
             //Use dark texture
             if (EditorGUIUtility.isProSkin && !_darkIconLocation.Equals("NOT FOUND"))
             {
-                Type iconType = _darkIconLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType("UnityEngine." + _darkIconLocation.Substring(2)) : null;
+                Type iconType = _darkIconLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType(_darkIconLocation.Substring(2)) : null;
 
-                Debug.Log(iconType);
+                if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
+                    iconType = null;
 
-                _icon = iconType != null ? (Texture2D)EditorGUIUtility.ObjectContent(null, iconType).image : Resources.Load<Texture2D>(_darkIconLocation);
+                _icon = iconType != null
+                    ? (Texture2D)EditorGUIUtility.ObjectContent((UnityEngine.Object)Activator.CreateInstance(iconType), iconType).image
+                    : Resources.Load<Texture2D>(_darkIconLocation);
             }
             else if (!String.IsNullOrEmpty(_lightIconLocation) && !_lightIconLocation.Equals("NOT FOUND"))
             {
-                Type iconType = _lightIconLocation.StartsWith("c_") ? Type.GetType(_lightIconLocation.Substring(2)) : null;
+                Type iconType = _lightIconLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType(_lightIconLocation.Substring(2)) : null;
 
-                _icon = iconType != null ? (Texture2D)EditorGUIUtility.ObjectContent(null, iconType).image : Resources.Load<Texture2D>(_lightIconLocation);
+                if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
+                    iconType = null;
+
+                _icon = iconType != null
+                    ? (Texture2D)EditorGUIUtility.ObjectContent((UnityEngine.Object)Activator.CreateInstance(iconType), iconType).image
+                    : Resources.Load<Texture2D>(_lightIconLocation);
             }
 
-            usingProTextures = EditorGUIUtility.isProSkin;
+            usingProSkin = EditorGUIUtility.isProSkin;
         }
         /// <summary>
         /// The current errors for this node
@@ -483,17 +492,43 @@ namespace Schema
             //Use dark texture
             if (EditorGUIUtility.isProSkin && !darkLocation.Equals("NOT FOUND"))
             {
-                Type iconType = darkLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType("UnityEngine." + darkLocation.Substring(2)) : null;
+                Type iconType = darkLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType(darkLocation.Substring(2)) : null;
 
-                Debug.Log(iconType);
+                if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
+                    iconType = null;
 
-                return iconType != null ? (Texture2D)EditorGUIUtility.ObjectContent(null, iconType).image : Resources.Load<Texture2D>(darkLocation);
+                UnityEngine.Object obj = null;
+
+                if (typeof(ScriptableObject).IsAssignableFrom(iconType))
+                    obj = ScriptableObject.CreateInstance(iconType);
+
+                Texture2D ret = iconType != null
+                    ? (Texture2D)EditorGUIUtility.ObjectContent(obj, iconType).image
+                    : Resources.Load<Texture2D>(darkLocation);
+
+                DestroyImmediate(obj);
+
+                return ret;
             }
             else if (!String.IsNullOrEmpty(lightLocation) && !lightLocation.Equals("NOT FOUND"))
             {
-                Type iconType = lightLocation.StartsWith("c_") ? Type.GetType(lightLocation.Substring(2)) : null;
+                Type iconType = lightLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType(lightLocation.Substring(2)) : null;
 
-                return iconType != null ? (Texture2D)EditorGUIUtility.ObjectContent(null, iconType).image : Resources.Load<Texture2D>(lightLocation);
+                if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
+                    iconType = null;
+
+                UnityEngine.Object obj = null;
+
+                if (typeof(ScriptableObject).IsAssignableFrom(iconType))
+                    obj = ScriptableObject.CreateInstance(iconType);
+
+                Texture2D ret = iconType != null
+                    ? (Texture2D)EditorGUIUtility.ObjectContent(obj, iconType).image
+                    : Resources.Load<Texture2D>(lightLocation);
+
+                DestroyImmediate(obj);
+
+                return ret;
             }
             else
             {
@@ -575,13 +610,16 @@ namespace Schema
         {
             get
             {
-                if (usingProTextures != EditorGUIUtility.isProSkin)
-                    GenerateIcon();
+                if (usingProSkin != EditorGUIUtility.isProSkin)
+                {
+                    _icon = GetNodeIcon(GetType());
+                    usingProSkin = EditorGUIUtility.isProSkin;
+                }
 
                 return _icon;
             }
         }
-        private bool usingProTextures;
+        private bool usingProSkin;
 #endif
     }
 }

@@ -6,6 +6,7 @@ using Schema;
 namespace Schema.Builtin.Nodes
 {
     [Description("Calculate a position between the points specified by current and target, moving no farther than the distance specified by maxDistanceDelta.")]
+    [Category("Vector")]
     public class MoveTowards : Action
     {
         [Tooltip("The position to move from.")]

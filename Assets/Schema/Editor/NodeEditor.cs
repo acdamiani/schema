@@ -36,7 +36,6 @@ namespace SchemaEditor
             }
             decoratorTypes = HelperMethods.GetEnumerableOfType(typeof(Decorator)).ToArray();
         }
-
         [MenuItem("Window/AI/Behavior Editor")]
         static void OpenWindow()
         {
@@ -199,8 +198,6 @@ namespace SchemaEditor
         }
         void FocusSearch()
         {
-            Debug.Log(searchWantsFocus);
-
             if (searchWantsFocus)
             {
                 EditorGUI.FocusTextInControl("SearchTextField");
@@ -913,7 +910,7 @@ namespace SchemaEditor
             }
         }
         //--SCHEMA SHORTCUTS--//
-        [Shortcut("Schema/Add Node", KeyCode.A, ShortcutModifiers.Shift)]
+        [Shortcut("Schema/Add Node", KeyCode.A, ShortcutModifiers.Action | ShortcutModifiers.Shift)]
         private static void AddNodeCommand()
         {
             if (instance == null) return;

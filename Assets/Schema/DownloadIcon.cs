@@ -12,7 +12,7 @@ public class DownloadIcon : MonoBehaviour
     }
     public static void Download()
     {
-        Texture tex = (Texture2D)EditorGUIUtility.IconContent("d_Favorite Enabled Icon").image;
+        Texture tex = (Texture2D)EditorGUIUtility.ObjectContent(null, typeof(UnityEditorInternal.AssemblyDefinitionAsset)).image;
 
         RenderTexture tmp = RenderTexture.GetTemporary(
                 tex.width,

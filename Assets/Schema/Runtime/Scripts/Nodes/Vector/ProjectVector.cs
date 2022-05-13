@@ -7,6 +7,7 @@ namespace Schema.Builtin.Nodes
 {
     [DarkIcon("c_Transform")]
     [LightIcon("c_Transform")]
+    [Category("Vector")]
     [Description("Projects a vector onto another vector")]
     public class ProjectVector : Action
     {

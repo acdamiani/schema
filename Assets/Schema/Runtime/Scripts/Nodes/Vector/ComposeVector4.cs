@@ -4,6 +4,7 @@ using Schema;
 namespace Schema.Builtin.Nodes
 {
     [Description("Composes a Vector4 with given x, y, z, and w values")]
+    [Category("Vector")]
     public class ComposeVector4 : Action
     {
         public BlackboardEntrySelector<float> x;

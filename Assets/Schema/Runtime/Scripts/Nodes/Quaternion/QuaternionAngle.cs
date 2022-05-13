@@ -5,11 +5,12 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("c_Transform")]
-    [LightIcon("c_Transform")]
+    [DarkIcon("Dark/Rotate")]
+    [LightIcon("Dark/Rotate")]
     [Description("Get the angle between two quaternion rotations")]
     public class QuaternionAngle : Action
     {
+
         [Tooltip("Quaternion A")]
         public BlackboardEntrySelector<Quaternion> quaternionOne;
         [Tooltip("Quaternion B")]

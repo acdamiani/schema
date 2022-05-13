@@ -69,9 +69,9 @@ internal static class Styles
     private static Texture2D _folderOpen;
     public static Texture2D folderOpen => _folderOpen == null ? _folderOpen = FindTexture("FolderOpened Icon") : _folderOpen;
     private static Texture2D _next;
-    public static Texture2D next => _next == null ? _next = (Texture2D)EditorGUIUtility.IconContent("d_tab_next").image : _next;
+    public static Texture2D next => _next == null ? _next = FindTexture("tab_next") : _next;
     private static Texture2D _prev;
-    public static Texture2D prev => _prev == null ? _prev = (Texture2D)EditorGUIUtility.IconContent("d_tab_prev").image : _prev;
+    public static Texture2D prev => _prev == null ? _prev = FindTexture("tab_prev") : _prev;
     private static GUIStyle _quickSearch;
     public static GUIStyle quickSearch
     {
@@ -81,9 +81,57 @@ internal static class Styles
             {
                 _quickSearch = new GUIStyle();
                 _quickSearch.normal.background = searchBackground;
+                _quickSearch.padding = new RectOffset(0, 0, 8, 8);
             }
 
             return _quickSearch;
+        }
+    }
+    private static GUIStyle _searchHighlight;
+    public static GUIStyle searchHighlight
+    {
+        get
+        {
+            if (_searchHighlight == null)
+            {
+                _searchHighlight = new GUIStyle(EditorStyles.boldLabel);
+                _searchHighlight.padding = new RectOffset(0, 0, 0, 0);
+                _searchHighlight.margin = new RectOffset(0, 0, 0, 0);
+                _searchHighlight.contentOffset = new Vector2(0, 0);
+                _searchHighlight.normal.textColor = Color.yellow;
+                _searchHighlight.hover.textColor = Color.yellow;
+            }
+
+            return _searchHighlight;
+        }
+    }
+    private static GUIStyle _searchResult;
+    public static GUIStyle searchResult
+    {
+        get
+        {
+            if (_searchResult == null)
+            {
+                _searchResult = new GUIStyle(EditorStyles.label);
+                _searchResult.padding = new RectOffset(0, 0, 0, 0);
+                _searchResult.margin = new RectOffset(0, 0, 0, 0);
+            }
+
+            return _searchResult;
+        }
+    }
+    private static GUIStyle _searchTitle;
+    public static GUIStyle searchTitle
+    {
+        get
+        {
+            if (_searchTitle == null)
+            {
+                _searchTitle = new GUIStyle(EditorStyles.boldLabel);
+                _searchTitle.fontSize = 16;
+            }
+
+            return _searchTitle;
         }
     }
     private static StylesObj _styles;

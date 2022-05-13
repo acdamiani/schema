@@ -6,6 +6,7 @@ using Schema;
 namespace Schema.Builtin.Nodes
 {
     [Description("Normalize a Vector")]
+    [Category("Vector")]
     public class NormalizeVector : Action
     {
         [Tooltip("Vector to normalize")]
