@@ -405,7 +405,7 @@ namespace Schema
             //Use dark texture
             if (EditorGUIUtility.isProSkin && !_darkIconLocation.Equals("NOT FOUND"))
             {
-                Type iconType = _darkIconLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType(_darkIconLocation.Substring(2)) : null;
+                Type iconType = _darkIconLocation.StartsWith("c_") ? Type.GetType(_darkIconLocation.Substring(2)) : null;
 
                 if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
                     iconType = null;
@@ -416,7 +416,7 @@ namespace Schema
             }
             else if (!String.IsNullOrEmpty(_lightIconLocation) && !_lightIconLocation.Equals("NOT FOUND"))
             {
-                Type iconType = _lightIconLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType(_lightIconLocation.Substring(2)) : null;
+                Type iconType = _lightIconLocation.StartsWith("c_") ? Type.GetType(_lightIconLocation.Substring(2)) : null;
 
                 if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
                     iconType = null;
@@ -492,7 +492,7 @@ namespace Schema
             //Use dark texture
             if (EditorGUIUtility.isProSkin && !darkLocation.Equals("NOT FOUND"))
             {
-                Type iconType = darkLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType(darkLocation.Substring(2)) : null;
+                Type iconType = darkLocation.StartsWith("c_") ? Type.GetType("UnityEngine." + darkLocation.Substring(2) + ",UnityEngine") : null;
 
                 if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
                     iconType = null;
@@ -512,7 +512,7 @@ namespace Schema
             }
             else if (!String.IsNullOrEmpty(lightLocation) && !lightLocation.Equals("NOT FOUND"))
             {
-                Type iconType = lightLocation.StartsWith("c_") ? Schema.Utilities.HelperMethods.FindType(lightLocation.Substring(2)) : null;
+                Type iconType = lightLocation.StartsWith("c_") ? Type.GetType(lightLocation.Substring(2)) : null;
 
                 if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
                     iconType = null;

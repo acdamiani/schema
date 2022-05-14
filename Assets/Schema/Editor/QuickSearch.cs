@@ -46,7 +46,6 @@ public static class QuickSearch
         QuickSearch.target = target;
         QuickSearch.newNodePosition = newNodePosition;
 
-
         GUI.Box(searchRect, "", Styles.quickSearch);
 
         GUILayout.BeginArea(searchRect);
@@ -57,8 +56,11 @@ public static class QuickSearch
 
         EditorGUI.BeginChangeCheck();
 
+        GUI.SetNextControlName("searchField");
         searchText = searchField.OnToolbarGUI(searchText);
         searchFavorites = GUILayout.Toggle(searchFavorites, "Favorites", EditorStyles.toolbarButton, GUILayout.Width(125));
+
+        searchField.downOrUpArrowKeyPressed += () => GUI.FocusControl("");
 
         if (EditorGUI.EndChangeCheck())
             selected = -1;
@@ -247,13 +249,6 @@ public static class QuickSearch
         transitionStartTime = (float)EditorApplication.timeSinceStartup;
         offset = new Vector2(folderView ? -searchRect.width : 0f, 0f);
         selected = -1;
-
-        float f = (float)EditorApplication.timeSinceStartup;
-
-        for (int i = 0; i < 100; i++)
-            Schema.Node.GetNodeIcon(typeof(FindGameObject));
-
-        Debug.Log(EditorApplication.timeSinceStartup - f);
     }
     // private static Tuple<bool, Type> RenderContents(IEnumerable<Type> contents, Type selected, string title, string searchValue)
     // {
