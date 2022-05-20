@@ -12,23 +12,16 @@ public class FindGameObject : Action
     public BlackboardEntrySelector<GameObject> gameObject;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (gameObject.empty)
-        {
-            GameObject found = GameObject.Find(gameObjectName);
+        GameObject found = GameObject.Find(gameObjectName);
 
-            if (!found)
-            {
-                return NodeStatus.Failure;
-            }
-            else
-            {
-                gameObject.value = found;
-                return NodeStatus.Success;
-            }
+        if (!found)
+        {
+            return NodeStatus.Failure;
         }
         else
         {
-            return NodeStatus.Failure;
+            gameObject.value = found;
+            return NodeStatus.Success;
         }
     }
 }

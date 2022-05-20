@@ -375,14 +375,12 @@ namespace SchemaEditor
         private void KeyDown()
         {
             Event current = Event.current;
-
             Node next;
 
             switch (current.keyCode)
             {
                 case KeyCode.Escape:
                     windowInfo.searchIsShown = false;
-
                     break;
                 case KeyCode.H:
                 case KeyCode.LeftArrow:

@@ -29,7 +29,7 @@ public class DebugLogFormatEditor : Editor
         string[] names = null;
 
         if (debugLog != null && debugLog.keys != null)
-            names = debugLog.keys.Select(key => key.entry?.name).ToArray();
+            names = debugLog.keys.Select(key => key.entryName).ToArray();
 
         serializedObject.Update();
 

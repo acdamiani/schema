@@ -103,7 +103,6 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/RotateTowards.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObjectWithTag.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Quaternion/QuaternionAngleAxis.cs" />
-     <Compile Include="Assets/Schema/Utilities/DynamicProperty.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Blackboard/SetBool.cs" />
      <Compile Include="Assets/Schema/Utilities/HelperMethods.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/GetAnimatorVariable.cs" />
@@ -130,6 +129,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/BlackboardCondition.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntrySelector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/SlerpVector.cs" />
+     <Compile Include="Assets/Schema/DownloadIconEditor.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/RequireAgentComponentAttribute.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/SetAnimatorLookAt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Node.cs" />
@@ -408,6 +408,9 @@
     </Reference>
     <Reference Include="log4netPlastic">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.15.15/Lib/Editor/PlasticSCM/log4netPlastic.dll</HintPath>
+    </Reference>
+    <Reference Include="DynamicProperty">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Assets/Schema/Utilities/DynamicProperty.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2021.3.0f1/Editor/Data/NetStandard/ref/2.1.0/netstandard.dll</HintPath>

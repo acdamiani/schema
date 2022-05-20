@@ -14,9 +14,6 @@ public class Raycast : Decorator
     public TagFilter tagFilter;
     public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
     {
-        if (point.empty)
-            return false;
-
         return TestCone(agent);
     }
     public override void DrawGizmos(SchemaAgent agent)
@@ -54,15 +51,6 @@ public class Raycast : Decorator
         }
 
         return hits.Any(hit => tagFilter.tags.Contains(hit.transform.tag));
-    }
-    public override List<Error> GetErrors()
-    {
-        List<Error> errors = new List<Error>();
-
-        if (type == RaycastType.Dynamic && point.empty)
-            errors.Add(new Error("Raycast is marked as dynamic but no valid key picked", Error.Severity.Warning));
-
-        return errors;
     }
     public enum RaycastType
     {

@@ -156,6 +156,8 @@ public class SchemaAgent : MonoBehaviour
         while (!ticked)
         {
             OptimizedNode node = graph.nodes[currentIndex];
+            SchemaManager.currentNode = node;
+            SchemaManager.currentParentNode = node.parent >= 0 ? graph.nodes[node.parent] : null;
             string nodeID = node.node.uID;
 
             switch (node.typeCode)

@@ -5,10 +5,10 @@ using System.Collections.Generic;
 public class DownloadIcon : MonoBehaviour
 {
     public bool test;
+    public BlackboardEntrySelector<float> selector;
     void Awake()
     {
-        Debug.Log("hey");
-        Download();
+        DynamicPropertyBuilder.Build();
     }
     public static void Download()
     {

@@ -1,9 +1,14 @@
 using Schema;
 using UnityEngine;
 
+[DarkIcon("c_Transform")]
+[LightIcon("c_Transform")]
+[Category("Transform")]
+[Description("Rotate a Transform towards a target smoothly")]
 public class RotateTo : Schema.Action
 {
-    public BlackboardEntrySelector<Vector3> selector;
+    [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
+    [Tooltip("Target to rotate towards")] public BlackboardEntrySelector<Vector3> target;
     [Tooltip("Speed of rotation, in deg/sec")]
     public float speed;
     [Tooltip("Enable smooth interpolation")]
@@ -26,7 +31,7 @@ public class RotateTo : Schema.Action
     {
         RotateToMemory memory = (RotateToMemory)nodeMemory;
 
-        Vector3 point = selector.value;
+        Vector3 point = target.value;
 
         Debug.Log(point);
 

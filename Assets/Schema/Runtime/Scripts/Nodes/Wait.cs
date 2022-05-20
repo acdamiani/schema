@@ -11,7 +11,7 @@ namespace Schema.Builtin.Nodes
         {
             public float startTime;
         }
-        public BlackboardEntrySelector<float> seconds;
+        public BlackboardEntrySelector<float> seconds = new BlackboardEntrySelector<float>(0.001f);
         void OnValidate()
         {
             seconds.inspectorValue = seconds.inspectorValue > 0.001f ? seconds.inspectorValue : 0.001f;

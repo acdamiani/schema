@@ -13,6 +13,29 @@ internal static class BlackboardDataContainer
         }
     }
     private static Dictionary<BlackboardEntry, EntryData> values = new Dictionary<BlackboardEntry, EntryData>();
+    private static Dictionary<string, EntryData> dynamicValues = new Dictionary<string, EntryData>();
+    public static object GetDynamic(string name)
+    {
+        dynamicValues.TryGetValue(name, out EntryData data);
+
+        if (data != null && (SchemaManager.currentNode.index < data.position.Item1 || SchemaManager.currentNode.index > data.position.Item1 + data.position.Item2))
+        {
+            dynamicValues.Remove(name);
+
+            return null;
+        }
+
+        return data?.GetValue(SchemaManager.pid);
+    }
+    public static void SetDynamic(string name, object value)
+    {
+        UnityEngine.Debug.Log("setting");
+
+        if (!dynamicValues.ContainsKey(name))
+            dynamicValues[name] = new EntryData(name, SchemaManager.currentParentNode.index, SchemaManager.currentParentNode.breadth);
+
+        dynamicValues[name].SetValue(SchemaManager.pid, value);
+    }
     public static object Get(BlackboardEntry entry, int pid)
     {
         values.TryGetValue(entry, out EntryData data);
@@ -30,11 +53,22 @@ internal static class BlackboardDataContainer
         public List<object> value = new List<object>();
         private object defaultValue;
         public BlackboardEntry.EntryType type;
+        public Tuple<int, int> position = new Tuple<int, int>(-1, -1);
         public EntryData(BlackboardEntry entry)
         {
             type = entry.entryType;
             defaultValue = entry.type.IsValueType ? Activator.CreateInstance(entry.type) : null;
             value.Add(defaultValue);
+        }
+        public EntryData(object defaultValue, int index, int breadth)
+        {
+            Type t = defaultValue.GetType();
+
+            type = BlackboardEntry.EntryType.Local;
+            this.defaultValue = t.IsValueType ? Activator.CreateInstance(t) : null;
+            value.Add(this.defaultValue);
+
+            position = new Tuple<int, int>(index, breadth);
         }
         public object GetValue(int pid)
         {
@@ -43,9 +77,7 @@ internal static class BlackboardDataContainer
                 if (pid > value.Count - 1)
                 {
                     while (pid > value.Count - 1)
-                    {
                         value.Add(defaultValue);
-                    }
                     return defaultValue;
                 }
 
@@ -63,9 +95,7 @@ internal static class BlackboardDataContainer
                 if (pid > value.Count - 1)
                 {
                     while (pid > value.Count - 2)
-                    {
-                        value.Add(defaultValue);
-                    }
+                        value.Add(null);
 
                     value.Add(v);
 

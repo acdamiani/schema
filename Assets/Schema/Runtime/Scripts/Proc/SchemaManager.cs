@@ -6,8 +6,10 @@ using Schema;
 public static class SchemaManager
 {
     private static Dictionary<Graph, OptimizedGraph> map = new Dictionary<Graph, OptimizedGraph>();
-    public static int pid;
-    public static OptimizedGraph LoadGraph(Graph graph, bool reload)
+    internal static int pid;
+    internal static OptimizedNode currentNode;
+    internal static OptimizedNode currentParentNode;
+    internal static OptimizedGraph LoadGraph(Graph graph, bool reload)
     {
         if (!map.ContainsKey(graph) || reload)
         {

@@ -12,9 +12,6 @@ public class FindGameObjectWithTag : Action
     public BlackboardEntrySelector<GameObject> gameObject;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (gameObject.empty)
-            return NodeStatus.Failure;
-
         GameObject found = GameObject.FindGameObjectWithTag(gameObjectTag.tag);
 
         if (!found)

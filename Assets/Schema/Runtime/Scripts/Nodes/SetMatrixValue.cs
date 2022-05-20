@@ -19,7 +19,7 @@ public class SetMatrixValue : Action
     public BlackboardEntrySelector<float> m31;
     public BlackboardEntrySelector<float> m32;
     public BlackboardEntrySelector<float> m33;
-    [WriteOnly][DisableDynamicBinding] public BlackboardEntrySelector<Matrix4x4> target;
+    [WriteOnly, DisableDynamicBinding] public BlackboardEntrySelector<Matrix4x4> target;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         // Matrix4x4 mat = new Matrix4x4();

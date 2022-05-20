@@ -7,19 +7,21 @@ namespace Schema.Builtin.Nodes
 {
     [Description("Normalize a Vector")]
     [Category("Vector")]
+    [DarkIcon("c_Transform")]
+    [LightIcon("c_Transform")]
     public class NormalizeVector : Action
     {
         [Tooltip("Vector to normalize")]
-        public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
+        public BlackboardEntrySelector vector = new BlackboardEntrySelector();
         [Tooltip("Blackboard variable to store the normalized vector in"), WriteOnly]
         public BlackboardEntrySelector normalized = new BlackboardEntrySelector();
         protected override void OnNodeEnable()
         {
-            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+            vector.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
         }
         void OnValidate()
         {
-            switch (vectorOne.entryType?.Name)
+            switch (vector.entryType?.Name)
             {
                 case "Vector2":
                     normalized.ApplyFilter<Vector2>();
@@ -34,7 +36,7 @@ namespace Schema.Builtin.Nodes
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
-            normalized.value = Vector4.Normalize((Vector4)vectorOne.value);
+            normalized.value = Vector4.Normalize((Vector4)vector.value);
 
             return NodeStatus.Success;
         }

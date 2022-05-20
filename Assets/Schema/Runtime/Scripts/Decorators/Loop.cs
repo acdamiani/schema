@@ -30,18 +30,4 @@ internal class Loop : Decorator
             return false;
         }
     }
-    public override GUIContent GetInfoContent()
-    {
-        if (loopForInfinity)
-        {
-            return new GUIContent($"Will loop node for infinity");
-        }
-        else
-        {
-            if (count.empty)
-                return new GUIContent($"Will loop node {count.inspectorValue} time{(count.inspectorValue > 1 ? "s" : "")}");
-            else
-                return new GUIContent($"Will loop node for the value of {count.entry.name} times");
-        }
-    }
 }

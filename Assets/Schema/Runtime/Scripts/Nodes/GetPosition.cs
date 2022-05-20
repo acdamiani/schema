@@ -29,13 +29,4 @@ public class GetPosition : Action
 
         return NodeStatus.Success;
     }
-    public override List<Error> GetErrors()
-    {
-        List<Error> ret = new List<Error>();
-
-        if (positionKey.empty)
-            ret.Add(new Error("Position Key is empty", Error.Severity.Warning));
-
-        return ret;
-    }
 }

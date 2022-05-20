@@ -196,17 +196,6 @@ public class ConeCheck : Decorator
             return Mathf.Sqrt(k - 0.5f) / Mathf.Sqrt(n - (b + 1) / 2f);
         }
     }
-    public override List<Error> GetErrors()
-    {
-        if (gameObjectKey.empty)
-        {
-            return new List<Error>() { new Error("Node has no valid GameObject key in which to store the hit object", Error.Severity.Info) };
-        }
-        else
-        {
-            return new List<Error>();
-        }
-    }
 #if UNITY_EDITOR
     public override void DrawGizmos(SchemaAgent agent)
     {

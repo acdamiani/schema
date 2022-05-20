@@ -21,9 +21,6 @@ public class GetRotation : Action
     public bool local;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (!useSelf && (gameObject.empty || (eulerAngles && eulerKey.empty) || (!eulerAngles && quaternionKey.empty)))
-            return NodeStatus.Failure;
-
         if (local)
         {
             if (eulerAngles)

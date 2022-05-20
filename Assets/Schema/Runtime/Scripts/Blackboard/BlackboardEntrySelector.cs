@@ -19,12 +19,15 @@ public class BlackboardEntrySelector<T> : BlackboardEntrySelector
             if (!Application.isPlaying)
                 return default(T);
 
-            if (entry == null)
+            if (entry == null && !isDynamic)
                 return (T)inspectorValue;
 
-            T v = (T)base.value;
+            object baseValue = base.value;
 
-            return v;
+            if (baseValue is T)
+                return (T)base.value;
+            else
+                return default(T);
         }
         set
         {
@@ -36,7 +39,15 @@ public class BlackboardEntrySelector<T> : BlackboardEntrySelector
     /// </summary>
     public T inspectorValue { get { return m_inspectorValue; } set { m_inspectorValue = value; } }
     [SerializeField] private T m_inspectorValue;
+    /// <summary>
+    /// Create a blackboard entry selector
+    /// </summary>
     public BlackboardEntrySelector() : base(typeof(T)) { }
+    /// <summary>
+    /// Create a blackboard entry selector with a given initial inspectorValue
+    /// </summary>
+    /// <param name="initialInspectorValue">Default inspector value of this selector</param>
+    public BlackboardEntrySelector(T initialInspectorValue) : base(typeof(T)) { m_inspectorValue = initialInspectorValue; }
 }
 [Serializable]
 public class BlackboardEntrySelector
@@ -46,8 +57,22 @@ public class BlackboardEntrySelector
     /// BlackboardEntry for this selector
     /// </summary>
     public BlackboardEntry entry { get { return m_entry; } }
+    /// <summary>
+    /// Name of the entry referenced by this selector
+    /// </summary>
+    public string entryName { get { return m_isDynamic ? m_dynamicName : m_entry?.name; } }
     [SerializeField] private int m_mask = -1;
     [SerializeField] private string m_valuePath;
+    [SerializeField] private string m_dynamicName;
+    /// <summary>
+    /// Whether this selector is dynamic
+    /// </summary>
+    public bool isDynamic { get { return m_isDynamic; } }
+    /// <summary>
+    /// The dynamic name for this selector
+    /// </summary>
+    public string dynamicName { get { return m_dynamicName; } }
+    [SerializeField] private bool m_isDynamic;
     public Type entryType
     {
         get
@@ -63,35 +88,61 @@ public class BlackboardEntrySelector
     {
         get
         {
-            if (entry == null || !Application.isPlaying)
+            if (!Application.isPlaying)
                 return null;
 
-            object obj = BlackboardDataContainer.Get(entry, SchemaManager.pid);
+            if (m_isDynamic)
+            {
+                object obj = BlackboardDataContainer.GetDynamic(m_dynamicName);
 
-            if (obj == null)
-                return null;
-
-            if (!String.IsNullOrEmpty(m_valuePath))
-                return DynamicProperty.Get(obj, m_valuePath);
-            else
                 return obj;
+            }
+            else if (entry != null)
+            {
+                object obj = BlackboardDataContainer.Get(entry, SchemaManager.pid);
+
+                if (obj == null)
+                    return null;
+
+                if (!String.IsNullOrEmpty(m_valuePath))
+                    return DynamicProperty.Get(obj, m_valuePath);
+                else
+                    return obj;
+            }
+
+            return null;
         }
         set
         {
-            if (entry == null || !Application.isPlaying)
+            if (!Application.isPlaying)
                 return;
 
-            if (!String.IsNullOrEmpty(m_valuePath))
-                DynamicProperty.Set(this.value, m_valuePath, value);
-            else
-                BlackboardDataContainer.Set(entry, SchemaManager.pid, value);
+            if (m_isDynamic)
+            {
+                BlackboardDataContainer.SetDynamic(m_dynamicName, value);
+            }
+            else if (entry != null)
+            {
+                if (!String.IsNullOrEmpty(m_valuePath.Trim('/')))
+                {
+                    object valueObj = BlackboardDataContainer.Get(entry, SchemaManager.pid);
+
+                    if (valueObj == null)
+                        return;
+
+                    DynamicProperty.Set(valueObj, m_valuePath, value);
+                }
+                else
+                {
+                    BlackboardDataContainer.Set(entry, SchemaManager.pid, value);
+                }
+            }
         }
     }
     [SerializeField] private List<string> m_filters;
     /// <summary>
     /// Whether the entry attached to this selector is null
     /// </summary>
-    public bool empty => entry == null;
     protected BlackboardEntrySelector(params Type[] filters)
     {
         this.m_filters = filters.Select(x => x.AssemblyQualifiedName).ToList();
@@ -163,7 +214,8 @@ public class BlackboardEntrySelector
     public void ApplyFilters(IEnumerable<Type> filters)
     {
         m_filters.Clear();
-        if (!filters.Contains(entryType))
+
+        if (entryType != null && !filters.Contains(entryType))
             m_entry = null;
 
         this.m_filters = filters

@@ -11,25 +11,18 @@ internal class MoveToDirect : Action
     public BlackboardEntrySelector<Vector3> point;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if (!point.empty)
+        if (rotateTowardsTarget)
         {
-            if (rotateTowardsTarget)
-            {
-                Vector3 target = (agent.transform.position - point.value).normalized;
-                Quaternion rotation = agent.transform.rotation * Quaternion.LookRotation(target);
-                agent.transform.rotation = rotation;
-            }
+            Vector3 target = (agent.transform.position - point.value).normalized;
+            Quaternion rotation = agent.transform.rotation * Quaternion.LookRotation(target);
+            agent.transform.rotation = rotation;
+        }
 
-            if (Vector3.SqrMagnitude(agent.transform.position - point.value) < 0.1f)
-            {
-                return NodeStatus.Success;
-            }
-            agent.transform.position = Vector3.MoveTowards(agent.transform.position, point.value, speed * Time.deltaTime);
-            return NodeStatus.Running;
-        }
-        else
+        if (Vector3.SqrMagnitude(agent.transform.position - point.value) < 0.1f)
         {
-            return NodeStatus.Failure;
+            return NodeStatus.Success;
         }
+        agent.transform.position = Vector3.MoveTowards(agent.transform.position, point.value, speed * Time.deltaTime);
+        return NodeStatus.Running;
     }
 }

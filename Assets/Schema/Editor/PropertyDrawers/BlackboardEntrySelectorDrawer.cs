@@ -12,6 +12,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     private static Dictionary<string, SelectorPropertyInfo> info = new Dictionary<string, SelectorPropertyInfo>();
     private delegate void GUIDelayCall(SerializedProperty property);
     private static event GUIDelayCall guiDelayCall;
+    private static readonly Type[] valid = new Type[] { typeof(Schema.Node), typeof(Schema.Decorator) };
     private class SelectorPropertyInfo
     {
         public bool writeOnly;
@@ -35,9 +36,24 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     }
     public static void DoSelectorDrawer(Rect position, SerializedProperty property, GUIContent label, Type fieldType, FieldInfo fieldInfo)
     {
+        Type parentType = property.serializedObject.targetObject.GetType();
+
+        if (Blackboard.instance == null)
+        {
+            GUI.Label(position, new GUIContent("Cannot use a BlackboardEntrySelector outside a tree", Styles.warnIcon), EditorStyles.miniLabel);
+            return;
+        }
+        else if (!valid.Any(t => t.IsAssignableFrom(parentType)))
+        {
+            GUI.Label(position, new GUIContent("Cannot use a BlackboardEntrySelector in a non tree type", Styles.warnIcon), EditorStyles.miniLabel);
+            return;
+        }
+
         SerializedProperty entry = property.FindPropertyRelative("m_entry");
         SerializedProperty valuePathProp = property.FindPropertyRelative("m_valuePath");
         SerializedProperty value = property.FindPropertyRelative("m_inspectorValue");
+        SerializedProperty isDynamicProperty = property.FindPropertyRelative("m_isDynamic");
+        SerializedProperty dynamicPropertyName = property.FindPropertyRelative("m_dynamicName");
 
         if (!info.ContainsKey(property.propertyPath))
         {
@@ -65,7 +81,25 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         if (doesHavePath)
             entryValue = (BlackboardEntry)entry.objectReferenceValue;
 
-        if (value != null && !info[property.propertyPath].writeOnly)
+        if (isDynamicProperty.boolValue)
+        {
+            EditorGUI.PropertyField(enumRect, dynamicPropertyName, label, true);
+
+            GUIStyle t = new GUIStyle("ObjectFieldButton");
+
+            t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
+            t.margin.Remove(buttonRect);
+
+            GUI.Label(buttonRect, "", t);
+
+            if (Event.current.type == EventType.MouseDown && buttonRect.Contains(Event.current.mousePosition))
+            {
+                GenericMenu menu = GenerateMenu(property, fieldInfo);
+
+                menu.DropDown(buttonRect);
+            }
+        }
+        else if (value != null && !info[property.propertyPath].writeOnly)
         {
             EditorGUI.BeginDisabledGroup(doesHavePath);
 
@@ -112,7 +146,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
             string path = valuePathProp.stringValue;
 
-            GUIContent buttonValue = new GUIContent(entryValue == null ? "None" : entryValue.name);
+            GUIContent buttonValue = new GUIContent(entryValue == null ? "None" : entryValue.name + valuePathProp.stringValue.Replace('/', '.').TrimEnd('.'));
 
             if (EditorGUI.DropdownButton(controlRect, buttonValue, FocusType.Passive))
             {
@@ -176,6 +210,9 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         SerializedProperty entry = property.FindPropertyRelative("m_entry");
         SerializedProperty valuePathProp = property.FindPropertyRelative("m_valuePath");
         SerializedProperty typeMask = property.FindPropertyRelative("m_mask");
+        SerializedProperty isDynamicProperty = property.FindPropertyRelative("m_isDynamic");
+
+        bool isDynamicPropertyValue = isDynamicProperty.boolValue;
 
         GenericMenu menu = new GenericMenu();
 
@@ -199,21 +236,25 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         typeMask.intValue = Blackboard.instance.GetMask(filtersList).Item2;
 
-        menu.AddItem("None", entry.objectReferenceValue == null, () => GenericMenuSelectOption(property, null), false);
-
         List<Type> filtered = HelperMethods.FilterArrayByMask(Blackboard.typeColors.Keys.Reverse().ToArray(), typeMask.intValue).ToList();
+
+        menu.AddItem("None", entry.objectReferenceValue == null && !isDynamicPropertyValue, () => GenericMenuSelectOption(property, null), false);
+        menu.AddSeparator("");
+        menu.AddItem("Dynamic", isDynamicPropertyValue, () => ToggleDynamic(property), false);
+
+        bool disableDynamicBinding = fieldInfo.GetCustomAttribute<DisableDynamicBindingAttribute>() != null;
 
         foreach (BlackboardEntry bEntry in Blackboard.instance.entries)
         {
             IEnumerable<string> props = null;
 
-            if (fieldInfo.GetCustomAttribute<DisableDynamicBindingAttribute>() != null)
+            if (disableDynamicBinding)
             {
                 if (!filtered.Contains(bEntry.type))
                     continue;
 
                 menu.AddItem(
-                    entry.objectReferenceValue.name + (filtered.Count > 1 ? " (" + bEntry.type.Name + ")" : ""),
+                    bEntry.name + (filtered.Count > 1 ? " (" + bEntry.type.Name + ")" : ""),
                     entry.objectReferenceValue == bEntry,
                     () => GenericMenuSelectOption(property, bEntry, "/"),
                     false
@@ -248,9 +289,25 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     {
         SerializedProperty entryProp = property.FindPropertyRelative("m_entry");
         SerializedProperty valuePathProperty = property.FindPropertyRelative("m_valuePath");
+        SerializedProperty isDynamicProperty = property.FindPropertyRelative("m_isDynamic");
 
         entryProp.objectReferenceValue = entry;
         valuePathProperty.stringValue = path;
+        isDynamicProperty.boolValue = false;
+
+        guiDelayCall += UpdateChanged;
+
+        property.serializedObject.ApplyModifiedProperties();
+    }
+    private static void ToggleDynamic(SerializedProperty property)
+    {
+        SerializedProperty entryProp = property.FindPropertyRelative("m_entry");
+        SerializedProperty valuePathProperty = property.FindPropertyRelative("m_valuePath");
+        SerializedProperty isDynamicProperty = property.FindPropertyRelative("m_isDynamic");
+
+        entryProp.objectReferenceValue = null;
+        valuePathProperty.stringValue = "";
+        isDynamicProperty.boolValue = !isDynamicProperty.boolValue;
 
         guiDelayCall += UpdateChanged;
 

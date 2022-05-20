@@ -17,9 +17,6 @@ public class GetScale : Action
     public bool local;
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
-        if ((!useSelf && gameObject.empty) || scaleKey.empty)
-            return NodeStatus.Failure;
-
         if (local)
             scaleKey.value = gameObject.value.transform.lossyScale;
         else
