@@ -195,6 +195,8 @@ namespace SchemaEditor
             instance = this;
             if (target != null && target.blackboard != null)
                 Blackboard.instance = target.blackboard;
+
+            target?.PurgeNull();
         }
         void FocusSearch()
         {

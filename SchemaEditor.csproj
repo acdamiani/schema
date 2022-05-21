@@ -74,6 +74,7 @@
      <Compile Include="Assets/Schema/Editor/NodeEditorGUI.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetPositionEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/RandomRangeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/SchemaAgentEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Components/CoverVolumeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorIKPositionWeightEditor.cs" />
@@ -86,7 +87,6 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/RaycastEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagFilterDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetBlackboardValueRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
@@ -344,6 +344,9 @@
     </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.15.15/Lib/Editor/PlasticSCM/Unity.Plastic.Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="DynamicProperty">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Assets/Schema/Utilities/DynamicProperty.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.15.15/Lib/Editor/PlasticSCM/Unity.Plastic.Antlr3.Runtime.dll</HintPath>

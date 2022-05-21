@@ -22,12 +22,8 @@ public class BlackboardEntrySelector<T> : BlackboardEntrySelector
             if (entry == null && !isDynamic)
                 return (T)inspectorValue;
 
-            object baseValue = base.value;
-
-            if (baseValue is T)
-                return (T)base.value;
-            else
-                return default(T);
+            try { return (T)base.value; }
+            catch { return default(T); }
         }
         set
         {
@@ -73,13 +69,7 @@ public class BlackboardEntrySelector
     /// </summary>
     public string dynamicName { get { return m_dynamicName; } }
     [SerializeField] private bool m_isDynamic;
-    public Type entryType
-    {
-        get
-        {
-            return entry?.type;
-        }
-    }
+    public Type entryType { get { return entry?.type; } }
     private string lastEntryTypeString;
     /// <summary>
     /// The value of this selector (runtime only)

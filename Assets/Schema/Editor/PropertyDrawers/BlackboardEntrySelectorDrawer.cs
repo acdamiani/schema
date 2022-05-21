@@ -218,7 +218,8 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         List<string> filtersList = new List<string>();
 
-        SerializedProperty valueProp = property.FindPropertyRelative("_value");
+        SerializedProperty valueProp = property.FindPropertyRelative("m_inspectorValue");
+
         if (valueProp != null)
         {
             filtersList.Add(FromPropertyType(valueProp.propertyType).AssemblyQualifiedName);
@@ -234,9 +235,9 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             }
         }
 
-        typeMask.intValue = Blackboard.instance.GetMask(filtersList).Item2;
+        int mask = typeMask.intValue = Blackboard.instance.GetMask(filtersList).Item2;
 
-        List<Type> filtered = HelperMethods.FilterArrayByMask(Blackboard.typeColors.Keys.Reverse().ToArray(), typeMask.intValue).ToList();
+        List<Type> filtered = HelperMethods.FilterArrayByMask(Blackboard.typeColors.Keys.Reverse().ToArray(), mask).ToList();
 
         menu.AddItem("None", entry.objectReferenceValue == null && !isDynamicPropertyValue, () => GenericMenuSelectOption(property, null), false);
         menu.AddSeparator("");
@@ -250,7 +251,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
             if (disableDynamicBinding)
             {
-                if (!filtered.Contains(bEntry.type))
+                if (!filtered.Any(t => bEntry.type.IsAssignableFrom(t)))
                     continue;
 
                 menu.AddItem(
@@ -372,7 +373,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     }
     private static IEnumerable<string> PrintProperties(Type baseType, Type type, List<Type> targets, string basePath, bool needsGetter, bool useType)
     {
-        if (targets.Contains(type))
+        if (targets.Any(t => type.IsAssignableFrom(t)))
         {
             yield return basePath;
             yield break;
@@ -396,24 +397,24 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                 typeof(Enum)
             };
 
-        foreach (PropertyInfo field in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            ObsoleteAttribute obsoleteAttribute = field.GetCustomAttribute<ObsoleteAttribute>();
+            ObsoleteAttribute obsoleteAttribute = property.GetCustomAttribute<ObsoleteAttribute>();
 
             if (obsoleteAttribute != null)
                 continue;
 
-            if (field.Name == "Item")
+            if (property.Name == "Item")
                 continue;
 
-            if (targets.Contains(field.PropertyType))
+            if (targets.Any(t => property.PropertyType.IsAssignableFrom(t)))
             {
-                if (!needsGetter || field.SetMethod != null)
-                    yield return basePath + "/" + field.Name + (useType ? " (" + field.PropertyType.Name + ")" : "");
+                if (!needsGetter || property.SetMethod != null)
+                    yield return basePath + "/" + property.Name + (useType ? " (" + property.PropertyType.Name + ")" : "");
             }
-            else if (field.PropertyType != type && field.PropertyType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.PropertyType)))
+            else if (property.PropertyType != type && property.PropertyType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(property.PropertyType)))
             {
-                foreach (string s in PrintProperties(baseType, field.PropertyType, targets, basePath + "/" + field.Name, needsGetter, useType))
+                foreach (string s in PrintProperties(baseType, property.PropertyType, targets, basePath + "/" + property.Name, needsGetter, useType))
                     yield return s;
             }
         }
@@ -425,7 +426,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             if (obsoleteAttribute != null)
                 continue;
 
-            if (targets.Contains(field.FieldType))
+            if (targets.Any(t => field.FieldType.IsAssignableFrom(t)))
             {
                 yield return basePath + "/" + field.Name + (useType ? " " + field.FieldType : "");
             }

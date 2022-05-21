@@ -377,6 +377,19 @@ namespace Schema
 
             return ret;
         }
+        /// <summary>
+        /// Remove all null nodes attached to this one
+        /// </summary>
+        public void PurgeNull()
+        {
+            Node[] n = m_children;
+
+            foreach (Node node in n)
+            {
+                if (node == null)
+                    ArrayUtility.Remove(ref m_children, node);
+            }
+        }
         internal void ResetGUID()
         {
             m_uID = Guid.NewGuid().ToString("N");

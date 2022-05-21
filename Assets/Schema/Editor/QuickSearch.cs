@@ -118,7 +118,10 @@ public static class QuickSearch
             {
                 scrollA = GUILayout.BeginScrollView(scrollA, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
 
-                didAddNode = RenderFolderView();
+                if (String.IsNullOrWhiteSpace(searchText))
+                    didAddNode = RenderFolderView();
+                else
+                    didAddNode = RenderNodeResults(SearchThroughResults(categories.Select(x => x.Value).SelectMany(x => x), searchText), 0);
 
                 GUILayout.EndScrollView();
             }
@@ -126,7 +129,10 @@ public static class QuickSearch
             {
                 scrollB = GUILayout.BeginScrollView(scrollB, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
 
-                didAddNode = RenderCategoryView();
+                if (String.IsNullOrWhiteSpace(searchText))
+                    didAddNode = RenderCategoryView();
+                else
+                    didAddNode = RenderNodeResults(SearchThroughResults(categories.Select(x => x.Value).SelectMany(x => x), searchText), 0);
 
                 GUILayout.EndScrollView();
             }
@@ -432,7 +438,7 @@ public static class QuickSearch
         index = Mathf.Clamp(index, 0, content.text.Length - 1);
         length = Mathf.Clamp(length, 0, content.text.Length - index);
 
-        if (index == content.text.Length - 1 || length == 0)
+        if (index == content.text.Length || length == 0)
         {
             GUI.Label(rect, content, regularStyle);
             return;

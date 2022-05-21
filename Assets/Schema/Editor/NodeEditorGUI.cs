@@ -106,6 +106,8 @@ namespace SchemaEditor
 hoveredDecorator: {windowInfo.hoveredDecorator?.name}
 hoveredType: {windowInfo.hoveredType}
 hoveredConnection: {windowInfo.hoveredConnection}
+window: {window}
+gridWindow: {WindowToGridRect(window)}
 
 ";
 
@@ -262,6 +264,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             Vector2 mousePos = Event.current.mousePosition;
 
+            Rect windowGrid = WindowToGridRect(window);
+
             foreach (Node node in target.nodes)
             {
                 Vector2 nodeSize = GetArea(node, false);
@@ -272,12 +276,22 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                     Vector2 childSize = GetArea(child, false);
 
+                    Vector2 gridFrom = new Vector2(
+                        node.position.x + (nodeSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
+                        node.position.y + (nodeSize.y + GUIData.nodePadding * 2 + 16f) * windowInfo.zoom);
+                    Vector2 gridTo = new Vector2(
+                        child.position.x + (childSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
+                        child.position.y - 16f * windowInfo.zoom);
+
                     Vector2 from = GridToWindowPositionNoClipped(new Vector2(
                         node.position.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
                         node.position.y + nodeSize.y + GUIData.nodePadding * 2 + 16f));
                     Vector2 to = GridToWindowPositionNoClipped(new Vector2(
                         child.position.x + (childSize.x + GUIData.nodePadding * 2) / 2f,
                         child.position.y - 16f));
+
+                    if (!windowGrid.Contains(gridFrom) && !windowGrid.Contains(gridTo))
+                        continue;
 
                     Vector2 p0 = from;
                     Vector2 p1 = from + Vector2.up * 50f;
@@ -389,8 +403,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             else if (IsNotLayoutEvent(current))
                 windowInfo.hoveredType = Window.Hovering.None;
 
-
             BeginZoomed(window, windowInfo.zoom, tabHeight);
+
+            Rect windowGridView = WindowToGridRect(window);
 
             List<Node> nodes = target.nodes.ToList();
 
@@ -423,6 +438,15 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                     Rect contained = new Rect(positionNoClipped.x + GUIData.nodePadding, positionNoClipped.y + GUIData.nodePadding, size.x, size.y);
                     Rect rect = new Rect(positionNoClipped, new Vector2(sizeWithPadding.x, sizeWithPadding.y));
+
+                    if (
+                        !windowGridView.Overlaps(
+                            new Rect(
+                                node.position - Vector2.one * GUIData.nodePadding,
+                                (sizeWithPadding + Vector2.one * GUIData.nodePadding * 2) * windowInfo.zoom)
+                            )
+                        )
+                        continue;
 
                     GUI.color = Styles.windowBackground;
 

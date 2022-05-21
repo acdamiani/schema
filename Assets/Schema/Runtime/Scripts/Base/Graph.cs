@@ -52,6 +52,7 @@ namespace Schema
             if (root == null)
                 m_root = AddNode<Root>(Vector2.zero);
 
+            PurgeNull();
             TraverseTree();
         }
         /// <summary>
@@ -320,6 +321,21 @@ namespace Schema
                 i += j + 1;
             }
             return children;
+        }
+        /// <summary>
+        /// Removes all null nodes from the tree
+        /// </summary>
+        public void PurgeNull()
+        {
+            Node[] n = m_nodes;
+
+            foreach (Node node in n)
+            {
+                if (node == null)
+                    ArrayUtility.Remove(ref m_nodes, node);
+                else
+                    node.PurgeNull();
+            }
         }
     }
     /// <summary>
