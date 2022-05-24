@@ -113,7 +113,7 @@ gridWindow: {WindowToGridRect(window)}
 
                     if (windowInfo.selected.Count == 1)
                     {
-                        content += @$"Position: {windowInfo.selected[0].position.ToString()}
+                        content += @$"Position: {windowInfo.selected[0].graphPosition.ToString()}
 Area: {GetAreaWithPadding(windowInfo.selected[0], false).ToString()}
 Parent: {windowInfo.selected[0].parent?.name}
 Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => node.name))}";
@@ -140,7 +140,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     if (windowInfo.isPanning)
                         needsPan = false;
 
-                    windowInfo.pan = Vector2.Lerp(windowInfo.pan, windowInfo.nextPan, Mathf.SmoothStep(0f, 1f, (Time.realtimeSinceStartup - windowInfo.recordedTime) / windowInfo.panDuration));
+                    windowInfo.pan = Vector2.Lerp(windowInfo.pan, windowInfo.nextPan, Mathf.SmoothStep(0f, 1f, ((float)EditorApplication.timeSinceStartup - windowInfo.recordedTime) / windowInfo.panDuration));
 
                     Vector2 diff = windowInfo.pan - windowInfo.nextPan;
 
@@ -277,18 +277,18 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     Vector2 childSize = GetArea(child, false);
 
                     Vector2 gridFrom = new Vector2(
-                        node.position.x + (nodeSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
-                        node.position.y + (nodeSize.y + GUIData.nodePadding * 2 + 16f) * windowInfo.zoom);
+                        node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
+                        node.graphPosition.y + (nodeSize.y + GUIData.nodePadding * 2 + 16f) * windowInfo.zoom);
                     Vector2 gridTo = new Vector2(
-                        child.position.x + (childSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
-                        child.position.y - 16f * windowInfo.zoom);
+                        child.graphPosition.x + (childSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
+                        child.graphPosition.y - 16f * windowInfo.zoom);
 
                     Vector2 from = GridToWindowPositionNoClipped(new Vector2(
-                        node.position.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
-                        node.position.y + nodeSize.y + GUIData.nodePadding * 2 + 16f));
+                        node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
+                        node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 16f));
                     Vector2 to = GridToWindowPositionNoClipped(new Vector2(
-                        child.position.x + (childSize.x + GUIData.nodePadding * 2) / 2f,
-                        child.position.y - 16f));
+                        child.graphPosition.x + (childSize.x + GUIData.nodePadding * 2) / 2f,
+                        child.graphPosition.y - 16f));
 
                     if (!windowGrid.Contains(gridFrom) && !windowGrid.Contains(gridTo))
                         continue;
@@ -318,7 +318,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     if (selected != null && selected.canHaveParent && selected.CanHaveChildren() && selected.parent != node && selected != node)
                         intersect = bezier.Intersect(
                             new Rect(
-                                GridToWindowPositionNoClipped(selected.position),
+                                GridToWindowPositionNoClipped(selected.graphPosition),
                                 GetAreaWithPadding(selected, false)
                             )
                         );
@@ -371,8 +371,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 Vector2 nodeSize = GetArea(node, false);
 
                 Vector2 from = GridToWindowPositionNoClipped(new Vector2(
-                    node.position.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
-                    node.position.y + nodeSize.y + GUIData.nodePadding * 2 + 16f));
+                    node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
+                    node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 16f));
                 Vector2 to = new Vector2(mousePos.x, mousePos.y - 8f * windowInfo.zoom);
 
                 Handles.DrawBezier(
@@ -432,7 +432,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 for (int i = nodes.Count - 1; i >= 0; i--)
                 {
                     Node node = nodes[i];
-                    Vector2 positionNoClipped = GridToWindowPositionNoClipped(node.position);
+                    Vector2 positionNoClipped = GridToWindowPositionNoClipped(node.graphPosition);
                     Vector2 size = GetArea(node, false);
                     Vector2 sizeWithPadding = GetAreaWithPadding(node, false);
 
@@ -442,7 +442,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     if (
                         !windowGridView.Overlaps(
                             new Rect(
-                                node.position - Vector2.one * GUIData.nodePadding,
+                                node.graphPosition - Vector2.one * GUIData.nodePadding,
                                 (sizeWithPadding + Vector2.one * GUIData.nodePadding * 2) * windowInfo.zoom)
                             )
                         )
@@ -852,7 +852,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 Node node = target.nodes[i];
 
                 Vector2 size = GetAreaWithPadding(node, false) / viewRect.width * viewWidth;
-                Vector2 position = GridToMinimapPosition(node.position, viewWidth, minimapPadding);
+                Vector2 position = GridToMinimapPosition(node.graphPosition, viewWidth, minimapPadding);
                 position.x += boxPos.width / 2f - viewWidth / 2f;
 
                 foreach (Node child in node.children)
@@ -864,7 +864,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                         && (child == active || IsSubTreeOf(child, active));
 
                     Vector2 childSize = GetAreaWithPadding(child, false) / viewRect.width * viewWidth;
-                    Vector2 childPosition = GridToMinimapPosition(child.position, viewWidth, minimapPadding);
+                    Vector2 childPosition = GridToMinimapPosition(child.graphPosition, viewWidth, minimapPadding);
                     childPosition.x += boxPos.width / 2f - viewWidth / 2f;
 
                     Color c = Handles.color;

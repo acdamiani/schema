@@ -34,12 +34,12 @@ public class ComponentSelectorDrawer : PropertyDrawer
 
         Rect r = EditorGUI.PrefixLabel(position, label);
 
-        float buttonSize = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
+        Vector2 size = EditorStyles.miniButtonRight.CalcSize(new GUIContent(Styles.menu));
 
-        Rect buttonRect = new Rect(r.x + r.width - buttonSize, r.y, buttonSize, buttonSize);
+        Rect buttonRect = new Rect(r.x + r.width - size.x, r.y, size.x, EditorGUIUtility.singleLineHeight);
         Rect useSelfLabel = new Rect(r.x, r.y, 49f, EditorGUIUtility.singleLineHeight);
         Rect useSelfRect = new Rect(r.x + 54f, r.y, 72f, EditorGUIUtility.singleLineHeight);
-        Rect textRect = new Rect(r.x + 72f, r.y + 3f, r.width - 72f - buttonSize, EditorGUIUtility.singleLineHeight);
+        Rect textRect = new Rect(r.x + 72f, r.y + 3f, r.width - 72f - size.x, EditorGUIUtility.singleLineHeight);
 
         GUIContent c = EditorGUIUtility.ObjectContent(null, fieldTypes[property.propertyPath]);
 
@@ -59,7 +59,7 @@ public class ComponentSelectorDrawer : PropertyDrawer
 
         Vector2 oldIconSize = EditorGUIUtility.GetIconSize();
         EditorGUIUtility.SetIconSize(Vector2.one * 12f);
-        Vector2 size = IconText.GetSize(s, EditorStyles.miniLabel, c.image);
+        size = IconText.GetSize(s, EditorStyles.miniLabel, c.image);
 
         GUI.BeginClip(textRect, new Vector2(scrolls[property.propertyPath], 0f), Vector2.zero, false);
         IconText.DoIconText(new Rect(0f, 0f, textRect.width, EditorGUIUtility.singleLineHeight), s, EditorStyles.miniLabel, c.image);

@@ -20,14 +20,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     }
     public static void DoSelectorMenu(Rect position, SerializedProperty property, FieldInfo fieldInfo)
     {
-        GUIStyle t = new GUIStyle("ObjectFieldButton");
-
-        t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
-        t.margin.Remove(position);
-
-        GUI.Label(position, "", t);
-
-        if (Event.current.type == EventType.MouseDown && position.Contains(Event.current.mousePosition))
+        if (GUI.Button(position, Styles.menu, EditorStyles.miniButtonRight))
         {
             GenericMenu menu = GenerateMenu(property, fieldInfo);
 
@@ -65,9 +58,11 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         bool lastWideMode = EditorGUIUtility.wideMode;
         EditorGUIUtility.wideMode = true;
 
-        Rect enumRect = new Rect(position.x, position.y, position.width - 19, position.height - 18);
-        Rect textRect = new Rect(position.x, position.y + position.height - 18, position.width, 18);
-        Rect buttonRect = new Rect(position.xMax - 19, position.y, 19, Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
+        Vector2 size = EditorStyles.miniButtonRight.CalcSize(new GUIContent(Styles.menu));
+
+        Rect enumRect = new Rect(position.x, position.y, position.width - size.x, Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
+        Rect textRect = new Rect(position.x, position.y + enumRect.height, position.width, enumRect.height);
+        Rect buttonRect = new Rect(position.xMax - size.x, position.y, size.x, Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
 
         Vector2 oldIconSize = EditorGUIUtility.GetIconSize();
         EditorGUIUtility.SetIconSize(new Vector2(12, 12));
@@ -85,14 +80,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         {
             EditorGUI.PropertyField(enumRect, dynamicPropertyName, label, true);
 
-            GUIStyle t = new GUIStyle("ObjectFieldButton");
-
-            t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
-            t.margin.Remove(buttonRect);
-
-            GUI.Label(buttonRect, "", t);
-
-            if (Event.current.type == EventType.MouseDown && buttonRect.Contains(Event.current.mousePosition))
+            if (GUI.Button(buttonRect, Styles.menu, EditorStyles.miniButtonRight))
             {
                 GenericMenu menu = GenerateMenu(property, fieldInfo);
 
@@ -111,7 +99,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
             {
                 Rect p = EditorGUI.PrefixLabel(textRect, new GUIContent("\0"));
                 GUIContent content = new GUIContent($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
-                Vector2 size = EditorStyles.miniLabel.CalcSize(content);
+                size = EditorStyles.miniLabel.CalcSize(content);
                 GUI.BeginClip(p, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
                 GUI.Label(new Rect(0f, 0f, size.x, 20f), content, EditorStyles.miniLabel);
                 GUI.EndClip();
@@ -124,16 +112,7 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
                 }
             }
 
-            GUIContent c = EditorGUIUtility.ObjectContent(null, typeof(Transform));
-
-            GUIStyle t = new GUIStyle("ObjectFieldButton");
-
-            t.fixedHeight = Mathf.Min(position.height, EditorGUIUtility.singleLineHeight);
-            t.margin.Remove(buttonRect);
-
-            GUI.Label(buttonRect, "", t);
-
-            if (Event.current.type == EventType.MouseDown && buttonRect.Contains(Event.current.mousePosition))
+            if (GUI.Button(buttonRect, Styles.menu, EditorStyles.miniButtonRight))
             {
                 GenericMenu menu = GenerateMenu(property, fieldInfo);
 
@@ -209,7 +188,6 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
     {
         SerializedProperty entry = property.FindPropertyRelative("m_entry");
         SerializedProperty valuePathProp = property.FindPropertyRelative("m_valuePath");
-        SerializedProperty typeMask = property.FindPropertyRelative("m_mask");
         SerializedProperty isDynamicProperty = property.FindPropertyRelative("m_isDynamic");
 
         bool isDynamicPropertyValue = isDynamicProperty.boolValue;
@@ -218,24 +196,14 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
 
         List<string> filtersList = new List<string>();
 
-        SerializedProperty valueProp = property.FindPropertyRelative("m_inspectorValue");
+        SerializedProperty filters = property.FindPropertyRelative("m_filters");
 
-        if (valueProp != null)
+        for (int i = 0; i < filters.arraySize; i++)
         {
-            filtersList.Add(FromPropertyType(valueProp.propertyType).AssemblyQualifiedName);
-            Debug.Log(valueProp.propertyType);
-        }
-        else
-        {
-            SerializedProperty filters = property.FindPropertyRelative("m_filters");
-
-            for (int i = 0; i < filters.arraySize; i++)
-            {
-                filtersList.Add(filters.GetArrayElementAtIndex(i).stringValue);
-            }
+            filtersList.Add(filters.GetArrayElementAtIndex(i).stringValue);
         }
 
-        int mask = typeMask.intValue = Blackboard.instance.GetMask(filtersList).Item2;
+        int mask = Blackboard.instance.GetMask(filtersList).Item2;
 
         List<Type> filtered = HelperMethods.FilterArrayByMask(Blackboard.typeColors.Keys.Reverse().ToArray(), mask).ToList();
 
@@ -320,56 +288,6 @@ public class BlackboardEntrySelectorDrawer : PropertyDrawer
         GUI.changed = true;
 
         guiDelayCall -= UpdateChanged;
-    }
-    private static Type FromPropertyType(SerializedPropertyType type)
-    {
-        switch (type)
-        {
-            case SerializedPropertyType.Integer:
-                return typeof(Int32);
-            case SerializedPropertyType.Boolean:
-                return typeof(Boolean);
-            case SerializedPropertyType.Float:
-                return typeof(Single);
-            case SerializedPropertyType.String:
-                return typeof(String);
-            case SerializedPropertyType.Color:
-                return typeof(Color);
-            case SerializedPropertyType.ExposedReference:
-            case SerializedPropertyType.ManagedReference:
-            case SerializedPropertyType.ObjectReference:
-                return typeof(GameObject);
-            case SerializedPropertyType.LayerMask:
-                return typeof(LayerMask);
-            case SerializedPropertyType.Enum:
-                return typeof(Enum);
-            case SerializedPropertyType.Vector2:
-                return typeof(Vector2);
-            case SerializedPropertyType.Vector3:
-                return typeof(Vector3);
-            case SerializedPropertyType.Vector4:
-                return typeof(Vector4);
-            case SerializedPropertyType.Rect:
-                return typeof(Rect);
-            case SerializedPropertyType.AnimationCurve:
-                return typeof(AnimationCurve);
-            case SerializedPropertyType.Bounds:
-                return typeof(Bounds);
-            case SerializedPropertyType.Gradient:
-                return typeof(Gradient);
-            case SerializedPropertyType.Quaternion:
-                return typeof(Quaternion);
-            case SerializedPropertyType.Vector2Int:
-                return typeof(Vector2Int);
-            case SerializedPropertyType.Vector3Int:
-                return typeof(Vector3Int);
-            case SerializedPropertyType.RectInt:
-                return typeof(RectInt);
-            case SerializedPropertyType.BoundsInt:
-                return typeof(BoundsInt);
-            default:
-                return typeof(object);
-        }
     }
     private static IEnumerable<string> PrintProperties(Type baseType, Type type, List<Type> targets, string basePath, bool needsGetter, bool useType)
     {

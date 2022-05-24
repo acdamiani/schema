@@ -13,6 +13,9 @@ public static class GraphUtility
     {
         Node root = nodes.Where(node => node.GetType() == typeof(Root)).FirstOrDefault();
 
+        if (root.children.Length == 0)
+            return;
+
         Calc(root);
         MoveTree(root, 0f);
     }
@@ -24,9 +27,9 @@ public static class GraphUtility
 
         if (node.GetType() == typeof(Root))
         {
-            node.position = new Vector2(
-                node.children[0].position.x + NodeEditor.GetAreaWithPadding(node.children[0], false).x / 2f - nodeSize.x / 2f,
-                node.position.y
+            node.graphPosition = new Vector2(
+                node.children[0].graphPosition.x + NodeEditor.GetAreaWithPadding(node.children[0], false).x / 2f - nodeSize.x / 2f,
+                node.graphPosition.y
             );
 
             return;
@@ -37,13 +40,13 @@ public static class GraphUtility
         if (node.children.Length == 0)
         {
             if (nodeIndex == 0)
-                node.position = new Vector2(0, node.position.y);
+                node.graphPosition = new Vector2(0, node.graphPosition.y);
             else
-                node.position = new Vector2(
-                    node.parent.children[nodeIndex - 1].position.x
+                node.graphPosition = new Vector2(
+                    node.parent.children[nodeIndex - 1].graphPosition.x
                         + NodeEditor.GetAreaWithPadding(node.parent.children[nodeIndex - 1], false).x
                         + 25f,
-                    node.position.y
+                    node.graphPosition.y
                 );
         }
         else if (node.children.Length == 1)
@@ -53,17 +56,17 @@ public static class GraphUtility
                 Node child = node.children[0];
                 Vector2 childSize = NodeEditor.GetAreaWithPadding(child, false);
 
-                node.position = new Vector2(child.position.x + childSize.x / 2f - nodeSize.x / 2f, node.position.y);
+                node.graphPosition = new Vector2(child.graphPosition.x + childSize.x / 2f - nodeSize.x / 2f, node.graphPosition.y);
             }
             else
             {
-                node.position = new Vector2(
-                    node.parent.children[nodeIndex - 1].position.x
+                node.graphPosition = new Vector2(
+                    node.parent.children[nodeIndex - 1].graphPosition.x
                         + NodeEditor.GetAreaWithPadding(node.parent.children[nodeIndex - 1], false).x
                         + 25f,
-                    node.position.y
+                    node.graphPosition.y
                 );
-                mod[node.uID] = node.position.x - node.children[0].position.x;
+                mod[node.uID] = node.graphPosition.x - node.children[0].graphPosition.x;
             }
         }
         else
@@ -71,31 +74,31 @@ public static class GraphUtility
             Node first = node.children[0];
             Node last = node.children[node.children.Length - 1];
 
-            float firstCenter = first.position.x + NodeEditor.GetAreaWithPadding(first, false).x / 2f;
-            float lastCenter = last.position.x + NodeEditor.GetAreaWithPadding(last, false).x / 2f;
+            float firstCenter = first.graphPosition.x + NodeEditor.GetAreaWithPadding(first, false).x / 2f;
+            float lastCenter = last.graphPosition.x + NodeEditor.GetAreaWithPadding(last, false).x / 2f;
 
             float midpoint = (firstCenter + lastCenter) / 2f - NodeEditor.GetAreaWithPadding(node, false).x / 2f;
 
             if (nodeIndex == 0)
             {
-                node.position = new Vector2(midpoint, node.position.y);
+                node.graphPosition = new Vector2(midpoint, node.graphPosition.y);
             }
             else
             {
-                node.position = new Vector2(
-                    node.parent.children[nodeIndex - 1].position.x
+                node.graphPosition = new Vector2(
+                    node.parent.children[nodeIndex - 1].graphPosition.x
                         + NodeEditor.GetAreaWithPadding(node.parent.children[nodeIndex - 1], false).x
                         + 25f,
-                    node.position.y
+                    node.graphPosition.y
                 );
-                mod[node.uID] = node.position.x - midpoint;
+                mod[node.uID] = node.graphPosition.x - midpoint;
             }
         }
 
         if (node.children.Length > 0 && nodeIndex != 0)
             GetOverlapDist(node);
 
-        node.position = new Vector2(node.position.x, node.GetParentSize() + 100f * node.GetParentCount());
+        node.graphPosition = new Vector2(node.graphPosition.x, node.GetParentSize() + 100f * node.GetParentCount());
     }
     private static void GetOverlapDist(Node node)
     {
@@ -126,7 +129,7 @@ public static class GraphUtility
 
             if (shift > 0f)
             {
-                node.position = new Vector2(node.position.x + shift, node.position.y);
+                node.graphPosition = new Vector2(node.graphPosition.x + shift, node.graphPosition.y);
                 mod.TryGetValue(node.uID, out float v);
                 mod[node.uID] = v + shift;
 
@@ -141,9 +144,9 @@ public static class GraphUtility
         int pCount = node.GetParentCount();
 
         if (!values.ContainsKey(pCount))
-            values.Add(pCount, node.position.x + sum);
+            values.Add(pCount, node.graphPosition.x + sum);
         else
-            values[pCount] = Math.Max(values[pCount], node.position.x + sum + NodeEditor.GetAreaWithPadding(node, false).x);
+            values[pCount] = Math.Max(values[pCount], node.graphPosition.x + sum + NodeEditor.GetAreaWithPadding(node, false).x);
 
         mod.TryGetValue(node.uID, out float v);
         sum += v;
@@ -169,9 +172,9 @@ public static class GraphUtility
         int pCount = node.GetParentCount();
 
         if (!values.ContainsKey(pCount))
-            values.Add(pCount, node.position.x + sum);
+            values.Add(pCount, node.graphPosition.x + sum);
         else
-            values[pCount] = Math.Min(values[pCount], node.position.x + sum);
+            values[pCount] = Math.Min(values[pCount], node.graphPosition.x + sum);
 
         mod.TryGetValue(node.uID, out float v);
         sum += v;
@@ -190,7 +193,7 @@ public static class GraphUtility
         {
             float leftWidth = NodeEditor.GetAreaWithPadding(left, false).x;
 
-            float dist = ((right.position.x) - (left.position.x + leftWidth));
+            float dist = ((right.graphPosition.x) - (left.graphPosition.x + leftWidth));
             float areaBetween = 0f;
 
             for (int i = leftIndex + 1; i < rightIndex; i++)
@@ -203,10 +206,10 @@ public static class GraphUtility
             {
                 Node middle = left.parent.children[i];
 
-                float final = left.position.x + leftWidth + x;
-                float diff = final - middle.position.x;
+                float final = left.graphPosition.x + leftWidth + x;
+                float diff = final - middle.graphPosition.x;
 
-                middle.position = new Vector2(middle.position.x + diff, middle.position.y);
+                middle.graphPosition = new Vector2(middle.graphPosition.x + diff, middle.graphPosition.y);
                 mod.TryGetValue(middle.uID, out float v);
                 mod[middle.uID] = v + diff;
 
@@ -247,7 +250,7 @@ public static class GraphUtility
         if (root.GetType() == typeof(CustomAction))
             Debug.Log(value);
 
-        root.position = new Vector2(root.position.x + value, root.position.y);
+        root.graphPosition = new Vector2(root.graphPosition.x + value, root.graphPosition.y);
 
         mod.TryGetValue(root.uID, out float v);
         value += v;

@@ -70,7 +70,7 @@ namespace Schema
 
             Node node = (Node)ScriptableObject.CreateInstance(nodeType);
             node.hideFlags = HideFlags.HideInHierarchy;
-            node.position = position;
+            node.graphPosition = position;
             node.graph = this;
 
             string path = AssetDatabase.GetAssetPath(this);
@@ -99,7 +99,7 @@ namespace Schema
             string path = AssetDatabase.GetAssetPath(this);
 
             node.hideFlags = HideFlags.HideInHierarchy;
-            node.position = position;
+            node.graphPosition = position;
             node.graph = this;
 
             if (!String.IsNullOrEmpty(path))
@@ -125,7 +125,7 @@ namespace Schema
             duplicate.BreakConnectionsIsolated(undo: false);
             duplicate.ResetGUID();
             duplicate.hideFlags = HideFlags.HideInHierarchy;
-            duplicate.position = newPosition;
+            duplicate.graphPosition = newPosition;
             duplicate.graph = this;
             duplicate.children = (Node[])node.children.Clone();
 
@@ -194,7 +194,7 @@ namespace Schema
         }
         private Node DuplicateRecursive(IEnumerable<Node> toDuplicate, Node node, Vector2 offset, bool undo = true)
         {
-            Node duplicate = Duplicate(node, node.position + offset, undo);
+            Node duplicate = Duplicate(node, node.graphPosition + offset, undo);
 
             List<Node> duplicateChildren = duplicate.children.ToList();
 

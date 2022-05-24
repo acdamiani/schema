@@ -26,7 +26,7 @@ public static class IconText
             content.text = content.text.Trim();
 
             Vector2 size = style.CalcSize(content);
-            GUI.Label(new Rect(position.x + x, position.y, size.x, size.y), content, style);
+            EditorGUI.LabelField(new Rect(position.x + x, position.y, size.x, size.y), content, style);
             x += size.x;
         }
     }

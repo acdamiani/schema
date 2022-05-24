@@ -31,7 +31,7 @@ namespace Schema
             return GetValue(component.gameObject);
         }
     }
-    public static class ComponentSelector
+    public static class ComponentSelectorExtensions
     {
         /// <summary>
         /// Get component of type using a ComponentSelector
@@ -61,5 +61,11 @@ namespace Schema
 namespace Schema.Internal
 {
     [Serializable]
-    public abstract class ComponentSelectorBase : BlackboardEntrySelector<GameObject> { }
+    public abstract class ComponentSelectorBase : BlackboardEntrySelector<GameObject>
+    {
+        /// <summary>
+        /// The gameObject entry to get the component from, null if useSelf is true (read only)
+        /// </summary>
+        public new GameObject value { get { return base.value; } }
+    }
 }

@@ -26,20 +26,26 @@ public class Blackboard : ScriptableObject
         typeof(Vector4),
         typeof(Matrix4x4),
         typeof(GameObject),
-        typeof(AnimationCurve)
+        typeof(Transform),
+        typeof(AnimationCurve),
+        typeof(List<GameObject>),
+        typeof(List<Transform>)
     };
     public static readonly Dictionary<Type, Color> typeColors = new Dictionary<Type, Color>() {
-        { typeof(int),            Color.black },
-        { typeof(string),         Color.black },
-        { typeof(float),          Color.black },
-        { typeof(bool),           Color.black },
-        { typeof(Quaternion),     Color.black },
-        { typeof(Vector2),        Color.black },
-        { typeof(Vector3),        Color.black },
-        { typeof(Vector4),        Color.black },
-        { typeof(Matrix4x4),      Color.black },
-        { typeof(GameObject),     Color.black },
-        { typeof(AnimationCurve), Color.black }
+        { typeof(int),              Color.black },
+        { typeof(string),           Color.black },
+        { typeof(float),            Color.black },
+        { typeof(bool),             Color.black },
+        { typeof(Quaternion),       Color.black },
+        { typeof(Vector2),          Color.black },
+        { typeof(Vector3),          Color.black },
+        { typeof(Vector4),          Color.black },
+        { typeof(Matrix4x4),        Color.black },
+        { typeof(GameObject),       Color.black },
+        { typeof(Transform),        Color.black},
+        { typeof(AnimationCurve),   Color.black },
+        { typeof(List<GameObject>), Color.black },
+        { typeof(List<Transform>),  Color.black }
     };
     /// <summary>
     /// Array of entries for the Blackboard
@@ -50,7 +56,7 @@ public class Blackboard : ScriptableObject
     {
         Dictionary<Type, Color> copy = new Dictionary<Type, Color>(typeColors);
         foreach (Type key in copy.Keys)
-            typeColors[key] = key.Name.GetHashCode().ToString().ToColor();
+            typeColors[key] = HelperMethods.GetFriendlyTypeName(key).GetHashCode().ToString().ToColor();
 
         foreach (BlackboardEntry entry in entries)
             entry.blackboard = this;
@@ -89,7 +95,7 @@ public class Blackboard : ScriptableObject
     {
         BlackboardEntry entry = ScriptableObject.CreateInstance<BlackboardEntry>();
         entry.blackboard = this;
-        entry.name = UniqueName(type.Name + "Key", entries.Select(e => e.name).ToList());
+        entry.name = UniqueName(HelperMethods.GetFriendlyTypeName(type) + "Key", entries.Select(e => e.name).ToList());
         entry.type = type;
         entry.hideFlags = HideFlags.HideInHierarchy;
 

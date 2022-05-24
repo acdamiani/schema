@@ -57,7 +57,6 @@ public class BlackboardEntrySelector
     /// Name of the entry referenced by this selector
     /// </summary>
     public string entryName { get { return m_isDynamic ? m_dynamicName : m_entry?.name; } }
-    [SerializeField] private int m_mask = -1;
     [SerializeField] private string m_valuePath;
     [SerializeField] private string m_dynamicName;
     /// <summary>
@@ -172,26 +171,23 @@ public class BlackboardEntrySelector
     /// <summary>
     /// Apply all possible filters for this selector
     /// </summary>
-    public void ApplyAllFilters()
-    {
-        ApplyFilters(Blackboard.typeColors.Keys);
-    }
+    public void ApplyAllFilters() { ApplyFilters(Blackboard.typeColors.Keys); }
     /// <summary>
     /// Overwrite the current list of filters with a new type filter
     /// </summary>
     /// <typeparam name="T">Type of the new filter</typeparam>
-    public void ApplyFilter<T>()
-    {
-        ApplyFilter(typeof(T));
-    }
+    public void ApplyFilter<T>() { ApplyFilter(typeof(T)); }
+    /// <summary>
+    /// Overwrite the current list of filters with two new type filters
+    /// </summary>
+    /// <typeparam name="T1">First type of the new filter</typeparam>
+    /// <typeparam name="T2">Second type of the new filter</typeparam>
+    public void ApplyFilters<T1, T2>() { ApplyFilters(typeof(T1), typeof(T2)); }
     /// <summary>
     /// Overwrite the current list of filters with a new type filter
     /// </summary>
     /// <param name="type">Type of the new filter</param>
-    public void ApplyFilter(Type type)
-    {
-        ApplyFilters(type);
-    }
+    public void ApplyFilter(Type type) { ApplyFilters(type); }
     /// <summary>
     /// Overwrite the current list of filters with a new list of filters
     /// </summary>
@@ -203,6 +199,16 @@ public class BlackboardEntrySelector
     /// <param name="filters">IEnumerable of filters to add</param>
     public void ApplyFilters(IEnumerable<Type> filters)
     {
+        Type t = this.GetType();
+
+        if (t != typeof(BlackboardEntrySelector))
+        {
+            Debug.LogWarning(
+                "Applying filters to a generic selector or component selector is not allowed. To use custom filters, create a non-generic BlackboardEntrySelector instead."
+            );
+            return;
+        }
+
         m_filters.Clear();
 
         if (entryType != null && !filters.Contains(entryType))
@@ -232,7 +238,30 @@ public class BlackboardEntrySelector
     /// </summary>
     /// <param name="filters">IEnumerable of filters to add</param>
     public void AddFilters(IEnumerable<Type> filters)
-    { }
+    {
+        Type t = this.GetType();
+
+        if (t != typeof(BlackboardEntrySelector))
+        {
+            Debug.LogWarning(
+                "Adding filters to a generic selector or component selector is not allowed. To use custom filters, create a non-generic BlackboardEntrySelector instead."
+            );
+            return;
+        }
+
+        this.m_filters.AddRange(filters
+            .Where(t =>
+            {
+                bool b = Blackboard.typeColors.ContainsKey(t);
+
+                if (!b)
+                    Debug.LogWarning($"Type {t.Name} is not a valid Blackboard type");
+
+                return b;
+            })
+            .Select(t => t.AssemblyQualifiedName)
+            );
+    }
     /// <summary>
     /// Remove a list of filters from the current list of filters
     /// </summary>
@@ -242,7 +271,34 @@ public class BlackboardEntrySelector
     /// Remove a list of filters from the current list of filters
     /// </summary>
     /// <param name="filters">Array of filters to remove</param>
-    public void RemoveFilters(IEnumerable<Type> filters) { }
+    public void RemoveFilters(IEnumerable<Type> filters)
+    {
+        Type t = this.GetType();
+
+        if (t != typeof(BlackboardEntrySelector))
+        {
+            Debug.LogWarning(
+                "Removing filters from a generic selector or component selector is not allowed. To use custom filters, create a non-generic BlackboardEntrySelector instead."
+            );
+            return;
+        }
+
+        this.m_filters = this.m_filters.Except(filters
+            .Where(t =>
+            {
+                bool b = Blackboard.typeColors.ContainsKey(t);
+
+                if (!b)
+                    Debug.LogWarning($"Type {t.Name} is not a valid Blackboard type");
+
+                return b;
+            })
+            .Select(t => t.AssemblyQualifiedName)
+            ).ToList();
+
+        if (entryType != null && filters.Contains(entryType))
+            m_entry = null;
+    }
 }
 [System.AttributeUsage(AttributeTargets.Field)]
 public class WriteOnlyAttribute : System.Attribute { }

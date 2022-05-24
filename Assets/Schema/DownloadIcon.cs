@@ -6,10 +6,6 @@ public class DownloadIcon : MonoBehaviour
 {
     public bool test;
     public BlackboardEntrySelector<float> selector;
-    void Awake()
-    {
-        DynamicPropertyBuilder.Build();
-    }
     public static void Download()
     {
         Texture tex = (Texture2D)EditorGUIUtility.ObjectContent(null, typeof(UnityEditorInternal.AssemblyDefinitionAsset)).image;

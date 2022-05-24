@@ -37,7 +37,7 @@ namespace Schema
         /// <summary>
         /// Position of the Node in the graph
         /// </summary>
-        public Vector2 position { get { return m_position; } set { m_position = value; } }
+        public Vector2 graphPosition { get { return m_position; } set { m_position = value; } }
         [SerializeField, HideInInspector] private Vector2 m_position;
         /// <summary>
         /// Priority for the node
@@ -334,7 +334,7 @@ namespace Schema
         /// </summary>
         public void VerifyOrder()
         {
-            Array.Sort(m_children, (x, y) => x.position.x < y.position.x ? -1 : 1);
+            Array.Sort(m_children, (x, y) => x.graphPosition.x < y.graphPosition.x ? -1 : 1);
         }
         /// <summary>
         /// Deletes a decorator from this node

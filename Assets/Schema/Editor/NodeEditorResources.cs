@@ -72,6 +72,8 @@ internal static class Styles
     public static Texture2D next => _next == null ? _next = FindTexture("tab_next") : _next;
     private static Texture2D _prev;
     public static Texture2D prev => _prev == null ? _prev = FindTexture("tab_prev") : _prev;
+    private static Texture2D _menu;
+    public static Texture2D menu => _menu == null ? _menu = FindTexture("_Menu") : _menu;
     private static GUIStyle _quickSearch;
     public static GUIStyle quickSearch
     {

@@ -343,7 +343,7 @@ namespace SchemaEditor
             IEnumerable<Node> prioritized = node.children.OrderBy(node =>
             {
                 Vector2 nodeArea = GetArea(node, false);
-                float x = (node.position.x + (nodeArea.x / 2f));
+                float x = (node.graphPosition.x + (nodeArea.x / 2f));
                 return x;
             });
 
@@ -653,7 +653,7 @@ namespace SchemaEditor
                     {
                         if (windowInfo.selected.Count > 0)
                         {
-                            List<Vector2> positions = windowInfo.selected.Select(node => node.position).ToList();
+                            List<Vector2> positions = windowInfo.selected.Select(node => node.graphPosition).ToList();
 
                             float x = 0f;
                             float y = 0f;
@@ -672,7 +672,7 @@ namespace SchemaEditor
                         }
                         else
                         {
-                            PanView(-(target.root.position + GetArea(target.root, false) / 2f), 1f);
+                            PanView(-(target.root.graphPosition + GetArea(target.root, false) / 2f), 1f);
                         }
                     }, editingPaused);
                     g.AddItem("Zoom In", false, () => windowInfo.zoom -= 3 * GUIData.zoomSpeed, false);
@@ -879,10 +879,10 @@ namespace SchemaEditor
             {
                 nodeCount = target.nodes.Length;
 
-                float xMax = target.nodes.Max(node => node.position.x + GetAreaWithPadding(node, false).x);
-                float xMin = target.nodes.Min(node => node.position.x);
-                float yMax = target.nodes.Max(node => node.position.y + GetAreaWithPadding(node, false).y);
-                float yMin = target.nodes.Min(node => node.position.y);
+                float xMax = target.nodes.Max(node => node.graphPosition.x + GetAreaWithPadding(node, false).x);
+                float xMin = target.nodes.Min(node => node.graphPosition.x);
+                float yMax = target.nodes.Max(node => node.graphPosition.y + GetAreaWithPadding(node, false).y);
+                float yMin = target.nodes.Min(node => node.graphPosition.y);
 
                 windowInfo.viewRect = new Rect(xMin - padding, yMin - padding, xMax - xMin + padding * 2f, yMax - yMin + padding * 2f);
             }

@@ -65,7 +65,7 @@ namespace SchemaEditor
 
                                 if (windowInfo.selected.Count > 0)
                                 {
-                                    List<Vector2> positions = windowInfo.selected.Select(node => node.position).ToList();
+                                    List<Vector2> positions = windowInfo.selected.Select(node => node.graphPosition).ToList();
 
                                     float x = 0f;
                                     float y = 0f;
@@ -84,7 +84,7 @@ namespace SchemaEditor
                                 }
                                 else
                                 {
-                                    PanView(-(target.root.position + GetAreaWithPadding(target.root, false) / 2f), 1f);
+                                    PanView(-(target.root.graphPosition + GetAreaWithPadding(target.root, false) / 2f), 1f);
                                 }
                                 break;
                             case "Copy":
@@ -241,7 +241,7 @@ namespace SchemaEditor
                         foreach (Node node in windowInfo.selected)
                         {
                             Vector2 rawMove = current.delta * windowInfo.zoom;
-                            node.position += rawMove;
+                            node.graphPosition += rawMove;
 
                             if (node.parent == null) continue;
 
