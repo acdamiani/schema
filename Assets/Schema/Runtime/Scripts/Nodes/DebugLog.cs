@@ -3,16 +3,20 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-[DarkIcon("Dark/DebugLog")]
-[LightIcon("Light/DebugLog")]
-[Description("Logs a rich-text enabled message to the console")]
-public class DebugLog : Action
+namespace Schema.Builtin.Nodes
 {
-    [TextArea] public string message;
-    public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
+    [DarkIcon("debuglog")]
+    [LightIcon("Light/DebugLog")]
+    [Category("Debug")]
+    [Description("Logs a rich-text enabled message to the console")]
+    public class DebugLog : Action
     {
-        Debug.Log(message);
+        [TextArea] public string message;
+        public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
+        {
+            Debug.Log(message);
 
-        return NodeStatus.Success;
+            return NodeStatus.Success;
+        }
     }
 }

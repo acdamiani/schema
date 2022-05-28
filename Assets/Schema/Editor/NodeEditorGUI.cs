@@ -4,8 +4,9 @@ using System;
 using System.Collections.Generic;
 using Schema;
 using Schema.Utilities;
-using Schema.Editor.Utilities;
+using Schema.Internal;
 using System.Linq;
+using SchemaEditor.CustomEditors;
 
 namespace SchemaEditor
 {
@@ -1205,12 +1206,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             windowInfo.searchIsShown = !windowInfo.searchIsShown;
             windowInfo.searchRect.position = new Vector2(window.size.x / 2f - windowInfo.searchRect.width / 2f, window.size.y / 2f - windowInfo.searchRect.height / 2f);
             windowInfo.searchText = "";
-            // GUI.FocusControl("searchField");
 
-            // if (windowInfo.searchIsShown)
-            // {
-            //     EditorApplication.delayCall += () => GUI.FocusControl("searchField");
-            // }
+            if (windowInfo.searchIsShown)
+                QuickSearch.FocusSearch();
         }
         void DoSplashWindow(int winID)
         {

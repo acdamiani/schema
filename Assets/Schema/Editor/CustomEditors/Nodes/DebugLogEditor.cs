@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(DebugLog)), CanEditMultipleObjects]
+[CustomEditor(typeof(Schema.Builtin.Nodes.DebugLog)), CanEditMultipleObjects]
 public class DebugLogEditor : Editor
 {
     SerializedProperty message;
@@ -15,7 +15,7 @@ public class DebugLogEditor : Editor
     }
     public override void OnInspectorGUI()
     {
-        DebugLog debugLog = (DebugLog)target;
+        Schema.Builtin.Nodes.DebugLog debugLog = (Schema.Builtin.Nodes.DebugLog)target;
 
         if (boxStyle == null)
         {

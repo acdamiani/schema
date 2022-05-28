@@ -7,7 +7,7 @@ namespace Schema.Builtin.Nodes
     [DarkIcon("c_SphereCollider")]
     [LightIcon("c_SphereCollider")]
     [Category("Physics")]
-    [Description("Gets colliders hit by a sphere")]
+    [Description("Gets colliders hit by a sphere positioned in the world")]
     public class OverlapSphere : Action
     {
         [Tooltip("Position of the sphere")] public BlackboardEntrySelector<Vector3> position;

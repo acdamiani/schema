@@ -1,55 +1,58 @@
 using System;
 using UnityEngine;
 
-/// <summary>
-/// ScriptableObject representation for BlackboardEntry
-/// </summary>
-[Serializable]
-public class BlackboardEntry : ScriptableObject
+namespace Schema.Internal
 {
     /// <summary>
-    /// Description of this entry
+    /// ScriptableObject representation for BlackboardEntry
     /// </summary>
-    public string description { get { return m_description; } }
-    [SerializeField] private string m_description;
-    /// <summary>
-    /// Type string for this entry
-    /// </summary>
-    public string typeString { get { return m_typeString; } }
-    [SerializeField] private string m_typeString;
-    /// <summary>
-    /// Type of this entry
-    /// </summary>
-    public Type type
+    [Serializable]
+    public class BlackboardEntry : ScriptableObject
     {
-        get
+        /// <summary>
+        /// Description of this entry
+        /// </summary>
+        public string description { get { return m_description; } }
+        [SerializeField] private string m_description;
+        /// <summary>
+        /// Type string for this entry
+        /// </summary>
+        public string typeString { get { return m_typeString; } }
+        [SerializeField] private string m_typeString;
+        /// <summary>
+        /// Type of this entry
+        /// </summary>
+        public Type type
         {
-            if (_type == null)
-                _type = Type.GetType(m_typeString);
+            get
+            {
+                if (_type == null)
+                    _type = Type.GetType(m_typeString);
 
-            return _type;
+                return _type;
+            }
+            set
+            {
+                m_typeString = value.AssemblyQualifiedName;
+                _type = value;
+            }
         }
-        set
+        private Type _type;
+        /// <summary>
+        /// Blackboard that this entry is attached to
+        /// </summary>
+        public Blackboard blackboard { get { return m_blackboard; } internal set { m_blackboard = value; } }
+        [SerializeField] private Blackboard m_blackboard;
+        /// <summary>
+        /// Whether this entry is local, shared, or global
+        /// </summary>
+        public EntryType entryType { get { return m_entryType; } }
+        [SerializeField] private EntryType m_entryType = EntryType.Local;
+        public enum EntryType
         {
-            m_typeString = value.AssemblyQualifiedName;
-            _type = value;
+            Local,
+            Shared,
+            Global
         }
-    }
-    private Type _type;
-    /// <summary>
-    /// Blackboard that this entry is attached to
-    /// </summary>
-    public Blackboard blackboard { get { return m_blackboard; } internal set { m_blackboard = value; } }
-    [SerializeField] private Blackboard m_blackboard;
-    /// <summary>
-    /// Whether this entry is local, shared, or global
-    /// </summary>
-    public EntryType entryType { get { return m_entryType; } }
-    [SerializeField] private EntryType m_entryType = EntryType.Local;
-    public enum EntryType
-    {
-        Local,
-        Shared,
-        Global
     }
 }

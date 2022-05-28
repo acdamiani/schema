@@ -3,6 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using Schema.Internal;
 
 namespace Schema
 {

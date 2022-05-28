@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using Schema;
 using Schema.Utilities;
+using Schema.Internal;
 using UnityEditor.ShortcutManagement;
 
 namespace SchemaEditor
@@ -957,11 +958,6 @@ namespace SchemaEditor
             if (instance == null || instance.windowInfo.selectedDecorator == null) return;
 
             instance.MoveDecoratorInNode(instance.windowInfo.selectedDecorator, false);
-        }
-        [Shortcut("Schema/Test", KeyCode.J, ShortcutModifiers.Action | ShortcutModifiers.Shift)]
-        private static void TestCommand()
-        {
-            DynamicPropertyBuilder.Build();
         }
         [Shortcut("Schema/Break Connections", KeyCode.B, ShortcutModifiers.Action | ShortcutModifiers.Alt)]
         private static void BreakConnectionsCommand()

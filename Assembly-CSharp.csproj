@@ -278,9 +278,6 @@
     <Reference Include="UnityEditor.UnityConnectModule">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2021.3.0f1/Editor/Data/Managed/UnityEngine/UnityEditor.UnityConnectModule.dll</HintPath>
     </Reference>
-    <Reference Include="DynamicProperty">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Assets/Schema/Utilities/DynamicProperty.dll</HintPath>
-    </Reference>
     <Reference Include="netstandard">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2021.3.0f1/Editor/Data/NetStandard/ref/2.1.0/netstandard.dll</HintPath>
     </Reference>

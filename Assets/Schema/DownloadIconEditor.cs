@@ -9,6 +9,10 @@ public class DownloadIconEditor : Editor
         base.OnInspectorGUI();
 
         if (GUILayout.Button("Click"))
-            DynamicPropertyBuilder.Build();
+        {
+            GameObject gameObject = GameObject.Find("Player");
+            Quaternion n = Quaternion.identity;
+            DynamicProperty.Set(gameObject, "/transform/rotation", n);
+        }
     }
 }

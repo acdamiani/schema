@@ -2,17 +2,16 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 using UnityEditor;
-using Schema;
 
 namespace Schema.Utilities
 {
     public static class HelperMethods
     {
+        private static MD5 md5 = MD5.Create();
         public static bool IsMac()
         {
 #if UNITY_2017_1_OR_NEWER
@@ -334,6 +333,18 @@ namespace Schema.Utilities
                 first = false;
             }
             builder.Append('>');
+            return builder.ToString();
+        }
+        public static string Hash(this string str)
+        {
+            byte[] text = Encoding.UTF8.GetBytes(str);
+            byte[] hash = md5.ComputeHash(text);
+
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < hash.Length; i++)
+                builder.Append(hash[i].ToString("X2"));
+
             return builder.ToString();
         }
     }

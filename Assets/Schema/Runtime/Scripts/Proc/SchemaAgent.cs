@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Schema;
+using Schema.Internal;
 using Schema.Utilities;
 
 public class SchemaAgent : MonoBehaviour

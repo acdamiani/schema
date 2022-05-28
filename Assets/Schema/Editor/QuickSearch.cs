@@ -29,6 +29,10 @@ public static class QuickSearch
     private static Vector2 scrollA;
     private static Vector2 _scrollA;
     private static Vector2 scrollB;
+    public static void FocusSearch()
+    {
+        EditorApplication.delayCall += () => searchField.SetFocus();
+    }
     public static bool DoSearch(Rect window, Schema.Graph target, Vector2 newNodePosition, float timeSinceStartup)
     {
         if (searchField == null)
@@ -60,7 +64,11 @@ public static class QuickSearch
         searchText = searchField.OnToolbarGUI(searchText);
         searchFavorites = GUILayout.Toggle(searchFavorites, "Favorites", EditorStyles.toolbarButton, GUILayout.Width(125));
 
-        searchField.downOrUpArrowKeyPressed += () => GUI.FocusControl("");
+        searchField.downOrUpArrowKeyPressed += () =>
+        {
+            GUI.FocusControl("");
+            selected = 0;
+        };
 
         if (EditorGUI.EndChangeCheck())
             selected = -1;
@@ -154,6 +162,8 @@ public static class QuickSearch
 
         if (String.IsNullOrWhiteSpace(searchText))
         {
+            categoryNames = categoryNames.OrderBy(x => x);
+
             for (int i = 0; i < categoryNames.Count(); i++)
             {
                 string s = categoryNames.ElementAt(i);
@@ -302,6 +312,8 @@ public static class QuickSearch
         EditorGUIUtility.SetIconSize(new Vector2(16, 16));
 
         bool didAddNode = false;
+
+        results = results.Keys.OrderBy(k => k.Name).ToDictionary(k => k, k => results[k]);
 
         for (int i = 0; i < results.Count; i++)
         {

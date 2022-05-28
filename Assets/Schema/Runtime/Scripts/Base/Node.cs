@@ -394,53 +394,6 @@ namespace Schema
         {
             m_uID = Guid.NewGuid().ToString("N");
         }
-        private void GenerateIcon()
-        {
-            if (String.IsNullOrEmpty(_darkIconLocation))
-            {
-                DarkIconAttribute attribute = (DarkIconAttribute)Attribute.GetCustomAttribute(GetType(), typeof(DarkIconAttribute));
-
-                if (attribute == null)
-                    _darkIconLocation = "NOT FOUND";
-                else
-                    _darkIconLocation = attribute.location;
-            }
-            if (String.IsNullOrEmpty(_lightIconLocation))
-            {
-                LightIconAttribute attribute = (LightIconAttribute)Attribute.GetCustomAttribute(GetType(), typeof(LightIconAttribute));
-
-                if (attribute == null)
-                    _lightIconLocation = "NOT FOUND";
-                else
-                    _lightIconLocation = attribute.location;
-            }
-
-            //Use dark texture
-            if (EditorGUIUtility.isProSkin && !_darkIconLocation.Equals("NOT FOUND"))
-            {
-                Type iconType = _darkIconLocation.StartsWith("c_") ? Type.GetType(_darkIconLocation.Substring(2)) : null;
-
-                if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
-                    iconType = null;
-
-                _icon = iconType != null
-                    ? (Texture2D)EditorGUIUtility.ObjectContent((UnityEngine.Object)Activator.CreateInstance(iconType), iconType).image
-                    : Resources.Load<Texture2D>(_darkIconLocation);
-            }
-            else if (!String.IsNullOrEmpty(_lightIconLocation) && !_lightIconLocation.Equals("NOT FOUND"))
-            {
-                Type iconType = _lightIconLocation.StartsWith("c_") ? Type.GetType(_lightIconLocation.Substring(2)) : null;
-
-                if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
-                    iconType = null;
-
-                _icon = iconType != null
-                    ? (Texture2D)EditorGUIUtility.ObjectContent((UnityEngine.Object)Activator.CreateInstance(iconType), iconType).image
-                    : Resources.Load<Texture2D>(_lightIconLocation);
-            }
-
-            usingProSkin = EditorGUIUtility.isProSkin;
-        }
         /// <summary>
         /// The current errors for this node
         /// </summary>
@@ -486,60 +439,23 @@ namespace Schema
         }
         public static Texture2D GetNodeIcon(Type type)
         {
-            string darkLocation;
-            string lightLocation;
-
-            DarkIconAttribute attribute = type.GetCustomAttribute<DarkIconAttribute>();
-            LightIconAttribute attribute1 = type.GetCustomAttribute<LightIconAttribute>();
-
-            if (attribute == null)
-                darkLocation = "NOT FOUND";
-            else
-                darkLocation = attribute.location;
-
-            if (attribute == null)
-                lightLocation = "NOT FOUND";
-            else
-                lightLocation = attribute.location;
+            DarkIconAttribute darkIcon = type.GetCustomAttribute<DarkIconAttribute>();
+            LightIconAttribute lightIcon = type.GetCustomAttribute<LightIconAttribute>();
 
             //Use dark texture
-            if (EditorGUIUtility.isProSkin && !darkLocation.Equals("NOT FOUND"))
+            if (EditorGUIUtility.isProSkin && darkIcon != null)
             {
-                Type iconType = darkLocation.StartsWith("c_") ? Type.GetType("UnityEngine." + darkLocation.Substring(2) + ",UnityEngine") : null;
-
-                if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
-                    iconType = null;
-
-                UnityEngine.Object obj = null;
-
-                if (typeof(ScriptableObject).IsAssignableFrom(iconType))
-                    obj = ScriptableObject.CreateInstance(iconType);
-
-                Texture2D ret = iconType != null
-                    ? (Texture2D)EditorGUIUtility.ObjectContent(obj, iconType).image
-                    : Resources.Load<Texture2D>(darkLocation);
-
-                DestroyImmediate(obj);
+                Texture2D ret = darkIcon.isEditorIcon
+                    ? (Texture2D)EditorGUIUtility.IconContent(darkIcon.location).image
+                    : Resources.Load<Texture2D>(darkIcon.location);
 
                 return ret;
             }
-            else if (!String.IsNullOrEmpty(lightLocation) && !lightLocation.Equals("NOT FOUND"))
+            else if (lightIcon != null)
             {
-                Type iconType = lightLocation.StartsWith("c_") ? Type.GetType(lightLocation.Substring(2)) : null;
-
-                if (!typeof(UnityEngine.Object).IsAssignableFrom(iconType))
-                    iconType = null;
-
-                UnityEngine.Object obj = null;
-
-                if (typeof(ScriptableObject).IsAssignableFrom(iconType))
-                    obj = ScriptableObject.CreateInstance(iconType);
-
-                Texture2D ret = iconType != null
-                    ? (Texture2D)EditorGUIUtility.ObjectContent(obj, iconType).image
-                    : Resources.Load<Texture2D>(lightLocation);
-
-                DestroyImmediate(obj);
+                Texture2D ret = lightIcon.isEditorIcon
+                    ? (Texture2D)EditorGUIUtility.IconContent(lightIcon.location).image
+                    : Resources.Load<Texture2D>(lightIcon.location);
 
                 return ret;
             }
@@ -555,6 +471,7 @@ namespace Schema
         protected class DarkIconAttribute : System.Attribute
         {
             public string location;
+            public bool isEditorIcon;
             /// <summary>
             /// Where Schema should load the dark mode icon within a resources folder
             /// </summary>
@@ -562,6 +479,16 @@ namespace Schema
             public DarkIconAttribute(string location)
             {
                 this.location = location;
+            }
+            /// <summary>
+            /// Where Schema should load the dark mode icon within a resources folder
+            /// </summary>
+            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
+            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
+            public DarkIconAttribute(string location, bool isEditorIcon)
+            {
+                this.location = location;
+                this.isEditorIcon = isEditorIcon;
             }
         }
         /// <summary>
@@ -571,6 +498,7 @@ namespace Schema
         protected class LightIconAttribute : System.Attribute
         {
             public string location;
+            public bool isEditorIcon;
             /// <summary>
             /// Where Schema should load the light mode icon within a resources folder
             /// </summary>
@@ -578,6 +506,16 @@ namespace Schema
             public LightIconAttribute(string location)
             {
                 this.location = location;
+            }
+            /// <summary>
+            /// Where Schema should load the light mode icon within a resources folder
+            /// </summary>
+            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
+            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
+            public LightIconAttribute(string location, bool isEditorIcon)
+            {
+                this.location = location;
+                this.isEditorIcon = isEditorIcon;
             }
         }
         /// <summary>

@@ -36,15 +36,18 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types/String.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/ComposeVector2.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Flee.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Quaternion/FromToRotation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Time/GetFixedDeltaTime.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MonoBehaviour/Invoke.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/SmoothStep.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Series.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/IsNull.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AnimationCurve/AddCurveKey.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandomWeighted.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MonoBehaviour/StopCoroutine.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/LerpAngle.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Asin.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/Distance.cs" />
@@ -55,6 +58,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/CustomAction.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/SetAnimatorLayerWeight.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/SetAnimatorIKPosition.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/EntryType.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Components/CoverVolume.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/SetAnimatorIKRotationWeight.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Random/PointInsideUnitSphere.cs" />
@@ -62,7 +66,6 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardData.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObject.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Quaternion/QuaternionAngle.cs" />
-     <Compile Include="Assets/Schema/Utilities/DynamicPropertyBuilder.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetRotation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/PingPong.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wait.cs" />
@@ -93,12 +96,16 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/RotateAway.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Quaternion/LerpQuaternion.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Acos.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MonoBehaviour/InvokeRepeating.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/DeltaAngle.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/FloorToInt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Idle.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/InverseLerp.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Exp.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types/Int.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/OverlapSphere.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/TriggerAnimator.cs" />
+     <Compile Include="Assets/Schema/Utilities/DynamicProperty.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Log.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/Cross.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Proc/SchemaManager.cs" />
@@ -115,6 +122,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/CeilToInt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/AddTorque.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/NavMeshAreaMask.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/OverlapBox.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Quaternion/EulerAngles.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Sign.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Patrol.cs" />
@@ -122,9 +130,11 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/DebugLog.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Blackboard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Max.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/CapsuleCast.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Sqrt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/LerpVector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/ComposeVector4.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/OverlapCapsule.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/RotateTowards.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Abs.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/FindGameObjectWithTag.cs" />
@@ -133,6 +143,7 @@
      <Compile Include="Assets/Schema/Utilities/HelperMethods.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/GetAnimatorVariable.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Clamp01.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MonoBehaviour/CancelInvoke.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/MoveTowardsAngle.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Sin.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/SphereCast.cs" />
@@ -144,6 +155,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Timer.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlayAnimation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/AnimationCurve/SampleValue.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MonoBehaviour/StopAllCoroutines.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Time/GetDeltaTime.cs" />
      <Compile Include="Assets/Schema/DownloadIcon.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/MoveTowards.cs" />
@@ -173,7 +185,9 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Floor.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Decorators/Conditionals/Raycast.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Log10.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MonoBehaviour/StartCoroutine.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Random/RandomValue.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/ClosestPoint.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/SelectRandom.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Animator/SetAnimatorIKRotation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/CoinFlip.cs" />
@@ -192,9 +206,8 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Quaternion/QuaternionDot.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Tan.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/CapsuleCast.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/ClosestPoint.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/OverlapSphere.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types/Vector2.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types/Vector3.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
      <None Include="Assets/Schema/Utilities/ClassTemplate.txt" />
      <None Include="Assets/Schema/Utilities/MethodTemplate.txt" />
@@ -446,9 +459,6 @@
     </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.15.15/Lib/Editor/PlasticSCM/Unity.Plastic.Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="DynamicProperty">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Assets/Schema/Utilities/DynamicProperty.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.15.15/Lib/Editor/PlasticSCM/Unity.Plastic.Antlr3.Runtime.dll</HintPath>

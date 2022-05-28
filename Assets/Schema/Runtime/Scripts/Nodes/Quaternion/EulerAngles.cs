@@ -5,8 +5,9 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("c_Transform")]
+    [DarkIcon("d_quaternion")]
     [LightIcon("c_Transform")]
+    [Category("Quaternion")]
     [Description("Returns a rotation that rotates z degrees around the z axis, x degrees around the x axis, and y degrees around the y axis; applied in that order.")]
     public class EulerAngles : Action
     {
