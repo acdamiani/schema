@@ -1011,11 +1011,13 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                 string[] values = Enum.GetNames(typeof(Window.InspectorView));
 
-                GUILayout.Space(10);
+                GUIContent[] content = new GUIContent[2] { new GUIContent(values[0], Styles.inspectorIcon), new GUIContent(values[1], Styles.hiearchyIcon) };
 
-                for (int i = 0; i < values.Length; i++)
+                GUILayout.FlexibleSpace();
+
+                for (int i = 0; i < content.Length; i++)
                 {
-                    if (GUILayout.Toggle((int)windowInfo.inspectorView == i, values[i], EditorStyles.toolbarButton, GUILayout.Width(100)))
+                    if (GUILayout.Toggle((int)windowInfo.inspectorView == i, content[i], EditorStyles.toolbarButton, GUILayout.Width(100)))
                         windowInfo.inspectorView = (Window.InspectorView)i;
                 }
 
@@ -1194,7 +1196,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             GUILayout.Label("Blackboard", Styles.styles.title);
             GUILayout.Space(GUIData.sidebarPadding);
 
-            GUILayout.Space(GUIData.sidebarPadding);
             if (!blackboardEditor || blackboardEditor.target != blackboard)
                 UnityEditor.Editor.CreateCachedEditor(blackboard, typeof(BlackboardEditor), ref blackboardEditor);
             blackboardEditor.OnInspectorGUI();

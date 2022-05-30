@@ -22,6 +22,7 @@ namespace SchemaEditor.CustomEditors
         private Editor entryEditor;
         private BlackboardEntry editing;
         private static Dictionary<Type, Tuple<string, Color>> entryGUIData = new Dictionary<Type, Tuple<string, Color>>();
+        private bool isShowingGlobal;
         public void OnEnable()
         {
             if (target != null && target.GetType() == typeof(Blackboard))
@@ -31,18 +32,21 @@ namespace SchemaEditor.CustomEditors
         }
         public void DeselectAll()
         {
-            if (editing == null)
-                Rename(selectedEntry, newEntryName);
-
             GUI.FocusControl("");
             editing = null;
             selectedEntry = null;
         }
         public override void OnInspectorGUI()
         {
-            GUILayout.BeginHorizontal();
+            isShowingGlobal = GUILayout.Toolbar(isShowingGlobal ? 1 : 0, new string[] { "Local", "Global" }) == 1;
 
-            if (GUILayout.Button(Styles.plus, GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16))) ShowContext();
+            GUILayout.Space(8);
+
+            GUILayout.BeginHorizontal(GUILayout.Height(16));
+
+            GUILayout.Space(4);
+
+            if (GUILayout.Button(Styles.plus, EditorStyles.iconButton, GUILayout.Width(16), GUILayout.ExpandHeight(true))) ShowContext();
 
             GUILayout.Space(10);
 
@@ -51,8 +55,10 @@ namespace SchemaEditor.CustomEditors
             GUILayout.Space(10);
 
             EditorGUI.BeginDisabledGroup(selectedEntry == null);
-            if (GUILayout.Button(Styles.minus, GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16))) RemoveSelected();
+            if (GUILayout.Button(Styles.minus, EditorStyles.iconButton, GUILayout.Width(16), GUILayout.Height(16))) RemoveSelected();
             EditorGUI.EndDisabledGroup();
+
+            GUILayout.Space(4);
 
             GUILayout.EndHorizontal();
 
@@ -60,41 +66,49 @@ namespace SchemaEditor.CustomEditors
 
             GUILayout.Space(10);
 
-            scroll = GUILayout.BeginScrollView(scroll);
+            BlackboardEntry[] globals = Blackboard.global.entries;
+            BlackboardEntry[] locals = blackboard.entries;
 
-            IEnumerable<BlackboardEntry> globals = Array.FindAll(blackboard.entries, entry => entry.entryType == BlackboardEntry.EntryType.Global);
-            IEnumerable<BlackboardEntry> locals = blackboard.entries.Except(globals);
-
-            DrawEntryList(locals);
-
-            EditorGUILayout.LabelField("Global Variables", EditorStyles.boldLabel);
-            DrawEntryList(globals);
-
-            if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
+            if ((isShowingGlobal ? globals : locals).Length > 0)
             {
-                if (editing == null)
-                    Rename(selectedEntry, newEntryName);
-                selectedEntry = null;
-                GUI.FocusControl("");
-                editing = null;
+                GUILayout.BeginVertical(Styles.blackboardScroll);
+
+                GUILayout.Space(1);
+
+                scroll = GUILayout.BeginScrollView(scroll, Styles.padding8x);
+
+                DrawEntryList(isShowingGlobal ? globals : locals);
+
+                if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
+                {
+                    selectedEntry = null;
+                    GUI.FocusControl("");
+                    editing = null;
+                }
+
+                if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
+                    GUI.FocusControl("");
+
+                GUILayout.EndScrollView();
+
+                GUILayout.Space(1);
+
+                GUILayout.EndVertical();
+
+                GUILayout.Space(8);
+
+                GUILayout.FlexibleSpace();
+
+                if (entryEditor != null && entryEditor.target)
+                {
+                    GUILayout.Label("Blackboard Entry", EditorStyles.boldLabel);
+                    entryEditor.OnInspectorGUI();
+                }
+
+                GUILayout.Space(10f);
+
+                clickedAny = false;
             }
-
-            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
-                GUI.FocusControl("");
-
-            GUILayout.EndScrollView();
-
-            GUILayout.FlexibleSpace();
-
-            if (entryEditor != null && entryEditor.target)
-            {
-                GUILayout.Label("Blackboard Entry", EditorStyles.boldLabel);
-                entryEditor.OnInspectorGUI();
-            }
-
-            GUILayout.Space(10f);
-
-            clickedAny = false;
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -119,8 +133,6 @@ namespace SchemaEditor.CustomEditors
                 {
                     if (selectedEntry != entry)
                     {
-                        if (editing == null)
-                            Rename(selectedEntry, newEntryName);
                         editing = null;
                         GUI.FocusControl("");
                     }
@@ -139,12 +151,11 @@ namespace SchemaEditor.CustomEditors
             var keys = Blackboard.blackboardTypes;
 
             foreach (Type key in keys)
-            {
-                menu.AddItem(new GUIContent(NameAliases.GetAliasForType(key)), false, () =>
-                {
-                    blackboard.AddEntry(key);
-                });
-            }
+                menu.AddItem(
+                    new GUIContent(NameAliases.GetAliasForType(key)),
+                    false,
+                    () => (isShowingGlobal ? Blackboard.global : blackboard).AddEntry(key)
+                );
 
             menu.ShowAsContext();
         }
@@ -159,16 +170,19 @@ namespace SchemaEditor.CustomEditors
             else
                 selectedEntry = null;
         }
-        private void Rename(BlackboardEntry entry, string name)
-        {
-            if (String.IsNullOrEmpty(name))
-                return;
+        // private void Rename(BlackboardEntry entry, string name)
+        // {
+        //     if (String.IsNullOrEmpty(name))
+        //         return;
 
-            Undo.RegisterCompleteObjectUndo(entry, "Rename Entry");
-            entry.name = name;
-        }
+        //     Undo.RegisterCompleteObjectUndo(entry, "Rename Entry");
+        //     entry.name = name;
+        // }
         private void DrawEntry(BlackboardEntry entry)
         {
+            if (entry?.type == null)
+                blackboard.RemoveEntry(entry, undo: false);
+
             Event current = Event.current;
 
             Vector2 nameSize = EditorStyles.whiteLabel.CalcSize(new GUIContent(entry.name));
@@ -190,29 +204,12 @@ namespace SchemaEditor.CustomEditors
 
             GUILayout.Space(8f);
 
-            Rect r = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none, GUILayout.Height(16f), GUILayout.Width(16f));
-
-            switch (entry.entryType)
-            {
-                case BlackboardEntry.EntryType.Local:
-                    GUI.Label(r, new GUIContent(Styles.local, "Local Variable"), GUIStyle.none);
-                    break;
-                case BlackboardEntry.EntryType.Global:
-                    GUI.Label(r, new GUIContent(Styles.global, "Global Variable"), GUIStyle.none);
-                    break;
-                case BlackboardEntry.EntryType.Shared:
-                    GUI.Label(r, new GUIContent(Styles.shared, "Shared Variable"), GUIStyle.none);
-                    break;
-            }
-
             GUILayout.Space(4f);
-
-            Rect name;
 
             GUIContent textContent = new GUIContent(entry == editing ? newEntryName : entry.name);
 
-            r = GUILayoutUtility.GetRect(textContent, entry == editing ? Styles.styles.nameField : Styles.styles.nodeText);
-            name = new Rect(r.x, r.y, r.width, 16f);
+            Rect r = GUILayoutUtility.GetRect(textContent, entry == editing ? Styles.styles.nameField : Styles.styles.nodeText);
+            Rect name = new Rect(r.x, r.y, r.width, 16f);
 
             if (current.clickCount == 2 && current.button == 0 && name.Contains(current.mousePosition))
             {
@@ -229,11 +226,7 @@ namespace SchemaEditor.CustomEditors
                 GUI.Label(name, textContent, Styles.styles.nodeText);
 
             if (entry == editing && GUI.GetNameOfFocusedControl() != entry.name)
-            {
-                Rename(entry, newEntryName);
-                Debug.Log("done");
                 editing = null;
-            }
 
             entryGUIData.TryGetValue(entry.type, out var entryData);
 

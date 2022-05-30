@@ -171,7 +171,7 @@ namespace Schema
         /// <summary>
         /// Apply all possible filters for this selector
         /// </summary>
-        public void ApplyAllFilters() { ApplyFilters(Blackboard.blackboardTypes); }
+        public void ApplyAllFilters() { ApplyFilters(Blackboard.mappedBlackboardTypes); }
         /// <summary>
         /// Overwrite the current list of filters with a new type filter
         /// </summary>
@@ -217,7 +217,7 @@ namespace Schema
             this.m_filters = filters
                 .Where(t =>
                 {
-                    bool b = Blackboard.blackboardTypes.Contains(t);
+                    bool b = Blackboard.mappedBlackboardTypes.Contains(t);
 
                     if (!b)
                         Debug.LogWarning($"Type {t.Name} is not a valid Blackboard type");
@@ -252,7 +252,7 @@ namespace Schema
             this.m_filters.AddRange(filters
                 .Where(t =>
                 {
-                    bool b = Blackboard.blackboardTypes.Contains(t);
+                    bool b = Blackboard.mappedBlackboardTypes.Contains(t);
 
                     if (!b)
                         Debug.LogWarning($"Type {t.Name} is not a valid Blackboard type");
@@ -286,7 +286,7 @@ namespace Schema
             this.m_filters = this.m_filters.Except(filters
                 .Where(t =>
                 {
-                    bool b = Blackboard.blackboardTypes.Contains(t);
+                    bool b = Blackboard.mappedBlackboardTypes.Contains(t);
 
                     if (!b)
                         Debug.LogWarning($"Type {t.Name} is not a valid Blackboard type");

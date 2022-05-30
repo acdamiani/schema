@@ -74,6 +74,10 @@ internal static class Styles
     public static Texture2D prev => _prev == null ? _prev = FindTexture("tab_prev") : _prev;
     private static Texture2D _menu;
     public static Texture2D menu => _menu == null ? _menu = FindTexture("_Menu") : _menu;
+    private static Texture2D _inspectorIcon;
+    public static Texture2D inspectorIcon => _inspectorIcon == null ? _inspectorIcon = FindTexture("UnityEditor.InspectorWindow") : _inspectorIcon;
+    private static Texture2D _hiearchyIcon;
+    public static Texture2D hiearchyIcon => _hiearchyIcon == null ? _hiearchyIcon = FindTexture("UnityEditor.HierarchyWindow") : _hiearchyIcon;
     private static GUIStyle _quickSearch;
     public static GUIStyle quickSearch
     {
@@ -87,6 +91,34 @@ internal static class Styles
             }
 
             return _quickSearch;
+        }
+    }
+    private static GUIStyle _blackboardScroll;
+    public static GUIStyle blackboardScroll
+    {
+        get
+        {
+            if (_blackboardScroll == null)
+            {
+                _blackboardScroll = new GUIStyle(EditorStyles.helpBox);
+                _blackboardScroll.padding = new RectOffset(0, 0, 0, 0);
+            }
+
+            return _blackboardScroll;
+        }
+    }
+    private static GUIStyle _padding8x;
+    public static GUIStyle padding8x
+    {
+        get
+        {
+            if (_padding8x == null)
+            {
+                _padding8x = new GUIStyle();
+                _padding8x.padding = new RectOffset(8, 8, 8, 8);
+            }
+
+            return _padding8x;
         }
     }
     private static GUIStyle _searchHighlight;

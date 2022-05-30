@@ -54,19 +54,18 @@ namespace Schema.Internal
         {
             public List<object> value = new List<object>();
             private object defaultValue;
-            public BlackboardEntry.EntryType type;
             public Tuple<int, int> position = new Tuple<int, int>(-1, -1);
             public EntryData(BlackboardEntry entry)
             {
-                type = entry.entryType;
-                defaultValue = entry.type.IsValueType ? Activator.CreateInstance(entry.type) : null;
+                Type mapped = EntryType.GetMappedType(entry.type);
+
+                defaultValue = mapped.IsValueType ? Activator.CreateInstance(mapped) : null;
                 value.Add(defaultValue);
             }
             public EntryData(object defaultValue, int index, int breadth)
             {
                 Type t = defaultValue.GetType();
 
-                type = BlackboardEntry.EntryType.Local;
                 this.defaultValue = t.IsValueType ? Activator.CreateInstance(t) : null;
                 value.Add(this.defaultValue);
 
@@ -74,42 +73,28 @@ namespace Schema.Internal
             }
             public object GetValue(int pid)
             {
-                if (type == BlackboardEntry.EntryType.Local)
+                if (pid > value.Count - 1)
                 {
-                    if (pid > value.Count - 1)
-                    {
-                        while (pid > value.Count - 1)
-                            value.Add(defaultValue);
-                        return defaultValue;
-                    }
+                    while (pid > value.Count - 1)
+                        value.Add(defaultValue);
+                    return defaultValue;
+                }
 
-                    return value[pid];
-                }
-                else
-                {
-                    return value[0];
-                }
+                return value[pid];
             }
             public void SetValue(int pid, object v)
             {
-                if (type == BlackboardEntry.EntryType.Local)
+                if (pid > value.Count - 1)
                 {
-                    if (pid > value.Count - 1)
-                    {
-                        while (pid > value.Count - 2)
-                            value.Add(null);
+                    while (pid > value.Count - 2)
+                        value.Add(null);
 
-                        value.Add(v);
+                    value.Add(v);
 
-                        return;
-                    }
-
-                    value[pid] = v;
+                    return;
                 }
-                else
-                {
-                    value[0] = v;
-                }
+
+                value[pid] = v;
             }
         }
     }

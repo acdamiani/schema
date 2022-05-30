@@ -13,12 +13,16 @@ namespace Schema.Internal
     public class Blackboard : ScriptableObject
     {
         public static Blackboard instance;
+        public static Blackboard global { get { return _global == null ? _global = LoadGlobal() : _global; } }
+        private static Blackboard _global;
         public delegate void EntryListChangedCallback(Blackboard changed);
         public delegate void EntryTypeChangedCallback(BlackboardEntry changed);
         public static event EntryListChangedCallback entryListChanged;
         public static event EntryTypeChangedCallback entryTypeChanged;
         public static Type[] blackboardTypes { get { return _blackboardTypes == null ? _blackboardTypes = GetBlackboardTypes() : _blackboardTypes; } }
         private static Type[] _blackboardTypes;
+        public static Type[] mappedBlackboardTypes { get { return _mappedBlackboardTypes == null ? _mappedBlackboardTypes = GetMappedBlackboardTypes() : _mappedBlackboardTypes; } }
+        private static Type[] _mappedBlackboardTypes;
         /// <summary>
         /// Array of entries for the Blackboard
         /// </summary>
@@ -33,29 +37,36 @@ namespace Schema.Internal
         {
             return HelperMethods.GetEnumerableOfType(typeof(Schema.EntryType)).ToArray();
         }
-        public System.Tuple<int, int> GetMask(List<string> filters)
+        private static Type[] GetMappedBlackboardTypes()
+        {
+            return blackboardTypes.Select(x => EntryType.GetMappedType(x)).ToArray();
+        }
+        public int GetTypeMask(IEnumerable<string> filters)
         {
             List<Type> typeArray = filters.Select(s => Type.GetType(s)).ToList();
 
-            int ret1 = 0;
-            for (int i = entries.Length - 1; i >= 0; i--)
+            int mask = 0;
+            for (int i = mappedBlackboardTypes.Length - 1; i >= 0; i--)
             {
-                bool entryIncluded = typeArray.Contains(entries[i].type);
+                bool entryIncluded = typeArray.Contains(mappedBlackboardTypes[i]);
 
                 if (entryIncluded)
-                    ret1 |= 1 << i;
+                    mask |= 1 << i;
             }
 
-            int ret2 = 0;
-            for (int i = blackboardTypes.Length - 1; i >= 0; i--)
+            return mask;
+        }
+        private static Blackboard LoadGlobal()
+        {
+            Blackboard loaded = Resources.Load<Blackboard>("GlobalBlackboard");
+
+            if (loaded == null)
             {
-                bool entryIncluded = typeArray.Contains(blackboardTypes[i]);
-
-                if (entryIncluded)
-                    ret2 |= 1 << i;
+                loaded = ScriptableObject.CreateInstance<Blackboard>();
+                AssetDatabase.CreateAsset(loaded, "Resources/GlobalBlackboard.asset");
             }
 
-            return new System.Tuple<int, int>(ret1, ret2);
+            return loaded;
         }
         /// <summary>
         /// Add an entry to the Blackboard

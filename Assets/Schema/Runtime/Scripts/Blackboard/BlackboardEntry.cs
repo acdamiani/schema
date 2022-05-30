@@ -43,16 +43,5 @@ namespace Schema.Internal
         /// </summary>
         public Blackboard blackboard { get { return m_blackboard; } internal set { m_blackboard = value; } }
         [SerializeField] private Blackboard m_blackboard;
-        /// <summary>
-        /// Whether this entry is local, shared, or global
-        /// </summary>
-        public EntryType entryType { get { return m_entryType; } }
-        [SerializeField] private EntryType m_entryType = EntryType.Local;
-        public enum EntryType
-        {
-            Local,
-            Shared,
-            Global
-        }
     }
 }

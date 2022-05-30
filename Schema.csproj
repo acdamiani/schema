@@ -36,7 +36,6 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types/String.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/ComposeVector2.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Flee.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Quaternion/FromToRotation.cs" />
@@ -98,11 +97,11 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Acos.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/MonoBehaviour/InvokeRepeating.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/DeltaAngle.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Blackboard/SetFloat.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/FloorToInt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Idle.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/InverseLerp.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Exp.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types/Int.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/OverlapSphere.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/TriggerAnimator.cs" />
      <Compile Include="Assets/Schema/Utilities/DynamicProperty.cs" />
@@ -130,6 +129,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/DebugLog.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Blackboard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Max.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/CapsuleCast.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Sqrt.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/LerpVector.cs" />
@@ -206,8 +206,6 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Quaternion/QuaternionDot.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Tan.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/TagFilter.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types/Vector2.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types/Vector3.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
      <None Include="Assets/Schema/Utilities/ClassTemplate.txt" />
      <None Include="Assets/Schema/Utilities/MethodTemplate.txt" />

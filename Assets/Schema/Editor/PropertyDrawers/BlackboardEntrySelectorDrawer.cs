@@ -18,6 +18,7 @@ namespace SchemaEditor
         private static event GUIDelayCall guiDelayCall;
         private static readonly Type[] valid = new Type[] { typeof(Schema.Node), typeof(Schema.Decorator) };
         private static Dictionary<Type, Type> typeMappings = new Dictionary<Type, Type>();
+        private static Dictionary<Type, Tuple<string[], Type[]>> excluded = new Dictionary<Type, Tuple<string[], Type[]>>();
         private class SelectorPropertyInfo
         {
             public bool writeOnly;
@@ -103,11 +104,18 @@ namespace SchemaEditor
                 if (doesHavePath)
                 {
                     Rect p = EditorGUI.PrefixLabel(textRect, new GUIContent("\0"));
+                    p.y += 3f;
+
                     GUIContent content = new GUIContent($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
                     size = EditorStyles.miniLabel.CalcSize(content);
+
                     GUI.BeginClip(p, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
-                    GUI.Label(new Rect(0f, 0f, size.x, 20f), content, EditorStyles.miniLabel);
+
+                    EditorGUI.LabelField(new Rect(0f, 3f, size.x, size.y), content, EditorStyles.miniLabel);
+
                     GUI.EndClip();
+
+                    GUI.Box(p, GUIContent.none, EditorStyles.helpBox);
 
                     if (size.x > p.width && p.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
                     {
@@ -182,7 +190,7 @@ namespace SchemaEditor
             }
 
             if (valueProp != null && !info[property.propertyPath].writeOnly)
-                height = EditorGUI.GetPropertyHeight(valueProp, label, true) + (entry.objectReferenceValue != null ? EditorGUIUtility.singleLineHeight : 0);
+                height = EditorGUI.GetPropertyHeight(valueProp, label, true) + (entry.objectReferenceValue != null ? EditorGUIUtility.singleLineHeight + 4 : 0);
             else
                 height = base.GetPropertyHeight(property, label);
 
@@ -216,13 +224,14 @@ namespace SchemaEditor
             SerializedProperty filters = property.FindPropertyRelative("m_filters");
 
             for (int i = 0; i < filters.arraySize; i++)
-            {
                 filtersList.Add(filters.GetArrayElementAtIndex(i).stringValue);
-            }
 
-            int mask = Blackboard.instance.GetMask(filtersList).Item2;
+            int mask = Blackboard.instance.GetTypeMask(filtersList);
 
-            List<Type> filtered = HelperMethods.FilterArrayByMask(Blackboard.blackboardTypes.Reverse().ToArray(), mask).ToList();
+            List<Type> filtered = HelperMethods.FilterArrayByMask(Blackboard.mappedBlackboardTypes.Reverse().ToArray(), mask)
+                .ToList();
+
+            filtered.ForEach(Debug.Log);
 
             menu.AddItem("None", entry.objectReferenceValue == null && !isDynamicPropertyValue, () => GenericMenuSelectOption(property, null), false);
             menu.AddSeparator("");
@@ -230,13 +239,18 @@ namespace SchemaEditor
 
             bool disableDynamicBinding = fieldInfo.GetCustomAttribute<DisableDynamicBindingAttribute>() != null;
 
+            Dictionary<Type, IEnumerable<string>> tmp = new Dictionary<Type, IEnumerable<string>>();
+
             foreach (BlackboardEntry bEntry in Blackboard.instance.entries)
             {
-                IEnumerable<string> props = null;
-
                 if (disableDynamicBinding)
                 {
-                    if (!filtered.Any(t => bEntry.type.IsAssignableFrom(t)))
+                    typeMappings.TryGetValue(bEntry.type, out Type value);
+
+                    if (value == null)
+                        value = EntryType.GetMappedType(bEntry.type);
+
+                    if (!filtered.Any(t => value.IsAssignableFrom(t)))
                         continue;
 
                     menu.AddItem(
@@ -248,16 +262,31 @@ namespace SchemaEditor
                 }
                 else
                 {
-                    props = PrintProperties(
-                        bEntry.type,
-                        bEntry.type,
-                        filtered,
-                        "",
-                        info.ContainsKey(property.propertyPath) && info[property.propertyPath].writeOnly,
-                        filtered.Count > 1
-                    );
+                    typeMappings.TryGetValue(bEntry.type, out Type value);
 
-                    foreach (string ss in props)
+                    if (value == null)
+                        value = typeMappings[bEntry.type] = EntryType.GetMappedType(bEntry.type);
+
+                    excluded.TryGetValue(bEntry.type, out Tuple<string[], Type[]> e);
+
+                    if (e == null)
+                        e = excluded[bEntry.type] = new Tuple<string[], Type[]>(EntryType.GetExcludedPaths(bEntry.type), EntryType.GetExcludedTypes(bEntry.type));
+
+                    tmp.TryGetValue(bEntry.type, out IEnumerable<string> enumerated);
+
+                    if (enumerated == null)
+                    {
+                        enumerated = tmp[bEntry.type] = EnumerateProperties(
+                            value,
+                            filtered,
+                            e.Item1,
+                            e.Item2,
+                            needsSetter: info.ContainsKey(property.propertyPath) && info[property.propertyPath].writeOnly,
+                            showType: filtered.Count > 1
+                        );
+                    }
+
+                    foreach (string ss in enumerated)
                     {
                         menu.AddItem(
                             bEntry.name + ss,
@@ -306,19 +335,21 @@ namespace SchemaEditor
 
             guiDelayCall -= UpdateChanged;
         }
-        private static readonly string[] excludePaths = new string[]{
-            "GameObject.transform.gameObject.transform",
-            "MonoBehaviour.transform.gameObject.transform",
-            "MonoBehaviour.gameObject.transform.gameObject"
-        };
-        private static IEnumerable<string> PrintProperties(Type baseType, Type type, List<Type> targets, string basePath, bool needsGetter, bool useType, int layer = 0, string path = "")
+        static int i;
+        private static IEnumerable<string> EnumerateProperties(
+            Type type,
+            IEnumerable<Type> targets,
+            IEnumerable<string> excludePaths,
+            IEnumerable<Type> excludeTypes,
+            string path = "",
+            bool needsSetter = false,
+            bool showType = false,
+            MemberInfo declaring = null
+        )
         {
-            if (String.IsNullOrEmpty(path))
-                path = type.Name;
-
             if (targets.Any(t => type.IsAssignableFrom(t)))
             {
-                yield return basePath;
+                yield return path;
                 yield break;
             }
 
@@ -340,46 +371,35 @@ namespace SchemaEditor
                 typeof(Enum)
             };
 
-            foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            IEnumerable<MemberInfo> members = type.GetFields(BindingFlags.Public | BindingFlags.Instance).Cast<MemberInfo>()
+                .Concat(type.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+
+            foreach (MemberInfo member in members)
             {
-                ObsoleteAttribute obsoleteAttribute = property.GetCustomAttribute<ObsoleteAttribute>();
+                ObsoleteAttribute obsoleteAttribute = member.GetCustomAttribute<ObsoleteAttribute>();
 
-                if (obsoleteAttribute != null)
+                Type memberType = (member as FieldInfo)?.FieldType ?? (member as PropertyInfo)?.PropertyType;
+                bool hasSetMethod = (member is FieldInfo) ? true : (member as PropertyInfo)?.SetMethod != null;
+
+                // if (path == "/transform/parent/root/parent")
+                //     Debug.Log(excludePaths.Contains(path.Trim('/').Replace('/', '.')));
+
+                if (
+                    obsoleteAttribute != null ||
+                    (needsSetter && member.DeclaringType.IsValueType) ||
+                    member.Name == "Item" ||
+                    excludePaths.Contains(path.Trim('/').Replace('/', '.')) ||
+                    excludeTypes.Contains(memberType)
+                )
                     continue;
 
-                if (property.DeclaringType.IsValueType || property.Name == "Item" || excludePaths.Contains(path + "." + property.Name))
-                    continue;
-
-                path += "." + property.Name;
-
-                if (targets.Any(t => property.PropertyType.IsAssignableFrom(t)))
+                if (targets.Any(t => memberType.IsAssignableFrom(t)) && (!needsSetter || hasSetMethod))
                 {
-                    if (!needsGetter || property.SetMethod != null)
-                        yield return basePath + "/" + property.Name + (useType ? " (" + property.PropertyType.Name + ")" : "");
+                    yield return $"{path}/{member.Name}{(showType ? $" ({memberType.Name})" : "")}";
                 }
-                else if (property.PropertyType != type && property.PropertyType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(property.PropertyType)))
+                else if (member.Name != declaring?.Name && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(memberType)))
                 {
-                    foreach (string s in PrintProperties(baseType, property.PropertyType, targets, basePath + "/" + property.Name, needsGetter, useType, layer + 1, path))
-                        yield return s;
-                }
-            }
-
-            foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
-            {
-                ObsoleteAttribute obsoleteAttribute = field.GetCustomAttribute<ObsoleteAttribute>();
-
-                if (field.DeclaringType.IsValueType || obsoleteAttribute != null || excludePaths.Contains(path + "." + field.Name))
-                    continue;
-
-                path += "." + field.Name;
-
-                if (targets.Any(t => field.FieldType.IsAssignableFrom(t)))
-                {
-                    yield return basePath + "/" + field.Name + (useType ? " " + field.FieldType : "");
-                }
-                else if (field.DeclaringType.IsValueType && field.FieldType != type && field.FieldType != baseType && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(field.FieldType)))
-                {
-                    foreach (string s in PrintProperties(baseType, field.FieldType, targets, basePath + "/" + field.Name, needsGetter, useType, layer + 1))
+                    foreach (string s in EnumerateProperties(memberType, targets, excludePaths, excludeTypes, path + "/" + member.Name, needsSetter, showType, member))
                         yield return s;
                 }
             }

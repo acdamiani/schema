@@ -14,7 +14,6 @@ namespace SchemaEditor
         private List<Type> possibleTypes = new List<Type>();
         SerializedProperty description;
         SerializedProperty typeString;
-        SerializedProperty entryTypeEnum;
         private void OnEnable()
         {
             foreach (Type t in Blackboard.blackboardTypes)
@@ -22,7 +21,6 @@ namespace SchemaEditor
 
             description = serializedObject.FindProperty("m_description");
             typeString = serializedObject.FindProperty("m_typeString");
-            entryTypeEnum = serializedObject.FindProperty("m_entryType");
         }
         public override void OnInspectorGUI()
         {
@@ -39,8 +37,6 @@ namespace SchemaEditor
                     Blackboard.blackboardTypes.Select(item => Schema.EntryType.GetName(item)).ToArray()
                     )
             ].AssemblyQualifiedName;
-
-            EditorGUILayout.PropertyField(entryTypeEnum);
 
             if (!newName.Equals(entry.name))
                 entry.name = newName;
