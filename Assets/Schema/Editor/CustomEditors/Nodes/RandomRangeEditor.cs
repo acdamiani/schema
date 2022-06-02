@@ -3,7 +3,7 @@ using Schema.Internal;
 using UnityEngine;
 using UnityEditor;
 
-namespace SchemaEditor.CustomEditors.Nodes
+namespace SchemaEditor.Editors.Nodes
 {
     [CustomEditor(typeof(Schema.Builtin.Nodes.RandomRange)), CanEditMultipleObjects]
     public class RangeEditor : Editor

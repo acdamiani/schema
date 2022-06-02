@@ -8,7 +8,7 @@ using Schema.Utilities;
 using Schema;
 using Schema.Internal;
 
-namespace SchemaEditor.CustomEditors
+namespace SchemaEditor.Editors
 {
     public class BlackboardEditor : Editor
     {
@@ -35,10 +35,17 @@ namespace SchemaEditor.CustomEditors
             GUI.FocusControl("");
             editing = null;
             selectedEntry = null;
+            DestroyImmediate(entryEditor);
         }
         public override void OnInspectorGUI()
         {
-            isShowingGlobal = GUILayout.Toolbar(isShowingGlobal ? 1 : 0, new string[] { "Local", "Global" }) == 1;
+            bool newIsShowingGlobal = GUILayout.Toolbar(isShowingGlobal ? 1 : 0, new string[] { "Local", "Global" }) == 1;
+
+            if (isShowingGlobal != newIsShowingGlobal)
+            {
+                isShowingGlobal = newIsShowingGlobal;
+                DeselectAll();
+            }
 
             GUILayout.Space(8);
 
@@ -69,46 +76,46 @@ namespace SchemaEditor.CustomEditors
             BlackboardEntry[] globals = Blackboard.global.entries;
             BlackboardEntry[] locals = blackboard.entries;
 
+            GUILayout.BeginVertical(Styles.blackboardScroll);
+
+            GUILayout.Space(1);
+
+            scroll = GUILayout.BeginScrollView(scroll, Styles.padding8x);
+
             if ((isShowingGlobal ? globals : locals).Length > 0)
-            {
-                GUILayout.BeginVertical(Styles.blackboardScroll);
-
-                GUILayout.Space(1);
-
-                scroll = GUILayout.BeginScrollView(scroll, Styles.padding8x);
-
                 DrawEntryList(isShowingGlobal ? globals : locals);
+            else
+                GUILayout.Label(NodeEditor.NodeEditorPrefs.enableDebugViewPlus ? Styles.megamind : "No entries");
 
-                if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
-                {
-                    selectedEntry = null;
-                    GUI.FocusControl("");
-                    editing = null;
-                }
-
-                if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
-                    GUI.FocusControl("");
-
-                GUILayout.EndScrollView();
-
-                GUILayout.Space(1);
-
-                GUILayout.EndVertical();
-
-                GUILayout.Space(8);
-
-                GUILayout.FlexibleSpace();
-
-                if (entryEditor != null && entryEditor.target)
-                {
-                    GUILayout.Label("Blackboard Entry", EditorStyles.boldLabel);
-                    entryEditor.OnInspectorGUI();
-                }
-
-                GUILayout.Space(10f);
-
-                clickedAny = false;
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
+            {
+                selectedEntry = null;
+                GUI.FocusControl("");
+                editing = null;
             }
+
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
+                GUI.FocusControl("");
+
+            GUILayout.EndScrollView();
+
+            GUILayout.Space(1);
+
+            GUILayout.EndVertical();
+
+            GUILayout.Space(8);
+
+            GUILayout.FlexibleSpace();
+
+            if (entryEditor != null && entryEditor.target)
+            {
+                GUILayout.Label("Blackboard Entry", EditorStyles.boldLabel);
+                entryEditor.OnInspectorGUI();
+            }
+
+            GUILayout.Space(10f);
+
+            clickedAny = false;
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -143,6 +150,9 @@ namespace SchemaEditor.CustomEditors
                     Editor.CreateCachedEditor(selectedEntry, null, ref entryEditor);
                 }
             }
+
+            if (searchExcept.Count() == 0)
+                GUILayout.Label(NodeEditor.NodeEditorPrefs.enableDebugViewPlus ? Styles.megamind : "No entries");
         }
         private void ShowContext()
         {
@@ -161,14 +171,18 @@ namespace SchemaEditor.CustomEditors
         }
         private void RemoveSelected()
         {
-            int i = Array.IndexOf(blackboard.entries, selectedEntry) - 1;
-            blackboard.RemoveEntry(selectedEntry);
+            Blackboard current = isShowingGlobal ? Blackboard.global : blackboard;
+
+            int i = Array.IndexOf(current.entries, selectedEntry) - 1;
+            current.RemoveEntry(selectedEntry);
             i = i > 0 ? i : 0;
 
-            if (blackboard.entries.Length > 0)
-                selectedEntry = blackboard.entries[i];
+            if (current.entries.Length > 0)
+                selectedEntry = current.entries[i];
             else
                 selectedEntry = null;
+
+            DestroyImmediate(entryEditor);
         }
         // private void Rename(BlackboardEntry entry, string name)
         // {

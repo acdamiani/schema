@@ -4,50 +4,53 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(DebugLogFormat)), CanEditMultipleObjects]
-public class DebugLogFormatEditor : Editor
+namespace SchemaEditor.Editors.Nodes
 {
-    SerializedProperty message;
-    SerializedProperty keys;
-    string m;
-    GUIStyle boxStyle;
-    void OnEnable()
+    [CustomEditor(typeof(DebugLogFormat)), CanEditMultipleObjects]
+    public class DebugLogFormatEditor : Editor
     {
-        message = serializedObject.FindProperty("message");
-        keys = serializedObject.FindProperty("keys");
-    }
-    public override void OnInspectorGUI()
-    {
-        DebugLogFormat debugLog = (DebugLogFormat)target;
-
-        if (boxStyle == null)
+        SerializedProperty message;
+        SerializedProperty keys;
+        string m;
+        GUIStyle boxStyle;
+        void OnEnable()
         {
-            boxStyle = new GUIStyle(EditorStyles.helpBox);
-            boxStyle.richText = true;
+            message = serializedObject.FindProperty("message");
+            keys = serializedObject.FindProperty("keys");
         }
-
-        string[] names = null;
-
-        if (debugLog != null && debugLog.keys != null)
-            names = debugLog.keys.Select(key => key.entryName).ToArray();
-
-        serializedObject.Update();
-
-        EditorGUILayout.PropertyField(message);
-        EditorGUILayout.PropertyField(keys);
-
-        EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
-
-        try
+        public override void OnInspectorGUI()
         {
-            m = String.Format(message.stringValue, names);
-        }
-        catch (Exception e)
-        {
-            EditorGUILayout.HelpBox(e.Message, MessageType.Warning);
-        }
-        EditorGUILayout.SelectableLabel(m, boxStyle);
+            DebugLogFormat debugLog = (DebugLogFormat)target;
 
-        serializedObject.ApplyModifiedProperties();
+            if (boxStyle == null)
+            {
+                boxStyle = new GUIStyle(EditorStyles.helpBox);
+                boxStyle.richText = true;
+            }
+
+            string[] names = null;
+
+            if (debugLog != null && debugLog.keys != null)
+                names = debugLog.keys.Select(key => key.entryName).ToArray();
+
+            serializedObject.Update();
+
+            EditorGUILayout.PropertyField(message);
+            EditorGUILayout.PropertyField(keys);
+
+            EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
+
+            try
+            {
+                m = String.Format(message.stringValue, names);
+            }
+            catch (Exception e)
+            {
+                EditorGUILayout.HelpBox(e.Message, MessageType.Warning);
+            }
+            EditorGUILayout.SelectableLabel(m, boxStyle);
+
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }

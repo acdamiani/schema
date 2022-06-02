@@ -1,29 +1,32 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(GetBounds)), CanEditMultipleObjects]
-public class GetBoundsEditor : Editor
+namespace SchemaEditor.Editors.Nodes
 {
-    SerializedProperty useSelf;
-    SerializedProperty gameObjectKey;
-    SerializedProperty boundsKey;
-    void OnEnable()
+    [CustomEditor(typeof(GetBounds)), CanEditMultipleObjects]
+    public class GetBoundsEditor : Editor
     {
-        useSelf = serializedObject.FindProperty("useSelf");
-        gameObjectKey = serializedObject.FindProperty("gameObject");
-        boundsKey = serializedObject.FindProperty("boundsKey");
-    }
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
+        SerializedProperty useSelf;
+        SerializedProperty gameObjectKey;
+        SerializedProperty boundsKey;
+        void OnEnable()
+        {
+            useSelf = serializedObject.FindProperty("useSelf");
+            gameObjectKey = serializedObject.FindProperty("gameObject");
+            boundsKey = serializedObject.FindProperty("boundsKey");
+        }
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
 
-        EditorGUILayout.PropertyField(useSelf);
+            EditorGUILayout.PropertyField(useSelf);
 
-        if (!useSelf.boolValue)
-            EditorGUILayout.PropertyField(gameObjectKey);
+            if (!useSelf.boolValue)
+                EditorGUILayout.PropertyField(gameObjectKey);
 
-        EditorGUILayout.PropertyField(boundsKey);
+            EditorGUILayout.PropertyField(boundsKey);
 
-        serializedObject.ApplyModifiedProperties();
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }

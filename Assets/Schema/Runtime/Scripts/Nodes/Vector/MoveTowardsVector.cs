@@ -5,6 +5,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Calculate a position between the points specified by current and target, moving no farther than the distance specified by maxDistanceDelta.")]
     [Category("Vector")]
     public class MoveTowardsVector : Action

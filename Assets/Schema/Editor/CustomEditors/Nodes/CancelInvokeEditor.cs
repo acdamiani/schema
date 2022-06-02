@@ -1,29 +1,31 @@
-
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Schema.Builtin.Nodes.CancelInvoke)), CanEditMultipleObjects]
-public class CancelInvokeEditor : Editor
+namespace SchemaEditor.Editors.Nodes
 {
-    SerializedProperty monoBehavior;
-    SerializedProperty cancelAll;
-    SerializedProperty methodName;
-    void OnEnable()
+    [CustomEditor(typeof(Schema.Builtin.Nodes.CancelInvoke)), CanEditMultipleObjects]
+    public class CancelInvokeEditor : Editor
     {
-        monoBehavior = serializedObject.FindProperty("monoBehaviour");
-        cancelAll = serializedObject.FindProperty("cancelAll");
-        methodName = serializedObject.FindProperty("methodName");
-    }
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
+        SerializedProperty monoBehavior;
+        SerializedProperty cancelAll;
+        SerializedProperty methodName;
+        void OnEnable()
+        {
+            monoBehavior = serializedObject.FindProperty("monoBehaviour");
+            cancelAll = serializedObject.FindProperty("cancelAll");
+            methodName = serializedObject.FindProperty("methodName");
+        }
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
 
-        EditorGUILayout.PropertyField(monoBehavior);
-        EditorGUILayout.PropertyField(cancelAll);
+            EditorGUILayout.PropertyField(monoBehavior);
+            EditorGUILayout.PropertyField(cancelAll);
 
-        if (!cancelAll.boolValue)
-            EditorGUILayout.PropertyField(methodName);
+            if (!cancelAll.boolValue)
+                EditorGUILayout.PropertyField(methodName);
 
-        serializedObject.ApplyModifiedProperties();
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }

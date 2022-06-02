@@ -37,6 +37,7 @@ namespace Schema
         /// </summary>
         public Vector2 pan { get { return m_pan; } set { m_pan = value; } }
         [SerializeField] private Vector2 m_pan;
+#if UNITY_EDITOR
         public void Initialize()
         {
             if (blackboard == null)
@@ -338,6 +339,7 @@ namespace Schema
                     node.PurgeNull();
             }
         }
+#endif
     }
     /// <summary>
     /// Used to create an error for a node or decorator

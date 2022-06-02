@@ -3,6 +3,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Composes a Vector3 with given x, y and z values")]
     [Category("Vector")]
     public class ComposeVector3 : Action

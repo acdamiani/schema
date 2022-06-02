@@ -5,8 +5,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("c_Transform")]
-    [LightIcon("c_Transform")]
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Get the inverse of a quaternion rotation")]
     public class QuaternionInverse : Action
     {

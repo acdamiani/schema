@@ -6,8 +6,9 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using Schema;
-using Schema.Utilities;
 using Schema.Internal;
+using Schema.Utilities;
+using SchemaEditor.Utilities;
 using UnityEditor.ShortcutManagement;
 
 namespace SchemaEditor
@@ -53,17 +54,17 @@ namespace SchemaEditor
             windowInfo = new Window();
             windowInfo.editor = this;
 
-            target = graphObj;
-            windowInfo.zoom = target.zoom;
-            windowInfo.pan = target.pan;
-
             if (graphObj == null)
             {
                 titleContent = new GUIContent("Behavior Editor");
                 return;
             }
 
+            target = graphObj;
             target.Initialize();
+
+            windowInfo.zoom = target.zoom;
+            windowInfo.pan = target.pan;
 
             titleContent = new GUIContent(graphObj.name);
 
@@ -110,9 +111,9 @@ namespace SchemaEditor
         }
         void TogglePrefs()
         {
-            windowInfo.inspectorToggled = !windowInfo.settingsShown;
             windowInfo.settingsShown = !windowInfo.settingsShown;
             windowInfo.inspectorScroll = Vector2.zero;
+            windowInfo.inspectorToggled = !windowInfo.inspectorToggled ? true : windowInfo.inspectorToggled;
         }
         private static GUIContent AggregateErrors(List<Error> errors)
         {
@@ -1037,6 +1038,11 @@ namespace SchemaEditor
             {
                 get => EditorPrefs.GetBool("SCHEMA_PREF__enableDebugView", false);
                 set => EditorPrefs.SetBool("SCHEMA_PREF__enableDebugView", value);
+            }
+            public static bool enableDebugViewPlus
+            {
+                get => EditorPrefs.GetBool("SCHEMA_PREF__enableDebugViewPlus", false);
+                set => EditorPrefs.SetBool("SCHEMA_PREF__enableDebugViewPlus", value);
             }
             public static Color GetColor(string key, Color defaultValue)
             {

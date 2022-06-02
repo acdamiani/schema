@@ -5,8 +5,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("c_Transform")]
-    [LightIcon("c_Transform")]
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Category("Vector")]
     [Description("Projects a vector onto another vector")]
     public class ProjectVector : Action

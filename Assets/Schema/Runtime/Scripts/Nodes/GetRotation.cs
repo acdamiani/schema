@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Schema;
 
-[DarkIcon("c_TransformIcon")]
-[LightIcon("c_TransformIcon")]
+[DarkIcon("Transform IconIcon")]
+[LightIcon("Transform IconIcon")]
 public class GetRotation : Action
 {
     [Tooltip("Use the current Game Object rather than a Blackboard Key")]

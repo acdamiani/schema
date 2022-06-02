@@ -170,6 +170,18 @@ internal static class Styles
     }
     private static StylesObj _styles;
     public static StylesObj styles => _styles ??= new StylesObj();
+    private static string _megamind =
+        "4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCUTm8gZW50cmllcz/igJTigJTigJTigJTigJTigJTigJTigJTigJQK4qCA4qOe4qK94qKq4qKj4qKj4qKj4qKr4qG64qG14qOd4qGu4qOX4qK34qK94qK94qK94qOu4qG34qG94qOc4qOc4qKu4qK64qOc4qK34qK94qKd4qG94qOdCuKguOKhuOKgnOKgleKgleKggeKigeKih+Kij+KiveKiuuKjquKhs+KhneKjjuKjj+Kir+KinuKhv+Kjn+Kjt+Kjs+Kir+Kht+KjveKiveKir+Kjs+Kjq+KghwrioIDioIDiooDiooDiooTioqzioqrioarioY7io4bioYjioJrioJzioJXioIfioJfioJ3iopXioq/ioqvio57io6/io7/io7viob3io4/iopfio5fioI/ioIAK4qCA4qCq4qGq4qGq4qOq4qKq4qK64qK44qKi4qKT4qKG4qKk4qKA4qCA4qCA4qCA4qCA4qCI4qKK4qKe4qG+4qO/4qGv4qOP4qKu4qC34qCB4qCA4qCACuKggOKggOKggOKgiOKgiuKghuKhg+KgleKileKih+Kih+Kih+Kih+Kih+Kij+KijuKijuKihuKihOKggOKikeKjveKjv+KineKgsuKgieKggOKggOKggOKggArioIDioIDioIDioIDioIDiob/ioILioKDioIDioYfioofioJXioojio4DioIDioIHioKHioKPioaPioavio4Lio7/ioK/ioqrioLDioILioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qGm4qGZ4qGC4qKA4qKk4qKj4qCj4qGI4qO+4qGD4qCg4qCE4qCA4qGE4qKx4qOM4qO24qKP4qKK4qCC4qCA4qCA4qCA4qCA4qCA4qCACuKggOKggOKggOKggOKineKhsuKjnOKhruKhj+KijuKijOKiguKgmeKgouKgkOKigOKimOKiteKjveKjv+Khv+KggeKggeKggOKggOKggOKggOKggOKggOKggArioIDioIDioIDioIDioKjio7riobrioZXioZXiobHioZHioYbioZXioYXioZXioZziobzior3iobvioI/ioIDioIDioIDioIDioIDioIDioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qO84qOz4qOr4qO+4qO14qOX4qG14qGx4qGh4qKj4qKR4qKV4qKc4qKV4qGd4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCACuKggOKggOKggOKjtOKjv+KjvuKjv+Kjv+Kjv+Khv+KhveKhkeKijOKgquKhouKho+Kjo+Khn+KggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggArioIDioIDioIDioZ/iob7io7/ior/ior/iorXio73io77io7zio5jiorjiorjio57ioZ/ioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qCB4qCH4qCh4qCp4qGr4qK/4qOd4qG74qGu4qOS4qK94qCL4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCACuKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlA==";
+    public static string megamind
+    {
+        get
+        {
+            byte[] data = System.Convert.FromBase64String(_megamind);
+            string decodedString = System.Text.Encoding.UTF8.GetString(data);
+
+            return decodedString;
+        }
+    }
     private static Texture2D FindTexture(string baseName)
     {
         bool darkMode = EditorGUIUtility.isProSkin;

@@ -66,38 +66,6 @@ namespace Schema.Utilities
             }
             return count;
         }
-        public static void Move<T>(this List<T> list, T item, int newIndex)
-        {
-            if (item != null)
-            {
-                var oldIndex = list.IndexOf(item);
-                if (oldIndex > -1)
-                {
-                    list.RemoveAt(oldIndex);
-
-                    if (newIndex > oldIndex) newIndex--;
-                    // the actual index could have shifted due to the removal
-
-                    list.Insert(newIndex, item);
-                }
-            }
-        }
-        public static void Move<T>(this T[] array, T item, int newIndex)
-        {
-            if (item != null)
-            {
-                int oldIndex = Array.IndexOf(array, item);
-
-                if (oldIndex > -1)
-                {
-                    ArrayUtility.RemoveAt(ref array, oldIndex);
-
-                    if (newIndex > oldIndex) newIndex--;
-
-                    ArrayUtility.Insert(ref array, newIndex, item);
-                }
-            }
-        }
         public static Vector3[] Circle(Vector2 center, float radius, int detail)
         {
             Vector3[] arr = new Vector3[detail];
@@ -303,9 +271,9 @@ namespace Schema.Utilities
         static bool IsCastDefined(Type type, Func<MethodInfo, Type> baseType,
                                 Func<MethodInfo, Type> derivedType, bool implicitly, bool lookInBase)
         {
-            var bindinFlags = BindingFlags.Public | BindingFlags.Static
+            var bindingFlags = BindingFlags.Public | BindingFlags.Static
                             | (lookInBase ? BindingFlags.FlattenHierarchy : BindingFlags.DeclaredOnly);
-            return type.GetMethods(bindinFlags).Any(
+            return type.GetMethods(bindingFlags).Any(
                 m => (m.Name == "op_Implicit" || (!implicitly && m.Name == "op_Explicit"))
                     && baseType(m).IsAssignableFrom(derivedType(m)));
         }

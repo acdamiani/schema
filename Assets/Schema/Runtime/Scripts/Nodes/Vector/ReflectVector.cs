@@ -5,6 +5,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Reflects a vector off another vector")]
     [Category("Vector")]
     public class ReflectVector : Action

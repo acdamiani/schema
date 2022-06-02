@@ -272,15 +272,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2dbe0438ec6507ec806816b16bad3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  test: 0
-  selector:
-    m_entry: {fileID: 0}
-    m_valuePath: 
-    m_dynamicName: 
-    m_isDynamic: 0
-    m_filters:
-    - System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
-    m_inspectorValue: 0
 --- !u!1 &415893144
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,6 +283,7 @@ GameObject:
   - component: {fileID: 415893147}
   - component: {fileID: 415893146}
   - component: {fileID: 415893145}
+  - component: {fileID: 415893148}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -365,6 +357,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 124.295, y: 0, z: -180}
+--- !u!114 &415893148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 415893144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7f49778fb513d1e5b94b0b391c91425, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &593247309
 PrefabInstance:
   m_ObjectHideFlags: 0

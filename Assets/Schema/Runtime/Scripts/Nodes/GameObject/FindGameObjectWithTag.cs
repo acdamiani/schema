@@ -10,9 +10,7 @@ namespace Schema.Builtin.Nodes
     public class FindGameObjectWithTag : Action
     {
         public TagList gameObjectTag;
-        [WriteOnly]
-        [DisableDynamicBinding]
-        [Tooltip("The Blackboard Key in which to store the found object")]
+        [Tooltip("The Blackboard Key in which to store the found object"), WriteOnly]
         public BlackboardEntrySelector<GameObject> gameObject;
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

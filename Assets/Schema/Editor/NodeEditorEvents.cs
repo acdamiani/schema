@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Linq;
 using Schema.Utilities;
 using Schema;
-using SchemaEditor.CustomEditors;
+using SchemaEditor.Editors;
 
 //Handles all events for the NodeEditor window
 namespace SchemaEditor

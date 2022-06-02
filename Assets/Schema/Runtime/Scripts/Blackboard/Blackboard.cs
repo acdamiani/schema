@@ -12,6 +12,7 @@ namespace Schema.Internal
     [Serializable]
     public class Blackboard : ScriptableObject
     {
+#if UNITY_EDITOR
         public static Blackboard instance;
         public static Blackboard global { get { return _global == null ? _global = LoadGlobal() : _global; } }
         private static Blackboard _global;
@@ -19,6 +20,7 @@ namespace Schema.Internal
         public delegate void EntryTypeChangedCallback(BlackboardEntry changed);
         public static event EntryListChangedCallback entryListChanged;
         public static event EntryTypeChangedCallback entryTypeChanged;
+#endif
         public static Type[] blackboardTypes { get { return _blackboardTypes == null ? _blackboardTypes = GetBlackboardTypes() : _blackboardTypes; } }
         private static Type[] _blackboardTypes;
         public static Type[] mappedBlackboardTypes { get { return _mappedBlackboardTypes == null ? _mappedBlackboardTypes = GetMappedBlackboardTypes() : _mappedBlackboardTypes; } }
@@ -41,6 +43,7 @@ namespace Schema.Internal
         {
             return blackboardTypes.Select(x => EntryType.GetMappedType(x)).ToArray();
         }
+#if UNITY_EDITOR
         public int GetTypeMask(IEnumerable<string> filters)
         {
             List<Type> typeArray = filters.Select(s => Type.GetType(s)).ToList();
@@ -63,7 +66,7 @@ namespace Schema.Internal
             if (loaded == null)
             {
                 loaded = ScriptableObject.CreateInstance<Blackboard>();
-                AssetDatabase.CreateAsset(loaded, "Resources/GlobalBlackboard.asset");
+                AssetDatabase.CreateAsset(loaded, "Assets/Resources/GlobalBlackboard.asset");
             }
 
             return loaded;
@@ -144,5 +147,6 @@ namespace Schema.Internal
         {
             entryTypeChanged?.Invoke(entry);
         }
+#endif
     }
 }

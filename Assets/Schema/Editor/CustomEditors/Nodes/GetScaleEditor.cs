@@ -1,33 +1,36 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(GetScale)), CanEditMultipleObjects]
-public class GetScaleEditor : Editor
+namespace SchemaEditor.Editors.Nodes
 {
-    SerializedProperty useSelf;
-    SerializedProperty gameObjectKey;
-    SerializedProperty positionKey;
-    SerializedProperty local;
-    void OnEnable()
+    [CustomEditor(typeof(GetScale)), CanEditMultipleObjects]
+    public class GetScaleEditor : Editor
     {
-        useSelf = serializedObject.FindProperty("useSelf");
-        gameObjectKey = serializedObject.FindProperty("gameObject");
-        positionKey = serializedObject.FindProperty("scaleKey");
-        local = serializedObject.FindProperty("local");
-    }
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
+        SerializedProperty useSelf;
+        SerializedProperty gameObjectKey;
+        SerializedProperty positionKey;
+        SerializedProperty local;
+        void OnEnable()
+        {
+            useSelf = serializedObject.FindProperty("useSelf");
+            gameObjectKey = serializedObject.FindProperty("gameObject");
+            positionKey = serializedObject.FindProperty("scaleKey");
+            local = serializedObject.FindProperty("local");
+        }
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
 
-        EditorGUILayout.PropertyField(useSelf);
+            EditorGUILayout.PropertyField(useSelf);
 
-        EditorGUILayout.PropertyField(local);
+            EditorGUILayout.PropertyField(local);
 
-        if (!useSelf.boolValue)
-            EditorGUILayout.PropertyField(gameObjectKey);
+            if (!useSelf.boolValue)
+                EditorGUILayout.PropertyField(gameObjectKey);
 
-        EditorGUILayout.PropertyField(positionKey);
+            EditorGUILayout.PropertyField(positionKey);
 
-        serializedObject.ApplyModifiedProperties();
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }

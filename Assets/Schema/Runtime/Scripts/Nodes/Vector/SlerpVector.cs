@@ -5,6 +5,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Spherically interpolate between two Vectors")]
     [Category("Vector")]
     public class SlerpVector : Action

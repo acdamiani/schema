@@ -4,32 +4,35 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Schema.Builtin.Nodes.DebugLog)), CanEditMultipleObjects]
-public class DebugLogEditor : Editor
+namespace SchemaEditor.Editors.Nodes
 {
-    SerializedProperty message;
-    GUIStyle boxStyle;
-    void OnEnable()
+    [CustomEditor(typeof(Schema.Builtin.Nodes.DebugLog)), CanEditMultipleObjects]
+    public class DebugLogEditor : Editor
     {
-        message = serializedObject.FindProperty("message");
-    }
-    public override void OnInspectorGUI()
-    {
-        Schema.Builtin.Nodes.DebugLog debugLog = (Schema.Builtin.Nodes.DebugLog)target;
-
-        if (boxStyle == null)
+        SerializedProperty message;
+        GUIStyle boxStyle;
+        void OnEnable()
         {
-            boxStyle = new GUIStyle(EditorStyles.helpBox);
-            boxStyle.richText = true;
+            message = serializedObject.FindProperty("message");
         }
+        public override void OnInspectorGUI()
+        {
+            Schema.Builtin.Nodes.DebugLog debugLog = (Schema.Builtin.Nodes.DebugLog)target;
 
-        serializedObject.Update();
+            if (boxStyle == null)
+            {
+                boxStyle = new GUIStyle(EditorStyles.helpBox);
+                boxStyle.richText = true;
+            }
 
-        EditorGUILayout.PropertyField(message);
+            serializedObject.Update();
 
-        EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
-        EditorGUILayout.SelectableLabel(message.stringValue, boxStyle);
+            EditorGUILayout.PropertyField(message);
 
-        serializedObject.ApplyModifiedProperties();
+            EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
+            EditorGUILayout.SelectableLabel(message.stringValue, boxStyle);
+
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }

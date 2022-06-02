@@ -47,8 +47,8 @@
      <Compile Include="Assets/Schema/Editor/NodeEditorFileHandler.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultNodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/IconText.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/EditorHelperMethods.cs" />
+     <Compile Include="Assets/Schema/Editor/DownloadIconEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/GraphEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Resources/a.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/VectorAngleEditor.cs" />

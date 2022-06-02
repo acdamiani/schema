@@ -1,36 +1,39 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(SetAnimatorIKPositionWeight)), CanEditMultipleObjects]
-public class SetAnimatorIKPositionWeightEditor : Editor
+namespace SchemaEditor.Editors.Nodes
 {
-    SerializedProperty isHint;
-    SerializedProperty animator;
-    SerializedProperty hint;
-    SerializedProperty goal;
-    SerializedProperty weight;
-    void OnEnable()
+    [CustomEditor(typeof(SetAnimatorIKPositionWeight)), CanEditMultipleObjects]
+    public class SetAnimatorIKPositionWeightEditor : Editor
     {
-        animator = serializedObject.FindProperty("animator");
-        isHint = serializedObject.FindProperty("isHint");
-        hint = serializedObject.FindProperty("hint");
-        goal = serializedObject.FindProperty("goal");
-        weight = serializedObject.FindProperty("weight");
-    }
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
+        SerializedProperty isHint;
+        SerializedProperty animator;
+        SerializedProperty hint;
+        SerializedProperty goal;
+        SerializedProperty weight;
+        void OnEnable()
+        {
+            animator = serializedObject.FindProperty("animator");
+            isHint = serializedObject.FindProperty("isHint");
+            hint = serializedObject.FindProperty("hint");
+            goal = serializedObject.FindProperty("goal");
+            weight = serializedObject.FindProperty("weight");
+        }
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
 
-        EditorGUILayout.PropertyField(animator);
-        EditorGUILayout.PropertyField(isHint);
+            EditorGUILayout.PropertyField(animator);
+            EditorGUILayout.PropertyField(isHint);
 
-        if (isHint.boolValue)
-            EditorGUILayout.PropertyField(hint);
-        else
-            EditorGUILayout.PropertyField(goal);
+            if (isHint.boolValue)
+                EditorGUILayout.PropertyField(hint);
+            else
+                EditorGUILayout.PropertyField(goal);
 
-        EditorGUILayout.PropertyField(weight);
+            EditorGUILayout.PropertyField(weight);
 
-        serializedObject.ApplyModifiedProperties();
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }

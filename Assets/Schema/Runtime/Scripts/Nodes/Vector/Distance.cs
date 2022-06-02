@@ -5,6 +5,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Find the distance between two Vector values")]
     [Category("Vector")]
     public class Distance : Action

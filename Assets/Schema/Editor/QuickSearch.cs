@@ -29,14 +29,21 @@ public static class QuickSearch
     private static Vector2 scrollA;
     private static Vector2 _scrollA;
     private static Vector2 scrollB;
+    private static bool focusSearch;
     public static void FocusSearch()
     {
-        EditorApplication.delayCall += () => searchField.SetFocus();
+        focusSearch = true;
     }
     public static bool DoSearch(Rect window, Schema.Graph target, Vector2 newNodePosition, float timeSinceStartup)
     {
         if (searchField == null)
             searchField = new SearchField();
+
+        if (focusSearch)
+        {
+            searchField.SetFocus();
+            focusSearch = false;
+        }
 
         if (categories == null)
             categories = Schema.Node.GetNodeCategories();

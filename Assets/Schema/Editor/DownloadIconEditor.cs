@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using System.Reflection;
 
 [CustomEditor(typeof(DownloadIcon))]
 public class DownloadIconEditor : Editor
@@ -10,9 +11,9 @@ public class DownloadIconEditor : Editor
 
         if (GUILayout.Button("Click"))
         {
-            GameObject gameObject = GameObject.Find("Player");
-            Quaternion n = Quaternion.identity;
-            DynamicProperty.Set(gameObject, "/transform/rotation", n);
+            GameObject g = GameObject.Find("Player");
+
+            Debug.Log(DynamicProperty.Get(g, "transform/position/x"));
         }
     }
 }

@@ -6,7 +6,7 @@ using Schema;
 using Schema.Utilities;
 using Schema.Internal;
 using System.Linq;
-using SchemaEditor.CustomEditors;
+using SchemaEditor.Editors;
 
 namespace SchemaEditor
 {
@@ -189,11 +189,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 target.blackboard.entries[Array.IndexOf(target.blackboard.entries, e)] = ScriptableObject.Instantiate(e);
             }
 
-            if (blackboardEditor && ((BlackboardEditor)blackboardEditor).selectedEntry != null)
-            {
-                targets.Add(((BlackboardEditor)blackboardEditor).selectedEntry);
-            }
-            else if (windowInfo.selectedDecorator != null)
+            if (windowInfo.selectedDecorator != null)
             {
                 targets.Add(windowInfo.selectedDecorator);
 
@@ -203,7 +199,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             else if (windowInfo.selected.Count > 0)
             {
                 targets.AddRange(windowInfo.selected);
-
             }
 
             distinctTypes = targets.Where(x => x != null).Select(x => x.GetType()).Distinct().ToList();
@@ -218,8 +213,11 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 if (windowInfo.selectedDecorator == null && distinctTypes.Count == 1 && (defaultNodeEditor == null || defaultNodeEditor.targets.Any(obj => obj == null) || !defaultNodeEditor.targets.SequenceEqual(targets)) && targets.Count > 0 && targets.All(obj => obj != null))
                     UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), typeof(DefaultNodeEditor), ref defaultNodeEditor);
             }
+            else if (targets.Count == 0)
+            {
+                editor = null;
+            }
 
-            // ReSharper disable once Unity.NoNullPropagation
             SchemaAgent agent = Selection.activeGameObject?.GetComponent<SchemaAgent>();
 
             if (Application.isPlaying)
@@ -1128,6 +1126,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             EditorGUILayout.LabelField("Debug", EditorStyles.boldLabel);
             NodeEditorPrefs.enableDebugView = EditorGUILayout.Toggle("Enable Debug View", NodeEditorPrefs.enableDebugView);
 
+            if (NodeEditorPrefs.enableDebugView)
+                NodeEditorPrefs.enableDebugViewPlus = EditorGUILayout.Toggle("Enable Debug View+", NodeEditorPrefs.enableDebugViewPlus);
+
             EditorGUILayout.LabelField("");
 
             if (GUILayout.Button("Reset to default"))
@@ -1279,8 +1280,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             if (GUILayout.Button("New Graph", GUILayout.Width(100f)))
             {
-                // Graph graph = NodeEditorFileHandler.CreateNew();
-                // OpenGraph(graph);
+                Graph graph = ScriptableObject.CreateInstance<Graph>();
+                AssetDatabase.CreateAsset(graph, "Assets/NewGraph.asset");
+                Open(graph);
             }
 
             GUILayout.EndHorizontal();

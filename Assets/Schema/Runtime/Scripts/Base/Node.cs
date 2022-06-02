@@ -77,6 +77,26 @@ namespace Schema
                 return _description;
             }
         }
+#if UNITY_EDITOR
+        private Texture2D _icon;
+        /// <summary>
+        /// Icon of the node (editor only)
+        /// </summary>
+        public Texture2D icon
+        {
+            get
+            {
+                if (usingProSkin != EditorGUIUtility.isProSkin)
+                {
+                    _icon = GetNodeIcon(GetType());
+                    usingProSkin = EditorGUIUtility.isProSkin;
+                }
+
+                return _icon;
+            }
+        }
+        private bool usingProSkin;
+#endif
         internal Type GetMemoryType()
         {
             Type[] types = GetType().GetTypeInfo().DeclaredNestedTypes.ToArray();
@@ -120,11 +140,164 @@ namespace Schema
 
             if (string.IsNullOrEmpty(uID)) m_uID = Guid.NewGuid().ToString("N");
 
+#if UNITY_EDITOR
             _icon = GetNodeIcon(GetType());
             usingProSkin = EditorGUIUtility.isProSkin;
+#endif
 
             OnNodeEnable();
         }
+        /// <summary>
+        /// Verifies the order of the child list by position
+        /// </summary>
+        public void VerifyOrder()
+        {
+            Array.Sort(m_children, (x, y) => x.graphPosition.x < y.graphPosition.x ? -1 : 1);
+        }
+        /// <summary>
+        /// Gets a list of all children attached directly or indirectly to this node (including self)
+        /// </summary>
+        /// <returns>List of all children in subtree</returns>
+        public IEnumerable<Node> GetAllChildren()
+        {
+            List<Node> ret = new List<Node>();
+
+            foreach (Node child in children)
+                ret.AddRange(child.GetAllChildren());
+
+            ret.Add(this);
+
+            return ret;
+        }
+        internal void ResetGUID()
+        {
+            m_uID = Guid.NewGuid().ToString("N");
+        }
+        /// <summary>
+        /// Define a custom category for a node
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class CategoryAttribute : System.Attribute
+        {
+            public string category;
+            /// <summary>
+            /// Define a custom category for a node
+            /// </summary>
+            /// <param name="category">Content to use for the category in the search menu</param>
+            public CategoryAttribute(string category)
+            {
+                this.category = category;
+            }
+        }
+        public static Dictionary<string, IEnumerable<Type>> GetNodeCategories()
+        {
+            Dictionary<string, List<Type>> dict = new Dictionary<string, List<Type>>();
+
+            foreach (Type nodeType in Schema.Utilities.HelperMethods.GetEnumerableOfType(typeof(Node)))
+            {
+                CategoryAttribute attribute = nodeType.GetCustomAttribute<CategoryAttribute>();
+
+                List<Type> t = null;
+
+                string key = attribute == null ? "" : attribute.category;
+
+                dict.TryGetValue(key, out t);
+
+                if (t == null)
+                    dict[key] = new List<Type>() { nodeType };
+                else
+                    t.Add(nodeType);
+            }
+
+            return dict.ToDictionary(x => x.Key, x => x.Value.AsEnumerable());
+        }
+        /// <summary>
+        /// Where Schema should load the dark mode icon within a resources folder
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class DarkIconAttribute : System.Attribute
+        {
+            public string location;
+            public bool isEditorIcon;
+            /// <summary>
+            /// Where Schema should load the dark mode icon within a resources folder
+            /// </summary>
+            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
+            public DarkIconAttribute(string location)
+            {
+                this.location = location;
+            }
+            /// <summary>
+            /// Where Schema should load the dark mode icon within a resources folder
+            /// </summary>
+            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
+            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
+            public DarkIconAttribute(string location, bool isEditorIcon)
+            {
+                this.location = location;
+                this.isEditorIcon = isEditorIcon;
+            }
+        }
+        /// <summary>
+        /// Where Schema should load the light mode icon within a resources folder
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class LightIconAttribute : System.Attribute
+        {
+            public string location;
+            public bool isEditorIcon;
+            /// <summary>
+            /// Where Schema should load the light mode icon within a resources folder
+            /// </summary>
+            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
+            public LightIconAttribute(string location)
+            {
+                this.location = location;
+            }
+            /// <summary>
+            /// Where Schema should load the light mode icon within a resources folder
+            /// </summary>
+            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
+            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
+            public LightIconAttribute(string location, bool isEditorIcon)
+            {
+                this.location = location;
+                this.isEditorIcon = isEditorIcon;
+            }
+        }
+        /// <summary>
+        /// Attribute for adding a description to a node in the Editor
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class DescriptionAttribute : System.Attribute
+        {
+            public string description;
+            /// <summary>
+            /// Attribute for adding a description to a node in the Editor
+            /// </summary>
+            /// <param name="description">Description for the node</param>
+            public DescriptionAttribute(string description)
+            {
+                this.description = description;
+            }
+        }
+        /// <summary>
+        /// Attribute to override the default name of the node in the editor
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class NameAttribute : System.Attribute
+        {
+            public string name;
+            /// <summary>
+            /// Attribute to override the default name of the node in the edit or
+            /// </summary>
+            /// <param name="name">Default name of the node to use</param>
+            public NameAttribute(string name)
+            {
+                this.name = name;
+            }
+        }
+#if UNITY_EDITOR
         /// <summary>
         /// Add a connection to another node
         /// </summary>
@@ -330,13 +503,6 @@ namespace Schema
             return duplicate;
         }
         /// <summary>
-        /// Verifies the order of the child list by position
-        /// </summary>
-        public void VerifyOrder()
-        {
-            Array.Sort(m_children, (x, y) => x.graphPosition.x < y.graphPosition.x ? -1 : 1);
-        }
-        /// <summary>
         /// Deletes a decorator from this node
         /// </summary>
         /// <param name="decorator">Decorator to remove</param>
@@ -363,21 +529,6 @@ namespace Schema
             }
         }
         /// <summary>
-        /// Gets a list of all children attached directly or indirectly to this node (including self)
-        /// </summary>
-        /// <returns>List of all children in subtree</returns>
-        public IEnumerable<Node> GetAllChildren()
-        {
-            List<Node> ret = new List<Node>();
-
-            foreach (Node child in children)
-                ret.AddRange(child.GetAllChildren());
-
-            ret.Add(this);
-
-            return ret;
-        }
-        /// <summary>
         /// Remove all null nodes attached to this one
         /// </summary>
         public void PurgeNull()
@@ -390,53 +541,11 @@ namespace Schema
                     ArrayUtility.Remove(ref m_children, node);
             }
         }
-        internal void ResetGUID()
-        {
-            m_uID = Guid.NewGuid().ToString("N");
-        }
         /// <summary>
         /// The current errors for this node
         /// </summary>
         /// <returns>A list of errors to display in the editor</returns>
         public virtual List<Error> GetErrors() { return new List<Error>(); }
-        /// <summary>
-        /// Define a custom category for a node
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class CategoryAttribute : System.Attribute
-        {
-            public string category;
-            /// <summary>
-            /// Define a custom category for a node
-            /// </summary>
-            /// <param name="category">Content to use for the category in the search menu</param>
-            public CategoryAttribute(string category)
-            {
-                this.category = category;
-            }
-        }
-        public static Dictionary<string, IEnumerable<Type>> GetNodeCategories()
-        {
-            Dictionary<string, List<Type>> dict = new Dictionary<string, List<Type>>();
-
-            foreach (Type nodeType in Schema.Utilities.HelperMethods.GetEnumerableOfType(typeof(Node)))
-            {
-                CategoryAttribute attribute = nodeType.GetCustomAttribute<CategoryAttribute>();
-
-                List<Type> t = null;
-
-                string key = attribute == null ? "" : attribute.category;
-
-                dict.TryGetValue(key, out t);
-
-                if (t == null)
-                    dict[key] = new List<Type>() { nodeType };
-                else
-                    t.Add(nodeType);
-            }
-
-            return dict.ToDictionary(x => x.Key, x => x.Value.AsEnumerable());
-        }
         public static Texture2D GetNodeIcon(Type type)
         {
             DarkIconAttribute darkIcon = type.GetCustomAttribute<DarkIconAttribute>();
@@ -464,113 +573,6 @@ namespace Schema
                 return null;
             }
         }
-        /// <summary>
-        /// Where Schema should load the dark mode icon within a resources folder
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class DarkIconAttribute : System.Attribute
-        {
-            public string location;
-            public bool isEditorIcon;
-            /// <summary>
-            /// Where Schema should load the dark mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
-            public DarkIconAttribute(string location)
-            {
-                this.location = location;
-            }
-            /// <summary>
-            /// Where Schema should load the dark mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
-            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
-            public DarkIconAttribute(string location, bool isEditorIcon)
-            {
-                this.location = location;
-                this.isEditorIcon = isEditorIcon;
-            }
-        }
-        /// <summary>
-        /// Where Schema should load the light mode icon within a resources folder
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class LightIconAttribute : System.Attribute
-        {
-            public string location;
-            public bool isEditorIcon;
-            /// <summary>
-            /// Where Schema should load the light mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
-            public LightIconAttribute(string location)
-            {
-                this.location = location;
-            }
-            /// <summary>
-            /// Where Schema should load the light mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
-            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
-            public LightIconAttribute(string location, bool isEditorIcon)
-            {
-                this.location = location;
-                this.isEditorIcon = isEditorIcon;
-            }
-        }
-        /// <summary>
-        /// Attribute for adding a description to a node in the Editor
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class DescriptionAttribute : System.Attribute
-        {
-            public string description;
-            /// <summary>
-            /// Attribute for adding a description to a node in the Editor
-            /// </summary>
-            /// <param name="description">Description for the node</param>
-            public DescriptionAttribute(string description)
-            {
-                this.description = description;
-            }
-        }
-        /// <summary>
-        /// Attribute to override the default name of the node in the editor
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class NameAttribute : System.Attribute
-        {
-            public string name;
-            /// <summary>
-            /// Attribute to override the default name of the node in the edit or
-            /// </summary>
-            /// <param name="name">Default name of the node to use</param>
-            public NameAttribute(string name)
-            {
-                this.name = name;
-            }
-        }
-#if UNITY_EDITOR
-        private Texture2D _icon;
-        private string _darkIconLocation;
-        private string _lightIconLocation;
-        /// <summary>
-        /// Icon of the node (editor only)
-        /// </summary>
-        public Texture2D icon
-        {
-            get
-            {
-                if (usingProSkin != EditorGUIUtility.isProSkin)
-                {
-                    _icon = GetNodeIcon(GetType());
-                    usingProSkin = EditorGUIUtility.isProSkin;
-                }
-
-                return _icon;
-            }
-        }
-        private bool usingProSkin;
 #endif
     }
 }

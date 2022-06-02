@@ -136,16 +136,21 @@ namespace Schema
         {
             this.m_filters = filters.Select(x => x.AssemblyQualifiedName).ToList();
 
+#if UNITY_EDITOR
             Blackboard.entryListChanged += BlackboardChangedCallback;
             Blackboard.entryTypeChanged += VerifyType;
+#endif
         }
         public BlackboardEntrySelector()
         {
             this.m_filters = new List<string>();
 
+#if UNITY_EDITOR
             Blackboard.entryListChanged += BlackboardChangedCallback;
             Blackboard.entryTypeChanged += VerifyType;
+#endif
         }
+#if UNITY_EDITOR
         private void BlackboardChangedCallback(Blackboard changed)
         {
             VerifyResults(changed);
@@ -168,6 +173,7 @@ namespace Schema
                 m_valuePath = "";
             }
         }
+#endif
         /// <summary>
         /// Apply all possible filters for this selector
         /// </summary>
@@ -199,6 +205,9 @@ namespace Schema
         /// <param name="filters">IEnumerable of filters to add</param>
         public void ApplyFilters(IEnumerable<Type> filters)
         {
+            if (!Application.isEditor)
+                return;
+
             Type t = this.GetType();
 
             if (t != typeof(BlackboardEntrySelector))
@@ -211,7 +220,7 @@ namespace Schema
 
             m_filters.Clear();
 
-            if (entryType != null && !filters.Contains(entryType))
+            if (entryType != null && !filters.Contains(EntryType.GetMappedType(entryType)))
                 m_entry = null;
 
             this.m_filters = filters
@@ -239,6 +248,9 @@ namespace Schema
         /// <param name="filters">IEnumerable of filters to add</param>
         public void AddFilters(IEnumerable<Type> filters)
         {
+            if (!Application.isEditor)
+                return;
+
             Type t = this.GetType();
 
             if (t != typeof(BlackboardEntrySelector))
@@ -273,6 +285,9 @@ namespace Schema
         /// <param name="filters">Array of filters to remove</param>
         public void RemoveFilters(IEnumerable<Type> filters)
         {
+            if (!Application.isEditor)
+                return;
+
             Type t = this.GetType();
 
             if (t != typeof(BlackboardEntrySelector))
@@ -296,7 +311,7 @@ namespace Schema
                 .Select(t => t.AssemblyQualifiedName)
                 ).ToList();
 
-            if (entryType != null && filters.Contains(entryType))
+            if (entryType != null && filters.Contains(EntryType.GetMappedType(entryType)))
                 m_entry = null;
         }
     }

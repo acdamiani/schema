@@ -233,22 +233,23 @@ namespace SchemaEditor
 
             filtered.ForEach(Debug.Log);
 
-            menu.AddItem("None", entry.objectReferenceValue == null && !isDynamicPropertyValue, () => GenericMenuSelectOption(property, null), false);
+            menu.AddItem("<None>", entry.objectReferenceValue == null && !isDynamicPropertyValue, () => GenericMenuSelectOption(property, null), false);
             menu.AddSeparator("");
-            menu.AddItem("Dynamic", isDynamicPropertyValue, () => ToggleDynamic(property), false);
+            menu.AddItem("<Dynamic>", isDynamicPropertyValue, () => ToggleDynamic(property), false);
 
             bool disableDynamicBinding = fieldInfo.GetCustomAttribute<DisableDynamicBindingAttribute>() != null;
 
             Dictionary<Type, IEnumerable<string>> tmp = new Dictionary<Type, IEnumerable<string>>();
 
-            foreach (BlackboardEntry bEntry in Blackboard.instance.entries)
+            foreach (BlackboardEntry bEntry in Blackboard.instance.entries.Concat(Blackboard.global.entries))
             {
+                typeMappings.TryGetValue(bEntry.type, out Type value);
+
+                if (value == null)
+                    value = EntryType.GetMappedType(bEntry.type);
+
                 if (disableDynamicBinding)
                 {
-                    typeMappings.TryGetValue(bEntry.type, out Type value);
-
-                    if (value == null)
-                        value = EntryType.GetMappedType(bEntry.type);
 
                     if (!filtered.Any(t => value.IsAssignableFrom(t)))
                         continue;
@@ -260,13 +261,20 @@ namespace SchemaEditor
                         false
                     );
                 }
+                else if (filtered.Any(t => t.IsAssignableFrom(value)))
+                {
+                    bool showType = filtered.Count > 1;
+                    string typeSuffix = $" ({bEntry.type.Name})";
+
+                    menu.AddItem(
+                        $"{bEntry.name}{(showType ? typeSuffix : "")}",
+                        entry.objectReferenceValue == bEntry,
+                        () => GenericMenuSelectOption(property, bEntry, ""),
+                        false
+                    );
+                }
                 else
                 {
-                    typeMappings.TryGetValue(bEntry.type, out Type value);
-
-                    if (value == null)
-                        value = typeMappings[bEntry.type] = EntryType.GetMappedType(bEntry.type);
-
                     excluded.TryGetValue(bEntry.type, out Tuple<string[], Type[]> e);
 
                     if (e == null)
@@ -347,12 +355,6 @@ namespace SchemaEditor
             MemberInfo declaring = null
         )
         {
-            if (targets.Any(t => type.IsAssignableFrom(t)))
-            {
-                yield return path;
-                yield break;
-            }
-
             HashSet<Type> nonRecursiveTypes = new HashSet<Type> {
                 typeof(sbyte),
                 typeof(byte),
@@ -379,21 +381,18 @@ namespace SchemaEditor
                 ObsoleteAttribute obsoleteAttribute = member.GetCustomAttribute<ObsoleteAttribute>();
 
                 Type memberType = (member as FieldInfo)?.FieldType ?? (member as PropertyInfo)?.PropertyType;
-                bool hasSetMethod = (member is FieldInfo) ? true : (member as PropertyInfo)?.SetMethod != null;
-
-                // if (path == "/transform/parent/root/parent")
-                //     Debug.Log(excludePaths.Contains(path.Trim('/').Replace('/', '.')));
+                bool hasSetMethod = (member is FieldInfo) ? true : (member as PropertyInfo)?.GetSetMethod(false) != null;
 
                 if (
                     obsoleteAttribute != null ||
                     (needsSetter && member.DeclaringType.IsValueType) ||
                     member.Name == "Item" ||
-                    excludePaths.Contains(path.Trim('/').Replace('/', '.')) ||
+                    excludePaths.Contains((path + "/" + member.Name).Trim('/').Replace('/', '.')) ||
                     excludeTypes.Contains(memberType)
                 )
                     continue;
 
-                if (targets.Any(t => memberType.IsAssignableFrom(t)) && (!needsSetter || hasSetMethod))
+                if (targets.Any(t => t.IsAssignableFrom(memberType)) && (!needsSetter || hasSetMethod))
                 {
                     yield return $"{path}/{member.Name}{(showType ? $" ({memberType.Name})" : "")}";
                 }

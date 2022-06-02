@@ -1,32 +1,35 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(PlaySound)), CanEditMultipleObjects]
-public class PlaySoundEditor : Editor
+namespace SchemaEditor.Editors.Nodes
 {
-	private SerializedProperty isOneShot;
-	private SerializedProperty clip;
-	private SerializedProperty volume;
-	private SerializedProperty waitForCompletion;
-	public override void OnInspectorGUI()
-	{
-		serializedObject.Update();
+    [CustomEditor(typeof(PlaySound)), CanEditMultipleObjects]
+    public class PlaySoundEditor : Editor
+    {
+        private SerializedProperty isOneShot;
+        private SerializedProperty clip;
+        private SerializedProperty volume;
+        private SerializedProperty waitForCompletion;
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
 
-		isOneShot = serializedObject.FindProperty("isOneShot");
-		clip = serializedObject.FindProperty("clip");
-		volume = serializedObject.FindProperty("volume");
-		waitForCompletion = serializedObject.FindProperty("waitForCompletion");
+            isOneShot = serializedObject.FindProperty("isOneShot");
+            clip = serializedObject.FindProperty("clip");
+            volume = serializedObject.FindProperty("volume");
+            waitForCompletion = serializedObject.FindProperty("waitForCompletion");
 
-		EditorGUILayout.PropertyField(isOneShot);
+            EditorGUILayout.PropertyField(isOneShot);
 
-		if (isOneShot.boolValue)
-		{
-			EditorGUILayout.PropertyField(clip);
-			EditorGUILayout.PropertyField(volume);
-		}
+            if (isOneShot.boolValue)
+            {
+                EditorGUILayout.PropertyField(clip);
+                EditorGUILayout.PropertyField(volume);
+            }
 
-		EditorGUILayout.PropertyField(waitForCompletion);
+            EditorGUILayout.PropertyField(waitForCompletion);
 
-		serializedObject.ApplyModifiedProperties();
-	}
+            serializedObject.ApplyModifiedProperties();
+        }
+    }
 }

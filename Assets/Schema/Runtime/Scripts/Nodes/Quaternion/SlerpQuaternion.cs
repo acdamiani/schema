@@ -5,8 +5,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("c_Transform")]
-    [LightIcon("c_Transform")]
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Spherically interpolate between two rotations, and normalize the result afterwards")]
     public class SlerpQuaternion : Action
     {

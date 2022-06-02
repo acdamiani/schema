@@ -2,49 +2,52 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(SetMatrixValue))]
-public class SetMatrixValueEditor : Editor
+namespace SchemaEditor.Editors.Nodes
 {
-    float padding = 10f;
-    SerializedProperty[,] matrix = new SerializedProperty[4, 4];
-    SerializedProperty t;
-    void OnEnable()
+    [CustomEditor(typeof(SetMatrixValue))]
+    public class SetMatrixValueEditor : Editor
     {
-        for (int x = 0; x < 4; x++)
-        {
-            for (int y = 0; y < 4; y++)
-            {
-                matrix[y, x] = serializedObject.FindProperty($"m{x}{y}");
-            }
-        }
-
-        t = serializedObject.FindProperty("target");
-    }
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-
-        EditorGUILayout.PropertyField(t);
-
-        GUILayout.Box("", GUILayout.Height(20 * 4 + padding * 5), GUILayout.ExpandWidth(true));
-
-        Rect reserved = GUILayoutUtility.GetLastRect();
-
-        for (int y = 0; y < 4; y++)
+        float padding = 10f;
+        SerializedProperty[,] matrix = new SerializedProperty[4, 4];
+        SerializedProperty t;
+        void OnEnable()
         {
             for (int x = 0; x < 4; x++)
             {
-                Rect r = new Rect(
-                    reserved.x + reserved.width / 4f * x + padding / 2f,
-                    reserved.y + 20 * y + padding * y + padding,
-                    (reserved.width - padding * 3) / 4f,
-                    20
-                );
-
-                EditorGUI.PropertyField(r, matrix[x, y], GUIContent.none, false);
+                for (int y = 0; y < 4; y++)
+                {
+                    matrix[y, x] = serializedObject.FindProperty($"m{x}{y}");
+                }
             }
-        }
 
-        serializedObject.ApplyModifiedProperties();
+            t = serializedObject.FindProperty("target");
+        }
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
+
+            EditorGUILayout.PropertyField(t);
+
+            GUILayout.Box("", GUILayout.Height(20 * 4 + padding * 5), GUILayout.ExpandWidth(true));
+
+            Rect reserved = GUILayoutUtility.GetLastRect();
+
+            for (int y = 0; y < 4; y++)
+            {
+                for (int x = 0; x < 4; x++)
+                {
+                    Rect r = new Rect(
+                        reserved.x + reserved.width / 4f * x + padding / 2f,
+                        reserved.y + 20 * y + padding * y + padding,
+                        (reserved.width - padding * 3) / 4f,
+                        20
+                    );
+
+                    EditorGUI.PropertyField(r, matrix[x, y], GUIContent.none, false);
+                }
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }

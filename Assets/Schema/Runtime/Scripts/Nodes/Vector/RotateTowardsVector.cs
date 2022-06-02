@@ -5,9 +5,11 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Rotates a vector towards a target")]
     [Category("Vector")]
-    public class RotateTowards : Action
+    public class RotateTowardsVector : Action
     {
         [Tooltip("Current managed vector")]
         public BlackboardEntrySelector current = new BlackboardEntrySelector();
@@ -23,6 +25,7 @@ namespace Schema.Builtin.Nodes
         {
             current.ApplyFilters(typeof(Vector2), typeof(Vector3));
             target.ApplyFilters(typeof(Vector2), typeof(Vector3));
+            rotated.ApplyFilters(typeof(Vector2), typeof(Vector3));
         }
         void OnValidate()
         {

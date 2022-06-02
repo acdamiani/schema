@@ -5,10 +5,10 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Normalize a Vector")]
     [Category("Vector")]
-    [DarkIcon("c_Transform")]
-    [LightIcon("c_Transform")]
     public class NormalizeVector : Action
     {
         [Tooltip("Vector to normalize")]

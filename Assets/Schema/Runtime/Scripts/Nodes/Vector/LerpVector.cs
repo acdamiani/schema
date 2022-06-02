@@ -5,6 +5,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Category("Vector")]
     [Description("Linearly interpolate between two Vectors")]
     public class LerpVector : Action

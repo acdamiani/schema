@@ -3,6 +3,8 @@ using Schema;
 
 namespace Schema.Builtin.Nodes
 {
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
     [Description("Decompose a vector to get its components")]
     [Category("Vector")]
     public class GetVectorComponents : Action

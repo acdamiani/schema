@@ -118,6 +118,7 @@ public static class DynamicProperty
     }
     private static Func<object, object> CreateGetMethod(MemberInfo memberInfo)
     {
+#if ENABLE_MONO
         string methodName = memberInfo.ReflectedType.FullName + ".get_" + memberInfo.Name;
         DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(object), new Type[1] { typeof(object) }, true);
         ILGenerator gen = getterMethod.GetILGenerator();
@@ -175,9 +176,25 @@ public static class DynamicProperty
         gen.Emit(OpCodes.Ret);
 
         return (Func<object, object>)getterMethod.CreateDelegate(typeof(Func<object, object>));
+#else
+        if (memberInfo is FieldInfo)
+        {
+            return new Func<object, object>(obj => (memberInfo as FieldInfo).GetValue(obj));
+        }
+        else if (memberInfo is PropertyInfo)
+        {
+            return new Func<object, object>(obj => (memberInfo as PropertyInfo).GetValue(obj));
+        }
+        else
+        {
+            return new Func<object, object>(o => null);
+        }
+
+#endif
     }
     private static Action<object, object> CreateSetMethod(MemberInfo memberInfo)
     {
+#if ENABLE_MONO
         string methodName = memberInfo.ReflectedType.FullName + ".set_" + memberInfo.Name;
         DynamicMethod setterMethod = new DynamicMethod(methodName, null, new Type[2] { typeof(object), typeof(object) }, true);
         ILGenerator gen = setterMethod.GetILGenerator();
@@ -240,6 +257,17 @@ public static class DynamicProperty
         gen.Emit(OpCodes.Ret);
 
         return (Action<object, object>)setterMethod.CreateDelegate(typeof(Action<object, object>));
+
+#else
+        if (memberInfo is PropertyInfo)
+        {
+            return new Action<object, object>((o1, o2) => (memberInfo as PropertyInfo).SetValue(o1, o2));
+        }
+        else
+        {
+            return new Action<object, object>((o1, o2) => { });
+        }
+#endif
     }
     public class ValueTypeHolder
     {
