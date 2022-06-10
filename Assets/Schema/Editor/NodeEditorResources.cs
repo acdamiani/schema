@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using Schema.Utilities;
 
 internal static class Styles
 {
@@ -12,12 +13,10 @@ internal static class Styles
     private static readonly Color32 LightBackgroundColor = new Color32(200, 200, 200, 255);
     private static readonly Color32 DarkBorder = new Color32(40, 40, 40, 255);
     private static readonly Color32 LightBorder = new Color32(147, 147, 147, 255);
-    //Textures
     private static Texture2D _node;
     private static Texture2D _nodeSelected;
     private static Texture2D _arrow;
     private static Texture2D _nodeSelectedDecorator;
-    private static Texture2D _solid;
     private static Texture2D _blackboardIcon;
     private static Texture2D _dropdown;
     private static Texture2D _warnIcon;
@@ -47,7 +46,6 @@ internal static class Styles
     public static Texture2D plus => _plus != null ? _plus : _plus = EditorGUIUtility.FindTexture("Toolbar Plus More");
     public static Texture2D minus => _minus != null ? _minus : _minus = EditorGUIUtility.FindTexture("Toolbar Minus");
     public static Texture2D circle => _circle != null ? _circle : _circle = Resources.Load<Texture2D>("Circle");
-    public static Texture2D solid => _solid != null ? _solid : _solid = GenerateSolid(Color.white, new Vector2Int(32, 32));
     public static Texture2D local => _local != null ? _local : _local = (Texture2D)EditorGUIUtility.IconContent("ModelImporter Icon").image;
     public static Texture2D global => _global != null ? _global : _global = EditorGUIUtility.FindTexture("Profiler.GlobalIllumination");
     public static Texture2D shared => _shared != null ? _shared : _shared = EditorGUIUtility.FindTexture("Linked");
@@ -57,13 +55,10 @@ internal static class Styles
     public static Texture2D gridTexture => _gridTexture == null ? _gridTexture = GenerateGridTexture(Color.grey, windowBackground) : _gridTexture;
     private static Texture2D _crossTexture;
     public static Texture2D crossTexture => _crossTexture == null ? _crossTexture = GenerateCrossTexture(Color.gray) : _crossTexture;
-    private static Texture2D _searchBackground;
-    public static Texture2D searchBackground
-    {
-        get { return _searchBackground == null ? _searchBackground = GenerateSolid(Styles.windowBackground, new Vector2Int(1, 1)) : _searchBackground; }
-    }
-    private static Texture2D _favorite;
-    public static Texture2D favorite => _favorite == null ? _favorite = FindTexture("Favorite On Icon") : _favorite;
+    private static Texture2D _favoriteDisabled;
+    public static Texture2D favoriteDisabled => _favoriteDisabled == null ? _favoriteDisabled = FindTexture("QuickSearch/favorite_disabled") : _favoriteDisabled;
+    private static Texture2D _favoriteEnabled;
+    public static Texture2D favoriteEnabled => _favoriteEnabled == null ? _favoriteEnabled = FindTexture("QuickSearch/favorite_enabled") : _favoriteEnabled;
     private static Texture2D _folder;
     public static Texture2D folder => _folder == null ? _folder = (Texture2D)EditorGUIUtility.IconContent("Folder Icon").image : _folder;
     private static Texture2D _folderOpen;
@@ -78,6 +73,10 @@ internal static class Styles
     public static Texture2D inspectorIcon => _inspectorIcon == null ? _inspectorIcon = FindTexture("UnityEditor.InspectorWindow") : _inspectorIcon;
     private static Texture2D _hiearchyIcon;
     public static Texture2D hiearchyIcon => _hiearchyIcon == null ? _hiearchyIcon = FindTexture("UnityEditor.HierarchyWindow") : _hiearchyIcon;
+    private static Texture2D _searchBackground;
+    public static Texture2D searchBackground => _searchBackground == null ? _searchBackground = Resources.Load<Texture2D>("search_bg") : _searchBackground;
+    private static Texture2D _solid;
+    public static Texture2D solid => _solid == null ? _solid = Resources.Load<Texture2D>("Misc/px") : _solid;
     private static GUIStyle _quickSearch;
     public static GUIStyle quickSearch
     {
@@ -87,7 +86,8 @@ internal static class Styles
             {
                 _quickSearch = new GUIStyle();
                 _quickSearch.normal.background = searchBackground;
-                _quickSearch.padding = new RectOffset(0, 0, 8, 8);
+                _quickSearch.border = new RectOffset(2, 2, 2, 2);
+                _quickSearch.padding = new RectOffset(0, 0, 2, 2);
             }
 
             return _quickSearch;
@@ -105,6 +105,26 @@ internal static class Styles
             }
 
             return _blackboardScroll;
+        }
+    }
+    private static GUIStyle _favoriteToggle;
+    public static GUIStyle favoriteToggle
+    {
+        get
+        {
+            if (_favoriteToggle == null)
+            {
+                _favoriteToggle = new GUIStyle();
+                _favoriteToggle.margin = new RectOffset(0, 8, 0, 0);
+                _favoriteToggle.stretchHeight = false;
+                _favoriteToggle.stretchWidth = false;
+                _favoriteToggle.fixedHeight = 24;
+                _favoriteToggle.fixedWidth = 24;
+                _favoriteToggle.normal.background = favoriteDisabled;
+                _favoriteToggle.onNormal.background = favoriteEnabled;
+            }
+
+            return _favoriteToggle;
         }
     }
     private static GUIStyle _padding8x;
@@ -146,9 +166,13 @@ internal static class Styles
         {
             if (_searchResult == null)
             {
-                _searchResult = new GUIStyle(EditorStyles.label);
-                _searchResult.padding = new RectOffset(0, 0, 0, 0);
-                _searchResult.margin = new RectOffset(0, 0, 0, 0);
+                _searchResult = new GUIStyle();
+                _searchResult.border = new RectOffset(8, 8, 8, 8);
+                _searchResult.padding = new RectOffset(4, 0, 0, 0);
+                _searchResult.alignment = TextAnchor.MiddleLeft;
+                _searchResult.hover.background = node.Tint(GUI.skin.settings.selectionColor);
+                _searchResult.hover.textColor = Color.white;
+                _searchResult.normal.textColor = Color.white;
             }
 
             return _searchResult;
@@ -182,19 +206,23 @@ internal static class Styles
             return decodedString;
         }
     }
-    private static Texture2D FindTexture(string baseName)
+    private static Texture2D FindTexture(string path)
     {
         bool darkMode = EditorGUIUtility.isProSkin;
-        string name = (darkMode ? "d_" : "") + baseName;
 
-        Texture2D tex = (Texture2D)EditorGUIUtility.IconContent(baseName).image;
+        string name = (darkMode ? "d_" : "") + System.IO.Path.GetFileName(path);
+
+        Texture2D tex = Resources.Load<Texture2D>(System.IO.Path.Join(System.IO.Path.GetDirectoryName(path), name));
 
         if (tex != null)
             return tex;
 
-        tex = EditorGUIUtility.FindTexture(baseName);
+        tex = (Texture2D)EditorGUIUtility.IconContent(name).image;
 
-        return tex;
+        if (tex != null)
+            return tex;
+
+        return EditorGUIUtility.FindTexture(name);
     }
     private static Texture2D GenerateGridTexture(Color line, Color bg)
     {

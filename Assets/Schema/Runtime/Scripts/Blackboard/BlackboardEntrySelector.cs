@@ -19,7 +19,7 @@ namespace Schema
                 if (!Application.isPlaying)
                     return default(T);
 
-                if (entry == null && !isDynamic)
+                if (!isDynamic && entry == null)
                     return (T)inspectorValue;
 
                 try { return (T)base.value; }
@@ -27,6 +27,9 @@ namespace Schema
             }
             set
             {
+                if (!Application.isPlaying || (!isDynamic && entry == null))
+                    return;
+
                 base.value = value;
             }
         }
@@ -77,18 +80,16 @@ namespace Schema
         {
             get
             {
-                if (!Application.isPlaying)
+                if (!Application.isPlaying || (!m_isDynamic && m_entry == null))
                     return null;
 
                 if (m_isDynamic)
                 {
-                    object obj = BlackboardDataContainer.GetDynamic(m_dynamicName);
-
-                    return obj;
+                    return BlackboardDataContainer.GetDynamic(m_dynamicName);
                 }
                 else if (entry != null)
                 {
-                    object obj = BlackboardDataContainer.Get(entry, SchemaManager.pid);
+                    object obj = BlackboardDataContainer.Get(m_entry, SchemaManager.pid);
 
                     if (obj == null)
                         return null;
@@ -103,18 +104,18 @@ namespace Schema
             }
             set
             {
-                if (!Application.isPlaying)
+                if (!Application.isPlaying || (!m_isDynamic && m_entry == null))
                     return;
 
                 if (m_isDynamic)
                 {
                     BlackboardDataContainer.SetDynamic(m_dynamicName, value);
                 }
-                else if (entry != null)
+                else if (m_entry != null)
                 {
                     if (!String.IsNullOrEmpty(m_valuePath.Trim('/')))
                     {
-                        object valueObj = BlackboardDataContainer.Get(entry, SchemaManager.pid);
+                        object valueObj = BlackboardDataContainer.Get(m_entry, SchemaManager.pid);
 
                         if (valueObj == null)
                             return;
@@ -123,7 +124,7 @@ namespace Schema
                     }
                     else
                     {
-                        BlackboardDataContainer.Set(entry, SchemaManager.pid, value);
+                        BlackboardDataContainer.Set(m_entry, SchemaManager.pid, value);
                     }
                 }
             }

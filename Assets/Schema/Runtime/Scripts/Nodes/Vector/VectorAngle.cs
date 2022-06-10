@@ -25,10 +25,12 @@ namespace Schema.Builtin.Nodes
         public bool overrideAxis;
         [Tooltip("Blackboard variable to store the angle between the vectors"), WriteOnly]
         public BlackboardEntrySelector<float> angle;
-        protected override void OnNodeEnable()
+        protected override void OnEnable()
         {
             vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3));
             vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3));
+
+            base.OnEnable();
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

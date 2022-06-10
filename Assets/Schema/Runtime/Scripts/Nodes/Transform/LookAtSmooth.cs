@@ -13,30 +13,20 @@ public class LookAtSmooth : Schema.Action
     public float speed;
     [Tooltip("Enable smooth interpolation")]
     public bool slerp = true;
-    class RotateToMemory
-    {
-        public float t;
-    }
-    public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
-    {
-        RotateToMemory memory = (RotateToMemory)nodeMemory;
-
-        memory.t = Time.time;
-    }
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Transform self = agent.GetComponent(transform);
         Transform targetTransform = agent.GetComponent(target);
 
-        RotateToMemory memory = (RotateToMemory)nodeMemory;
+        Vector3 dir = Vector3.Normalize(targetTransform.position - self.position);
 
-        Quaternion rotation = Quaternion.FromToRotation(self.forward, (targetTransform.position - agent.transform.position).normalized);
-        float angleDiff = Vector3.Angle(agent.transform.forward, (targetTransform.position - agent.transform.position).normalized);
+        Quaternion rotation = Quaternion.LookRotation(dir);
+        float angleDiff = Vector3.Angle(self.forward, dir);
 
         if (slerp)
-            agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, self.rotation * rotation, Time.deltaTime * speed / angleDiff);
+            self.rotation = Quaternion.Slerp(self.rotation, rotation, Time.deltaTime * speed / angleDiff);
         else
-            agent.transform.rotation = Quaternion.Lerp(agent.transform.rotation, rotation, Time.deltaTime * speed / angleDiff);
+            self.rotation = Quaternion.Lerp(self.rotation, rotation, Time.deltaTime * speed / angleDiff);
 
         if (Mathf.Abs(angleDiff) > 0.0001f)
             return NodeStatus.Running;

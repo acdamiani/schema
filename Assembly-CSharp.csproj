@@ -653,6 +653,9 @@
     <Reference Include="Unity.VisualStudio.Editor">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.VisualStudio.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Sysroot.Linux_x86_64">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.Sysroot.Linux_x86_64.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Timeline.Editor">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
@@ -661,6 +664,9 @@
     </Reference>
     <Reference Include="Unity.TextMeshPro">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Toolchain.Linux-x86_64">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.Toolchain.Linux-x86_64.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.UI">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
@@ -673,6 +679,9 @@
     </Reference>
     <Reference Include="UnityEngine.UI">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.SysrootPackage.Editor">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.SysrootPackage.Editor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

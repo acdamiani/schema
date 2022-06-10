@@ -15,9 +15,11 @@ namespace Schema.Builtin.Nodes
         public BlackboardEntrySelector vector = new BlackboardEntrySelector();
         [Tooltip("Blackboard variable to store the normalized vector in"), WriteOnly]
         public BlackboardEntrySelector normalized = new BlackboardEntrySelector();
-        protected override void OnNodeEnable()
+        protected override void OnEnable()
         {
             vector.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+
+            base.OnEnable();
         }
         void OnValidate()
         {

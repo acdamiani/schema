@@ -55,8 +55,12 @@ namespace SchemaEditor
 
                 if (windowInfo.searchIsShown)
                 {
-                    if (QuickSearch.DoSearch(window, target, WindowToGridPosition(window.size * 0.5f), (float)EditorApplication.timeSinceStartup))
+                    BeginWindows();
+
+                    if (QuickSearch.OnGUI(window, target, WindowToGridPosition(window.size * 0.5f), (float)EditorApplication.timeSinceStartup))
                         windowInfo.searchIsShown = false;
+
+                    EndWindows();
                 }
 
                 DrawToolbar();

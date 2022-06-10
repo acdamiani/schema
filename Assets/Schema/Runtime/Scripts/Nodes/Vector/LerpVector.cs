@@ -21,10 +21,12 @@ namespace Schema.Builtin.Nodes
         public bool unclamped;
         [Tooltip("Blackboard variable to store the lerped vector in."), WriteOnly]
         public BlackboardEntrySelector lerped = new BlackboardEntrySelector();
-        protected override void OnNodeEnable()
+        protected override void OnEnable()
         {
             vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
             vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+
+            base.OnEnable();
         }
         void OnValidate()
         {

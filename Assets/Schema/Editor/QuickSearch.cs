@@ -9,6 +9,7 @@ public static class QuickSearch
 {
     private static readonly RectOffset windowPadding = new RectOffset(100, 100, 250, 100);
     private static readonly float keydownTimeWindow = 0.05f;
+    private static readonly KeyCode[] validMovementCodes = new KeyCode[] { KeyCode.UpArrow, KeyCode.DownArrow };
     private static Rect searchRect;
     private static Schema.Graph target;
     private static Vector2 newNodePosition;
@@ -34,10 +35,13 @@ public static class QuickSearch
     {
         focusSearch = true;
     }
-    public static bool DoSearch(Rect window, Schema.Graph target, Vector2 newNodePosition, float timeSinceStartup)
+    public static bool OnGUI(Rect window, Schema.Graph target, Vector2 newNodePosition, float timeSinceStartup)
     {
         if (searchField == null)
+        {
             searchField = new SearchField();
+            searchField.downOrUpArrowKeyPressed += MoveSelectionByEvent;
+        }
 
         if (focusSearch)
         {
@@ -65,20 +69,9 @@ public static class QuickSearch
 
         GUILayout.Space(8);
 
-        EditorGUI.BeginChangeCheck();
-
         GUI.SetNextControlName("searchField");
         searchText = searchField.OnToolbarGUI(searchText);
         searchFavorites = GUILayout.Toggle(searchFavorites, "Favorites", EditorStyles.toolbarButton, GUILayout.Width(125));
-
-        searchField.downOrUpArrowKeyPressed += () =>
-        {
-            GUI.FocusControl("");
-            selected = 0;
-        };
-
-        if (EditorGUI.EndChangeCheck())
-            selected = -1;
 
         GUILayout.EndHorizontal();
 
@@ -129,28 +122,31 @@ public static class QuickSearch
         }
         else
         {
-            if (folderView)
-            {
-                scrollA = GUILayout.BeginScrollView(scrollA, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
+            if (Event.current.type == EventType.KeyDown && validMovementCodes.Contains(Event.current.keyCode))
+                MoveSelection(Event.current.keyCode == KeyCode.UpArrow);
 
-                if (String.IsNullOrWhiteSpace(searchText))
-                    didAddNode = RenderFolderView();
-                else
-                    didAddNode = RenderNodeResults(SearchThroughResults(categories.Select(x => x.Value).SelectMany(x => x), searchText), 0);
+            // if (folderView)
+            // {
+            //     scrollA = GUILayout.BeginScrollView(scrollA, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
 
-                GUILayout.EndScrollView();
-            }
+            //     if (String.IsNullOrWhiteSpace(searchText))
+            //         didAddNode = RenderFolderView();
+            //     else
+            //         didAddNode = RenderNodeResults(SearchThroughResults(categories.Select(x => x.Value).SelectMany(x => x), searchText), 0);
+
+            //     GUILayout.EndScrollView();
+            // }
+            // else
+            // {
+            scrollB = GUILayout.BeginScrollView(scrollB, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
+
+            if (String.IsNullOrWhiteSpace(searchText))
+                didAddNode = RenderCategoryView();
             else
-            {
-                scrollB = GUILayout.BeginScrollView(scrollB, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
+                didAddNode = RenderNodeResults(SearchThroughResults(categories.Select(x => x.Value).SelectMany(x => x), searchText), 0);
 
-                if (String.IsNullOrWhiteSpace(searchText))
-                    didAddNode = RenderCategoryView();
-                else
-                    didAddNode = RenderNodeResults(SearchThroughResults(categories.Select(x => x.Value).SelectMany(x => x), searchText), 0);
-
-                GUILayout.EndScrollView();
-            }
+            GUILayout.EndScrollView();
+            // }
         }
 
         GUI.EndClip();
@@ -310,6 +306,55 @@ public static class QuickSearch
 
     //     return new Tuple<bool, Type>(goBack, newSelected);
     // }
+    private static void DoSingleResult(GUIContent content, string favoriteName, int index, Action onClick)
+    {
+        DoSingleResult(content, favoriteName, index, onClick, -1, -1);
+    }
+    private static void DoSingleResult(GUIContent content, string favoriteName, int index, Action onClick, int highlightBegin, int highlightLength)
+    {
+        Event current = Event.current;
+
+        GUILayout.BeginHorizontal(GUILayout.Height(24));
+
+        GUILayout.Toggle(true, GUIContent.none, Styles.favoriteToggle);
+
+        Rect r = GUILayoutUtility.GetRect(content, EditorStyles.label, GUILayout.Height(24));
+        bool insideRect = r.Contains(current.mousePosition);
+
+        switch (current.type)
+        {
+            case EventType.Repaint:
+                Styles.searchResult.Draw(r, content, false, false, false, index == selected);
+                break;
+            case EventType.MouseMove:
+                if (insideRect)
+                    selected = index;
+                break;
+            case EventType.KeyDown when current.keyCode == KeyCode.Return && index == selected:
+            case EventType.MouseDown when insideRect:
+                onClick.Invoke();
+                break;
+        }
+
+        GUILayout.EndHorizontal();
+    }
+    private static void DoResults()
+    {
+    }
+    private static void MoveSelectionByEvent()
+    {
+        Event current = Event.current;
+
+        if (current.keyCode == KeyCode.UpArrow || current.keyCode == KeyCode.K)
+            MoveSelection(true);
+        else if (current.keyCode == KeyCode.DownArrow || current.keyCode == KeyCode.J)
+            MoveSelection(false);
+    }
+    private static void MoveSelection(bool isUp)
+    {
+        selected = isUp ? selected - 1 : selected + 1;
+        Debug.Log(selected);
+    }
     private static bool RenderNodeResults(IDictionary<Type, Tuple<int, int>> results, int offset)
     {
         GUILayout.BeginVertical();
@@ -339,111 +384,124 @@ public static class QuickSearch
 
             GUIContent c = new GUIContent(type.Name, icon);
 
-            Rect r = GUILayoutUtility.GetRect(c, Styles.searchResult, GUILayout.Height(24));
-            r = new Rect(r.position + new Vector2(24, 0), r.size - new Vector2(24, 0));
-
-            if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && r.Contains(Event.current.mousePosition))
-            {
-                GUI.FocusControl("");
-
-                if (Event.current.clickCount == 1)
-                {
-                    selected = i + offset;
-                }
-                else if (Event.current.clickCount == 2)
+            DoSingleResult(
+                c,
+                type.FullName,
+                i + offset,
+                () =>
                 {
                     target.AddNode(type, newNodePosition);
                     didAddNode = true;
                 }
-            }
-            else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.UpArrow)
-            {
-                if (EditorApplication.timeSinceStartup - keydownTime >= keydownTimeWindow)
-                {
-                    keydownTime = (float)EditorApplication.timeSinceStartup;
-                    selected = selected < 0 ? 0 : selected - 1;
+            );
 
-                    if (folderView)
-                    {
-                        if (selected * 24 - scrollA.y < 0)
-                            scrollA.y = selected * 24 + 16;
-                        else if (selected * 24 + 48 - scrollA.y > searchRect.height - 48)
-                            scrollA.y = selected * 24 - searchRect.height + 112;
-                    }
-                    else
-                    {
-                        if (selected * 24 - scrollB.y < 0)
-                            scrollB.y = selected * 24 + 16;
-                        else if (selected * 24 + 48 - scrollB.y > searchRect.height - 48)
-                            scrollB.y = selected * 24 - searchRect.height + 112;
-                    }
 
-                    selected = Mathf.Clamp(selected, 0, offset + results.Count - 1);
-                }
-            }
-            else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.DownArrow)
-            {
-                if (EditorApplication.timeSinceStartup - keydownTime >= keydownTimeWindow)
-                {
-                    keydownTime = (float)EditorApplication.timeSinceStartup;
-                    selected = selected < 0 ? 0 : selected + 1;
 
-                    if (folderView)
-                    {
-                        if (selected * 24 + 48 - scrollA.y > searchRect.height - 48)
-                            scrollA.y = selected * 24 - searchRect.height + 112;
-                        else if (selected * 24 - scrollA.y < 0)
-                            scrollA.y = selected * 24 + 16;
-                    }
-                    else
-                    {
-                        if (selected * 24 + 48 - scrollB.y > searchRect.height - 48)
-                            scrollB.y = selected * 24 - searchRect.height + 112;
-                        else if (selected * 24 - scrollB.y < 0)
-                            scrollB.y = selected * 24 + 16;
-                    }
+            // Rect r = GUILayoutUtility.GetRect(c, Styles.searchResult, GUILayout.Height(24));
+            // r = new Rect(r.position + new Vector2(24, 0), r.size - new Vector2(24, 0));
 
-                    selected = Mathf.Clamp(selected, 0, offset + results.Count - 1);
-                }
-            }
-            else if (isSelected && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
-            {
-                target.AddNode(type, newNodePosition);
+            // if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && r.Contains(Event.current.mousePosition))
+            // {
+            //     GUI.FocusControl("");
 
-                didAddNode = true;
-            }
-            else if (Event.current.type == EventType.KeyUp)
-            {
-                keydownTime = 0f;
-            }
+            //     if (Event.current.clickCount == 1)
+            //     {
+            //         selected = i + offset;
+            //     }
+            //     else if (Event.current.clickCount == 2)
+            //     {
+            //         target.AddNode(type, newNodePosition);
+            //         didAddNode = true;
+            //     }
+            // }
+            // else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.UpArrow)
+            // {
+            //     if (EditorApplication.timeSinceStartup - keydownTime >= keydownTimeWindow)
+            //     {
+            //         keydownTime = (float)EditorApplication.timeSinceStartup;
+            //         selected = selected < 0 ? 0 : selected - 1;
 
-            Color col = GUI.color;
+            //         if (folderView)
+            //         {
+            //             if (selected * 24 - scrollA.y < 0)
+            //                 scrollA.y = selected * 24 + 16;
+            //             else if (selected * 24 + 48 - scrollA.y > searchRect.height - 48)
+            //                 scrollA.y = selected * 24 - searchRect.height + 112;
+            //         }
+            //         else
+            //         {
+            //             if (selected * 24 - scrollB.y < 0)
+            //                 scrollB.y = selected * 24 + 16;
+            //             else if (selected * 24 + 48 - scrollB.y > searchRect.height - 48)
+            //                 scrollB.y = selected * 24 - searchRect.height + 112;
+            //         }
 
-            if (favorites.Contains(type.FullName))
-                GUI.color = EditorGUIUtility.isProSkin ? new Color32(252, 191, 7, 255) : new Color32(199, 150, 0, 255);
-            else
-                GUI.color = Styles.windowAccent;
+            //         selected = Mathf.Clamp(selected, 0, offset + results.Count - 1);
+            //     }
+            // }
+            // else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.DownArrow)
+            // {
+            //     if (EditorApplication.timeSinceStartup - keydownTime >= keydownTimeWindow)
+            //     {
+            //         keydownTime = (float)EditorApplication.timeSinceStartup;
+            //         selected = selected < 0 ? 0 : selected + 1;
 
-            if (GUI.Button(new Rect(r.x - 20, r.y + r.height / 2f - 8, 16, 16), Styles.favorite, GUIStyle.none))
-            {
-                if (favorites.Contains(type.FullName))
-                    favorites.Remove(type.FullName);
-                else
-                    favorites.Add(type.FullName);
+            //         if (folderView)
+            //         {
+            //             if (selected * 24 + 48 - scrollA.y > searchRect.height - 48)
+            //                 scrollA.y = selected * 24 - searchRect.height + 112;
+            //             else if (selected * 24 - scrollA.y < 0)
+            //                 scrollA.y = selected * 24 + 16;
+            //         }
+            //         else
+            //         {
+            //             if (selected * 24 + 48 - scrollB.y > searchRect.height - 48)
+            //                 scrollB.y = selected * 24 - searchRect.height + 112;
+            //             else if (selected * 24 - scrollB.y < 0)
+            //                 scrollB.y = selected * 24 + 16;
+            //         }
 
-                SchemaEditor.NodeEditor.NodeEditorPrefs.SetList("SCHEMA_PREF__favorites", favorites);
-            }
+            //         selected = Mathf.Clamp(selected, 0, offset + results.Count - 1);
+            //     }
+            // }
+            // else if (isSelected && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
+            // {
+            //     target.AddNode(type, newNodePosition);
 
-            GUI.color = GUI.skin.settings.selectionColor;
+            //     didAddNode = true;
+            // }
+            // else if (Event.current.type == EventType.KeyUp)
+            // {
+            //     keydownTime = 0f;
+            // }
 
-            if (isSelected)
-                GUI.Box(r, "", Styles.styles.node);
+            // Color col = GUI.color;
 
-            r = new Rect(r.x + 5, r.y, r.width - 5, r.height);
+            // if (favorites.Contains(type.FullName))
+            //     GUI.color = EditorGUIUtility.isProSkin ? new Color32(252, 191, 7, 255) : new Color32(199, 150, 0, 255);
+            // else
+            //     GUI.color = Styles.windowAccent;
 
-            GUI.color = col;
+            // if (GUI.Button(new Rect(r.x - 20, r.y + r.height / 2f - 8, 16, 16), Styles.favoriteEnabled, GUIStyle.none))
+            // {
+            //     if (favorites.Contains(type.FullName))
+            //         favorites.Remove(type.FullName);
+            //     else
+            //         favorites.Add(type.FullName);
 
-            DoHighlightedLabel(r, c, result.Value.Item1, result.Value.Item2, Styles.searchResult, Styles.searchHighlight);
+            //     SchemaEditor.NodeEditor.NodeEditorPrefs.SetList("SCHEMA_PREF__favorites", favorites);
+            // }
+
+            // GUI.color = GUI.skin.settings.selectionColor;
+
+            // if (isSelected)
+            //     GUI.Box(r, "", Styles.styles.node);
+
+            // r = new Rect(r.x + 5, r.y, r.width - 5, r.height);
+
+            // GUI.color = col;
+
+            // DoHighlightedLabel(r, c, result.Value.Item1, result.Value.Item2, Styles.searchResult, Styles.searchHighlight);
         }
 
         EditorGUIUtility.SetIconSize(iconSize);

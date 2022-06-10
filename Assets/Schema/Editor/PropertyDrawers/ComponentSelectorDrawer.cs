@@ -72,9 +72,12 @@ namespace SchemaEditor
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             SerializedProperty useSelf = property.FindPropertyRelative("m_useSelf");
+            SerializedProperty entry = property.FindPropertyRelative("m_entry");
 
             if (useSelf.boolValue)
                 return EditorGUIUtility.singleLineHeight;
+            else if (entry.objectReferenceValue != null)
+                return EditorGUIUtility.singleLineHeight * 3f + 4f;
             else
                 return EditorGUIUtility.singleLineHeight * 2f;
         }

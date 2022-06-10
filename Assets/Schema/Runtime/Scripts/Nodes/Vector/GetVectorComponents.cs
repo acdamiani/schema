@@ -14,9 +14,11 @@ namespace Schema.Builtin.Nodes
         [WriteOnly] public BlackboardEntrySelector<float> y;
         [WriteOnly] public BlackboardEntrySelector<float> z;
         [WriteOnly] public BlackboardEntrySelector<float> w;
-        protected override void OnNodeEnable()
+        protected override void OnEnable()
         {
             vector.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+
+            base.OnEnable();
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

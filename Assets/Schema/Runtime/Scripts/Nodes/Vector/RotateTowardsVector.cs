@@ -21,11 +21,13 @@ namespace Schema.Builtin.Nodes
         public BlackboardEntrySelector<float> maxMagnitudeDelta;
         [Tooltip("Blackboard variable to store the new rotated vector in"), WriteOnly]
         public BlackboardEntrySelector rotated = new BlackboardEntrySelector();
-        protected override void OnNodeEnable()
+        protected override void OnEnable()
         {
             current.ApplyFilters(typeof(Vector2), typeof(Vector3));
             target.ApplyFilters(typeof(Vector2), typeof(Vector3));
             rotated.ApplyFilters(typeof(Vector2), typeof(Vector3));
+
+            base.OnEnable();
         }
         void OnValidate()
         {

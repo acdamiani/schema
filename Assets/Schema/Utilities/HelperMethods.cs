@@ -315,5 +315,38 @@ namespace Schema.Utilities
 
             return builder.ToString();
         }
+        public static Color Contrast(this Color color)
+        {
+            int d = 0;
+
+            // Counting the perceptive luminance - human eye favors green color...      
+            double luminance = (0.299 * color.r + 0.587 * color.g + 0.114 * color.b) / 255;
+
+            if (luminance > 0.5)
+                d = 0; // bright colors - black font
+            else
+                d = 255; // dark colors - white font
+
+            return new Color(d, d, d);
+        }
+        public static Texture2D Tint(this Texture2D texture, Color color)
+        {
+            Texture2D ret = new Texture2D(texture.width, texture.height);
+            Color[] cols = new Color[texture.width * texture.height];
+
+            for (int y = 0; y < texture.height; y++)
+            {
+                for (int x = 0; x < texture.width; x++)
+                {
+                    cols[(y * texture.width) + x] = texture.GetPixel(x, y) * color;
+                }
+            }
+
+            ret.SetPixels(cols);
+            ret.name = "Tinted";
+            ret.Apply();
+
+            return ret;
+        }
     }
 }

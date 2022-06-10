@@ -116,10 +116,6 @@ namespace Schema
             return maxChildren > 0 && m_children.Length < maxChildren;
         }
         /// <summary>
-        /// Called during OnEnable(). Override this method instead of declaring an OnEnable method to avoid errors
-        /// </summary>
-        protected virtual void OnNodeEnable() { }
-        /// <summary>
         ///	Override to allow for Gizmo visualization in the scene view. This will be called only for the currently selected SchemaAgent. 
         /// </summary>
         public virtual void DrawGizmos(SchemaAgent agent) { }
@@ -131,7 +127,7 @@ namespace Schema
         /// The maximum allowed number of children for this node
         /// </summary>
         public virtual int maxChildren { get { return Int32.MaxValue; } }
-        void OnEnable()
+        protected virtual void OnEnable()
         {
             NameAttribute attribute = GetType().GetCustomAttribute<NameAttribute>();
 
@@ -144,8 +140,6 @@ namespace Schema
             _icon = GetNodeIcon(GetType());
             usingProSkin = EditorGUIUtility.isProSkin;
 #endif
-
-            OnNodeEnable();
         }
         /// <summary>
         /// Verifies the order of the child list by position

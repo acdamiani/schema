@@ -17,9 +17,11 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Layer mask to use when casting the box")] public LayerMask layerMask;
         [Tooltip("Specifies whether this query should hit triggers")] public QueryTriggerInteraction queryTriggerInteraction;
         [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object"), WriteOnly] public BlackboardEntrySelector hit = new BlackboardEntrySelector();
-        protected override void OnNodeEnable()
+        protected override void OnEnable()
         {
             hit.ApplyFilters(typeof(GameObject), typeof(List<GameObject>), typeof(Transform), typeof(List<Transform>));
+
+            base.OnEnable();
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

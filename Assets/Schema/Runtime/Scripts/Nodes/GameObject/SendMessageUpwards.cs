@@ -12,9 +12,11 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Name of method to invoke")] public BlackboardEntrySelector<string> methodName;
         [Tooltip("Optional argument to pass to the method")] public BlackboardEntrySelector param = new BlackboardEntrySelector();
         [Tooltip("Should an error be raised if the method doesn't exist on the target object?")] public SendMessageOptions options;
-        protected override void OnNodeEnable()
+        protected override void OnEnable()
         {
             param.ApplyAllFilters();
+
+            base.OnEnable();
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

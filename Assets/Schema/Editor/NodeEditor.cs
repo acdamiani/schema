@@ -192,6 +192,8 @@ namespace SchemaEditor
         //Validates connections between nodes also resets HideFlags
         void OnEnable()
         {
+            wantsMouseMove = true;
+
             Undo.undoRedoPerformed += UndoPerformed;
 
             instance = this;

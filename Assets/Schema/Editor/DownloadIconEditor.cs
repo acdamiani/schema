@@ -11,9 +11,7 @@ public class DownloadIconEditor : Editor
 
         if (GUILayout.Button("Click"))
         {
-            GameObject g = GameObject.Find("Player");
-
-            Debug.Log(DynamicProperty.Get(g, "transform/position/x"));
+            DownloadIcon.Download();
         }
     }
 }

@@ -29,6 +29,8 @@ public class SchemaAgent : MonoBehaviour
     private static int pidInc;
     private int pid;
     NodeStatus context;
+    OptimizedNode node;
+    Decorator d;
     private void Start()
     {
         pid = pidInc;
@@ -83,9 +85,6 @@ public class SchemaAgent : MonoBehaviour
         }
 
         VerifyComponents();
-
-        // InvokeRepeating(nameof(EvaluateDecorators), 0f, 1f / checksPerSecond);
-        // InvokeRepeating(nameof(Tick), 0f, 1f / ticksPerSecond);
     }
     void Update()
     {
@@ -153,7 +152,7 @@ public class SchemaAgent : MonoBehaviour
 
         while (!ticked)
         {
-            OptimizedNode node = graph.nodes[currentIndex];
+            node = graph.nodes[currentIndex];
             SchemaManager.currentNode = node;
             SchemaManager.currentParentNode = node.parent >= 0 ? graph.nodes[node.parent] : null;
             string nodeID = node.node.uID;
@@ -200,7 +199,7 @@ public class SchemaAgent : MonoBehaviour
 
                         for (int i = 0; i < node.decorators.Length; i++)
                         {
-                            Decorator d = node.node.decorators[i];
+                            d = node.node.decorators[i];
 
                             willRepeatNode = node.node.decorators[i].OnNodeProcessed(agentState[d.uID], this, ref context) || willRepeatNode;
                         }
@@ -276,7 +275,7 @@ public class SchemaAgent : MonoBehaviour
 
                         for (int i = 0; i < node.decorators.Length; i++)
                         {
-                            Decorator d = node.node.decorators[i];
+                            d = node.node.decorators[i];
 
                             willRepeatNode = node.node.decorators[i].OnNodeProcessed(agentState[d.uID], this, ref context) || willRepeatNode;
                         }
@@ -322,29 +321,29 @@ public class SchemaAgent : MonoBehaviour
 
     private void EvaluateDecorators()
     {
-        List<OptimizedDecorator> state = new List<OptimizedDecorator>(decoratorState.Keys);
-
-        foreach (OptimizedDecorator d in state)
+        foreach (OptimizedDecorator od in decoratorState.Keys)
         {
-            bool result = d.decorator.Evaluate(agentState[d.decorator.uID], this);
-            if (result == decoratorState[d]) continue;
-            decoratorState[d] = result;
-            d.decorator.conditionalValue.value = result;
+            bool result = od.decorator.Evaluate(agentState[od.decorator.uID], this);
 
-            if (currentIndex > d.node.index + d.node.breadth)
+            if (result == decoratorState[od]) continue;
+
+            decoratorState[od] = result;
+            od.decorator.conditionalValue.value = result;
+
+            if (currentIndex > od.node.index + od.node.breadth)
             {
                 //Node is running to the right of the subtree
-                if (d.decorator.abortsType == Decorator.ObserverAborts.Both || d.decorator.abortsType == Decorator.ObserverAborts.LowerPriority)
+                if (od.decorator.abortsType == Decorator.ObserverAborts.Both || od.decorator.abortsType == Decorator.ObserverAborts.LowerPriority)
                 {
-                    PullToNode(d.node);
+                    PullToNode(od.node);
                 }
             }
-            else if (currentIndex <= d.node.index + d.node.breadth)
+            else if (currentIndex <= od.node.index + od.node.breadth)
             {
                 //Node is running under this subtree (or is the evaluated decorator)
-                if (d.decorator.abortsType == Decorator.ObserverAborts.Both || d.decorator.abortsType == Decorator.ObserverAborts.Self)
+                if (od.decorator.abortsType == Decorator.ObserverAborts.Both || od.decorator.abortsType == Decorator.ObserverAborts.Self)
                 {
-                    PullToNode(d.node);
+                    PullToNode(od.node);
                 }
             }
         }

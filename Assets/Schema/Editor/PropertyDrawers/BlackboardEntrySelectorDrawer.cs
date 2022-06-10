@@ -95,31 +95,33 @@ namespace SchemaEditor
             }
             else if (value != null && !info[property.propertyPath].writeOnly)
             {
+                Rect r = EditorGUI.PrefixLabel(enumRect, label);
+
                 EditorGUI.BeginDisabledGroup(doesHavePath);
 
-                EditorGUI.PropertyField(enumRect, value, label, true);
+                EditorGUI.PropertyField(r, value, GUIContent.none, true);
 
                 EditorGUI.EndDisabledGroup();
 
                 if (doesHavePath)
                 {
-                    Rect p = EditorGUI.PrefixLabel(textRect, new GUIContent("\0"));
-                    p.y += 3f;
+                    r = new Rect(r.x, textRect.y, r.width + size.x, r.height);
+                    r.y += 3f;
 
                     GUIContent content = new GUIContent($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
                     size = EditorStyles.miniLabel.CalcSize(content);
 
-                    GUI.BeginClip(p, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
+                    GUI.BeginClip(r, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
 
                     EditorGUI.LabelField(new Rect(0f, 3f, size.x, size.y), content, EditorStyles.miniLabel);
 
                     GUI.EndClip();
 
-                    GUI.Box(p, GUIContent.none, EditorStyles.helpBox);
+                    GUI.Box(r, GUIContent.none, EditorStyles.helpBox);
 
-                    if (size.x > p.width && p.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
+                    if (size.x > r.width && r.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
                     {
-                        info[property.propertyPath].scroll = Mathf.Clamp(info[property.propertyPath].scroll - Event.current.delta.y * 10, -(size.x - p.width), 0f);
+                        info[property.propertyPath].scroll = Mathf.Clamp(info[property.propertyPath].scroll - Event.current.delta.y * 10, -(size.x - r.width), 0f);
                         // Prevent scroll
                         Event.current.delta = Vector2.zero;
                     }

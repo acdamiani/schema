@@ -19,10 +19,12 @@ namespace Schema.Builtin.Nodes
         public BlackboardEntrySelector<float> maxDistanceDelta;
         [Tooltip("Blackboard variable to store the new position vector in"), WriteOnly]
         public BlackboardEntrySelector newPosition = new BlackboardEntrySelector();
-        protected override void OnNodeEnable()
+        protected override void OnEnable()
         {
             vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
             vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+
+            base.OnEnable();
         }
         void OnValidate()
         {
