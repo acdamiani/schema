@@ -373,8 +373,13 @@ namespace SchemaEditor
             target.DeleteNodes(windowInfo.selected);
 
             target.TraverseTree();
+
             if (windowInfo.selected.Contains(windowInfo.hoveredNode))
                 windowInfo.hoveredNode = null;
+
+            DestroyImmediate(editor);
+            GetViewRect(100f, true);
+
             windowInfo.selected.Clear();
         }
         private void Copy(List<Node> copies, bool clearSelected = true)
@@ -916,7 +921,7 @@ namespace SchemaEditor
             }
         }
         //--SCHEMA SHORTCUTS--//
-        [Shortcut("Schema/Add Node", KeyCode.A, ShortcutModifiers.Action | ShortcutModifiers.Shift)]
+        [Shortcut("Schema/Add Node", KeyCode.A, ShortcutModifiers.Shift)]
         private static void AddNodeCommand()
         {
             if (instance == null) return;

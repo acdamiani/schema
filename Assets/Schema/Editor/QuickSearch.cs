@@ -4,6 +4,7 @@ using UnityEditor.IMGUI.Controls;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Schema.Utilities;
 
 public static class QuickSearch
 {
@@ -14,44 +15,27 @@ public static class QuickSearch
     private static Schema.Graph target;
     private static Vector2 newNodePosition;
     private static SearchField searchField;
-    private static string searchText;
-    private static bool folderView = true;
-    private static Vector2 offset;
-    private static bool isTransitioning;
-    private static float transitionStartTime;
-    private static Dictionary<string, IEnumerable<Type>> categories;
-    private static Dictionary<Type, Texture2D> nodeIcons = new Dictionary<Type, Texture2D>();
-    private static string currentCategory;
-    private static string selectedCategory;
+    private static string searchText = "";
+    private static int refinementLength;
+    private static CacheDictionary<Type, string> categories = new CacheDictionary<Type, string>();
+    private static CacheDictionary<Type, string> descriptions = new CacheDictionary<Type, string>();
+    private static CacheDictionary<string, IEnumerable<Type>> search = new CacheDictionary<string, IEnumerable<Type>>();
+    private static CacheDictionary<Type, Texture2D> icons = new CacheDictionary<Type, Texture2D>();
+    private static IEnumerable<Type> nodeTypes = HelperMethods.GetEnumerableOfType(typeof(Schema.Node));
     private static List<string> favorites = SchemaEditor.NodeEditor.NodeEditorPrefs.GetList("SCHEMA_PREF__favorites").ToList();
     private static int selected = -1;
     private static bool searchFavorites;
     private static float keydownTime;
-    private static Vector2 scrollA;
-    private static Vector2 _scrollA;
-    private static Vector2 scrollB;
+    private static Vector2 scroll;
     private static bool focusSearch;
+    private static Vector2 mouseOverPosition;
+    private static float toolbarHeight;
     public static void FocusSearch()
     {
         focusSearch = true;
     }
-    public static bool OnGUI(Rect window, Schema.Graph target, Vector2 newNodePosition, float timeSinceStartup)
+    public static bool DoWindow(Rect window, Schema.Graph target, Vector2 newNodePosition, float timeSinceStartup)
     {
-        if (searchField == null)
-        {
-            searchField = new SearchField();
-            searchField.downOrUpArrowKeyPressed += MoveSelectionByEvent;
-        }
-
-        if (focusSearch)
-        {
-            searchField.SetFocus();
-            focusSearch = false;
-        }
-
-        if (categories == null)
-            categories = Schema.Node.GetNodeCategories();
-
         QuickSearch.searchRect = new Rect(
             window.x + windowPadding.left,
             window.y + windowPadding.top,
@@ -61,276 +45,99 @@ public static class QuickSearch
         QuickSearch.target = target;
         QuickSearch.newNodePosition = newNodePosition;
 
-        GUI.Box(searchRect, "", Styles.quickSearch);
+        GUILayout.Window(1, searchRect, OnGUI, "", Styles.quickSearch);
+        GUI.FocusWindow(1);
 
-        GUILayout.BeginArea(searchRect);
+        return false;
+    }
+    public static void OnGUI(int id)
+    {
+        if (searchField == null)
+        {
+            searchField = new SearchField();
+            searchField.downOrUpArrowKeyPressed += MoveSelectionByEvent;
+        }
+
+        searchField.SetFocus();
 
         GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
         GUILayout.Space(8);
 
         GUI.SetNextControlName("searchField");
-        searchText = searchField.OnToolbarGUI(searchText);
+
+        if (Event.current.keyCode != KeyCode.Return)
+            searchText = searchField.OnToolbarGUI(searchText);
         searchFavorites = GUILayout.Toggle(searchFavorites, "Favorites", EditorStyles.toolbarButton, GUILayout.Width(125));
 
         GUILayout.EndHorizontal();
 
-        GUILayout.EndArea();
+        if (Event.current.type == EventType.Repaint)
+            toolbarHeight = GUILayoutUtility.GetLastRect().height;
+        else if (Event.current.type == EventType.KeyDown && validMovementCodes.Contains(Event.current.keyCode))
+            MoveSelection(Event.current.keyCode == KeyCode.UpArrow, refinementLength);
 
-        float headerHeight = 24;
+        GUILayout.BeginScrollView(
+            scroll,
+            false,
+            false,
+            GUIStyle.none,
+            GUIStyle.none,
+            Styles.padding8x,
+            GUILayout.Width(searchRect.width),
+            GUILayout.ExpandHeight(true)
+        );
 
-        bool didAddNode = false;
+        DoResults();
 
-        if (isTransitioning && Event.current.type == EventType.Layout)
-        {
-            float t = !folderView ? -searchRect.width : 0f;
-
-            float newX = Mathf.SmoothStep(offset.x, t, (((timeSinceStartup - transitionStartTime) % 1.5f) / 1.5f));
-
-            if (Mathf.Abs(newX - t) < 1f)
-            {
-                isTransitioning = false;
-                offset = new Vector2(0f, 0f);
-            }
-            else
-            {
-                offset = new Vector2(newX, 0f);
-            }
-        }
-
-        Rect clip = new Rect(searchRect.x, searchRect.y + headerHeight, searchRect.width, searchRect.height - headerHeight);
-
-        GUI.BeginClip(clip, offset, Vector2.zero, false);
-
-        if (isTransitioning)
-        {
-            GUILayout.BeginHorizontal();
-
-            GUILayout.BeginScrollView(scrollA, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
-
-            RenderFolderView();
-
-            GUILayout.EndScrollView();
-
-            GUILayout.BeginScrollView(scrollB, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
-
-            RenderCategoryView();
-
-            GUILayout.EndScrollView();
-
-            GUILayout.EndHorizontal();
-        }
-        else
-        {
-            if (Event.current.type == EventType.KeyDown && validMovementCodes.Contains(Event.current.keyCode))
-                MoveSelection(Event.current.keyCode == KeyCode.UpArrow);
-
-            // if (folderView)
-            // {
-            //     scrollA = GUILayout.BeginScrollView(scrollA, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
-
-            //     if (String.IsNullOrWhiteSpace(searchText))
-            //         didAddNode = RenderFolderView();
-            //     else
-            //         didAddNode = RenderNodeResults(SearchThroughResults(categories.Select(x => x.Value).SelectMany(x => x), searchText), 0);
-
-            //     GUILayout.EndScrollView();
-            // }
-            // else
-            // {
-            scrollB = GUILayout.BeginScrollView(scrollB, GUILayout.Width(searchRect.width), GUILayout.Height(searchRect.height - headerHeight));
-
-            if (String.IsNullOrWhiteSpace(searchText))
-                didAddNode = RenderCategoryView();
-            else
-                didAddNode = RenderNodeResults(SearchThroughResults(categories.Select(x => x.Value).SelectMany(x => x), searchText), 0);
-
-            GUILayout.EndScrollView();
-            // }
-        }
-
-        GUI.EndClip();
-
-        return didAddNode;
+        GUILayout.EndScrollView();
     }
-    private static bool RenderFolderView()
-    {
-        IEnumerable<string> categoryNames = categories.Keys.Where(x => !String.IsNullOrEmpty(x));
-
-        GUILayout.BeginVertical();
-
-        GUILayout.Label("Add Node", Styles.searchTitle, GUILayout.Height(32));
-
-        bool didAddNode = false;
-
-        if (String.IsNullOrWhiteSpace(searchText))
-        {
-            categoryNames = categoryNames.OrderBy(x => x);
-
-            for (int i = 0; i < categoryNames.Count(); i++)
-            {
-                string s = categoryNames.ElementAt(i);
-
-                if (s == "")
-                    continue;
-
-                GUIContent content = new GUIContent(s);
-
-                Rect r = GUILayoutUtility.GetRect(content, Styles.searchResult, GUILayout.Height(24));
-                r = new Rect(r.position + new Vector2(24, 0), r.size - new Vector2(24, 0));
-
-                Vector2 b = EditorStyles.iconButton.CalcSize(new GUIContent(Styles.next));
-                Rect buttonRect = new Rect(r.xMax - b.x - 5f, r.y + r.height / 2f - b.y / 2f, b.x, b.y);
-
-                Color c = GUI.color;
-                GUI.color = GUI.skin.settings.selectionColor;
-
-                Vector2 pos = Event.current.mousePosition;
-
-                if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && r.Contains(pos) && !buttonRect.Contains(pos))
-                {
-                    GUI.FocusControl("");
-
-                    if (Event.current.clickCount == 1)
-                    {
-                        selected = i;
-                    }
-                    else if (Event.current.clickCount == 2)
-                    {
-                        SwitchView();
-                        selectedCategory = s;
-                    }
-                }
-
-                string selectedFolder = categoryNames.ElementAtOrDefault(selected);
-
-                if (selectedFolder == s)
-                    GUI.Box(r, "", Styles.styles.node);
-
-                r = new Rect(r.x + 5f, r.y, r.width - 5f, r.height);
-
-                GUI.color = c;
-
-                GUI.DrawTexture(new Rect(r.x - 25, r.y + r.height / 2f - 8, 16, 16), Styles.folder);
-
-                GUI.Label(r, content, Styles.searchResult);
-
-                if (GUI.Button(buttonRect, new GUIContent(Styles.next), EditorStyles.iconButton))
-                {
-                    SwitchView();
-                    selectedCategory = s;
-                }
-            }
-        }
-
-        IEnumerable<Type> nodeTypes = searchFavorites ? categories[""].Where(x => favorites.Contains(x.FullName)) : categories[""];
-
-        didAddNode = RenderNodeResults(SearchThroughResults(nodeTypes, searchText), String.IsNullOrWhiteSpace(searchText) ? categoryNames.Count() : 0);
-
-        GUILayout.EndVertical();
-
-        return didAddNode;
-    }
-    private static bool RenderCategoryView()
-    {
-        GUILayout.BeginVertical();
-
-        Vector2 iconSize = EditorGUIUtility.GetIconSize();
-
-        EditorGUIUtility.SetIconSize(new Vector2(36, 36));
-        GUIContent t = new GUIContent(selectedCategory, Styles.folderOpen);
-        Rect r = GUILayoutUtility.GetRect(t, Styles.searchTitle);
-        r = new Rect(r.position + new Vector2(24, 0), r.size - new Vector2(24, 0));
-
-        EditorGUIUtility.SetIconSize(new Vector2(16, 16));
-
-        Vector2 b = EditorStyles.iconButton.CalcSize(new GUIContent(Styles.prev));
-
-        if (GUI.Button(new Rect(r.x - 20, r.y + r.height / 2f - b.y / 2f, b.x, b.y), new GUIContent(Styles.prev), EditorStyles.iconButton))
-            SwitchView();
-
-        GUI.Label(r, t, Styles.searchTitle);
-
-        IEnumerable<Type> nodeTypes = searchFavorites ? categories[selectedCategory].Where(x => favorites.Contains(x.FullName)) : categories[selectedCategory];
-
-        bool didAddNode = RenderNodeResults(SearchThroughResults(nodeTypes, searchText), 0);
-
-        EditorGUIUtility.SetIconSize(iconSize);
-
-        GUILayout.EndVertical();
-
-        return didAddNode;
-    }
-    private static void SwitchView()
-    {
-        folderView = !folderView;
-        isTransitioning = true;
-        transitionStartTime = (float)EditorApplication.timeSinceStartup;
-        offset = new Vector2(folderView ? -searchRect.width : 0f, 0f);
-        selected = -1;
-    }
-    // private static Tuple<bool, Type> RenderContents(IEnumerable<Type> contents, Type selected, string title, string searchValue)
-    // {
-    //     int searchLen = String.IsNullOrWhiteSpace(searchValue) ? 0 : searchValue.Length;
-
-    //     Dictionary<Type, int> searched = contents.ToDictionary(x => x, x => 0);
-
-    //     if (!String.IsNullOrWhiteSpace(searchValue))
-    //         searched = (Dictionary<Type, int>)SearchThroughResults(contents, searchValue);
-
-    //     GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-
-    //     Vector2 iconSize = EditorGUIUtility.GetIconSize();
-
-    //     EditorGUIUtility.SetIconSize(new Vector2(36, 36));
-
-    //     GUIContent t = new GUIContent(title, Styles.folderOpen);
-    //     Rect r = GUILayoutUtility.GetRect(t, Styles.searchTitle);
-    //     r = new Rect(r.position + new Vector2(24, 0), r.size - new Vector2(24, 0));
-
-    //     EditorGUIUtility.SetIconSize(new Vector2(16, 16));
-
-    //     Vector2 b = EditorStyles.iconButton.CalcSize(new GUIContent(Styles.prev));
-
-    //     bool goBack = GUI.Button(new Rect(r.x - 20, r.y + r.height / 2f - b.y / 2f, b.x, b.y), new GUIContent(Styles.prev), EditorStyles.iconButton);
-
-    //     GUI.Label(r, t, Styles.searchTitle);
-
-    //     Type newSelected = RenderNodeResults(searched.ToDictionary(x => x.Key, x => new Tuple<int, int>(x.Value, searchLen)), selected);
-
-    //     EditorGUIUtility.SetIconSize(iconSize);
-
-    //     GUILayout.Space(8);
-
-    //     GUILayout.EndVertical();
-
-    //     return new Tuple<bool, Type>(goBack, newSelected);
-    // }
-    private static void DoSingleResult(GUIContent content, string favoriteName, int index, Action onClick)
-    {
-        DoSingleResult(content, favoriteName, index, onClick, -1, -1);
-    }
-    private static void DoSingleResult(GUIContent content, string favoriteName, int index, Action onClick, int highlightBegin, int highlightLength)
+    private static void DoSingleResult(Type type, string favoriteName, int index, Action onClick)
     {
         Event current = Event.current;
 
+        int realSelection = CorrectSelection(selected);
+
         GUILayout.BeginHorizontal(GUILayout.Height(24));
 
-        GUILayout.Toggle(true, GUIContent.none, Styles.favoriteToggle);
+        Rect r = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none, GUILayout.Width(24), GUILayout.Height(24));
+        r = r.Pad(new RectOffset(4, 4, 4, 4));
 
-        Rect r = GUILayoutUtility.GetRect(content, EditorStyles.label, GUILayout.Height(24));
+        bool isInFavorites = favorites.Contains(favoriteName);
+
+        if (GUI.Toggle(r, isInFavorites, GUIContent.none, Styles.favoriteToggle))
+        {
+            if (!isInFavorites)
+            {
+                favorites.Add(favoriteName);
+                SchemaEditor.NodeEditor.NodeEditorPrefs.SetList("SCHEMA_PREF__favorites", favorites);
+            }
+        }
+        else
+        {
+            if (isInFavorites)
+            {
+                favorites.Remove(favoriteName);
+                SchemaEditor.NodeEditor.NodeEditorPrefs.SetList("SCHEMA_PREF__favorites", favorites);
+            }
+        }
+
+        r = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.label, GUILayout.Height(24));
         bool insideRect = r.Contains(current.mousePosition);
+
+        Vector2 delta = current.mousePosition - mouseOverPosition;
 
         switch (current.type)
         {
             case EventType.Repaint:
-                Styles.searchResult.Draw(r, content, false, false, false, index == selected);
+                Styles.searchResult.Draw(r, GUIContent.none, false, false, false, index == realSelection);
+                DoCompleteLabel(r, type);
                 break;
             case EventType.MouseMove:
                 if (insideRect)
                     selected = index;
                 break;
-            case EventType.KeyDown when current.keyCode == KeyCode.Return && index == selected:
+            case EventType.KeyDown when current.keyCode == KeyCode.Return && index == realSelection:
             case EventType.MouseDown when insideRect:
                 onClick.Invoke();
                 break;
@@ -338,258 +145,137 @@ public static class QuickSearch
 
         GUILayout.EndHorizontal();
     }
+    private static void DoCompleteLabel(Rect rect, Type type)
+    {
+        rect = rect.Pad(new RectOffset(4, 4, 0, 0));
+
+        Vector2 iconSize = EditorGUIUtility.GetIconSize();
+        EditorGUIUtility.SetIconSize(new Vector2(16, 16));
+
+        string category = Schema.Node.GetNodeCategory(type) ?? "";
+
+        if (!String.IsNullOrEmpty(category))
+        {
+            category = category.Trim('/')
+                .Replace("/", " \u25B8 ");
+            category += " \u25B8";
+        }
+
+        GUIContent content = new GUIContent(category);
+
+        rect.width = EditorStyles.label.CalcSize(content).x;
+
+        if (Event.current.type == EventType.Repaint)
+            EditorStyles.label.Draw(rect, content, false, false, false, false);
+
+        content = new GUIContent(type.Name, icons.GetOrCreate(type, () => Schema.Node.GetNodeIcon(type)));
+
+        rect.x += rect.width;
+        rect.width = EditorStyles.label.CalcSize(content).x;
+
+        if (Event.current.type == EventType.Repaint)
+            EditorStyles.label.Draw(rect, content, false, false, false, false);
+
+        EditorGUIUtility.SetIconSize(iconSize);
+    }
     private static void DoResults()
     {
+        GUILayout.BeginVertical();
+
+        MoveSelectionByEvent();
+
+        IEnumerable<Type> results = search.GetOrCreate(searchText, () => SearchThroughResults(nodeTypes, searchText));
+
+        int i = 0;
+
+        foreach (Type nodeType in results)
+        {
+            Texture2D icon = icons.GetOrCreate(nodeType, () => Schema.Node.GetNodeIcon(nodeType));
+            GUIContent content = new GUIContent(nodeType.Name, icon);
+
+            DoSingleResult(
+                nodeType,
+                nodeType.Name,
+                i,
+                () =>
+                {
+                    target.AddNode(nodeType, newNodePosition);
+                }
+            );
+
+            i++;
+        }
+
+        GUILayout.EndVertical();
     }
     private static void MoveSelectionByEvent()
     {
         Event current = Event.current;
 
-        if (current.keyCode == KeyCode.UpArrow || current.keyCode == KeyCode.K)
-            MoveSelection(true);
-        else if (current.keyCode == KeyCode.DownArrow || current.keyCode == KeyCode.J)
-            MoveSelection(false);
+        int resultsLength = search.GetOrCreate(searchText, () => SearchThroughResults(nodeTypes, searchText)).Count();
+
+        if (current.type == EventType.KeyDown)
+        {
+            if (current.keyCode == KeyCode.UpArrow)
+                MoveSelection(true, resultsLength);
+            else if (current.keyCode == KeyCode.DownArrow)
+                MoveSelection(false, resultsLength);
+        }
+        else if (current.type == EventType.ScrollWheel && current.delta.y != 0)
+        {
+            MoveSelection(current.delta.y < 0, resultsLength);
+        }
     }
-    private static void MoveSelection(bool isUp)
+    private static void MoveSelection(bool isUp, int resultsCount)
     {
         selected = isUp ? selected - 1 : selected + 1;
-        Debug.Log(selected);
+        selected = CorrectSelection(selected);
+
+        float positionInView = selected * 24 + 8;
+
+        if (positionInView - scroll.y < 0)
+            scroll.y = positionInView;
+        else if (positionInView + 24 - scroll.y > searchRect.height - toolbarHeight)
+            scroll.y = positionInView - searchRect.height + toolbarHeight + 24 + 8;
     }
-    private static bool RenderNodeResults(IDictionary<Type, Tuple<int, int>> results, int offset)
+    private static int CorrectSelection(int selected)
     {
-        GUILayout.BeginVertical();
+        int resultsLength = search.GetOrCreate(searchText, () => SearchThroughResults(nodeTypes, searchText)).Count();
 
-        Vector2 iconSize = EditorGUIUtility.GetIconSize();
+        selected = selected < 0 ? 0 : selected;
+        selected = selected > resultsLength - 1 ? resultsLength - 1 : selected;
 
-        EditorGUIUtility.SetIconSize(new Vector2(16, 16));
-
-        bool didAddNode = false;
-
-        results = results.Keys.OrderBy(k => k.Name).ToDictionary(k => k, k => results[k]);
-
-        for (int i = 0; i < results.Count; i++)
-        {
-            KeyValuePair<Type, Tuple<int, int>> result = results.ElementAt(i);
-
-            Type type = result.Key;
-
-            bool isSelected = i == selected - offset;
-
-            Texture2D icon;
-
-            if (!nodeIcons.ContainsKey(type))
-                icon = nodeIcons[type] = Schema.Node.GetNodeIcon(type);
-            else
-                icon = nodeIcons[type];
-
-            GUIContent c = new GUIContent(type.Name, icon);
-
-            DoSingleResult(
-                c,
-                type.FullName,
-                i + offset,
-                () =>
-                {
-                    target.AddNode(type, newNodePosition);
-                    didAddNode = true;
-                }
-            );
-
-
-
-            // Rect r = GUILayoutUtility.GetRect(c, Styles.searchResult, GUILayout.Height(24));
-            // r = new Rect(r.position + new Vector2(24, 0), r.size - new Vector2(24, 0));
-
-            // if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && r.Contains(Event.current.mousePosition))
-            // {
-            //     GUI.FocusControl("");
-
-            //     if (Event.current.clickCount == 1)
-            //     {
-            //         selected = i + offset;
-            //     }
-            //     else if (Event.current.clickCount == 2)
-            //     {
-            //         target.AddNode(type, newNodePosition);
-            //         didAddNode = true;
-            //     }
-            // }
-            // else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.UpArrow)
-            // {
-            //     if (EditorApplication.timeSinceStartup - keydownTime >= keydownTimeWindow)
-            //     {
-            //         keydownTime = (float)EditorApplication.timeSinceStartup;
-            //         selected = selected < 0 ? 0 : selected - 1;
-
-            //         if (folderView)
-            //         {
-            //             if (selected * 24 - scrollA.y < 0)
-            //                 scrollA.y = selected * 24 + 16;
-            //             else if (selected * 24 + 48 - scrollA.y > searchRect.height - 48)
-            //                 scrollA.y = selected * 24 - searchRect.height + 112;
-            //         }
-            //         else
-            //         {
-            //             if (selected * 24 - scrollB.y < 0)
-            //                 scrollB.y = selected * 24 + 16;
-            //             else if (selected * 24 + 48 - scrollB.y > searchRect.height - 48)
-            //                 scrollB.y = selected * 24 - searchRect.height + 112;
-            //         }
-
-            //         selected = Mathf.Clamp(selected, 0, offset + results.Count - 1);
-            //     }
-            // }
-            // else if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.DownArrow)
-            // {
-            //     if (EditorApplication.timeSinceStartup - keydownTime >= keydownTimeWindow)
-            //     {
-            //         keydownTime = (float)EditorApplication.timeSinceStartup;
-            //         selected = selected < 0 ? 0 : selected + 1;
-
-            //         if (folderView)
-            //         {
-            //             if (selected * 24 + 48 - scrollA.y > searchRect.height - 48)
-            //                 scrollA.y = selected * 24 - searchRect.height + 112;
-            //             else if (selected * 24 - scrollA.y < 0)
-            //                 scrollA.y = selected * 24 + 16;
-            //         }
-            //         else
-            //         {
-            //             if (selected * 24 + 48 - scrollB.y > searchRect.height - 48)
-            //                 scrollB.y = selected * 24 - searchRect.height + 112;
-            //             else if (selected * 24 - scrollB.y < 0)
-            //                 scrollB.y = selected * 24 + 16;
-            //         }
-
-            //         selected = Mathf.Clamp(selected, 0, offset + results.Count - 1);
-            //     }
-            // }
-            // else if (isSelected && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
-            // {
-            //     target.AddNode(type, newNodePosition);
-
-            //     didAddNode = true;
-            // }
-            // else if (Event.current.type == EventType.KeyUp)
-            // {
-            //     keydownTime = 0f;
-            // }
-
-            // Color col = GUI.color;
-
-            // if (favorites.Contains(type.FullName))
-            //     GUI.color = EditorGUIUtility.isProSkin ? new Color32(252, 191, 7, 255) : new Color32(199, 150, 0, 255);
-            // else
-            //     GUI.color = Styles.windowAccent;
-
-            // if (GUI.Button(new Rect(r.x - 20, r.y + r.height / 2f - 8, 16, 16), Styles.favoriteEnabled, GUIStyle.none))
-            // {
-            //     if (favorites.Contains(type.FullName))
-            //         favorites.Remove(type.FullName);
-            //     else
-            //         favorites.Add(type.FullName);
-
-            //     SchemaEditor.NodeEditor.NodeEditorPrefs.SetList("SCHEMA_PREF__favorites", favorites);
-            // }
-
-            // GUI.color = GUI.skin.settings.selectionColor;
-
-            // if (isSelected)
-            //     GUI.Box(r, "", Styles.styles.node);
-
-            // r = new Rect(r.x + 5, r.y, r.width - 5, r.height);
-
-            // GUI.color = col;
-
-            // DoHighlightedLabel(r, c, result.Value.Item1, result.Value.Item2, Styles.searchResult, Styles.searchHighlight);
-        }
-
-        EditorGUIUtility.SetIconSize(iconSize);
-
-        GUILayout.EndVertical();
-
-        return didAddNode;
+        return selected;
     }
-    private static void DoHighlightedLabel(Rect rect, GUIContent content, int index, int length, GUIStyle regularStyle, GUIStyle highlightedStyle)
-    {
-        index = Mathf.Clamp(index, 0, content.text.Length - 1);
-        length = Mathf.Clamp(length, 0, content.text.Length - index);
-
-        if (index == content.text.Length || length == 0)
-        {
-            GUI.Label(rect, content, regularStyle);
-            return;
-        }
-        else if (index == 0 && length == content.text.Length)
-        {
-            GUI.Label(rect, content, highlightedStyle);
-
-            return;
-        }
-        else if (index == 0)
-        {
-            GUIContent first = new GUIContent(content.text.Substring(index, length), content.image, content.tooltip);
-            GUIContent second = new GUIContent(content.text.Substring(length, content.text.Length - length), content.tooltip);
-
-            Vector2 s1 = highlightedStyle.CalcSize(first);
-            Vector2 s2 = regularStyle.CalcSize(second);
-
-            Rect r1 = new Rect(rect.x, rect.y, s1.x, rect.height);
-            Rect r2 = new Rect(rect.x + s1.x, rect.y, s2.x, rect.height);
-
-            GUI.Label(r1, first, highlightedStyle);
-            GUI.Label(r2, second, regularStyle);
-        }
-        else if (index + length - 1 >= content.text.Length - 1)
-        {
-            GUIContent first = new GUIContent(content.text.Substring(0, index), content.image, content.tooltip);
-            GUIContent second = new GUIContent(content.text.Substring(index, length), content.tooltip);
-
-            Vector2 s1 = regularStyle.CalcSize(first);
-            Vector2 s2 = highlightedStyle.CalcSize(second);
-
-            Rect r1 = new Rect(rect.x, rect.y, s1.x, rect.height);
-            Rect r2 = new Rect(rect.x + s1.x, rect.y, s2.x, rect.height);
-
-            GUI.Label(r1, first, regularStyle);
-            GUI.Label(r2, second, highlightedStyle);
-        }
-        else
-        {
-            GUIContent first = new GUIContent(content.text.Substring(0, index), content.image, content.tooltip);
-            GUIContent second = new GUIContent(content.text.Substring(index, length), content.tooltip);
-            GUIContent third = new GUIContent(content.text.Substring(index + length), content.tooltip);
-
-            Vector2 s1 = regularStyle.CalcSize(first);
-            Vector2 s2 = highlightedStyle.CalcSize(second);
-            Vector2 s3 = regularStyle.CalcSize(third);
-
-            Rect r1 = new Rect(rect.x, rect.y, s1.x, rect.height);
-            Rect r2 = new Rect(rect.x + s1.x, rect.y, s2.x, rect.height);
-            Rect r3 = new Rect(r2.x + s2.x, rect.y, s3.x, rect.height);
-
-            GUI.Label(r1, first, regularStyle);
-            GUI.Label(r2, second, highlightedStyle);
-            GUI.Label(r3, third, regularStyle);
-        }
-    }
-    private static IDictionary<Type, Tuple<int, int>> SearchThroughResults(IEnumerable<Type> types, string query)
+    private static IEnumerable<Type> SearchThroughResults(IEnumerable<Type> types, string query)
     {
         if (String.IsNullOrWhiteSpace(query))
-            return types.ToDictionary(x => x, x => new Tuple<int, int>(0, 0));
+        {
+            return types;
+        }
 
         query = query.ToLower();
+        string[] queries = query.Split(' ').Where(s => s != "").ToArray();
 
-        Dictionary<Type, Tuple<int, int>> d = new Dictionary<Type, Tuple<int, int>>();
+        List<Type> ret = new List<Type>();
 
         foreach (Type ty in types)
         {
-            int s = Search(query, ty.Name.ToLower());
-            if (s != -1)
-                d[ty] = new Tuple<int, int>(s, query.Length);
+            foreach (string q in queries)
+            {
+                string category = categories.GetOrCreate(ty, () => Schema.Node.GetNodeCategory(ty)) ?? "";
+                string search = category.ToLower() + ty.Name.ToLower();
+
+                int s = Search(q, search);
+                if (s != -1)
+                {
+                    ret.Add(ty);
+                    break;
+                }
+            }
         }
 
-        return d;
+        return ret;
     }
     private static int Search(string needle, string haystack)
     {

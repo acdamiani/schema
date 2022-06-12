@@ -348,5 +348,14 @@ namespace Schema.Utilities
 
             return ret;
         }
+        public static Rect Pad(this Rect rect, RectOffset padding)
+        {
+            rect.x += padding.left;
+            rect.y += padding.top;
+            rect.width -= padding.left + padding.right;
+            rect.height -= padding.top + padding.bottom;
+
+            return rect;
+        }
     }
 }

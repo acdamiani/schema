@@ -87,7 +87,7 @@ internal static class Styles
                 _quickSearch = new GUIStyle();
                 _quickSearch.normal.background = searchBackground;
                 _quickSearch.border = new RectOffset(2, 2, 2, 2);
-                _quickSearch.padding = new RectOffset(0, 0, 2, 2);
+                _quickSearch.padding = new RectOffset(2, 2, 2, 2);
             }
 
             return _quickSearch;
@@ -118,8 +118,8 @@ internal static class Styles
                 _favoriteToggle.margin = new RectOffset(0, 8, 0, 0);
                 _favoriteToggle.stretchHeight = false;
                 _favoriteToggle.stretchWidth = false;
-                _favoriteToggle.fixedHeight = 24;
-                _favoriteToggle.fixedWidth = 24;
+                _favoriteToggle.fixedHeight = 16;
+                _favoriteToggle.fixedWidth = 16;
                 _favoriteToggle.normal.background = favoriteDisabled;
                 _favoriteToggle.onNormal.background = favoriteEnabled;
             }
@@ -141,24 +141,6 @@ internal static class Styles
             return _padding8x;
         }
     }
-    private static GUIStyle _searchHighlight;
-    public static GUIStyle searchHighlight
-    {
-        get
-        {
-            if (_searchHighlight == null)
-            {
-                _searchHighlight = new GUIStyle(EditorStyles.boldLabel);
-                _searchHighlight.padding = new RectOffset(0, 0, 0, 0);
-                _searchHighlight.margin = new RectOffset(0, 0, 0, 0);
-                _searchHighlight.contentOffset = new Vector2(0, 0);
-                _searchHighlight.normal.textColor = Color.yellow;
-                _searchHighlight.hover.textColor = Color.yellow;
-            }
-
-            return _searchHighlight;
-        }
-    }
     private static GUIStyle _searchResult;
     public static GUIStyle searchResult
     {
@@ -176,20 +158,6 @@ internal static class Styles
             }
 
             return _searchResult;
-        }
-    }
-    private static GUIStyle _searchTitle;
-    public static GUIStyle searchTitle
-    {
-        get
-        {
-            if (_searchTitle == null)
-            {
-                _searchTitle = new GUIStyle(EditorStyles.boldLabel);
-                _searchTitle.fontSize = 16;
-            }
-
-            return _searchTitle;
         }
     }
     private static StylesObj _styles;

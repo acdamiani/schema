@@ -57,7 +57,7 @@ namespace SchemaEditor
                 {
                     BeginWindows();
 
-                    if (QuickSearch.OnGUI(window, target, WindowToGridPosition(window.size * 0.5f), (float)EditorApplication.timeSinceStartup))
+                    if (QuickSearch.DoWindow(window, target, WindowToGridPosition(window.size * 0.5f), (float)EditorApplication.timeSinceStartup))
                         windowInfo.searchIsShown = false;
 
                     EndWindows();
@@ -145,7 +145,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     if (windowInfo.isPanning)
                         needsPan = false;
 
-                    windowInfo.pan = Vector2.Lerp(windowInfo.pan, windowInfo.nextPan, Mathf.SmoothStep(0f, 1f, ((float)EditorApplication.timeSinceStartup - windowInfo.recordedTime) / windowInfo.panDuration));
+                    windowInfo.pan = Vector2.Lerp(windowInfo.pan, windowInfo.nextPan, Mathf.SmoothStep(0f, 1f, (Time.realtimeSinceStartup - windowInfo.recordedTime) / windowInfo.panDuration));
 
                     Vector2 diff = windowInfo.pan - windowInfo.nextPan;
 
@@ -629,8 +629,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                     if (node.canHaveParent)
                     {
-                        float width = size.x - GUIData.nodePadding * 2;
-                        Rect inConnection = new Rect(positionNoClipped.x + GUIData.nodePadding + size.x / 2f - width / 2f, positionNoClipped.y - 16f, width, 16f);
+                        // float width = size.x - GUIData.nodePadding * 2;
+                        float width = 16f;
+                        Rect inConnection = new Rect(positionNoClipped.x + GUIData.nodePadding + size.x / 2f - width / 2f, positionNoClipped.y - width / 2f, width, 16f);
 
                         if (inConnection.Contains(current.mousePosition) && IsNotLayoutEvent(current))
                         {
@@ -643,7 +644,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                         else
                             GUI.color = Styles.windowAccent;
 
-                        GUI.Box(inConnection, "", Styles.styles.decorator);
+                        GUI.DrawTexture(inConnection, Styles.circle);
+
+                        // GUI.Box(inConnection, "", Styles.styles.decorator);
                     }
 
                     if (node.maxChildren > 0)

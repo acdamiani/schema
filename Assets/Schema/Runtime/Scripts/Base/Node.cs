@@ -183,6 +183,18 @@ namespace Schema
                 this.category = category;
             }
         }
+        public static string GetNodeCategory(Type nodeType)
+        {
+            CategoryAttribute attribute = nodeType.GetCustomAttribute<CategoryAttribute>();
+
+            return attribute?.category;
+        }
+        public static string GetNodeDescription(Type nodeType)
+        {
+            DescriptionAttribute attribute = nodeType.GetCustomAttribute<DescriptionAttribute>();
+
+            return attribute?.description;
+        }
         public static Dictionary<string, IEnumerable<Type>> GetNodeCategories()
         {
             Dictionary<string, List<Type>> dict = new Dictionary<string, List<Type>>();
