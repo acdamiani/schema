@@ -30,12 +30,11 @@ public static class QuickSearch
     private static bool focusSearch;
     private static Vector2 mouseOverPosition;
     private static float toolbarHeight;
-    public static void FocusSearch()
-    {
-        focusSearch = true;
-    }
+    private static bool didAddNode;
     public static bool DoWindow(Rect window, Schema.Graph target, Vector2 newNodePosition, float timeSinceStartup)
     {
+        didAddNode = false;
+
         QuickSearch.searchRect = new Rect(
             window.x + windowPadding.left,
             window.y + windowPadding.top,
@@ -48,7 +47,7 @@ public static class QuickSearch
         GUILayout.Window(1, searchRect, OnGUI, "", Styles.quickSearch);
         GUI.FocusWindow(1);
 
-        return false;
+        return didAddNode;
     }
     public static void OnGUI(int id)
     {
@@ -200,6 +199,7 @@ public static class QuickSearch
                 () =>
                 {
                     target.AddNode(nodeType, newNodePosition);
+                    didAddNode = true;
                 }
             );
 

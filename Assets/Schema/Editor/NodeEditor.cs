@@ -1051,6 +1051,16 @@ namespace SchemaEditor
                 get => EditorPrefs.GetBool("SCHEMA_PREF__enableDebugViewPlus", false);
                 set => EditorPrefs.SetBool("SCHEMA_PREF__enableDebugViewPlus", value);
             }
+            public static Color connectionColor
+            {
+                get => GetColor("SCHEMA_PREF__connectionColor", Color.white);
+                set => SetColor("SCHEMA_PREF__connectionColor", value);
+            }
+            public static Color portColor
+            {
+                get => GetColor("SCHEMA_PREF__portColor", new Color32(80, 80, 80, 255));
+                set => SetColor("SCHEMA_PREF__portColor", value);
+            }
             public static Color GetColor(string key, Color defaultValue)
             {
                 float r = EditorPrefs.GetFloat(key + "_r", defaultValue.r);

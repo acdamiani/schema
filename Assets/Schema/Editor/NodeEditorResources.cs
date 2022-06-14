@@ -45,7 +45,7 @@ internal static class Styles
     public static Texture2D blackboardIcon => _blackboardIcon != null ? _blackboardIcon : _blackboardIcon = Resources.Load<Texture2D>("blackboard_key");
     public static Texture2D plus => _plus != null ? _plus : _plus = EditorGUIUtility.FindTexture("Toolbar Plus More");
     public static Texture2D minus => _minus != null ? _minus : _minus = EditorGUIUtility.FindTexture("Toolbar Minus");
-    public static Texture2D circle => _circle != null ? _circle : _circle = Resources.Load<Texture2D>("Circle");
+    public static Texture2D circle => _circle != null ? _circle : _circle = Resources.Load<Texture2D>("in_connection");
     public static Texture2D local => _local != null ? _local : _local = (Texture2D)EditorGUIUtility.IconContent("ModelImporter Icon").image;
     public static Texture2D global => _global != null ? _global : _global = EditorGUIUtility.FindTexture("Profiler.GlobalIllumination");
     public static Texture2D shared => _shared != null ? _shared : _shared = EditorGUIUtility.FindTexture("Linked");
@@ -77,6 +77,10 @@ internal static class Styles
     public static Texture2D searchBackground => _searchBackground == null ? _searchBackground = Resources.Load<Texture2D>("search_bg") : _searchBackground;
     private static Texture2D _solid;
     public static Texture2D solid => _solid == null ? _solid = Resources.Load<Texture2D>("Misc/px") : _solid;
+    private static Texture2D _curve;
+    public static Texture2D curve => _curve == null ? _curve = Resources.Load<Texture2D>("curve") : _curve;
+    private static Texture2D _inConnectionOutline;
+    public static Texture2D inConnectionOutline => _inConnectionOutline == null ? _inConnectionOutline = Resources.Load<Texture2D>("in_connection_outline") : _inConnectionOutline;
     private static GUIStyle _quickSearch;
     public static GUIStyle quickSearch
     {

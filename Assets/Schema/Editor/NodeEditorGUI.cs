@@ -281,17 +281,17 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                     Vector2 gridFrom = new Vector2(
                         node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
-                        node.graphPosition.y + (nodeSize.y + GUIData.nodePadding * 2 + 16f) * windowInfo.zoom);
+                        node.graphPosition.y + (nodeSize.y + GUIData.nodePadding * 2 + 9f) * windowInfo.zoom);
                     Vector2 gridTo = new Vector2(
                         child.graphPosition.x + (childSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
-                        child.graphPosition.y - 16f * windowInfo.zoom);
+                        child.graphPosition.y - 8f * windowInfo.zoom);
 
                     Vector2 from = GridToWindowPositionNoClipped(new Vector2(
                         node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
-                        node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 16f));
+                        node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 9f));
                     Vector2 to = GridToWindowPositionNoClipped(new Vector2(
                         child.graphPosition.x + (childSize.x + GUIData.nodePadding * 2) / 2f,
-                        child.graphPosition.y - 16f));
+                        child.graphPosition.y - 8f));
 
                     if (!windowGrid.Contains(gridFrom) && !windowGrid.Contains(gridTo))
                         continue;
@@ -299,7 +299,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     Vector2 p0 = from;
                     Vector2 p1 = from + Vector2.up * 50f;
                     Vector2 p2 = to - Vector2.up * 50f;
-                    Vector2 p3 = new Vector2(to.x, to.y - 8f * windowInfo.zoom);
+                    Vector2 p3 = to;
 
                     CurveUtility.Bezier bezier = new CurveUtility.Bezier(p0, p1, p2, p3);
 
@@ -331,15 +331,19 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     else if (!intersect && windowInfo.hoveredConnection == child && windowInfo.shouldCheckConnectionHover)
                         windowInfo.hoveredConnection = null;
 
-                    Handles.DrawBezier(
-                        p0,
-                        p3,
-                        p1,
-                        p2,
-                        isActiveConnection ? NodeEditorPrefs.highlightColor : (windowInfo.hoveredConnection == child ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f)),
-                        null,
-                        3f * windowInfo.zoom
-                    );
+                    Color connectionColor = isActiveConnection ? NodeEditorPrefs.highlightColor : (windowInfo.hoveredConnection == child ? NodeEditorPrefs.selectionColor : NodeEditorPrefs.connectionColor);
+
+                    Handles.DrawBezier(p0, p3, p1, p2, connectionColor, Styles.curve, 5f * windowInfo.zoom);
+
+                    // Handles.DrawBezier(
+                    //     p0,
+                    //     p3,
+                    //     p1,
+                    //     p2,
+                    //     isActiveConnection ? NodeEditorPrefs.highlightColor : (windowInfo.hoveredConnection == child ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f)),
+                    //     null,
+                    //     5f * windowInfo.zoom
+                    // );
 
                     if (isActiveConnection)
                     {
@@ -357,12 +361,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                             GUI.DrawTexture(new Rect(p.x - 4f * windowInfo.zoom, p.y - 4f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom), Styles.circle);
                         }
                     }
-
-                    Rect r = new Rect(to.x - 4f * windowInfo.zoom, to.y - 8f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom);
-
-                    GUI.color = isActiveConnection ? NodeEditorPrefs.highlightColor : new Color(.5f, .5f, .5f, 1f);
-
-                    GUI.DrawTexture(r, Styles.arrow);
 
                     GUI.color = Color.white;
                 }
@@ -450,6 +448,50 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                             )
                         )
                         continue;
+
+                    if (node.canHaveParent)
+                    {
+                        // float width = size.x - GUIData.nodePadding * 2;
+                        float width = 24f;
+                        Rect inConnection = new Rect(positionNoClipped.x + GUIData.nodePadding + size.x / 2f - width / 2f, positionNoClipped.y - width / 2f, width, 24f);
+                        Rect inConnectionHover = new Rect(inConnection.position.x, inConnection.position.y, inConnection.size.x, inConnection.size.y / 2f);
+
+                        if (inConnectionHover.Contains(current.mousePosition) && IsNotLayoutEvent(current))
+                        {
+                            windowInfo.hoveredType = Window.Hovering.InConnection;
+                            windowInfo.hoveredNode = node;
+                        }
+
+                        if (windowInfo.hoveredType == Window.Hovering.InConnection && windowInfo.hoveredNode == node && !drawBox)
+                            GUI.color = Color.white;
+                        else
+                            GUI.color = NodeEditorPrefs.portColor;
+
+                        GUI.DrawTexture(inConnection, Styles.circle);
+
+                        GUI.color = Color.white;
+
+                        // GUI.Box(inConnection, "", Styles.styles.decorator);
+                    }
+
+                    if (node.maxChildren > 0)
+                    {
+                        float width = rect.width - GUIData.nodePadding * 3f;
+                        Rect outConnection = new Rect(rect.x + rect.width / 2f - width / 2f, rect.yMax - 9f, width, 18f);
+
+                        if (outConnection.Contains(current.mousePosition) && IsNotLayoutEvent(current))
+                        {
+                            windowInfo.hoveredType = Window.Hovering.OutConnection;
+                            windowInfo.hoveredNode = node;
+                        }
+
+                        if (windowInfo.hoveredType == Window.Hovering.OutConnection && windowInfo.hoveredNode == node && !drawBox)
+                            GUI.color = Color.white;
+                        else
+                            GUI.color = NodeEditorPrefs.portColor;
+
+                        GUI.Box(outConnection, "", Styles.styles.decorator);
+                    }
 
                     GUI.color = Styles.windowBackground;
 
@@ -627,46 +669,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                         EditorGUI.DrawRect(toDraw, new Color32(200, 200, 200, 255));
                     }
 
-                    if (node.canHaveParent)
-                    {
-                        // float width = size.x - GUIData.nodePadding * 2;
-                        float width = 16f;
-                        Rect inConnection = new Rect(positionNoClipped.x + GUIData.nodePadding + size.x / 2f - width / 2f, positionNoClipped.y - width / 2f, width, 16f);
-
-                        if (inConnection.Contains(current.mousePosition) && IsNotLayoutEvent(current))
-                        {
-                            windowInfo.hoveredType = Window.Hovering.InConnection;
-                            windowInfo.hoveredNode = node;
-                        }
-
-                        if (windowInfo.hoveredType == Window.Hovering.InConnection && windowInfo.hoveredNode == node && !drawBox)
-                            GUI.color = Color.white;
-                        else
-                            GUI.color = Styles.windowAccent;
-
-                        GUI.DrawTexture(inConnection, Styles.circle);
-
-                        // GUI.Box(inConnection, "", Styles.styles.decorator);
-                    }
-
-                    if (node.maxChildren > 0)
-                    {
-                        float width = size.x - GUIData.nodePadding * 2;
-                        Rect outConnection = new Rect(positionNoClipped.x + GUIData.nodePadding + size.x / 2f - width / 2f, positionNoClipped.y + size.y + GUIData.nodePadding * 2, width, 16f);
-
-                        if (outConnection.Contains(current.mousePosition) && IsNotLayoutEvent(current))
-                        {
-                            windowInfo.hoveredType = Window.Hovering.OutConnection;
-                            windowInfo.hoveredNode = node;
-                        }
-
-                        if (windowInfo.hoveredType == Window.Hovering.OutConnection && windowInfo.hoveredNode == node && !drawBox)
-                            GUI.color = Color.white;
-                        else
-                            GUI.color = Styles.windowAccent;
-
-                        GUI.Box(outConnection, "", Styles.styles.decorator);
-                    }
 
                     if (rect.Contains(current.mousePosition) && IsNotLayoutEvent(current))
                     {
@@ -1118,6 +1120,14 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 new GUIContent("Failure Color", "Color to use when failed"),
                 NodeEditorPrefs.failureColor
             );
+            NodeEditorPrefs.connectionColor = EditorGUILayout.ColorField(
+                new GUIContent("Connection Color", "Color to use for node connections"),
+                NodeEditorPrefs.connectionColor
+            );
+            NodeEditorPrefs.portColor = EditorGUILayout.ColorField(
+                new GUIContent("Port Color", "Color to use for node ports"),
+                NodeEditorPrefs.portColor
+            );
 
             EditorGUILayout.LabelField("");
 
@@ -1215,9 +1225,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             windowInfo.searchIsShown = !windowInfo.searchIsShown;
             windowInfo.searchRect.position = new Vector2(window.size.x / 2f - windowInfo.searchRect.width / 2f, window.size.y / 2f - windowInfo.searchRect.height / 2f);
             windowInfo.searchText = "";
-
-            if (windowInfo.searchIsShown)
-                QuickSearch.FocusSearch();
         }
         void DoSplashWindow(int winID)
         {

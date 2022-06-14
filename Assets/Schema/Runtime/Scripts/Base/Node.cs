@@ -321,6 +321,7 @@ namespace Schema
             if (!m_children.Contains(to))
                 ArrayUtility.Add(ref m_children, to);
 
+            to.parent?.RemoveConnection(to);
             to.parent = this;
         }
         public void SplitConnection(Node to, Node child, string actionName = "Split Connection", bool undo = true)
