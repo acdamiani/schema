@@ -13,7 +13,6 @@ internal static class Styles
     private static readonly Color32 LightBackgroundColor = new Color32(200, 200, 200, 255);
     private static readonly Color32 DarkBorder = new Color32(40, 40, 40, 255);
     private static readonly Color32 LightBorder = new Color32(147, 147, 147, 255);
-    private static Texture2D _node;
     private static Texture2D _nodeSelected;
     private static Texture2D _arrow;
     private static Texture2D _nodeSelectedDecorator;
@@ -39,7 +38,6 @@ internal static class Styles
     public static Texture2D infoIcon => _infoIcon != null ? _infoIcon : _infoIcon = EditorGUIUtility.FindTexture("console.infoicon");
     public static Texture2D searchIcon => _searchIcon != null ? _searchIcon : _searchIcon = EditorGUIUtility.FindTexture("Search Icon");
     public static Texture2D splashImage => _splashImage != null ? _splashImage : _splashImage = Resources.Load<Texture2D>("splash");
-    public static Texture2D node => _node != null ? _node : _node = Resources.Load<Texture2D>("node");
     public static Texture2D nodeSelected => _nodeSelected != null ? _nodeSelected : _nodeSelected = Resources.Load<Texture2D>("node_highlight");
     public static Texture2D arrow => _arrow != null ? _arrow : _arrow = Resources.Load<Texture2D>("arrow");
     public static Texture2D blackboardIcon => _blackboardIcon != null ? _blackboardIcon : _blackboardIcon = Resources.Load<Texture2D>("blackboard_key");
@@ -156,12 +154,42 @@ internal static class Styles
                 _searchResult.border = new RectOffset(8, 8, 8, 8);
                 _searchResult.padding = new RectOffset(4, 0, 0, 0);
                 _searchResult.alignment = TextAnchor.MiddleLeft;
-                _searchResult.hover.background = node.Tint(GUI.skin.settings.selectionColor);
+                _searchResult.hover.background = roundedBox.normal.background.Tint(GUI.skin.settings.selectionColor);
                 _searchResult.hover.textColor = Color.white;
                 _searchResult.normal.textColor = Color.white;
             }
 
             return _searchResult;
+        }
+    }
+    private static GUIStyle _shadow;
+    public static GUIStyle shadow
+    {
+        get
+        {
+            if (_shadow == null)
+            {
+                _shadow = new GUIStyle();
+                _shadow.border = new RectOffset(36, 36, 36, 36);
+                _shadow.normal.background = Resources.Load<Texture2D>("node");
+            }
+
+            return _shadow;
+        }
+    }
+    private static GUIStyle _roundedBox;
+    public static GUIStyle roundedBox
+    {
+        get
+        {
+            if (_roundedBox == null)
+            {
+                _roundedBox = new GUIStyle();
+                _roundedBox.border = new RectOffset(8, 8, 8, 8);
+                _roundedBox.normal.background = Resources.Load<Texture2D>("round");
+            }
+
+            return _roundedBox;
         }
     }
     private static StylesObj _styles;
@@ -258,27 +286,6 @@ internal static class Styles
         ///</summary>
         public StylesObj()
         {
-            //node style
-            node = new GUIStyle
-            {
-                normal =
-                {
-                    background = global::Styles.node
-                },
-                border = new RectOffset(8, 8, 8, 8),
-                padding = new RectOffset(16, 16, 16, 16)
-            };
-
-            //node style (no padding)
-            nodeWithoutPadding = new GUIStyle
-            {
-                normal =
-                {
-                    background = global::Styles.node
-                },
-                border = new RectOffset(8, 8, 8, 8),
-            };
-
             //selected node style
             nodeSelected = new GUIStyle
             {
@@ -293,7 +300,7 @@ internal static class Styles
             {
                 normal =
                 {
-                    background = global::Styles.node
+                    background = global::Styles.roundedBox.normal.background
                 },
                 border = new RectOffset(8, 8, 8, 8),
                 contentOffset = Vector2.zero,
@@ -320,19 +327,6 @@ internal static class Styles
                 {
                     textColor = Color.white
                 }
-            };
-
-            //new node result item style
-            newNode = new GUIStyle
-            {
-                normal =
-                {
-                    background = global::Styles.node,
-                    textColor = Color.black
-                },
-                border = new RectOffset(32, 32, 32, 32),
-                padding = new RectOffset(0, 0, 4, 16),
-                alignment = TextAnchor.MiddleCenter
             };
 
             addNodeWindow = new GUIStyle(GUI.skin.window)

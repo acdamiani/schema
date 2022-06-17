@@ -31,7 +31,8 @@ public static class QuickSearch
     private static Vector2 mouseOverPosition;
     private static float toolbarHeight;
     private static bool didAddNode;
-    public static bool DoWindow(Rect window, Schema.Graph target, Vector2 newNodePosition, float timeSinceStartup)
+    private static Schema.Node targetNode;
+    public static bool DoWindow(Rect window, Schema.Graph target, Schema.Node targetNode, Vector2 newNodePosition, float timeSinceStartup)
     {
         didAddNode = false;
 
@@ -42,6 +43,7 @@ public static class QuickSearch
             window.height - windowPadding.top - windowPadding.bottom
         );
         QuickSearch.target = target;
+        QuickSearch.targetNode = targetNode;
         QuickSearch.newNodePosition = newNodePosition;
 
         GUILayout.Window(1, searchRect, OnGUI, "", Styles.quickSearch);
@@ -198,7 +200,11 @@ public static class QuickSearch
                 i,
                 () =>
                 {
-                    target.AddNode(nodeType, newNodePosition);
+                    Schema.Node n = target.AddNode(nodeType, newNodePosition);
+
+                    if (targetNode != null)
+                        targetNode.AddConnection(n);
+
                     didAddNode = true;
                 }
             );

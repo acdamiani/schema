@@ -287,7 +287,6 @@ namespace SchemaEditor
                 return;
             }
 
-
             switch (current.button)
             {
                 case 2:
@@ -295,11 +294,9 @@ namespace SchemaEditor
                     windowInfo.isPanning = true;
                     break;
                 case 1:
-                    {
-                        Rect r = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
-                        drawBox = false;
-                        break;
-                    }
+                    Rect r = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
+                    drawBox = false;
+                    break;
                 case 0 when !windowInfo.didDragSinceMouseUp:
                     {
                         if (windowInfo.hoveredType != Window.Hovering.Inspector && blackboardEditor)

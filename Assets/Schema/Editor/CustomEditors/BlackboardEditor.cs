@@ -201,16 +201,7 @@ namespace SchemaEditor.Editors
 
             Vector2 nameSize = EditorStyles.whiteLabel.CalcSize(new GUIContent(entry.name));
 
-            if (selectedEntry == entry)
-            {
-                GUI.color = GUI.skin.settings.selectionColor;
-                GUILayout.BeginVertical(Styles.styles.nodeWithoutPadding, GUILayout.Height(32f));
-                GUI.color = Color.white;
-            }
-            else
-            {
-                GUILayout.BeginVertical(GUILayout.Height(32f));
-            }
+            GUILayout.BeginVertical(selectedEntry == entry ? Styles.searchResult : GUIStyle.none, GUILayout.Height(32f));
 
             GUILayout.Space(8f);
 

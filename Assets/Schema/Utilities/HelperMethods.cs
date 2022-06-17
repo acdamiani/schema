@@ -357,5 +357,16 @@ namespace Schema.Utilities
 
             return rect;
         }
+        public static Rect Scale(this Rect rect, Vector2 factor)
+        {
+            float w = rect.width * factor.x;
+            float h = rect.height * factor.y;
+
+            return new Rect(rect.x + (rect.width - w) / 2f, rect.y + (rect.height - h) / 2f, w, h);
+        }
+        public static Rect Scale(this Rect rect, float factor)
+        {
+            return rect.Scale(Vector2.one * factor);
+        }
     }
 }

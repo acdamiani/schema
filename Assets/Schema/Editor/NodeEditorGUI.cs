@@ -57,7 +57,7 @@ namespace SchemaEditor
                 {
                     BeginWindows();
 
-                    if (QuickSearch.DoWindow(window, target, WindowToGridPosition(window.size * 0.5f), (float)EditorApplication.timeSinceStartup))
+                    if (QuickSearch.DoWindow(window, target, requestingConnection, Event.current.mousePosition, (float)EditorApplication.timeSinceStartup))
                         windowInfo.searchIsShown = false;
 
                     EndWindows();
@@ -137,8 +137,18 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     GUI.Label(new Rect(8f, position.height - size.y - 8f, size.x, size.y), content, EditorStyles.boldLabel);
                 }
 
-                if (windowInfo.isPanning) SetCursor(MouseCursor.Pan);
-                else if (windowInfo.resizingInspector || windowInfo.hoverDivider) SetCursor(MouseCursor.ResizeHorizontal);
+                if (windowInfo.isPanning)
+                {
+                    SetCursor(MouseCursor.Pan);
+                }
+                else if (requestingConnection != null && windowInfo.lastClicked == Window.Hovering.OutConnection)
+                {
+                    SetCursor(MouseCursor.ArrowPlus);
+                }
+                else if (windowInfo.resizingInspector || windowInfo.hoverDivider)
+                {
+                    SetCursor(MouseCursor.ResizeHorizontal);
+                }
 
                 if (needsPan)
                 {
@@ -373,8 +383,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                 Vector2 from = GridToWindowPositionNoClipped(new Vector2(
                     node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
-                    node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 16f));
-                Vector2 to = new Vector2(mousePos.x, mousePos.y - 8f * windowInfo.zoom);
+                    node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 9f));
+                Vector2 to = mousePos;
 
                 Handles.DrawBezier(
                     from,
@@ -385,12 +395,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     null,
                     3f * windowInfo.zoom
                 );
-
-                Rect r = new Rect(to.x - 4f * windowInfo.zoom, to.y, 8f * windowInfo.zoom, 8f * windowInfo.zoom);
-
-                GUI.color = new Color(.85f, .85f, .85f, 1f);
-
-                GUI.DrawTexture(r, Styles.arrow);
             }
             EndZoomed();
         }
@@ -478,9 +482,11 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     {
                         float width = rect.width - GUIData.nodePadding * 3f;
                         Rect outConnection = new Rect(rect.x + rect.width / 2f - width / 2f, rect.yMax - 9f, width, 18f);
+                        Rect outConnectionHover = new Rect(outConnection.x, outConnection.y + outConnection.height / 2f, outConnection.width, outConnection.height / 2f);
 
-                        if (outConnection.Contains(current.mousePosition) && IsNotLayoutEvent(current))
+                        if (outConnectionHover.Contains(current.mousePosition) && IsNotLayoutEvent(current))
                         {
+
                             windowInfo.hoveredType = Window.Hovering.OutConnection;
                             windowInfo.hoveredNode = node;
                         }
@@ -495,7 +501,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                     GUI.color = Styles.windowBackground;
 
-                    GUI.Box(rect, "", Styles.styles.node);
+                    GUI.Box(rect.Pad(new RectOffset(-14, -14, -14, -14)), "", Styles.shadow);
 
                     if (windowInfo.selected.Contains(node))
                         GUI.color = NodeEditorPrefs.selectionColor;
@@ -640,7 +646,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                     float contentHeight = Mathf.Max((node.icon == null ? 0 : node.icon.height + 10f) + GUIData.labelHeight, GUIData.minContentHeight);
 
-                    GUILayout.BeginVertical(Styles.styles.decorator, GUILayout.Height(contentHeight));
+                    GUILayout.BeginVertical(Styles.roundedBox, GUILayout.Height(contentHeight));
 
                     GUI.color = Color.white;
 
