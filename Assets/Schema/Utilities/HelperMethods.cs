@@ -348,6 +348,10 @@ namespace Schema.Utilities
 
             return ret;
         }
+        public static Rect Pad(this Rect rect, int padding)
+        {
+            return rect.Pad(new RectOffset(padding, padding, padding, padding));
+        }
         public static Rect Pad(this Rect rect, RectOffset padding)
         {
             rect.x += padding.left;
@@ -367,6 +371,10 @@ namespace Schema.Utilities
         public static Rect Scale(this Rect rect, float factor)
         {
             return rect.Scale(Vector2.one * factor);
+        }
+        public static Rect UseCenter(this Rect rect)
+        {
+            return new Rect(rect.x - rect.width / 2f, rect.y - rect.height / 2f, rect.width, rect.height);
         }
     }
 }

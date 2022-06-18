@@ -7,12 +7,13 @@ internal static class Styles
     //Colors
     public static Color windowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
     public static Color windowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
-    public static readonly Color32 lowerPriorityColor = new Color32(255, 140, 144, 255);
-    public static readonly Color32 selfColor = new Color32(71, 255, 166, 255);
-    private static readonly Color32 DarkBackgroundColor = new Color32(56, 56, 56, 255);
-    private static readonly Color32 LightBackgroundColor = new Color32(200, 200, 200, 255);
-    private static readonly Color32 DarkBorder = new Color32(40, 40, 40, 255);
-    private static readonly Color32 LightBorder = new Color32(147, 147, 147, 255);
+    public static Color outlineColor => EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : new Color32(176, 176, 176, 255);
+    public static readonly Color lowerPriorityColor = new Color32(255, 140, 144, 255);
+    public static readonly Color selfColor = new Color32(71, 255, 166, 255);
+    private static readonly Color DarkBackgroundColor = new Color32(56, 56, 56, 255);
+    private static readonly Color LightBackgroundColor = new Color32(200, 200, 200, 255);
+    private static readonly Color DarkBorder = new Color32(40, 40, 40, 255);
+    private static readonly Color LightBorder = new Color32(147, 147, 147, 255);
     private static Texture2D _nodeSelected;
     private static Texture2D _arrow;
     private static Texture2D _nodeSelectedDecorator;
@@ -50,9 +51,7 @@ internal static class Styles
     public static Texture2D preAudioLoopOff => _preAudioLoopOff != null ? _preAudioLoopOff : _preAudioLoopOff = EditorGUIUtility.FindTexture("preAudioLoopOff@2x");
     public static GUIContent visibilityToggleOffContent => _visibilityToggleOffContent != null ? _visibilityToggleOffContent : _visibilityToggleOffContent = new GUIContent(EditorGUIUtility.FindTexture("animationvisibilitytoggleoff"), "Toggle Inspector On");
     public static GUIContent visibilityToggleOnContent => _visibilityToggleOnContent != null ? _visibilityToggleOnContent : _visibilityToggleOnContent = new GUIContent("", EditorGUIUtility.FindTexture("animationvisibilitytoggleon"), "Toggle Inspector Off");
-    public static Texture2D gridTexture => _gridTexture == null ? _gridTexture = GenerateGridTexture(Color.grey, windowBackground) : _gridTexture;
-    private static Texture2D _crossTexture;
-    public static Texture2D crossTexture => _crossTexture == null ? _crossTexture = GenerateCrossTexture(Color.gray) : _crossTexture;
+    public static Texture2D gridTexture => _gridTexture == null ? _gridTexture = GenerateGridTexture(Color.Lerp(Color.grey, windowAccent, 0.5f), windowAccent) : _gridTexture;
     private static Texture2D _favoriteDisabled;
     public static Texture2D favoriteDisabled => _favoriteDisabled == null ? _favoriteDisabled = FindTexture("QuickSearch/favorite_disabled") : _favoriteDisabled;
     private static Texture2D _favoriteEnabled;
@@ -192,6 +191,23 @@ internal static class Styles
             return _roundedBox;
         }
     }
+    private static GUIStyle _nodeLabel;
+    public static GUIStyle nodeLabel
+    {
+        get
+        {
+            if (_nodeLabel == null)
+            {
+                _nodeLabel = new GUIStyle();
+                _nodeLabel.alignment = TextAnchor.MiddleCenter;
+                _nodeLabel.imagePosition = ImagePosition.ImageAbove;
+                _nodeLabel.fontSize = 15;
+                _nodeLabel.normal.textColor = Color.white;
+            }
+
+            return _nodeLabel;
+        }
+    }
     private static StylesObj _styles;
     public static StylesObj styles => _styles ??= new StylesObj();
     private static string _megamind =
@@ -224,8 +240,24 @@ internal static class Styles
 
         return EditorGUIUtility.FindTexture(name);
     }
-    private static Texture2D GenerateGridTexture(Color line, Color bg)
+    private static Texture2D GenerateGridTexture(Color dots, Color bg)
     {
+        // float border = 0.01;
+        // float radius = 0.5;
+        // vec4 color0 = vec4(0.0, 0.0, 0.0, 1.0);
+        // vec4 color1 = vec4(1.0, 1.0, 1.0, 1.0);
+
+        // vec2 m = uv - vec2(0.5, 0.5);
+        // float dist = radius - sqrt(m.x * m.x + m.y * m.y);
+
+        // float t = 0.0;
+        // if (dist > border)
+        //     t = 1.0;
+        // else if (dist > 0.0)
+        //     t = dist / border;
+
+        // gl_FragColor = mix(color0, color1, t);
+
         Texture2D tex = new Texture2D(64, 64);
         Color[] cols = new Color[64 * 64];
         for (int y = 0; y < 64; y++)
@@ -233,14 +265,29 @@ internal static class Styles
             for (int x = 0; x < 64; x++)
             {
                 Color col = bg;
-                if (y % 16 == 0 || x % 16 == 0) col = Color.Lerp(line, bg, 0.65f);
-                if (y == 63 || x == 63) col = Color.Lerp(line, bg, 0.35f);
+
+                float border = 1f;
+
+                int xDist = Mathf.Abs(x - 32);
+                int yDist = Mathf.Abs(y - 32);
+
+                float dist = 4f - Mathf.Sqrt(xDist * xDist + yDist * yDist);
+
+                float f = 0;
+
+                if (dist > border)
+                    f = 1;
+                else if (dist > 0)
+                    f = dist / border;
+
+                col = Color.Lerp(bg, dots, f);
+
                 cols[(y * 64) + x] = col;
             }
         }
         tex.SetPixels(cols);
         tex.wrapMode = TextureWrapMode.Repeat;
-        tex.filterMode = FilterMode.Bilinear;
+        // tex.filterMode = FilterMode.Bilinear;
         tex.name = "Grid";
         tex.Apply();
         return tex;

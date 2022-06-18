@@ -7,6 +7,7 @@ using Schema.Utilities;
 using Schema.Internal;
 using System.Linq;
 using SchemaEditor.Editors;
+using SchemaEditor.Internal;
 
 namespace SchemaEditor
 {
@@ -15,7 +16,6 @@ namespace SchemaEditor
         private Matrix4x4 prevMatrix;
         private bool drawBox;
         private float tabHeight => isDocked() ? 19.0f : 21.0f;
-
         private Func<bool> isDocked => isDockedFunc ??= this.GetIsDockedDelegate();
         private Func<bool> isDockedFunc;
         private UnityEditor.Editor editor;
@@ -30,8 +30,11 @@ namespace SchemaEditor
         private bool searchWantsFocus;
         private bool shouldFocusSearch;
         private Rect window;
+        [SerializeField] private ComponentCanvas canvas;
         private void OnGUI()
         {
+            windowInfo.mousePosition = Event.current.mousePosition;
+
             if (target != null)
             {
                 ProcessEvents(Event.current);
@@ -48,6 +51,11 @@ namespace SchemaEditor
                     GetArea(windowInfo.changedNodes.Dequeue(), true);
 
                 DrawGrid(window, windowInfo.zoom, windowInfo.pan);
+
+                BeginZoomed(window, windowInfo.zoom, tabHeight);
+                canvas.Draw();
+                EndZoomed();
+
                 DrawConnections();
                 DrawNodes();
                 DrawWindow();
@@ -57,7 +65,7 @@ namespace SchemaEditor
                 {
                     BeginWindows();
 
-                    if (QuickSearch.DoWindow(window, target, requestingConnection, Event.current.mousePosition, (float)EditorApplication.timeSinceStartup))
+                    if (QuickSearch.DoWindow(window, target, requestingConnection, AddNode, (float)EditorApplication.timeSinceStartup))
                         windowInfo.searchIsShown = false;
 
                     EndWindows();
@@ -215,12 +223,13 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 targets.AddRange(windowInfo.selected);
             }
 
-            distinctTypes = targets.Where(x => x != null).Select(x => x.GetType()).Distinct().ToList();
+            targets = targets.Where(x => x != null).ToList();
+            distinctTypes = targets.Select(x => x.GetType()).Distinct().ToList();
 
             if (distinctTypes.Count > 1) return;
 
             //caches inspector once per OnGUI call so we don't get EventType.Layout and EventType.Repaint related errors
-            if (editor == null || editor.targets.Any(obj => obj == null) || !editor.targets.SequenceEqual(targets) && targets.Count > 0 && targets.All(x => x != null))
+            if (editor == null || editor.targets.Any(obj => obj == null) || !editor.targets.SequenceEqual(targets) && targets.Count > 0)
             {
                 UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), null, ref editor);
 
@@ -1311,6 +1320,23 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             GUILayout.EndVertical();
         }
+        private void CreateComponentTree()
+        {
+            if (canvas == null)
+                canvas = new ComponentCanvas();
+
+            if (target == null)
+                return;
+
+            foreach (Node node in target.nodes)
+            {
+                NodeComponent.NodeComponentCreateArgs args = new NodeComponent.NodeComponentCreateArgs();
+
+                args.fromExisting = node;
+
+                canvas.Create<NodeComponent>(args);
+            }
+        }
         List<Type> GetSearchResults(string query)
         {
             string[] words = query.Trim().Split(' ');
@@ -1423,7 +1449,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             Vector2 center = rect.size * .5f;
             Texture2D gridTex = Styles.gridTexture;
-            Texture2D crossTex = Styles.crossTexture;
 
             // Offset from origin in tile units
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
@@ -1439,7 +1464,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             // Draw tiled background
             GUI.DrawTextureWithTexCoords(rect, gridTex, new Rect(tileOffset, tileAmount));
-            GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
         }
 
         [Serializable]
@@ -1531,6 +1555,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             public bool hoverDivider;
             public float resizeClickOffset;
             public bool drawMinimap = true;
+            public Vector2 mousePosition;
             [SerializeField] internal Rect searchRect = new Rect(0f, 0f, 250f, 350f);
             public enum Hovering
             {

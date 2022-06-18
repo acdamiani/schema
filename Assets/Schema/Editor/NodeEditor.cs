@@ -9,6 +9,7 @@ using Schema;
 using Schema.Internal;
 using Schema.Utilities;
 using SchemaEditor.Utilities;
+using SchemaEditor.Internal;
 using UnityEditor.ShortcutManagement;
 
 namespace SchemaEditor
@@ -53,6 +54,7 @@ namespace SchemaEditor
         {
             windowInfo = new Window();
             windowInfo.editor = this;
+            instance = this;
 
             if (graphObj == null)
             {
@@ -62,6 +64,8 @@ namespace SchemaEditor
 
             target = graphObj;
             target.Initialize();
+
+            CreateComponentTree();
 
             windowInfo.zoom = target.zoom;
             windowInfo.pan = target.pan;
@@ -196,9 +200,14 @@ namespace SchemaEditor
 
             Undo.undoRedoPerformed += UndoPerformed;
 
+            CreateComponentTree();
+
             instance = this;
             if (target != null && target.blackboard != null)
                 Blackboard.instance = target.blackboard;
+
+            DestroyImmediate(editor);
+            editor = null;
 
             target?.PurgeNull();
         }
@@ -471,12 +480,24 @@ namespace SchemaEditor
             //     }
             // }
         }
+        private void AddNode(Type nodeType)
+        {
+            AddNode(nodeType, WindowToGridPosition(windowInfo.mousePosition), false);
+        }
         private void AddNode(Type nodeType, Vector2 position, bool asChild)
         {
             if (!typeof(Node).IsAssignableFrom(nodeType))
                 return;
 
-            target.AddNode(nodeType, position);
+            NodeComponent.NodeComponentCreateArgs args = new NodeComponent.NodeComponentCreateArgs();
+
+            args.graph = target;
+            args.nodeType = nodeType;
+            args.position = position;
+
+            canvas.Create<NodeComponent>(args);
+
+            // target.AddNode(nodeType, position);
 
             // List<Node> operators = new List<Node>(windowInfo.selected);
             // operators = operators.OrderBy(node => node.priority).ToList();
@@ -856,9 +877,9 @@ namespace SchemaEditor
             return windowRect;
         }
 
-        private Vector2 GridToWindowPosition(Vector2 gridPosition)
+        internal static Vector2 GridToWindowPosition(Vector2 gridPosition)
         {
-            return (window.size * 0.5f) + (windowInfo.pan / windowInfo.zoom) + (gridPosition / windowInfo.zoom);
+            return (instance.window.size * 0.5f) + (instance.windowInfo.pan / instance.windowInfo.zoom) + (gridPosition / instance.windowInfo.zoom);
         }
 
         public Rect GridToWindowRectNoClipped(Rect gridRect)
@@ -898,12 +919,11 @@ namespace SchemaEditor
 
             return windowInfo.viewRect;
         }
-        public Vector2 GridToWindowPositionNoClipped(Vector2 gridPosition)
+        internal static Vector2 GridToWindowPositionNoClipped(Vector2 gridPosition)
         {
-            Vector2 center = window.size * 0.5f;
-            // UI Sharpness complete fix - Round final offset not panOffset
-            float xOffset = center.x * windowInfo.zoom + (windowInfo.pan.x + gridPosition.x);
-            float yOffset = center.y * windowInfo.zoom + (windowInfo.pan.y + gridPosition.y);
+            Vector2 center = instance.window.size * 0.5f;
+            float xOffset = center.x * instance.windowInfo.zoom + (instance.windowInfo.pan.x + gridPosition.x);
+            float yOffset = center.y * instance.windowInfo.zoom + (instance.windowInfo.pan.y + gridPosition.y);
             return new Vector2(xOffset, yOffset);
         }
         [OnOpenAsset(1)]

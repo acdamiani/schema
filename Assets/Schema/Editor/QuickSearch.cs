@@ -13,7 +13,6 @@ public static class QuickSearch
     private static readonly KeyCode[] validMovementCodes = new KeyCode[] { KeyCode.UpArrow, KeyCode.DownArrow };
     private static Rect searchRect;
     private static Schema.Graph target;
-    private static Vector2 newNodePosition;
     private static SearchField searchField;
     private static string searchText = "";
     private static int refinementLength;
@@ -32,7 +31,8 @@ public static class QuickSearch
     private static float toolbarHeight;
     private static bool didAddNode;
     private static Schema.Node targetNode;
-    public static bool DoWindow(Rect window, Schema.Graph target, Schema.Node targetNode, Vector2 newNodePosition, float timeSinceStartup)
+    private static Action<Type> createNodeAction;
+    public static bool DoWindow(Rect window, Schema.Graph target, Schema.Node targetNode, Action<Type> createNodeAction, float timeSinceStartup)
     {
         didAddNode = false;
 
@@ -44,7 +44,7 @@ public static class QuickSearch
         );
         QuickSearch.target = target;
         QuickSearch.targetNode = targetNode;
-        QuickSearch.newNodePosition = newNodePosition;
+        QuickSearch.createNodeAction = createNodeAction;
 
         GUILayout.Window(1, searchRect, OnGUI, "", Styles.quickSearch);
         GUI.FocusWindow(1);
@@ -200,11 +200,8 @@ public static class QuickSearch
                 i,
                 () =>
                 {
-                    Schema.Node n = target.AddNode(nodeType, newNodePosition);
-
-                    if (targetNode != null)
-                        targetNode.AddConnection(n);
-
+                    Debug.Log(createNodeAction);
+                    createNodeAction(nodeType);
                     didAddNode = true;
                 }
             );

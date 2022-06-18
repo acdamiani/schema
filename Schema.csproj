@@ -120,8 +120,8 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/DebugLogFormat.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Misc/DisableOnPlayAttribute.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Transform/SetParent.cs" />
-     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/GetVectorComponents.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Random/RandomRange.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/GetVectorComponents.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Cos.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Transform/SetAsFirstSibling.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Atan.cs" />

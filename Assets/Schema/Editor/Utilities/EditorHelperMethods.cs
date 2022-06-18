@@ -50,5 +50,20 @@ namespace SchemaEditor.Utilities
                 }
             }
         }
+        public static void DrawIfRepaint(this GUIStyle style, Rect position, bool isHover, bool isActive, bool on, bool hasKeyboardFocus)
+        {
+            if (Event.current.type != EventType.Repaint)
+                return;
+
+            style.Draw(position, isHover, isActive, on, hasKeyboardFocus);
+        }
+        public static void DrawIfRepaint(this GUIStyle style, Rect position, GUIContent content, bool isHover, bool isActive, bool on, bool hasKeyboardFocus)
+        {
+            if (Event.current.type != EventType.Repaint)
+                return;
+
+            style.Draw(position, content, isHover, isActive, on, hasKeyboardFocus);
+        }
+
     }
 }
