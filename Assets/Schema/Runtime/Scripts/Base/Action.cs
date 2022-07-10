@@ -9,7 +9,10 @@ namespace Schema
     [Serializable]
     public abstract class Action : Node
     {
-        public override int maxChildren => 0;
+        public override bool CanHaveChildren()
+        {
+            return false;
+        }
         /// <summary>
         /// Runs once when all nodes are first initialized. Similar to Start() in a MonoBehavior class
         /// </summary>

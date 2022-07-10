@@ -44,7 +44,6 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/MoveToRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SoundHeardEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorUtilities.cs" />
-     <Compile Include="Assets/Schema/Editor/Components/NodeComponent.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorFileHandler.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultNodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/IconText.cs" />
@@ -59,7 +58,6 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEntryEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Components/PatrolRouteEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/ConeCheckEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/Components/ComponentCanvas.cs" />
      <Compile Include="Assets/Schema/Editor/QuickSearch.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditor.cs" />
@@ -67,7 +65,9 @@
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntryDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/PlaySoundEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/CancelInvokeEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Components/GUIComponent.cs" />
      <Compile Include="Assets/Schema/Editor/ShortcutManager.cs" />
+     <Compile Include="Assets/Schema/Editor/Components/NodeComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultDecoratorEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/CurveUtility.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogFormatEditor.cs" />
@@ -83,16 +83,18 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorIKPositionWeightEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/GraphUtility.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/DisableOnPlayDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/Components/ConnectionComponent.cs" />
+     <Compile Include="Assets/Schema/Editor/Components/ComponentCanvas.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetMatrixValueEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/QuaternionAngleAxisEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorResources.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntrySelectorDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/RaycastEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagFilterDrawer.cs" />
-     <Compile Include="Assets/Schema/Editor/Components/GUIComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/Cache.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/Components/ConditionalComponent.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
     <Reference Include="UnityEngine">

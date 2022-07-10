@@ -27,6 +27,7 @@ internal static class Styles
     private static Texture2D _plus;
     private static Texture2D _minus;
     private static Texture2D _gridTexture;
+    private static Texture2D _gridTexture2x;
     private static Texture2D _circle;
     private static Texture2D _global;
     private static Texture2D _local;
@@ -51,7 +52,8 @@ internal static class Styles
     public static Texture2D preAudioLoopOff => _preAudioLoopOff != null ? _preAudioLoopOff : _preAudioLoopOff = EditorGUIUtility.FindTexture("preAudioLoopOff@2x");
     public static GUIContent visibilityToggleOffContent => _visibilityToggleOffContent != null ? _visibilityToggleOffContent : _visibilityToggleOffContent = new GUIContent(EditorGUIUtility.FindTexture("animationvisibilitytoggleoff"), "Toggle Inspector On");
     public static GUIContent visibilityToggleOnContent => _visibilityToggleOnContent != null ? _visibilityToggleOnContent : _visibilityToggleOnContent = new GUIContent("", EditorGUIUtility.FindTexture("animationvisibilitytoggleon"), "Toggle Inspector Off");
-    public static Texture2D gridTexture => _gridTexture == null ? _gridTexture = GenerateGridTexture(Color.Lerp(Color.grey, windowAccent, 0.5f), windowAccent) : _gridTexture;
+    public static Texture2D gridTexture => _gridTexture == null ? _gridTexture = GenerateGridTexture(Color.Lerp(Color.grey, windowAccent, 0.5f), windowAccent, false) : _gridTexture;
+    public static Texture2D gridTexture2x => _gridTexture2x == null ? _gridTexture2x = GenerateGridTexture(Color.Lerp(Color.grey, windowAccent, 0.5f), windowAccent, true) : _gridTexture2x;
     private static Texture2D _favoriteDisabled;
     public static Texture2D favoriteDisabled => _favoriteDisabled == null ? _favoriteDisabled = FindTexture("QuickSearch/favorite_disabled") : _favoriteDisabled;
     private static Texture2D _favoriteEnabled;
@@ -183,9 +185,11 @@ internal static class Styles
         {
             if (_roundedBox == null)
             {
-                _roundedBox = new GUIStyle();
+                _roundedBox = new GUIStyle(EditorStyles.label);
                 _roundedBox.border = new RectOffset(8, 8, 8, 8);
                 _roundedBox.normal.background = Resources.Load<Texture2D>("round");
+                _roundedBox.alignment = TextAnchor.MiddleCenter;
+                _roundedBox.normal.textColor = Color.white;
             }
 
             return _roundedBox;
@@ -206,6 +210,26 @@ internal static class Styles
             }
 
             return _nodeLabel;
+        }
+    }
+    private static GUIStyle _conditional;
+    public static GUIStyle conditional
+    {
+        get
+        {
+            if (_conditional == null)
+            {
+                _conditional = new GUIStyle();
+                _conditional.alignment = TextAnchor.MiddleRight;
+                _conditional.imagePosition = ImagePosition.TextOnly;
+                _conditional.fontSize = 15;
+                _conditional.normal.textColor = Color.white;
+                _conditional.normal.background = Resources.Load<Texture2D>("round");
+                _conditional.border = new RectOffset(8, 8, 8, 8);
+                _conditional.padding = new RectOffset(8, 8, 8, 8);
+            }
+
+            return _conditional;
         }
     }
     private static StylesObj _styles;
@@ -240,24 +264,8 @@ internal static class Styles
 
         return EditorGUIUtility.FindTexture(name);
     }
-    private static Texture2D GenerateGridTexture(Color dots, Color bg)
+    private static Texture2D GenerateGridTexture(Color dots, Color bg, bool large)
     {
-        // float border = 0.01;
-        // float radius = 0.5;
-        // vec4 color0 = vec4(0.0, 0.0, 0.0, 1.0);
-        // vec4 color1 = vec4(1.0, 1.0, 1.0, 1.0);
-
-        // vec2 m = uv - vec2(0.5, 0.5);
-        // float dist = radius - sqrt(m.x * m.x + m.y * m.y);
-
-        // float t = 0.0;
-        // if (dist > border)
-        //     t = 1.0;
-        // else if (dist > 0.0)
-        //     t = dist / border;
-
-        // gl_FragColor = mix(color0, color1, t);
-
         Texture2D tex = new Texture2D(64, 64);
         Color[] cols = new Color[64 * 64];
         for (int y = 0; y < 64; y++)
@@ -266,28 +274,18 @@ internal static class Styles
             {
                 Color col = bg;
 
-                float border = 1f;
+                if (!large && (y % 16 == 0 || x % 16 == 0))
+                    col = Color.Lerp(dots, bg, 0.65f);
 
-                int xDist = Mathf.Abs(x - 32);
-                int yDist = Mathf.Abs(y - 32);
-
-                float dist = 4f - Mathf.Sqrt(xDist * xDist + yDist * yDist);
-
-                float f = 0;
-
-                if (dist > border)
-                    f = 1;
-                else if (dist > 0)
-                    f = dist / border;
-
-                col = Color.Lerp(bg, dots, f);
+                if (y == 0 || x == 0) col = Color.Lerp(dots, bg, 0.65f);
+                if (y == 63 || x == 63) col = Color.Lerp(dots, bg, 0.35f);
 
                 cols[(y * 64) + x] = col;
             }
         }
         tex.SetPixels(cols);
         tex.wrapMode = TextureWrapMode.Repeat;
-        // tex.filterMode = FilterMode.Bilinear;
+        tex.filterMode = FilterMode.Bilinear;
         tex.name = "Grid";
         tex.Apply();
         return tex;

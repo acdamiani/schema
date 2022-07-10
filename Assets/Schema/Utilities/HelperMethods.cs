@@ -376,5 +376,22 @@ namespace Schema.Utilities
         {
             return new Rect(rect.x - rect.width / 2f, rect.y - rect.height / 2f, rect.width, rect.height);
         }
+        public static Rect Slice(this Rect rect, float position, bool horizontal, bool forwards)
+        {
+            position = Mathf.Clamp01(position);
+
+            if (horizontal)
+            {
+                position = position * rect.width + rect.x;
+
+                return new Rect(forwards ? rect.x : position, rect.y, rect.xMax - position, rect.height);
+            }
+            else
+            {
+                position = position * rect.height + rect.y;
+
+                return new Rect(rect.x, forwards ? rect.y : position, rect.width, rect.yMax - position);
+            }
+        }
     }
 }

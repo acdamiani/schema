@@ -35,7 +35,7 @@ namespace SchemaEditor
                     KeyDown();
                     break;
                 case EventType.ScrollWheel:
-                    if (!drawBox && !windowInfo.didDragSinceMouseUp) ScrollWheel();
+                    ScrollWheel();
                     break;
                 case EventType.ValidateCommand:
                     if (!editingPaused)
@@ -458,9 +458,7 @@ namespace SchemaEditor
         private void ScrollWheel()
         {
             if (windowInfo.searchIsShown)
-            {
                 return;
-            }
 
             Event current = Event.current;
 

@@ -25,7 +25,7 @@ namespace SchemaEditor
         private Node orphanNode;
         public Graph target;
         public Blackboard globalBlackboard;
-        private Window windowInfo = new Window();
+        public Window windowInfo = new Window();
         private int nodeCount;
         [DidReloadScripts]
         static void Init()
@@ -888,10 +888,10 @@ namespace SchemaEditor
             return gridRect;
         }
 
-        public Rect GridToWindowRect(Rect gridRect)
+        public static Rect GridToWindowRect(Rect gridRect)
         {
             gridRect.position = GridToWindowPosition(gridRect.position);
-            gridRect.size /= windowInfo.zoom;
+            gridRect.size /= instance.windowInfo.zoom;
             return gridRect;
         }
         public Vector2 GridToMinimapPosition(Vector2 gridPosition, float width, float padding)

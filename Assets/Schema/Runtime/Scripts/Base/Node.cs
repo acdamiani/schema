@@ -109,20 +109,17 @@ namespace Schema
             return types[0];
         }
         /// <summary>
-        /// Determine whether the Node can have more children attached to it
+        /// Whether a parent node is allowed for this node
         /// </summary>
-        public bool CanHaveChildren()
-        {
-            return maxChildren > 0 && m_children.Length < maxChildren;
-        }
+        public virtual bool CanHaveParent() { return true; }
+        /// <summary>
+        /// Whether children nodes are allowed for this node
+        /// </summary>
+        public virtual bool CanHaveChildren() { return true; }
         /// <summary>
         ///	Override to allow for Gizmo visualization in the scene view. This will be called only for the currently selected SchemaAgent. 
         /// </summary>
         public virtual void DrawGizmos(SchemaAgent agent) { }
-        /// <summary>
-        /// Whether a parent node is allowed for this node:w
-        /// </summary>
-        public virtual bool canHaveParent { get { return true; } }
         /// <summary>
         /// The maximum allowed number of children for this node
         /// </summary>

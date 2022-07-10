@@ -30,13 +30,19 @@ namespace SchemaEditor
         private bool searchWantsFocus;
         private bool shouldFocusSearch;
         private Rect window;
-        [SerializeField] private ComponentCanvas canvas;
+        public ComponentCanvas canvas;
         private void OnGUI()
         {
             windowInfo.mousePosition = Event.current.mousePosition;
 
             if (target != null)
             {
+                DrawGrid(window, windowInfo.zoom, windowInfo.pan);
+
+                BeginZoomed(window, windowInfo.zoom, tabHeight);
+                canvas.Draw();
+                EndZoomed();
+
                 ProcessEvents(Event.current);
 
                 if (Event.current.type == EventType.Layout) LayoutGUI();
@@ -49,12 +55,6 @@ namespace SchemaEditor
 
                 for (int i = 0; i < windowInfo.changedNodes.Count; i++)
                     GetArea(windowInfo.changedNodes.Dequeue(), true);
-
-                DrawGrid(window, windowInfo.zoom, windowInfo.pan);
-
-                BeginZoomed(window, windowInfo.zoom, tabHeight);
-                canvas.Draw();
-                EndZoomed();
 
                 DrawConnections();
                 DrawNodes();
@@ -337,7 +337,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     if (windowInfo.selected.Count == 1)
                         selected = windowInfo.selected[0];
 
-                    if (selected != null && selected.canHaveParent && selected.CanHaveChildren() && selected.parent != node && selected != node)
+                    if (selected != null && selected.CanHaveParent() && selected.CanHaveChildren() && selected.parent != node && selected != node)
                         intersect = bezier.Intersect(
                             new Rect(
                                 GridToWindowPositionNoClipped(selected.graphPosition),
@@ -462,7 +462,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                         )
                         continue;
 
-                    if (node.canHaveParent)
+                    if (node.CanHaveParent())
                     {
                         // float width = size.x - GUIData.nodePadding * 2;
                         float width = 24f;
@@ -1443,12 +1443,14 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         ///<summary>
         ///Draws the grid to the screen based on zoom and pan
         ///</summary>
-        public void DrawGrid(Rect rect, float zoom, Vector2 panOffset)
+        public void DrawGrid(Rect rect, float zoom, Vector2 panOffset, float transitionPoint = 2f, float transitionWindow = 0.25f)
         {
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size * .5f;
-            Texture2D gridTex = Styles.gridTexture;
+            Texture2D gridTex = zoom > 2f ? Styles.gridTexture2x : Styles.gridTexture;
+
+            float fac = 1f - (Mathf.Clamp(zoom - (transitionPoint - transitionWindow), 0f, transitionWindow * 2f) / (transitionWindow * 2f));
 
             // Offset from origin in tile units
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
@@ -1462,12 +1464,14 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             Vector2 tileAmount = new Vector2(tileAmountX, tileAmountY);
 
-            // Draw tiled background
-            GUI.DrawTextureWithTexCoords(rect, gridTex, new Rect(tileOffset, tileAmount));
+            GUI.DrawTextureWithTexCoords(rect, Styles.gridTexture2x, new Rect(tileOffset, tileAmount));
+            GUI.color = new Color(1f, 1f, 1f, fac);
+            GUI.DrawTextureWithTexCoords(rect, Styles.gridTexture, new Rect(tileOffset, tileAmount));
+            GUI.color = Color.white;
         }
 
         [Serializable]
-        internal class Window
+        public class Window
         {
             public NodeEditor editor;
             private float _zoom = 1f;

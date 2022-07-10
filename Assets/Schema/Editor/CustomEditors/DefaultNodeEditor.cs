@@ -8,18 +8,12 @@ public class DefaultNodeEditor : Editor
     SerializedProperty nodeName;
     SerializedProperty enableStatusIndicator;
     SerializedProperty comment;
+    SerializedProperty priority;
     void OnEnable()
     {
-        if (targets.Length > 0 && targets.All(obj => obj != null) && serializedObject != null)
-        {
-            try
-            {
-                nodeName = serializedObject.FindProperty("m_Name");
-                comment = serializedObject.FindProperty("m_comment");
-                enableStatusIndicator = serializedObject.FindProperty("m_enableStatusIndicator");
-            }
-            catch { }
-        }
+        nodeName = serializedObject.FindProperty("m_Name");
+        comment = serializedObject.FindProperty("m_comment");
+        enableStatusIndicator = serializedObject.FindProperty("m_enableStatusIndicator");
     }
     public override void OnInspectorGUI()
     {
