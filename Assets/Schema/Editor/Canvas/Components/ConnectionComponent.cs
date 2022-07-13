@@ -37,10 +37,19 @@ public sealed class ConnectionComponent : GUIComponent
         else
             p3 = new Vector2(to.layout.body.center.x, to.layout.body.y - 12f);
 
-        Vector2 p1 = p0 + Vector2.up * 50f;
-        Vector2 p2 = p3 - Vector2.up * 50f;
+        float vertDist = Mathf.Abs(p0.y - p3.y);
+
+        Vector2 p1 = p0 + Vector2.up * vertDist / 2f;
+        Vector2 p2 = p3 - Vector2.up * vertDist / 2f;
 
         Handles.DrawBezier(p0, p3, p1, p2, Color.white, Styles.curve, NodeEditor.instance.windowInfo.zoom * 5f);
+    }
+    public void Join()
+    {
+        if (from == null || to == null)
+            return;
+
+        from.node.AddConnection(to.node);
     }
     public class ConnectionComponentCreateArgs : CreateArgs
     {

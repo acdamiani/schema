@@ -29,6 +29,8 @@ namespace Schema
         /// </summary>
         public Decorator[] decorators { get { return m_decorators; } internal set { m_decorators = value; } }
         [SerializeField, HideInInspector] private Decorator[] m_decorators = Array.Empty<Decorator>();
+        public Modifier[] modifiers { get { return m_modifiers; } internal set { m_modifiers = value; } }
+        [SerializeField, HideInInspector] private Modifier[] m_modifiers = Array.Empty<Modifier>();
         /// <summary>
         /// The GUID for the node
         /// </summary>
@@ -102,16 +104,14 @@ namespace Schema
             Type[] types = GetType().GetTypeInfo().DeclaredNestedTypes.ToArray();
 
             if (types.Length == 0)
-            {
                 return null;
-            }
 
             return types[0];
         }
         /// <summary>
         /// Whether a parent node is allowed for this node
         /// </summary>
-        public virtual bool CanHaveParent() { return true; }
+        public virtual bool CanHaveParent() { return parent == null; }
         /// <summary>
         /// Whether children nodes are allowed for this node
         /// </summary>
@@ -120,10 +120,6 @@ namespace Schema
         ///	Override to allow for Gizmo visualization in the scene view. This will be called only for the currently selected SchemaAgent. 
         /// </summary>
         public virtual void DrawGizmos(SchemaAgent agent) { }
-        /// <summary>
-        /// The maximum allowed number of children for this node
-        /// </summary>
-        public virtual int maxChildren { get { return Int32.MaxValue; } }
         protected virtual void OnEnable()
         {
             NameAttribute attribute = GetType().GetCustomAttribute<NameAttribute>();
@@ -455,7 +451,7 @@ namespace Schema
         public Decorator AddDecorator(Type decoratorType, bool undo = true)
         {
             if (!typeof(Decorator).IsAssignableFrom(decoratorType))
-                throw new ArgumentException("decoratorType does not inherit from type Node");
+                throw new ArgumentException("decoratorType does not inherit from type Decorator");
 
             if (GetType() == typeof(Root))
                 return null;
@@ -531,6 +527,38 @@ namespace Schema
                 ArrayUtility.Remove(ref m_decorators, decorator);
                 ScriptableObject.DestroyImmediate(decorator, true);
             }
+        }
+        /// <summary>
+        /// Add a modifier to the node
+        /// </summary>
+        /// <param name="modifierType">The type of the modifier to add</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        public Modifier AddModifier(Type modifierType, bool undo = true)
+        {
+            if (!typeof(Modifier).IsAssignableFrom(modifierType))
+                throw new ArgumentException("modifierType does not inherit from type Modifier");
+
+            if (GetType() == typeof(Root))
+                return null;
+
+            Modifier modifier = (Modifier)ScriptableObject.CreateInstance(modifierType);
+            modifier.hideFlags = HideFlags.HideInHierarchy;
+            modifier.node = this;
+
+            string path = AssetDatabase.GetAssetPath(this);
+
+            if (!String.IsNullOrEmpty(path))
+                AssetDatabase.AddObjectToAsset(modifier, path);
+
+            if (undo)
+            {
+                Undo.RegisterCreatedObjectUndo(modifier, "Modifier Created");
+                Undo.RegisterCompleteObjectUndo(this, "Modifier Added");
+            }
+
+            ArrayUtility.Add(ref m_modifiers, modifier);
+
+            return modifier;
         }
         /// <summary>
         /// Remove all null nodes attached to this one

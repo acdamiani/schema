@@ -4,6 +4,7 @@ using System;
 using Schema.Utilities;
 using System.Reflection;
 using System.Linq;
+using SchemaEditor;
 using System.Collections.Generic;
 
 namespace SchemaEditor
@@ -55,10 +56,10 @@ namespace SchemaEditor
 
             Vector2 oldIconSize = EditorGUIUtility.GetIconSize();
             EditorGUIUtility.SetIconSize(Vector2.one * 12f);
-            Vector2 size = IconText.GetSize(name, EditorStyles.miniLabel, c.image);
+            Vector2 size = SchemaGUI.GetSize(name, EditorStyles.miniLabel, c.image);
 
             GUI.BeginClip(textRect, new Vector2(scrolls[property.propertyPath], 0f), Vector2.zero, false);
-            IconText.DoIconText(new Rect(0f, 0f, textRect.width, EditorGUIUtility.singleLineHeight), name, EditorStyles.miniLabel, c.image);
+            SchemaGUI.DoIconText(new Rect(0f, 0f, textRect.width, EditorGUIUtility.singleLineHeight), name, EditorStyles.miniLabel, c.image);
             GUI.EndClip();
 
             if (size.x > textRect.width && textRect.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)

@@ -26,6 +26,7 @@ namespace SchemaEditor
         public Graph target;
         public Blackboard globalBlackboard;
         public Window windowInfo = new Window();
+        public Event eventNoZoom;
         private int nodeCount;
         [DidReloadScripts]
         static void Init()
@@ -864,11 +865,9 @@ namespace SchemaEditor
         {
             EditorGUIUtility.AddCursorRect(new Rect(0, 0, position.width, position.height), cursor);
         }
-
-        //These are methods that transform a position into another position with zoom and pan accounted for. Taken from the excellent XNode framework
-        public Vector2 WindowToGridPosition(Vector2 windowPosition)
+        internal static Vector2 WindowToGridPosition(Vector2 windowPosition)
         {
-            return (windowPosition - (window.size * 0.5f) - (windowInfo.pan / windowInfo.zoom)) * windowInfo.zoom;
+            return (windowPosition - instance.window.center - (instance.windowInfo.pan / instance.windowInfo.zoom)) * instance.windowInfo.zoom;
         }
         public Rect WindowToGridRect(Rect windowRect)
         {

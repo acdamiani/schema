@@ -11,8 +11,7 @@ namespace Schema
         }
         public override bool CanHaveChildren()
         {
-            return base.CanHaveChildren();
+            return children.Length == 0;
         }
-        public override int maxChildren => 1;
     }
 }

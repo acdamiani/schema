@@ -29,7 +29,7 @@ namespace SchemaEditor
         //Focus of the search box needs to be delayed by one frame, or else the keyboard shortcut triggering the search box will type in the box
         private bool searchWantsFocus;
         private bool shouldFocusSearch;
-        private Rect window;
+        public Rect window;
         public ComponentCanvas canvas;
         private void OnGUI()
         {
@@ -38,6 +38,8 @@ namespace SchemaEditor
             if (target != null)
             {
                 DrawGrid(window, windowInfo.zoom, windowInfo.pan);
+
+                eventNoZoom = new Event(Event.current);
 
                 BeginZoomed(window, windowInfo.zoom, tabHeight);
                 canvas.Draw();
@@ -56,8 +58,8 @@ namespace SchemaEditor
                 for (int i = 0; i < windowInfo.changedNodes.Count; i++)
                     GetArea(windowInfo.changedNodes.Dequeue(), true);
 
-                DrawConnections();
-                DrawNodes();
+                // DrawConnections();
+                // DrawNodes();
                 DrawWindow();
                 DrawMinimap();
 
@@ -121,6 +123,9 @@ hoveredType: {windowInfo.hoveredType}
 hoveredConnection: {windowInfo.hoveredConnection}
 window: {window}
 gridWindow: {WindowToGridRect(window)}
+mousePos: {Event.current.mousePosition}
+zoom: {windowInfo.zoom}
+pan: {windowInfo.pan}
 
 ";
 
@@ -487,26 +492,26 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                         // GUI.Box(inConnection, "", Styles.styles.decorator);
                     }
 
-                    if (node.maxChildren > 0)
-                    {
-                        float width = rect.width - GUIData.nodePadding * 3f;
-                        Rect outConnection = new Rect(rect.x + rect.width / 2f - width / 2f, rect.yMax - 9f, width, 18f);
-                        Rect outConnectionHover = new Rect(outConnection.x, outConnection.y + outConnection.height / 2f, outConnection.width, outConnection.height / 2f);
+                    // if (node.maxChildren > 0)
+                    // {
+                    //     float width = rect.width - GUIData.nodePadding * 3f;
+                    //     Rect outConnection = new Rect(rect.x + rect.width / 2f - width / 2f, rect.yMax - 9f, width, 18f);
+                    //     Rect outConnectionHover = new Rect(outConnection.x, outConnection.y + outConnection.height / 2f, outConnection.width, outConnection.height / 2f);
 
-                        if (outConnectionHover.Contains(current.mousePosition) && IsNotLayoutEvent(current))
-                        {
+                    //     if (outConnectionHover.Contains(current.mousePosition) && IsNotLayoutEvent(current))
+                    //     {
 
-                            windowInfo.hoveredType = Window.Hovering.OutConnection;
-                            windowInfo.hoveredNode = node;
-                        }
+                    //         windowInfo.hoveredType = Window.Hovering.OutConnection;
+                    //         windowInfo.hoveredNode = node;
+                    //     }
 
-                        if (windowInfo.hoveredType == Window.Hovering.OutConnection && windowInfo.hoveredNode == node && !drawBox)
-                            GUI.color = Color.white;
-                        else
-                            GUI.color = NodeEditorPrefs.portColor;
+                    //     if (windowInfo.hoveredType == Window.Hovering.OutConnection && windowInfo.hoveredNode == node && !drawBox)
+                    //         GUI.color = Color.white;
+                    //     else
+                    //         GUI.color = NodeEditorPrefs.portColor;
 
-                        GUI.Box(outConnection, "", Styles.styles.decorator);
-                    }
+                    //     GUI.Box(outConnection, "", Styles.styles.decorator);
+                    // }
 
                     GUI.color = Styles.windowBackground;
 
@@ -1322,8 +1327,11 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         }
         private void CreateComponentTree()
         {
+            SelectionBoxComponent.SelectionBoxComponentCreateArgs sBoxCreateArgs = new SelectionBoxComponent.SelectionBoxComponentCreateArgs();
+            sBoxCreateArgs.hideOnMouseUp = true;
+
             if (canvas == null)
-                canvas = new ComponentCanvas();
+                canvas = new ComponentCanvas(sBoxCreateArgs);
 
             if (target == null)
                 return;

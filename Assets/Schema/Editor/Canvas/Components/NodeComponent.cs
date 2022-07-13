@@ -8,12 +8,15 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-public sealed class NodeComponent : GUIComponent
+public sealed class NodeComponent : GUIComponent, ISelectable
 {
     private static readonly RectOffset ContentPadding = new RectOffset(20, 20, 14, 14);
     public Node node { get; set; }
     public NodeComponentLayout layout { get; set; }
-    public static ConnectionComponent floatingConnection;
+    public static ConnectionComponent floatingConnection { get; set; }
+    private Nullable<Vector2> beginDragPosition;
+    private Vector2 beginDragDiff;
+    private bool isSelected;
     public override void Create(CreateArgs args)
     {
         NodeComponentCreateArgs createArgs = args as NodeComponentCreateArgs;
@@ -30,9 +33,6 @@ public sealed class NodeComponent : GUIComponent
     }
     public override void OnGUI()
     {
-        ConditionalComponent c = new ConditionalComponent();
-        c.Do(layout.body.position);
-
         layout.Update();
 
         DoEvents();
@@ -50,13 +50,15 @@ public sealed class NodeComponent : GUIComponent
         GUI.color = Styles.windowBackground;
         Styles.shadow.DrawIfRepaint(layout.shadow, false, false, false, false);
 
-        GUI.color = Styles.outlineColor;
+        GUI.color = isSelected ? Color.white : Styles.outlineColor;
         Styles.styles.nodeSelected.DrawIfRepaint(layout.body, false, false, false, false);
 
         GUI.color = Styles.windowAccent;
         Styles.roundedBox.DrawIfRepaint(layout.content, false, false, false, false);
 
         GUI.color = Color.white;
+
+        Vector2 mousePos = Event.current.mousePosition;
 
         GUILayout.BeginArea(layout.content);
         GUILayout.Space(ContentPadding.top);
@@ -94,33 +96,71 @@ public sealed class NodeComponent : GUIComponent
     private void DoEvents()
     {
         Event e = Event.current;
+        Vector2 mousePositionGrid = NodeEditor.WindowToGridPosition(NodeEditor.instance.eventNoZoom.mousePosition);
 
         switch (e.type)
         {
             case EventType.MouseDown when e.button == 0:
-                if (layout.inConnection.Contains(e.mousePosition))
+                if (layout.inConnectionSliced.Contains(e.mousePosition) && node.CanHaveParent())
                 {
                     ConnectionComponent.ConnectionComponentCreateArgs createArgs = new ConnectionComponent.ConnectionComponentCreateArgs();
                     createArgs.to = this;
 
                     floatingConnection = NodeEditor.instance.canvas.Create<ConnectionComponent>(createArgs);
-                    e.Use();
                 }
-                else if (layout.outConnection.Contains(e.mousePosition))
+                else if (layout.outConnectionSliced.Contains(e.mousePosition) && node.CanHaveChildren())
                 {
                     ConnectionComponent.ConnectionComponentCreateArgs createArgs = new ConnectionComponent.ConnectionComponentCreateArgs();
                     createArgs.from = this;
 
                     floatingConnection = NodeEditor.instance.canvas.Create<ConnectionComponent>(createArgs);
-                    e.Use();
                 }
                 break;
-            case EventType.MouseUp when floatingConnection != null:
-                NodeEditor.instance.canvas.Remove(floatingConnection);
-                floatingConnection = null;
+            case EventType.MouseUp:
+                beginDragPosition = null;
+
+                if (floatingConnection == null)
+                    break;
+
+                NodeComponent hovered = NodeEditor.instance.canvas.hovered as NodeComponent;
+
+                if (hovered != null && hovered != this)
+                {
+                    HoverType hoverType = hovered.GetHoverType(Event.current.mousePosition);
+
+                    if (hoverType == HoverType.InConnection && floatingConnection.to == null)
+                        floatingConnection.to = hovered;
+                    else if (hoverType == HoverType.OutConnection && floatingConnection.from == null)
+                        floatingConnection.from = hovered;
+
+                    floatingConnection.Join();
+                    floatingConnection = null;
+                }
+                else
+                {
+                    NodeEditor.instance.canvas.Remove(floatingConnection);
+                    floatingConnection = null;
+                }
+
                 e.Use();
                 break;
             case EventType.ScrollWheel when floatingConnection != null:
+                e.Use();
+                break;
+            case EventType.MouseDrag when e.button == 0 && isSelected && canvas.selectionBoxComponent.hidden:
+                if (beginDragPosition == null)
+                {
+                    beginDragPosition = mousePositionGrid;
+                    beginDragDiff = mousePositionGrid - node.graphPosition;
+                }
+
+                NodeEditor instance = NodeEditor.instance;
+
+                Vector2 desiredNodePos = mousePositionGrid - beginDragDiff;
+
+                float snap = Styles.gridTexture.width / 4f;
+                node.graphPosition = new Vector2(Mathf.Round(desiredNodePos.x / snap) * snap, Mathf.Round(desiredNodePos.y / snap) * snap);
+
                 e.Use();
                 break;
         }
@@ -129,19 +169,24 @@ public sealed class NodeComponent : GUIComponent
     {
         if (layout.body.Contains(mousePosition))
             return HoverType.Body;
-        else if (layout.inConnection.Contains(mousePosition))
+        else if (layout.inConnectionSliced.Contains(mousePosition))
             return HoverType.InConnection;
-        else if (layout.outConnection.Contains(mousePosition))
+        else if (layout.outConnectionSliced.Contains(mousePosition))
             return HoverType.OutConnection;
 
         return HoverType.None;
     }
-    public override bool IsHovered(Vector2 mousePosition)
+    public override bool ShouldHover(Vector2 mousePosition)
     {
         return layout.body.Contains(mousePosition)
             || layout.inConnection.Contains(mousePosition)
             || layout.outConnection.Contains(mousePosition);
     }
+    public bool IsSelectable() { return true; }
+    public bool IsHit(Vector2 mousePosition) { return layout.body.Contains(mousePosition); }
+    public bool Overlaps(Rect rect) { return layout.body.Overlaps(rect, true); }
+    public void Select(bool additive) { isSelected = true; }
+    public void Deselect() { isSelected = false; }
     public class NodeComponentCreateArgs : CreateArgs
     {
         public Graph graph { get; set; }
@@ -208,6 +253,8 @@ public sealed class NodeComponent : GUIComponent
             errorBox = new Rect(body.xMax, body.yMax, 40f, 40f).UseCenter();
             inConnection = new Rect(body.center.x, body.y, 24f, 24f).UseCenter();
             outConnection = new Rect(body.center.x, body.yMax, body.width - 48f, 24f).UseCenter();
+            inConnectionSliced = inConnection.Slice(0.5f, false, true);
+            outConnectionSliced = outConnection.Slice(0.5f, false, false);
             priorityIndicator = new Rect(body.x, body.center.y, v.x, v.y).UseCenter();
         }
         private void DoRect()
@@ -217,7 +264,7 @@ public sealed class NodeComponent : GUIComponent
             float width = labelSize.x + ContentPadding.left + ContentPadding.right + 28;
             float height = labelSize.y + ContentPadding.top + ContentPadding.bottom + 28;
 
-            gridRect = new Rect(component.node.graphPosition - new Vector2(250f, 0f), new Vector2(width, height)).UseCenter();
+            gridRect = new Rect(component.node.graphPosition, new Vector2(width, height));
         }
         private NodeComponent component { get; set; }
         private ShallowNode last { get; set; }
@@ -227,6 +274,8 @@ public sealed class NodeComponent : GUIComponent
         public Rect shadow { get; set; }
         public Rect inConnection { get; set; }
         public Rect outConnection { get; set; }
+        public Rect inConnectionSliced { get; set; }
+        public Rect outConnectionSliced { get; set; }
         public Rect errorBox { get; set; }
         public Rect priorityIndicator { get; set; }
     }

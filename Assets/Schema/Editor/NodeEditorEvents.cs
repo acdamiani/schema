@@ -225,15 +225,15 @@ namespace SchemaEditor
             switch (current.button)
             {
                 case 0:
-                    if (windowInfo.hoveredType == Window.Hovering.Minimap || windowInfo.hoveredType == Window.Hovering.MinimapNode && !drawBox)
-                    {
-                        Vector2 ratio = window.size / (windowInfo.minimapView.size);
+                    // if (windowInfo.hoveredType == Window.Hovering.Minimap || windowInfo.hoveredType == Window.Hovering.MinimapNode && !drawBox)
+                    // {
+                    //     Vector2 ratio = window.size / (windowInfo.minimapView.size);
 
-                        windowInfo.pan -= current.delta * ratio * windowInfo.zoom;
-                        windowInfo.isPanning = true;
-                        windowInfo.didDragSinceMouseUp = true;
-                        break;
-                    }
+                    //     windowInfo.pan -= current.delta * ratio * windowInfo.zoom;
+                    //     windowInfo.isPanning = true;
+                    //     windowInfo.didDragSinceMouseUp = true;
+                    //     break;
+                    // }
 
                     if (!drawBox && requestingConnection == null && inNodeEditor && windowInfo.lastClicked == Window.Hovering.Node && !editingPaused)
                     {
@@ -259,13 +259,8 @@ namespace SchemaEditor
                     break;
                 case 2:
                     drawBox = false;
-                    if (windowInfo.hoveredType != Window.Hovering.Inspector && windowInfo.hoveredType != Window.Hovering.None)
-                    {
-                        windowInfo.isPanning = true;
-                        windowInfo.pan += current.delta * windowInfo.zoom;
-                    }
-                    else
-                        windowInfo.isPanning = false;
+                    windowInfo.isPanning = true;
+                    windowInfo.pan += current.delta * windowInfo.zoom;
                     break;
             }
         }
@@ -297,66 +292,66 @@ namespace SchemaEditor
                     Rect r = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
                     drawBox = false;
                     break;
-                case 0 when !windowInfo.didDragSinceMouseUp:
-                    {
-                        if (windowInfo.hoveredType != Window.Hovering.Inspector && blackboardEditor)
-                        {
-                            ((BlackboardEditor)blackboardEditor).DeselectAll();
-                        }
+                    // case 0 when !windowInfo.didDragSinceMouseUp:
+                    //     {
+                    //         if (windowInfo.hoveredType != Window.Hovering.Inspector && blackboardEditor)
+                    //         {
+                    //             ((BlackboardEditor)blackboardEditor).DeselectAll();
+                    //         }
 
-                        if (windowInfo.hoveredType != Window.Hovering.Inspector) GUI.FocusControl(null);
-                        switch (windowInfo.hoveredType)
-                        {
-                            case Window.Hovering.Window:
-                                if (windowInfo.selectedDecorator == null)
-                                    windowInfo.selected.Clear();
-                                else windowInfo.selectedDecorator = null;
+                    //         if (windowInfo.hoveredType != Window.Hovering.Inspector) GUI.FocusControl(null);
+                    //         switch (windowInfo.hoveredType)
+                    //         {
+                    //             case Window.Hovering.Window:
+                    //                 if (windowInfo.selectedDecorator == null)
+                    //                     windowInfo.selected.Clear();
+                    //                 else windowInfo.selectedDecorator = null;
 
-                                drawBox = true;
-                                windowInfo.mouseDownPos = WindowToGridPosition(current.mousePosition);
+                    //                 drawBox = true;
+                    //                 windowInfo.mouseDownPos = WindowToGridPosition(current.mousePosition);
 
-                                SceneView.RepaintAll();
+                    //                 SceneView.RepaintAll();
 
-                                break;
-                            case Window.Hovering.Node:
-                                if (windowInfo.selected.Contains(windowInfo.hoveredNode) && current.shift)
-                                {
-                                    Deselect(windowInfo.hoveredNode);
-                                }
-                                else if (windowInfo.selected.Count < 2 || !windowInfo.selected.Contains(windowInfo.hoveredNode))
-                                {
-                                    Select(windowInfo.hoveredNode, current.shift);
-                                    //Selection.activeObject = hovered;
-                                    if (windowInfo.selectedDecorator != null)
-                                    {
-                                        Deselect(windowInfo.selectedDecorator);
-                                    }
-                                }
+                    //                 break;
+                    //             case Window.Hovering.Node:
+                    //                 if (windowInfo.selected.Contains(windowInfo.hoveredNode) && current.shift)
+                    //                 {
+                    //                     Deselect(windowInfo.hoveredNode);
+                    //                 }
+                    //                 else if (windowInfo.selected.Count < 2 || !windowInfo.selected.Contains(windowInfo.hoveredNode))
+                    //                 {
+                    //                     // Select(windowInfo.hoveredNode, current.shift);
+                    //                     //Selection.activeObject = hovered;
+                    //                     if (windowInfo.selectedDecorator != null)
+                    //                     {
+                    //                         Deselect(windowInfo.selectedDecorator);
+                    //                     }
+                    //                 }
 
-                                break;
-                            case Window.Hovering.InConnection:
-                                if (windowInfo.hoveredNode.parent != null && !editingPaused)
-                                {
-                                    requestingConnection = windowInfo.hoveredNode.parent;
-                                    orphanNode = windowInfo.hoveredNode;
-                                }
+                    //                 break;
+                    //             case Window.Hovering.InConnection:
+                    //                 if (windowInfo.hoveredNode.parent != null && !editingPaused)
+                    //                 {
+                    //                     requestingConnection = windowInfo.hoveredNode.parent;
+                    //                     orphanNode = windowInfo.hoveredNode;
+                    //                 }
 
-                                break;
-                            case Window.Hovering.OutConnection:
-                                if (windowInfo.hoveredNode.CanHaveChildren() && !editingPaused)
-                                {
-                                    requestingConnection = windowInfo.hoveredNode;
-                                }
+                    //                 break;
+                    //             case Window.Hovering.OutConnection:
+                    //                 if (windowInfo.hoveredNode.CanHaveChildren() && !editingPaused)
+                    //                 {
+                    //                     requestingConnection = windowInfo.hoveredNode;
+                    //                 }
 
-                                break;
-                            case Window.Hovering.Decorator:
-                                Select(windowInfo.hoveredDecorator);
-                                break;
-                        }
+                    //                 break;
+                    //             case Window.Hovering.Decorator:
+                    //                 Select(windowInfo.hoveredDecorator);
+                    //                 break;
+                    //         }
 
-                        windowInfo.lastClicked = windowInfo.hoveredType;
-                        break;
-                    }
+                    //         windowInfo.lastClicked = windowInfo.hoveredType;
+                    //         break;
+                    //     }
             }
 
             if (current.button == 0)

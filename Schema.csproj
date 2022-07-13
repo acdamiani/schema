@@ -141,6 +141,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Blackboard.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Max.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Modifiers/ForceStatus.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Transform/TransformDirection.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/CapsuleCast.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Sqrt.cs" />
@@ -189,6 +190,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetBounds.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/NextPowerOfTwo.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Random/PointInsideUnitCircle.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Base/Modifier.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Transform/SetAsLastSibling.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Vector/ProjectVector.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Round.cs" />

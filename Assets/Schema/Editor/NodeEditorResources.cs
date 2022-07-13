@@ -80,6 +80,14 @@ internal static class Styles
     public static Texture2D curve => _curve == null ? _curve = Resources.Load<Texture2D>("curve") : _curve;
     private static Texture2D _inConnectionOutline;
     public static Texture2D inConnectionOutline => _inConnectionOutline == null ? _inConnectionOutline = Resources.Load<Texture2D>("in_connection_outline") : _inConnectionOutline;
+    private static Texture2D _foldout;
+    public static Texture2D foldout => _foldout == null ? _foldout = Resources.Load<Texture2D>("foldout") : _foldout;
+    private static Texture2D _moveUp;
+    public static Texture2D moveUp => _moveUp == null ? _moveUp = Resources.Load<Texture2D>("move_up") : _moveUp;
+    private static Texture2D _moveDown;
+    public static Texture2D moveDown => _moveDown == null ? _moveDown = Resources.Load<Texture2D>("move_down") : _moveDown;
+    private static Texture2D _close;
+    public static Texture2D close => _close == null ? _close = Resources.Load<Texture2D>("close") : _close;
     private static GUIStyle _quickSearch;
     public static GUIStyle quickSearch
     {
@@ -230,6 +238,20 @@ internal static class Styles
             }
 
             return _conditional;
+        }
+    }
+    private static GUIStyle _center;
+    public static GUIStyle center
+    {
+        get
+        {
+            if (_center == null)
+            {
+                _center = new GUIStyle(EditorStyles.label);
+                _center.alignment = TextAnchor.MiddleLeft;
+            }
+
+            return _center;
         }
     }
     private static StylesObj _styles;
