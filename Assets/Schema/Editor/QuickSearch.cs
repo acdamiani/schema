@@ -21,7 +21,7 @@ public static class QuickSearch
     private static CacheDictionary<string, IEnumerable<Type>> search = new CacheDictionary<string, IEnumerable<Type>>();
     private static CacheDictionary<Type, Texture2D> icons = new CacheDictionary<Type, Texture2D>();
     private static IEnumerable<Type> nodeTypes = HelperMethods.GetEnumerableOfType(typeof(Schema.Node));
-    private static List<string> favorites = SchemaEditor.NodeEditor.NodeEditorPrefs.GetList("SCHEMA_PREF__favorites").ToList();
+    private static List<string> favorites = SchemaEditor.NodeEditor.Prefs.GetList("SCHEMA_PREF__favorites").ToList();
     private static int selected = -1;
     private static bool searchFavorites;
     private static float keydownTime;
@@ -111,7 +111,7 @@ public static class QuickSearch
             if (!isInFavorites)
             {
                 favorites.Add(favoriteName);
-                SchemaEditor.NodeEditor.NodeEditorPrefs.SetList("SCHEMA_PREF__favorites", favorites);
+                SchemaEditor.NodeEditor.Prefs.SetList("SCHEMA_PREF__favorites", favorites);
             }
         }
         else
@@ -119,7 +119,7 @@ public static class QuickSearch
             if (isInFavorites)
             {
                 favorites.Remove(favoriteName);
-                SchemaEditor.NodeEditor.NodeEditorPrefs.SetList("SCHEMA_PREF__favorites", favorites);
+                SchemaEditor.NodeEditor.Prefs.SetList("SCHEMA_PREF__favorites", favorites);
             }
         }
 

@@ -4,7 +4,22 @@ using Schema.Utilities;
 
 internal static class Styles
 {
-    //Colors
+    public static class Icons
+    {
+        private static System.Collections.Generic.Dictionary<string, Texture2D> cache
+            = new System.Collections.Generic.Dictionary<string, Texture2D>();
+        public static Texture2D Get(string iconName)
+        {
+            iconName = (EditorGUIUtility.isProSkin ? "d_" : "") + iconName;
+
+            cache.TryGetValue(iconName, out Texture2D value);
+
+            if (value == null)
+                cache[iconName] = value = (Texture2D)EditorGUIUtility.IconContent(iconName).image;
+
+            return value;
+        }
+    }
     public static Color windowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
     public static Color windowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
     public static Color outlineColor => EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : new Color32(176, 176, 176, 255);
@@ -88,6 +103,22 @@ internal static class Styles
     public static Texture2D moveDown => _moveDown == null ? _moveDown = Resources.Load<Texture2D>("move_down") : _moveDown;
     private static Texture2D _close;
     public static Texture2D close => _close == null ? _close = Resources.Load<Texture2D>("close") : _close;
+    private static GUIStyle _title;
+    public static GUIStyle title
+    {
+        get
+        {
+            if (_title == null)
+            {
+                _title = new GUIStyle();
+                _title.alignment = TextAnchor.UpperCenter;
+                _title.fontSize = 24;
+                _title.normal.textColor = Color.white;
+            }
+
+            return _title;
+        }
+    }
     private static GUIStyle _quickSearch;
     public static GUIStyle quickSearch
     {

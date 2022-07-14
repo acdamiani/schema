@@ -58,12 +58,14 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetBoundsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEntryEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Window/IControlIDProvider.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/ConeCheckEditor.cs" />
      <Compile Include="Assets/Schema/Editor/QuickSearch.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorIKPositionEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntryDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/FrameEditor.cs" />
      <Compile Include="Assets/Schema/Editor/SchemaGUI.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/SelectionBoxComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/PlaySoundEditor.cs" />
@@ -72,6 +74,7 @@
      <Compile Include="Assets/Schema/Editor/Canvas/Components/NodeComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultDecoratorEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/CurveUtility.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Components/FrameComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogFormatEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PatrolRouteEditor.cs" />
      <Compile Include="Assets/Schema/Editor/EditorInspector.cs" />
@@ -85,6 +88,7 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorIKPositionWeightEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CoverVolumeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/GraphUtility.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/IFramable.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/DisableOnPlayDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/ConnectionComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetMatrixValueEditor.cs" />
@@ -98,6 +102,7 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/Cache.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/IEditable.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
     <Reference Include="UnityEngine">

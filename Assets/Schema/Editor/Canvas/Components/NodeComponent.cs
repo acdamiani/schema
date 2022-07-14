@@ -3,20 +3,25 @@ using Schema.Utilities;
 using SchemaEditor;
 using SchemaEditor.Utilities;
 using SchemaEditor.Internal;
+using SchemaEditor.Internal.ComponentSystem;
 using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-public sealed class NodeComponent : GUIComponent, ISelectable
+public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFramable
 {
     private static readonly RectOffset ContentPadding = new RectOffset(20, 20, 14, 14);
     public Node node { get; set; }
     public NodeComponentLayout layout { get; set; }
     public static ConnectionComponent floatingConnection { get; set; }
     private Nullable<Vector2> beginDragPosition;
-    private Vector2 beginDragDiff;
+    private Vector2 beginDragNodePosition;
     private bool isSelected;
+    public float xMin => layout.body.x;
+    public float yMin => layout.body.y;
+    public float xMax => layout.body.xMax;
+    public float yMax => layout.body.yMax;
     public override void Create(CreateArgs args)
     {
         NodeComponentCreateArgs createArgs = args as NodeComponentCreateArgs;
@@ -98,7 +103,7 @@ public sealed class NodeComponent : GUIComponent, ISelectable
         Event e = Event.current;
         Vector2 mousePositionGrid = NodeEditor.WindowToGridPosition(NodeEditor.instance.eventNoZoom.mousePosition);
 
-        switch (e.type)
+        switch (e.rawType)
         {
             case EventType.MouseDown when e.button == 0:
                 if (layout.inConnectionSliced.Contains(e.mousePosition) && node.CanHaveParent())
@@ -148,20 +153,35 @@ public sealed class NodeComponent : GUIComponent, ISelectable
                 e.Use();
                 break;
             case EventType.MouseDrag when e.button == 0 && isSelected && canvas.selectionBoxComponent.hidden:
+                float snap = Styles.gridTexture.width / 4f;
+
                 if (beginDragPosition == null)
                 {
                     beginDragPosition = mousePositionGrid;
-                    beginDragDiff = mousePositionGrid - node.graphPosition;
+
+                    if (NodeEditor.Prefs.gridSnap)
+                    {
+                        node.graphPosition = new Vector2(
+                            Mathf.Round(node.graphPosition.x / snap) * snap,
+                            Mathf.Round(node.graphPosition.y / snap) * snap
+                        );
+                    }
+
+                    beginDragNodePosition = node.graphPosition;
                 }
 
-                NodeEditor instance = NodeEditor.instance;
+                Vector2 dxdy = mousePositionGrid - beginDragPosition.Value;
 
-                Vector2 desiredNodePos = mousePositionGrid - beginDragDiff;
+                if (NodeEditor.Prefs.gridSnap)
+                {
+                    dxdy = new Vector2(
+                        Mathf.Round(dxdy.x / snap) * snap,
+                        Mathf.Round(dxdy.y / snap) * snap
+                    );
+                }
 
-                float snap = Styles.gridTexture.width / 4f;
-                node.graphPosition = new Vector2(Mathf.Round(desiredNodePos.x / snap) * snap, Mathf.Round(desiredNodePos.y / snap) * snap);
+                node.graphPosition = beginDragNodePosition + dxdy;
 
-                e.Use();
                 break;
         }
     }
@@ -182,11 +202,15 @@ public sealed class NodeComponent : GUIComponent, ISelectable
             || layout.inConnection.Contains(mousePosition)
             || layout.outConnection.Contains(mousePosition);
     }
+    public override bool ResolveObject(UnityEngine.Object obj) { return obj == node; }
     public bool IsSelectable() { return true; }
     public bool IsHit(Vector2 mousePosition) { return layout.body.Contains(mousePosition); }
     public bool Overlaps(Rect rect) { return layout.body.Overlaps(rect, true); }
     public void Select(bool additive) { isSelected = true; }
     public void Deselect() { isSelected = false; }
+    public UnityEngine.Object GetEditable() { return node; }
+    public bool IsEditable() { return true; }
+    public bool IsFramable() { return true; }
     public class NodeComponentCreateArgs : CreateArgs
     {
         public Graph graph { get; set; }

@@ -29,7 +29,7 @@ public sealed class SelectionBoxComponent : GUIComponent
 
         Event e = Event.current;
 
-        if (hideOnMouseUp && e.type == EventType.MouseUp)
+        if (hideOnMouseUp && e.rawType == EventType.MouseUp)
             hidden = true;
 
         Vector2 curPos = NodeEditor.WindowToGridPosition(e.mousePosition);

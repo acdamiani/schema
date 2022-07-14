@@ -16,18 +16,21 @@ namespace SchemaEditor.Internal
         private GUIComponent[] _selected = Array.Empty<GUIComponent>();
         public SelectionBoxComponent selectionBoxComponent { get { return _selectionBoxComponent; } }
         private SelectionBoxComponent _selectionBoxComponent;
-        public ComponentCanvas(SelectionBoxComponent.SelectionBoxComponentCreateArgs selectionBoxComponentCreateArgs)
+        private IControlIDProvider context;
+        public ComponentCanvas(IControlIDProvider context, SelectionBoxComponent.SelectionBoxComponentCreateArgs selectionBoxComponentCreateArgs)
         {
             selectionBoxComponentCreateArgs.layer = 1;
             _selectionBoxComponent = Create<SelectionBoxComponent>(selectionBoxComponentCreateArgs);
             _selectionBoxComponent.hidden = true;
+
+            this.context = context;
         }
         public T Create<T>(CreateArgs args) where T : GUIComponent, new()
         {
             T component = new T();
+            ((GUIComponent)component).canvas = this;
             component.Create(args);
             component.layer = args.layer;
-            ((GUIComponent)component).canvas = this;
 
             ArrayUtility.Add(ref _components, component);
 
@@ -56,12 +59,24 @@ namespace SchemaEditor.Internal
 
             return null;
         }
+        public GUIComponent Resolve(UnityEngine.Object obj)
+        {
+            foreach (GUIComponent component in components)
+            {
+                if (!component.ResolveObject(obj))
+                    continue;
+
+                return component;
+            }
+
+            return null;
+        }
         public void Draw()
         {
-            DoEvents();
-
             GUIComponent[] c = (GUIComponent[])components.Clone();
             Array.Sort(c, (a, b) => b.layer - a.layer);
+
+            DoEvents(c);
 
             for (int i = c.Length - 1; i >= 0; i--)
                 c[i].OnGUI();
@@ -88,12 +103,12 @@ namespace SchemaEditor.Internal
 
             ArrayUtility.Clear(ref _selected);
         }
-        private void DoEvents()
+        private void DoEvents(IEnumerable<GUIComponent> layeredComponents)
         {
             switch (Event.current.type)
             {
                 case EventType.MouseDown:
-                    OnMouseDown(Event.current);
+                    OnMouseDown(Event.current, layeredComponents);
                     break;
                 case EventType.MouseDrag:
                     OnMouseDrag(Event.current);
@@ -103,14 +118,15 @@ namespace SchemaEditor.Internal
                     break;
             }
         }
-        private void OnMouseDown(Event mouseEvent)
+        private void OnMouseDown(Event mouseEvent, IEnumerable<GUIComponent> layeredComponents)
         {
             switch (mouseEvent.button)
             {
                 case 0:
-                    for (int i = components.Length - 1; i >= 0; i--)
+                    GUIUtility.hotControl = context.GetControlID();
+
+                    foreach (GUIComponent component in layeredComponents)
                     {
-                        GUIComponent component = components[i];
                         ISelectable selectableComponent = component as ISelectable;
 
                         if (
@@ -120,7 +136,7 @@ namespace SchemaEditor.Internal
                             )
                             continue;
 
-                        components.MoveItemAtIndexToFront(i);
+                        MoveToFront(component);
 
                         if (!mouseEvent.shift && !selected.Contains(component))
                             DeselectAll();
@@ -145,7 +161,8 @@ namespace SchemaEditor.Internal
         }
         private void OnMouseDrag(Event mouseEvent)
         {
-            DoBoxOverlap(selectionBoxComponent.selectionRect, mouseEvent);
+            if (!selectionBoxComponent.hidden)
+                DoBoxOverlap(selectionBoxComponent.selectionRect, mouseEvent);
         }
         private void OnMouseScroll(Event mouseEvent)
         {

@@ -16,7 +16,7 @@ namespace SchemaEditor
         private void ProcessEvents(Event e)
         {
             //Used to receive mouseUp events outside the window
-            controlId = GUIUtility.GetControlID(FocusType.Passive);
+            // controlId = GUIUtility.GetControlID(FocusType.Passive);
 
             windowInfo.shouldCheckConnectionHover = false;
 
@@ -360,7 +360,7 @@ namespace SchemaEditor
                 //see https://answers.unity.com/questions/34694/detecting-mouseup-event-when-the-mouse-is-not-over.html
                 //this HAS to be done only on left click because otherwise it causes issues with the GenericMenu
                 //Menu still focused even after dismissed?
-                GUIUtility.hotControl = controlId;
+                // GUIUtility.hotControl = controlId;
             }
 
             windowInfo.didDragSinceMouseUp = false;

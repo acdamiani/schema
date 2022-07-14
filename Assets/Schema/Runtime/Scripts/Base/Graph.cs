@@ -112,6 +112,22 @@ namespace Schema
 
             ArrayUtility.Add(ref m_nodes, node);
         }
+        public Frame AddFrame(IEnumerable<UnityEngine.Object> framed, bool undo = true)
+        {
+            string path = AssetDatabase.GetAssetPath(this);
+
+            Frame frame = ScriptableObject.CreateInstance<Frame>();
+            frame.hideFlags = HideFlags.HideInHierarchy;
+            frame.children = framed.ToArray();
+
+            if (!String.IsNullOrEmpty(path))
+                AssetDatabase.AddObjectToAsset(frame, path);
+
+            if (undo)
+                Undo.RegisterCreatedObjectUndo(frame, "Frame Added");
+
+            return frame;
+        }
         /// <summary>
         /// Duplicates a given node and adds it to the tree.
         /// </summary>

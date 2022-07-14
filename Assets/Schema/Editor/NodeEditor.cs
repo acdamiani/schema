@@ -15,7 +15,7 @@ using UnityEditor.ShortcutManagement;
 namespace SchemaEditor
 {
     //This class contains the basic information about the EditorWindow, including various preferences and basic methods (Delete, Select, etc.)
-    public partial class NodeEditor : EditorWindow, IHasCustomMenu
+    public partial class NodeEditor : EditorWindow, IHasCustomMenu, IControlIDProvider
     {
         public static NodeEditor instance;
         private static Dictionary<Type, List<Type>> nodeTypes;
@@ -27,6 +27,7 @@ namespace SchemaEditor
         public Blackboard globalBlackboard;
         public Window windowInfo = new Window();
         public Event eventNoZoom;
+        private int? _controlID;
         private int nodeCount;
         [DidReloadScripts]
         static void Init()
@@ -113,6 +114,13 @@ namespace SchemaEditor
         {
             menu.AddItem("Preferences", windowInfo.settingsShown, TogglePrefs, false);
             menu.AddItem("Documentation", false, () => OpenUrl("https://thinking-automation.vercel.app/docs/getting-started"), false);
+        }
+        public int GetControlID()
+        {
+            if (_controlID == null)
+                _controlID = GUIUtility.GetControlID(FocusType.Passive);
+
+            return _controlID.Value;
         }
         void TogglePrefs()
         {
@@ -972,6 +980,20 @@ namespace SchemaEditor
             if (!instance.editingPaused)
                 instance.ToggleSearch();
         }
+        [Shortcut("Schema/Join Frame", KeyCode.J, ShortcutModifiers.Action)]
+        private static void JoinFrameCommand()
+        {
+            IEnumerable<NodeComponent> selectedNodes = instance.canvas.selected.Where(x => x is NodeComponent).Cast<NodeComponent>();
+
+            if (instance == null || selectedNodes.Count() == 0) return;
+
+            SchemaEditor.Internal.ComponentSystem.Components.FrameComponent.FrameComponentCreateArgs frameComponentCreateArgs
+                = new Internal.ComponentSystem.Components.FrameComponent.FrameComponentCreateArgs();
+
+            frameComponentCreateArgs.frame = instance.target.AddFrame(selectedNodes.Select(x => x.node));
+
+            instance.canvas.Create<SchemaEditor.Internal.ComponentSystem.Components.FrameComponent>(frameComponentCreateArgs);
+        }
         [Shortcut("Schema/Move Up", KeyCode.UpArrow, ShortcutModifiers.Action)]
         private static void MoveUpCommand()
         {
@@ -993,7 +1015,7 @@ namespace SchemaEditor
 
             instance.target.BreakConnections(instance.windowInfo.selected);
         }
-        internal static class NodeEditorPrefs
+        internal static class Prefs
         {
             public static bool saveOnClose
             {
@@ -1080,6 +1102,11 @@ namespace SchemaEditor
                 get => GetColor("SCHEMA_PREF__portColor", new Color32(80, 80, 80, 255));
                 set => SetColor("SCHEMA_PREF__portColor", value);
             }
+            public static bool gridSnap
+            {
+                get => EditorPrefs.GetBool("SCHEMA_PREF__gridSnap", false);
+                set => EditorPrefs.SetBool("SCHEMA_PREF__gridSnap", value);
+            }
             public static Color GetColor(string key, Color defaultValue)
             {
                 float r = EditorPrefs.GetFloat(key + "_r", defaultValue.r);
@@ -1110,7 +1137,7 @@ namespace SchemaEditor
             {
                 List<TypeCode> valid = new List<TypeCode> { TypeCode.String, TypeCode.Single, TypeCode.Boolean, TypeCode.Int32 };
 
-                Type t = typeof(NodeEditorPrefs);
+                Type t = typeof(Prefs);
                 PropertyInfo[] fields = t.GetProperties(BindingFlags.Static | BindingFlags.Public);
 
                 foreach (PropertyInfo property in fields)

@@ -68,6 +68,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/PlaySound.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardData.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Quaternion/QuaternionAngle.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Base/Frame.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/GetRotation.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/PingPong.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Wait.cs" />
@@ -142,6 +143,7 @@
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Max.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/Types.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Modifiers/ForceStatus.cs" />
+     <Compile Include="Assets/Schema/Runtime/Scripts/Base/Conditional.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Transform/TransformDirection.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Physics/CapsuleCast.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Nodes/Math/Sqrt.cs" />

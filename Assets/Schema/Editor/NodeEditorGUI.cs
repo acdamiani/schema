@@ -115,7 +115,7 @@ namespace SchemaEditor
                     GUI.Label(new Rect(8f, 32f, size.x, size.y), content, EditorStyles.boldLabel);
                 }
 
-                if (NodeEditorPrefs.enableDebugView && windowInfo != null)
+                if (Prefs.enableDebugView && windowInfo != null)
                 {
                     string content = @$"hoveredNode: {windowInfo.hoveredNode?.name}
 hoveredDecorator: {windowInfo.hoveredDecorator?.name}
@@ -223,10 +223,14 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 if (!defaultDecoratorEditor || defaultDecoratorEditor.target == null || defaultDecoratorEditor.target != windowInfo.selectedDecorator)
                     UnityEditor.Editor.CreateCachedEditor(windowInfo.selectedDecorator, typeof(DefaultDecoratorEditor), ref defaultDecoratorEditor);
             }
-            else if (windowInfo.selected.Count > 0)
-            {
-                targets.AddRange(windowInfo.selected);
-            }
+
+            IEnumerable<UnityEngine.Object> editableComponents = canvas.selected
+                .Where(x => x is IEditable)
+                .Cast<IEditable>()
+                .Where(x => x.IsEditable())
+                .Select(x => x.GetEditable());
+
+            targets = editableComponents.ToList();
 
             targets = targets.Where(x => x != null).ToList();
             distinctTypes = targets.Select(x => x.GetType()).Distinct().ToList();
@@ -238,7 +242,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             {
                 UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), null, ref editor);
 
-                if (windowInfo.selectedDecorator == null && distinctTypes.Count == 1 && (defaultNodeEditor == null || defaultNodeEditor.targets.Any(obj => obj == null) || !defaultNodeEditor.targets.SequenceEqual(targets)) && targets.Count > 0 && targets.All(obj => obj != null))
+                if (targets.Any(x => typeof(Node).IsAssignableFrom(x.GetType())))
                     UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), typeof(DefaultNodeEditor), ref defaultNodeEditor);
             }
             else if (targets.Count == 0)
@@ -355,7 +359,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     else if (!intersect && windowInfo.hoveredConnection == child && windowInfo.shouldCheckConnectionHover)
                         windowInfo.hoveredConnection = null;
 
-                    Color connectionColor = isActiveConnection ? NodeEditorPrefs.highlightColor : (windowInfo.hoveredConnection == child ? NodeEditorPrefs.selectionColor : NodeEditorPrefs.connectionColor);
+                    Color connectionColor = isActiveConnection ? Prefs.highlightColor : (windowInfo.hoveredConnection == child ? Prefs.selectionColor : Prefs.connectionColor);
 
                     Handles.DrawBezier(p0, p3, p1, p2, connectionColor, Styles.curve, 5f * windowInfo.zoom);
 
@@ -381,7 +385,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                             t = t > 1 ? t % 1 : t;
                             Vector2 p = bezier.Position(t);
 
-                            GUI.color = NodeEditorPrefs.highlightColor;
+                            GUI.color = Prefs.highlightColor;
                             GUI.DrawTexture(new Rect(p.x - 4f * windowInfo.zoom, p.y - 4f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom), Styles.circle);
                         }
                     }
@@ -483,7 +487,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                         if (windowInfo.hoveredType == Window.Hovering.InConnection && windowInfo.hoveredNode == node && !drawBox)
                             GUI.color = Color.white;
                         else
-                            GUI.color = NodeEditorPrefs.portColor;
+                            GUI.color = Prefs.portColor;
 
                         GUI.DrawTexture(inConnection, Styles.circle);
 
@@ -518,9 +522,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     GUI.Box(rect.Pad(new RectOffset(-14, -14, -14, -14)), "", Styles.shadow);
 
                     if (windowInfo.selected.Contains(node))
-                        GUI.color = NodeEditorPrefs.selectionColor;
+                        GUI.color = Prefs.selectionColor;
                     else if (windowInfo.alpha.ContainsKey(node.uID))
-                        GUI.color = Color.Lerp(new Color32(80, 80, 80, 255), NodeEditorPrefs.highlightColor, windowInfo.alpha[node.uID]);
+                        GUI.color = Color.Lerp(new Color32(80, 80, 80, 255), Prefs.highlightColor, windowInfo.alpha[node.uID]);
                     else if (windowInfo.selectedDecorator &&
                         node.priority > 0 &&
                         windowInfo.selectedDecorator.node.priority > 0 &&
@@ -566,15 +570,15 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                         GUI.Label(new Rect(rect.x + rect.width - iconWidth / 2f, rect.y + rect.height - iconHeight / 2f, iconWidth, iconHeight), error, GUIStyle.none);
                     }
 
-                    if (NodeEditorPrefs.enableStatusIndicators && node.enableStatusIndicator && windowInfo.nodeStatus != null && Application.isPlaying && windowInfo.nodeStatus.ContainsKey(node.uID))
+                    if (Prefs.enableStatusIndicators && node.enableStatusIndicator && windowInfo.nodeStatus != null && Application.isPlaying && windowInfo.nodeStatus.ContainsKey(node.uID))
                     {
                         float iconSize = 32f;
 
                         bool? nodeStatus = windowInfo.nodeStatus[node.uID];
                         if (nodeStatus == true)
-                            GUI.color = NodeEditorPrefs.successColor;
+                            GUI.color = Prefs.successColor;
                         else if (nodeStatus == false)
-                            GUI.color = NodeEditorPrefs.failureColor;
+                            GUI.color = Prefs.failureColor;
 
                         GUI.Label(new Rect(rect.x + rect.width - iconSize / 2f, rect.y - iconSize / 2f, iconSize, iconSize),
                             "",
@@ -837,25 +841,25 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             Rect viewRect = GetViewRect(minimapPadding, false);
 
-            float minimapHeight = viewRect.height / viewRect.width * NodeEditorPrefs.minimapWidth;
-            float viewWidth = minimapHeight >= NodeEditorPrefs.maxMinimapHeight ? NodeEditorPrefs.minimapWidth / minimapHeight * NodeEditorPrefs.maxMinimapHeight : NodeEditorPrefs.minimapWidth;
-            minimapHeight = Mathf.Clamp(minimapHeight, 0f, NodeEditorPrefs.maxMinimapHeight);
+            float minimapHeight = viewRect.height / viewRect.width * Prefs.minimapWidth;
+            float viewWidth = minimapHeight >= Prefs.maxMinimapHeight ? Prefs.minimapWidth / minimapHeight * Prefs.maxMinimapHeight : Prefs.minimapWidth;
+            minimapHeight = Mathf.Clamp(minimapHeight, 0f, Prefs.maxMinimapHeight);
 
             Rect boxPos = Rect.zero;
 
-            switch (NodeEditorPrefs.minimapPosition)
+            switch (Prefs.minimapPosition)
             {
                 case 0:
-                    boxPos = new Rect(10f, position.height - minimapHeight - 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    boxPos = new Rect(10f, position.height - minimapHeight - 10f, Prefs.minimapWidth, minimapHeight);
                     break;
                 case 1:
-                    boxPos = new Rect(10f, EditorStyles.toolbar.fixedHeight + 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    boxPos = new Rect(10f, EditorStyles.toolbar.fixedHeight + 10f, Prefs.minimapWidth, minimapHeight);
                     break;
                 case 2:
-                    boxPos = new Rect(window.width - 10f - NodeEditorPrefs.minimapWidth, position.height - minimapHeight - 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    boxPos = new Rect(window.width - 10f - Prefs.minimapWidth, position.height - minimapHeight - 10f, Prefs.minimapWidth, minimapHeight);
                     break;
                 case 3:
-                    boxPos = new Rect(window.width - 10f - NodeEditorPrefs.minimapWidth, EditorStyles.toolbar.fixedHeight + 10f, NodeEditorPrefs.minimapWidth, minimapHeight);
+                    boxPos = new Rect(window.width - 10f - Prefs.minimapWidth, EditorStyles.toolbar.fixedHeight + 10f, Prefs.minimapWidth, minimapHeight);
                     break;
             }
 
@@ -864,7 +868,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             gridViewRect.position = new Vector2(gridViewRect.position.x + boxPos.width / 2f - viewWidth / 2f, gridViewRect.position.y);
             gridViewRect.size = gridViewRect.size / viewRect.width * viewWidth;
 
-            Handles.DrawSolidRectangleWithOutline(boxPos, new Color(0.1f, 0.1f, 0.1f, NodeEditorPrefs.minimapOpacity), NodeEditorPrefs.minimapOutlineColor);
+            Handles.DrawSolidRectangleWithOutline(boxPos, new Color(0.1f, 0.1f, 0.1f, Prefs.minimapOpacity), Prefs.minimapOutlineColor);
 
             GUILayout.BeginArea(boxPos);
 
@@ -896,7 +900,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     childPosition.x += boxPos.width / 2f - viewWidth / 2f;
 
                     Color c = Handles.color;
-                    Handles.color = isActiveConnection ? NodeEditorPrefs.highlightColor : Color.white;
+                    Handles.color = isActiveConnection ? Prefs.highlightColor : Color.white;
                     Handles.DrawAAPolyLine(new Vector2(position.x + size.x / 2f, position.y + size.y), new Vector2(childPosition.x + childSize.x / 2f, childPosition.y));
                     Handles.color = c;
                 }
@@ -908,7 +912,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 if (windowInfo.selected.Contains(node))
                     nodeColor = Color.white;
                 else if (active == node)
-                    nodeColor = NodeEditorPrefs.highlightColor;
+                    nodeColor = Prefs.highlightColor;
                 else
                     nodeColor = nodeOutlineColor;
 
@@ -971,8 +975,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             GUILayout.FlexibleSpace();
 
             windowInfo.useLiveLink = GUILayout.Toggle(windowInfo.useLiveLink, "Live Link", EditorStyles.toolbarButton);
-
             windowInfo.drawMinimap = GUILayout.Toggle(windowInfo.drawMinimap, "Minimap", EditorStyles.toolbarButton);
+            Prefs.gridSnap = GUILayout.Toggle(Prefs.gridSnap, "Grid Snap", EditorStyles.toolbarButton);
 
             if (!windowInfo.inspectorToggled && GUILayout.Button(Styles.visibilityToggleOffContent, EditorStyles.toolbarButton))
                 windowInfo.inspectorToggled = true;
@@ -1113,63 +1117,63 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             GUILayout.Space(GUIData.sidebarPadding);
 
             EditorGUILayout.LabelField("General", EditorStyles.boldLabel);
-            NodeEditorPrefs.saveOnClose = EditorGUILayout.Toggle("Save on Close", NodeEditorPrefs.saveOnClose);
-            NodeEditorPrefs.formatOnSave = EditorGUILayout.Toggle("Format on Save", NodeEditorPrefs.formatOnSave);
-            NodeEditorPrefs.screenshotPath = EditorGUILayout.TextField("Screenshot Path", NodeEditorPrefs.screenshotPath);
+            Prefs.saveOnClose = EditorGUILayout.Toggle("Save on Close", Prefs.saveOnClose);
+            Prefs.formatOnSave = EditorGUILayout.Toggle("Format on Save", Prefs.formatOnSave);
+            Prefs.screenshotPath = EditorGUILayout.TextField("Screenshot Path", Prefs.screenshotPath);
 
             EditorGUILayout.LabelField("");
 
             EditorGUILayout.LabelField("Editor", EditorStyles.boldLabel);
-            NodeEditorPrefs.selectionColor = EditorGUILayout.ColorField(
+            Prefs.selectionColor = EditorGUILayout.ColorField(
                 new GUIContent("Selection Color", "The selection color to use for nodes"),
-                NodeEditorPrefs.selectionColor
+                Prefs.selectionColor
             );
-            NodeEditorPrefs.highlightColor = EditorGUILayout.ColorField(
+            Prefs.highlightColor = EditorGUILayout.ColorField(
                 new GUIContent("Highlight Color", "The color to use when highlighting a node"),
-                NodeEditorPrefs.highlightColor
+                Prefs.highlightColor
             );
-            NodeEditorPrefs.enableStatusIndicators = EditorGUILayout.Toggle(
+            Prefs.enableStatusIndicators = EditorGUILayout.Toggle(
                 new GUIContent("Enable Status Indicators", "Toggle status indicators for all nodes"),
-                NodeEditorPrefs.enableStatusIndicators
+                Prefs.enableStatusIndicators
             );
-            NodeEditorPrefs.successColor = EditorGUILayout.ColorField(
+            Prefs.successColor = EditorGUILayout.ColorField(
                 new GUIContent("Success Color", "Color to use when successful"),
-                NodeEditorPrefs.successColor
+                Prefs.successColor
             );
-            NodeEditorPrefs.failureColor = EditorGUILayout.ColorField(
+            Prefs.failureColor = EditorGUILayout.ColorField(
                 new GUIContent("Failure Color", "Color to use when failed"),
-                NodeEditorPrefs.failureColor
+                Prefs.failureColor
             );
-            NodeEditorPrefs.connectionColor = EditorGUILayout.ColorField(
+            Prefs.connectionColor = EditorGUILayout.ColorField(
                 new GUIContent("Connection Color", "Color to use for node connections"),
-                NodeEditorPrefs.connectionColor
+                Prefs.connectionColor
             );
-            NodeEditorPrefs.portColor = EditorGUILayout.ColorField(
+            Prefs.portColor = EditorGUILayout.ColorField(
                 new GUIContent("Port Color", "Color to use for node ports"),
-                NodeEditorPrefs.portColor
+                Prefs.portColor
             );
 
             EditorGUILayout.LabelField("");
 
             EditorGUILayout.LabelField("Minimap", EditorStyles.boldLabel);
             EditorGUILayout.LabelField("Minimap Position");
-            NodeEditorPrefs.minimapPosition = GUILayout.Toolbar(NodeEditorPrefs.minimapPosition, new string[] { "Bottom Left", "Top Left", "Bottom Right", "Top Right" });
-            NodeEditorPrefs.minimapWidth = EditorGUILayout.FloatField("Minimap Width", NodeEditorPrefs.minimapWidth);
-            NodeEditorPrefs.maxMinimapHeight = EditorGUILayout.FloatField("Max Minimap Height", NodeEditorPrefs.maxMinimapHeight);
-            NodeEditorPrefs.minimapOpacity = EditorGUILayout.Slider("Minimap Opacity", NodeEditorPrefs.minimapOpacity, 0f, 1f);
-            NodeEditorPrefs.minimapOutlineColor = EditorGUILayout.ColorField("Minimap Outline Color", NodeEditorPrefs.minimapOutlineColor);
+            Prefs.minimapPosition = GUILayout.Toolbar(Prefs.minimapPosition, new string[] { "Bottom Left", "Top Left", "Bottom Right", "Top Right" });
+            Prefs.minimapWidth = EditorGUILayout.FloatField("Minimap Width", Prefs.minimapWidth);
+            Prefs.maxMinimapHeight = EditorGUILayout.FloatField("Max Minimap Height", Prefs.maxMinimapHeight);
+            Prefs.minimapOpacity = EditorGUILayout.Slider("Minimap Opacity", Prefs.minimapOpacity, 0f, 1f);
+            Prefs.minimapOutlineColor = EditorGUILayout.ColorField("Minimap Outline Color", Prefs.minimapOutlineColor);
 
             EditorGUILayout.LabelField("");
             EditorGUILayout.LabelField("Debug", EditorStyles.boldLabel);
-            NodeEditorPrefs.enableDebugView = EditorGUILayout.Toggle("Enable Debug View", NodeEditorPrefs.enableDebugView);
+            Prefs.enableDebugView = EditorGUILayout.Toggle("Enable Debug View", Prefs.enableDebugView);
 
-            if (NodeEditorPrefs.enableDebugView)
-                NodeEditorPrefs.enableDebugViewPlus = EditorGUILayout.Toggle("Enable Debug View+", NodeEditorPrefs.enableDebugViewPlus);
+            if (Prefs.enableDebugView)
+                Prefs.enableDebugViewPlus = EditorGUILayout.Toggle("Enable Debug View+", Prefs.enableDebugViewPlus);
 
             EditorGUILayout.LabelField("");
 
             if (GUILayout.Button("Reset to default"))
-                NodeEditorPrefs.ResetToDefault();
+                Prefs.ResetToDefault();
         }
 
         ///<summary>
@@ -1201,7 +1205,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     defaultDecoratorEditor.OnInspectorGUI();
                     EditorGUILayout.LabelField("");
                 }
-                else if (editor.targets.All(obj => typeof(Node).IsAssignableFrom(obj.GetType())))
+                else if (editor.targets.OfType<Node>().Count() > 0)
                 {
                     defaultNodeEditor.OnInspectorGUI();
                     EditorGUILayout.LabelField("");
@@ -1209,22 +1213,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 EditorGUILayout.LabelField(editor.targets[0].name, EditorStyles.boldLabel);
                 editor.OnInspectorGUI();
                 EditorGUI.EndDisabledGroup();
-                if (EditorGUI.EndChangeCheck())
-                {
-                    if (editor.targets.OfType<BlackboardEntry>().Any()) { }
-                    else if (isInspectingDecorator)
-                    {
-                        Decorator decorator = ((Decorator)editor.targets.ToList().Find(obj => (typeof(Decorator)).IsAssignableFrom(obj.GetType())));
-                        windowInfo.changedNodes.Enqueue(decorator.node);
-                    }
-                    else
-                    {
-                        foreach (Node node in editor.targets)
-                            windowInfo.changedNodes.Enqueue(node);
-                    }
-
-                    SceneView.RepaintAll();
-                }
             }
         }
         void DrawBlackboard(Blackboard blackboard)
@@ -1331,7 +1319,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             sBoxCreateArgs.hideOnMouseUp = true;
 
             if (canvas == null)
-                canvas = new ComponentCanvas(sBoxCreateArgs);
+                canvas = new ComponentCanvas(this, sBoxCreateArgs);
 
             if (target == null)
                 return;

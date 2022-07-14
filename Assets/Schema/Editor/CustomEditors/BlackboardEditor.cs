@@ -85,7 +85,7 @@ namespace SchemaEditor.Editors
             if ((isShowingGlobal ? globals : locals).Length > 0)
                 DrawEntryList(isShowingGlobal ? globals : locals);
             else
-                GUILayout.Label(NodeEditor.NodeEditorPrefs.enableDebugViewPlus ? Styles.megamind : "No entries");
+                GUILayout.Label(NodeEditor.Prefs.enableDebugViewPlus ? Styles.megamind : "No entries");
 
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !clickedAny)
             {
@@ -152,7 +152,7 @@ namespace SchemaEditor.Editors
             }
 
             if (searchExcept.Count() == 0)
-                GUILayout.Label(NodeEditor.NodeEditorPrefs.enableDebugViewPlus ? Styles.megamind : "No entries");
+                GUILayout.Label(NodeEditor.Prefs.enableDebugViewPlus ? Styles.megamind : "No entries");
         }
         private void ShowContext()
         {

@@ -11,6 +11,7 @@ namespace SchemaEditor.Internal
         public abstract void Create(CreateArgs args);
         public virtual bool IsHoverable() { return true; }
         public virtual bool ShouldHover(Vector2 mousePosition) { return false; }
+        public virtual bool ResolveObject(UnityEngine.Object obj) { return false; }
         public void Destroy() { canvas.Remove(this); }
         public ComponentCanvas canvas { get; set; }
         public int layer { get; set; }
