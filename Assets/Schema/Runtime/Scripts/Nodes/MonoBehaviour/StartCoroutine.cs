@@ -11,11 +11,11 @@ namespace Schema.Builtin.Nodes
         [Tooltip("MonoBehaviour to stop methods on")] public BlackboardEntrySelector<MonoBehaviour> monoBehaviour;
         [Tooltip("Name of the coroutine to start")] public BlackboardEntrySelector<string> methodName;
         [Tooltip("Optional argument to be passed to the Coroutine")] public BlackboardEntrySelector arg;
-        protected override void OnEnable()
+        protected override void OnObjectEnable()
         {
             arg.ApplyAllFilters();
 
-            base.OnEnable();
+            ;
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

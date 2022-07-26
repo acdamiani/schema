@@ -12,11 +12,11 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Target world position")] public BlackboardEntrySelector<Vector3> target;
         [Tooltip("The axis of rotation (defaults to Vector3.up)")] public BlackboardEntrySelector<Vector3> axis = new BlackboardEntrySelector<Vector3>(Vector3.up);
         [Tooltip("Number of degrees to rotate")] public BlackboardEntrySelector<float> angle;
-        protected override void OnEnable()
+        protected override void OnObjectEnable()
         {
             axis.inspectorValue.Normalize();
 
-            base.OnEnable();
+            ;
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

@@ -19,12 +19,10 @@ namespace Schema.Builtin.Nodes
         public BlackboardEntrySelector<float> distance;
         [Tooltip("Whether to get distance squared, which avoids the expensive square root operation")]
         public bool squared;
-        protected override void OnEnable()
+        protected override void OnObjectEnable()
         {
             vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
             vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
-
-            base.OnEnable();
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

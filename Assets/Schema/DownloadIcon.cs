@@ -22,7 +22,6 @@ public class DownloadIcon : MonoBehaviour
 
         Graphics.Blit(tex, tmp);
 
-
         List<byte> test = new System.Collections.Generic.List<byte>();
         RenderTexture.active = tmp;
 

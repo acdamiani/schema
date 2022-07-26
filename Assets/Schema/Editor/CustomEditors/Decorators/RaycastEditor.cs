@@ -1,43 +1,47 @@
 using UnityEngine;
 using UnityEditor;
+using Schema.Builtin.Conditionals;
 
-[CustomEditor(typeof(Raycast)), CanEditMultipleObjects]
-public class RaycastEditor : Editor
+namespace SchemaEditor.Editors
 {
-    private SerializedProperty visualize;
-    private SerializedProperty offset;
-    private SerializedProperty direction;
-    private SerializedProperty point;
-    private SerializedProperty tagFilter;
-    private SerializedProperty maxDistance;
-    private void OnEnable()
+    [CustomEditor(typeof(Raycast)), CanEditMultipleObjects]
+    public class RaycastEditor : Editor
     {
-        offset = serializedObject.FindProperty("offset");
-        direction = serializedObject.FindProperty("direction");
-        point = serializedObject.FindProperty("point");
-        tagFilter = serializedObject.FindProperty("tagFilter");
-        maxDistance = serializedObject.FindProperty("maxDistance");
-    }
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-        Raycast raycast = (Raycast)target;
-
-        raycast.type = (Raycast.RaycastType)GUILayout.Toolbar((int)raycast.type, new string[] { "Absolute", "Dynamic" });
-
-        EditorGUILayout.PropertyField(tagFilter);
-
-        if (raycast.type == Raycast.RaycastType.Absolute)
+        private SerializedProperty visualize;
+        private SerializedProperty offset;
+        private SerializedProperty direction;
+        private SerializedProperty point;
+        private SerializedProperty tagFilter;
+        private SerializedProperty maxDistance;
+        private void OnEnable()
         {
-            EditorGUILayout.PropertyField(offset);
-            EditorGUILayout.PropertyField(direction);
-            EditorGUILayout.PropertyField(maxDistance);
+            offset = serializedObject.FindProperty("offset");
+            direction = serializedObject.FindProperty("direction");
+            point = serializedObject.FindProperty("point");
+            tagFilter = serializedObject.FindProperty("tagFilter");
+            maxDistance = serializedObject.FindProperty("maxDistance");
         }
-        else
+        public override void OnInspectorGUI()
         {
-            EditorGUILayout.PropertyField(point);
-        }
+            serializedObject.Update();
+            Raycast raycast = (Raycast)target;
 
-        serializedObject.ApplyModifiedProperties();
+            raycast.type = (Raycast.RaycastType)GUILayout.Toolbar((int)raycast.type, new string[] { "Absolute", "Dynamic" });
+
+            EditorGUILayout.PropertyField(tagFilter);
+
+            if (raycast.type == Raycast.RaycastType.Absolute)
+            {
+                EditorGUILayout.PropertyField(offset);
+                EditorGUILayout.PropertyField(direction);
+                EditorGUILayout.PropertyField(maxDistance);
+            }
+            else
+            {
+                EditorGUILayout.PropertyField(point);
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }

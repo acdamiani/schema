@@ -55,7 +55,7 @@ namespace Schema
                 m_root = AddNode<Root>(Vector2.zero);
 
             PurgeNull();
-            TraverseTree();
+            Traverse();
         }
         /// <summary>
         /// Add a node to the tree
@@ -111,22 +111,6 @@ namespace Schema
                 Undo.RegisterCompleteObjectUndo(this, "Node Added");
 
             ArrayUtility.Add(ref m_nodes, node);
-        }
-        public Frame AddFrame(IEnumerable<UnityEngine.Object> framed, bool undo = true)
-        {
-            string path = AssetDatabase.GetAssetPath(this);
-
-            Frame frame = ScriptableObject.CreateInstance<Frame>();
-            frame.hideFlags = HideFlags.HideInHierarchy;
-            frame.children = framed.ToArray();
-
-            if (!String.IsNullOrEmpty(path))
-                AssetDatabase.AddObjectToAsset(frame, path);
-
-            if (undo)
-                Undo.RegisterCreatedObjectUndo(frame, "Frame Added");
-
-            return frame;
         }
         /// <summary>
         /// Duplicates a given node and adds it to the tree.
@@ -200,7 +184,7 @@ namespace Schema
             foreach (Node root in roots)
                 dupl.AddRange(DuplicateRecursive(nodes, root, offset, undo).GetAllChildren());
 
-            TraverseTree();
+            Traverse();
 
             if (undo)
             {
@@ -224,7 +208,7 @@ namespace Schema
             foreach (Node child in duplicateChildren)
                 duplicate.AddConnection(child, undo: false);
 
-            node.decorators = node.decorators.Select(x => node.DuplciateDecorator(x, undo)).ToArray();
+            node.conditionals = node.conditionals.Select(x => node.Duplciateconditional(x, undo)).ToArray();
 
             return duplicate;
         }
@@ -260,8 +244,8 @@ namespace Schema
                 foreach (Node child in node.children)
                     node.RemoveConnection(child, actionName: "");
 
-                foreach (Decorator decorator in node.decorators)
-                    node.RemoveDecorator(decorator, actionName: "");
+                foreach (Conditional decorator in node.conditionals)
+                    node.RemoveConditional(decorator, actionName: "");
 
                 Undo.DestroyObjectImmediate(node);
             }
@@ -286,39 +270,15 @@ namespace Schema
                     node.RemoveConnection(child, actionName: "");
             }
 
-            TraverseTree();
+            Traverse();
 
             Undo.SetCurrentGroupName("Break Connections");
             Undo.CollapseUndoOperations(groupIndex);
         }
         /// <summary>
-        /// Add a decorator to multiple nodes
-        /// </summary>
-        /// <param name="nodes">List of nodes to add decorators to</param>
-        /// <param name="decoratorType">Type of decorator to add. Must inherit from type <see cref="Schema.Decorator">Decorator</see>.</param>
-        /// <returns>List of created decorators</returns>
-        public IEnumerable<Decorator> AddDecorators(IEnumerable<Node> nodes, Type decoratorType)
-        {
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
-
-            List<Decorator> decorators = new List<Decorator>();
-
-            foreach (Node node in nodes)
-            {
-                Decorator decorator = node.AddDecorator(decoratorType);
-                decorators.Add(decorator);
-            }
-
-            Undo.SetCurrentGroupName("Add Decorators");
-            Undo.CollapseUndoOperations(groupIndex);
-
-            return decorators;
-        }
-        /// <summary>
         /// Recalculate priorities for all nodes
         /// </summary>
-        public void TraverseTree()
+        public void Traverse()
         {
             IEnumerable<Node> nodeList = nodes.Where(node => node != null);
 
@@ -333,7 +293,6 @@ namespace Schema
             int children = 0;
             foreach (Node child in node.children)
             {
-                Debug.Log(child);
                 int j = TraverseSubtree(child, i + 1);
                 children += j + 1;
                 i += j + 1;
@@ -356,33 +315,5 @@ namespace Schema
             }
         }
 #endif
-    }
-    /// <summary>
-    /// Used to create an error for a node or decorator
-    /// </summary>
-    public struct Error
-    {
-        /// <summary>
-        /// Severity of the error
-        /// </summary>
-        public enum Severity
-        {
-            Info,
-            Warning,
-            Error
-        }
-        /// <summary>
-        /// Error message
-        /// </summary>
-        public string message;
-        /// <summary>
-        /// Severity of the error
-        /// </summary>
-        public Severity severity;
-        public Error(string message, Severity severity)
-        {
-            this.message = message;
-            this.severity = severity;
-        }
     }
 }

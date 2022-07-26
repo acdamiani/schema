@@ -163,12 +163,12 @@ public class OptimizedNode
     {
         this.node = node;
 
-        decorators = new OptimizedDecorator[node.decorators.Length];
+        decorators = new OptimizedDecorator[node.conditionals.Length];
         for (int i = 0; i < decorators.Length; i++)
         {
             decorators[i] = new OptimizedDecorator();
             decorators[i].node = this;
-            decorators[i].decorator = node.decorators[i];
+            decorators[i].decorator = node.conditionals[i];
             decorators[i].nodePriority = i;
         }
     }
@@ -184,5 +184,5 @@ public class OptimizedDecorator
 {
     public OptimizedNode node;
     public int nodePriority;
-    public Decorator decorator;
+    public Conditional decorator;
 }

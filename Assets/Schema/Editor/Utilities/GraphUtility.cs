@@ -11,17 +11,17 @@ public static class GraphUtility
     private static Dictionary<string, float> mod = new Dictionary<string, float>();
     public static void Prettify(IEnumerable<Node> nodes)
     {
-        Node root = nodes.Where(node => node.GetType() == typeof(Root)).FirstOrDefault();
+        nodes = PreOrder(nodes.Aggregate((n1, n2) => n1.priority < n2.priority ? n1 : n2));
 
-        if (root.children.Length == 0)
-            return;
+        Node root = nodes.Where(node => node.GetType() == typeof(Root)).FirstOrDefault();
 
         Calc(root);
         MoveTree(root, 0f);
     }
     private static void Calc(Node node)
     {
-        foreach (Node child in node.children) Calc(child);
+        foreach (Node child in node.children)
+            Calc(child);
 
         Vector2 nodeSize = NodeEditor.GetAreaWithPadding(node, false);
 
@@ -96,16 +96,17 @@ public static class GraphUtility
         }
 
         if (node.children.Length > 0 && nodeIndex != 0)
+        {
             GetOverlapDist(node);
+        }
 
-        node.graphPosition = new Vector2(node.graphPosition.x, node.GetParentSize() + 100f * node.GetParentCount());
+        node.graphPosition = new Vector2(node.graphPosition.x, node.GetParentCount() * 300f);
     }
     private static void GetOverlapDist(Node node)
     {
         if (node.parent == null)
             return;
 
-        float minDistance = NodeEditor.GetAreaWithPadding(node, false).x + 25f;
         int nodeIndex = Array.IndexOf(node.parent.children, node);
 
         Dictionary<int, float> nodeContour = new Dictionary<int, float>();
@@ -123,8 +124,7 @@ public static class GraphUtility
             {
                 float distance = nodeContour[level] - childContour[level];
 
-                if (distance + shift < minDistance)
-                    shift = minDistance - distance;
+                shift = -distance + 25f;
             }
 
             if (shift > 0f)
@@ -138,6 +138,23 @@ public static class GraphUtility
                 shift = 0;
             }
         }
+    }
+    private static IEnumerable<Node> PreOrder(Node root)
+    {
+        List<Node> ret = new List<Node>();
+
+        if (root.children.Length == 0)
+        {
+            ret.Add(root);
+            return ret;
+        }
+
+        foreach (Node child in root.children)
+            ret.AddRange(PreOrder(child));
+
+        ret.Add(root);
+
+        return ret;
     }
     private static void GetRightContour(Node node, float sum, ref Dictionary<int, float> values)
     {
@@ -156,19 +173,6 @@ public static class GraphUtility
     }
     private static void GetLeftContour(Node node, float sum, ref Dictionary<int, float> values)
     {
-        /*           
-            if (!values.ContainsKey(node.Y))
-                values.Add(node.Y, node.X + modSum);
-            else
-                values[node.Y] = Math.Min(values[node.Y], node.X + modSum);
- 
-            modSum += node.Mod;
-            foreach (var child in node.Children)
-            {
-                GetLeftContour(child, modSum, ref values);
-            }
-        */
-
         int pCount = node.GetParentCount();
 
         if (!values.ContainsKey(pCount))
@@ -218,19 +222,6 @@ public static class GraphUtility
 
             GetOverlapDist(left);
         }
-    }
-    private static float GetParentSize(this Node node)
-    {
-        float s = 0f;
-        Node current = node;
-
-        while (current.parent != null)
-        {
-            current = current.parent;
-            s += NodeEditor.GetAreaWithPadding(current, false).y;
-        }
-
-        return s;
     }
     private static int GetParentCount(this Node node)
     {

@@ -16,7 +16,7 @@ namespace SchemaEditor
         private static Dictionary<string, SelectorPropertyInfo> info = new Dictionary<string, SelectorPropertyInfo>();
         private delegate void GUIDelayCall(SerializedProperty property);
         private static event GUIDelayCall guiDelayCall;
-        private static readonly Type[] valid = new Type[] { typeof(Schema.Node), typeof(Schema.Decorator) };
+        private static readonly Type[] valid = new Type[] { typeof(Schema.Node), typeof(Schema.Conditional) };
         private static Dictionary<Type, Type> typeMappings = new Dictionary<Type, Type>();
         private static Dictionary<Type, Tuple<string[], Type[]>> excluded = new Dictionary<Type, Tuple<string[], Type[]>>();
         private class SelectorPropertyInfo

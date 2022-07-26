@@ -13,11 +13,11 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Maximum allowed value for the range (inclusive)")] public BlackboardEntrySelector<float> floatMax = new BlackboardEntrySelector<float>(1f);
         [Tooltip("Mimimum allowed value for the range (inclusive)")] public BlackboardEntrySelector<int> intMin;
         [Tooltip("Maximum allowed value for the range (inclusive)")] public BlackboardEntrySelector<int> intMax = new BlackboardEntrySelector<int>(1);
-        protected override void OnEnable()
+        protected override void OnObjectEnable()
         {
             target.ApplyFilters(typeof(int), typeof(float));
 
-            base.OnEnable();
+            ;
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

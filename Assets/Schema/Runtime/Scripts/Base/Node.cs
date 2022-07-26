@@ -4,6 +4,7 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using UnityEditor;
+using Schema.Internal;
 
 namespace Schema
 {
@@ -12,7 +13,7 @@ namespace Schema
     /// </summary>
 
     [Serializable]
-    public abstract class Node : ScriptableObject
+    public abstract class Node : GraphObject
     {
         /// <summary>
         /// The parent of this node
@@ -25,22 +26,25 @@ namespace Schema
         public Node[] children { get { return m_children; } internal set { m_children = value; } }
         [SerializeField, HideInInspector] private Node[] m_children = Array.Empty<Node>();
         /// <summary>
-        /// An array containing the decorators for this node
+        /// An array containing the conditionals for this node
         /// </summary>
-        public Decorator[] decorators { get { return m_decorators; } internal set { m_decorators = value; } }
-        [SerializeField, HideInInspector] private Decorator[] m_decorators = Array.Empty<Decorator>();
+        public Conditional[] conditionals { get { return m_conditionals; } internal set { m_conditionals = value; } }
+        [SerializeField, HideInInspector] private Conditional[] m_conditionals = Array.Empty<Conditional>();
         public Modifier[] modifiers { get { return m_modifiers; } internal set { m_modifiers = value; } }
         [SerializeField, HideInInspector] private Modifier[] m_modifiers = Array.Empty<Modifier>();
         /// <summary>
-        /// The GUID for the node
-        /// </summary>
-        public string uID { get { return m_uID; } }
-        [SerializeField, HideInInspector] private string m_uID;
-        /// <summary>
         /// Position of the Node in the graph
         /// </summary>
-        public Vector2 graphPosition { get { return m_position; } set { m_position = value; } }
-        [SerializeField, HideInInspector] private Vector2 m_position;
+        public Vector2 graphPosition
+        {
+            get { return m_graphPosition; }
+            set
+            {
+                m_graphPosition = value;
+                parent?.OrderChildren();
+            }
+        }
+        [SerializeField, HideInInspector] private Vector2 m_graphPosition;
         /// <summary>
         /// Priority for the node
         /// </summary>
@@ -64,6 +68,10 @@ namespace Schema
         private string _description;
         private bool didGetDescriptionAttribute;
         /// <summary>
+        /// How this node can be connected to other nodes (do not override)
+        /// </summary>
+        public virtual ConnectionDescriptor connectionDescriptor => ConnectionDescriptor.Both;
+        /// <summary>
         /// Description for this node, given by the Description attribute
         /// </summary>
         public string description
@@ -79,26 +87,6 @@ namespace Schema
                 return _description;
             }
         }
-#if UNITY_EDITOR
-        private Texture2D _icon;
-        /// <summary>
-        /// Icon of the node (editor only)
-        /// </summary>
-        public Texture2D icon
-        {
-            get
-            {
-                if (usingProSkin != EditorGUIUtility.isProSkin)
-                {
-                    _icon = GetNodeIcon(GetType());
-                    usingProSkin = EditorGUIUtility.isProSkin;
-                }
-
-                return _icon;
-            }
-        }
-        private bool usingProSkin;
-#endif
         internal Type GetMemoryType()
         {
             Type[] types = GetType().GetTypeInfo().DeclaredNestedTypes.ToArray();
@@ -120,20 +108,6 @@ namespace Schema
         ///	Override to allow for Gizmo visualization in the scene view. This will be called only for the currently selected SchemaAgent. 
         /// </summary>
         public virtual void DrawGizmos(SchemaAgent agent) { }
-        protected virtual void OnEnable()
-        {
-            NameAttribute attribute = GetType().GetCustomAttribute<NameAttribute>();
-
-            if (String.IsNullOrEmpty(name))
-                name = attribute != null ? attribute.name : String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
-
-            if (string.IsNullOrEmpty(uID)) m_uID = Guid.NewGuid().ToString("N");
-
-#if UNITY_EDITOR
-            _icon = GetNodeIcon(GetType());
-            usingProSkin = EditorGUIUtility.isProSkin;
-#endif
-        }
         /// <summary>
         /// Verifies the order of the child list by position
         /// </summary>
@@ -156,10 +130,6 @@ namespace Schema
 
             return ret;
         }
-        internal void ResetGUID()
-        {
-            m_uID = Guid.NewGuid().ToString("N");
-        }
         /// <summary>
         /// Define a custom category for a node
         /// </summary>
@@ -175,6 +145,13 @@ namespace Schema
             {
                 this.category = category;
             }
+        }
+        public enum ConnectionDescriptor
+        {
+            OnlyInConnection,
+            OnlyOutConnection,
+            Floating,
+            Both
         }
         public static string GetNodeCategory(Type nodeType)
         {
@@ -210,93 +187,20 @@ namespace Schema
 
             return dict.ToDictionary(x => x.Key, x => x.Value.AsEnumerable());
         }
-        /// <summary>
-        /// Where Schema should load the dark mode icon within a resources folder
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class DarkIconAttribute : System.Attribute
-        {
-            public string location;
-            public bool isEditorIcon;
-            /// <summary>
-            /// Where Schema should load the dark mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
-            public DarkIconAttribute(string location)
-            {
-                this.location = location;
-            }
-            /// <summary>
-            /// Where Schema should load the dark mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
-            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
-            public DarkIconAttribute(string location, bool isEditorIcon)
-            {
-                this.location = location;
-                this.isEditorIcon = isEditorIcon;
-            }
-        }
-        /// <summary>
-        /// Where Schema should load the light mode icon within a resources folder
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class LightIconAttribute : System.Attribute
-        {
-            public string location;
-            public bool isEditorIcon;
-            /// <summary>
-            /// Where Schema should load the light mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
-            public LightIconAttribute(string location)
-            {
-                this.location = location;
-            }
-            /// <summary>
-            /// Where Schema should load the light mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
-            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
-            public LightIconAttribute(string location, bool isEditorIcon)
-            {
-                this.location = location;
-                this.isEditorIcon = isEditorIcon;
-            }
-        }
-        /// <summary>
-        /// Attribute for adding a description to a node in the Editor
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class DescriptionAttribute : System.Attribute
-        {
-            public string description;
-            /// <summary>
-            /// Attribute for adding a description to a node in the Editor
-            /// </summary>
-            /// <param name="description">Description for the node</param>
-            public DescriptionAttribute(string description)
-            {
-                this.description = description;
-            }
-        }
-        /// <summary>
-        /// Attribute to override the default name of the node in the editor
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class NameAttribute : System.Attribute
-        {
-            public string name;
-            /// <summary>
-            /// Attribute to override the default name of the node in the edit or
-            /// </summary>
-            /// <param name="name">Default name of the node to use</param>
-            public NameAttribute(string name)
-            {
-                this.name = name;
-            }
-        }
 #if UNITY_EDITOR
+        /// <summary>
+        /// Order child list by their graph positions
+        /// </summary>
+        public void OrderChildren()
+        {
+            IEnumerable<Node> prev = (IEnumerable<Node>)m_children.Clone();
+
+            m_children = m_children.OrderBy(x => x.graphPosition.x)
+                .ToArray();
+
+            if (!prev.SequenceEqual(m_children))
+                graph.Traverse();
+        }
         /// <summary>
         /// Add a connection to another node
         /// </summary>
@@ -316,6 +220,21 @@ namespace Schema
 
             to.parent?.RemoveConnection(to);
             to.parent = this;
+
+            OrderChildren();
+
+            graph.Traverse();
+        }
+        /// <summary>
+        /// Whether this node is connected to another
+        /// </summary>
+        /// <param name="node">The node to check</param>
+        public bool IsConnected(Node node)
+        {
+            if (node == this)
+                return false;
+
+            return node == parent || ArrayUtility.Contains(m_children, node);
         }
         public void SplitConnection(Node to, Node child, string actionName = "Split Connection", bool undo = true)
         {
@@ -352,7 +271,11 @@ namespace Schema
 
             if (m_children.Contains(from))
                 ArrayUtility.Remove(ref m_children, from);
-            from.parent = null;
+
+            if (from.parent == this)
+                from.parent = null;
+
+            graph.Traverse();
         }
         /// <summary>
         /// Remove the connection between this node and its parent
@@ -442,50 +365,47 @@ namespace Schema
             }
         }
         /// <summary>
-        /// Add a decorator to this node
+        /// Add a conditional to this node
         /// </summary>
-        /// <param name="decoratorType">Type of decorator to add. Must inherit from type Decorator</param>
+        /// <param name="conditionalType">Type of conditional to add. Must inherit from type Conditional</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
-        /// <returns>Created decorator</returns>
-        /// <exception cref="ArgumentException">decoratorType does not inherit from Decorator</exception>
-        public Decorator AddDecorator(Type decoratorType, bool undo = true)
+        /// <returns>Created Conditional</returns>
+        /// <exception cref="ArgumentException">conditionalType does not inherit from Conditional</exception>
+        public Conditional AddConditional(Type conditionalType, bool undo = true)
         {
-            if (!typeof(Decorator).IsAssignableFrom(decoratorType))
-                throw new ArgumentException("decoratorType does not inherit from type Decorator");
+            if (!typeof(Conditional).IsAssignableFrom(conditionalType))
+                throw new ArgumentException("conditionalType does not inherit from type conditional");
 
-            if (GetType() == typeof(Root))
-                return null;
-
-            Decorator decorator = (Decorator)ScriptableObject.CreateInstance(decoratorType);
-            decorator.hideFlags = HideFlags.HideInHierarchy;
-            decorator.node = this;
+            Conditional conditional = (Conditional)ScriptableObject.CreateInstance(conditionalType);
+            conditional.hideFlags = HideFlags.HideInHierarchy;
+            conditional.node = this;
 
             string path = AssetDatabase.GetAssetPath(this);
 
             if (!String.IsNullOrEmpty(path))
-                AssetDatabase.AddObjectToAsset(decorator, path);
+                AssetDatabase.AddObjectToAsset(conditional, path);
 
             if (undo)
             {
-                Undo.RegisterCreatedObjectUndo(decorator, "Decorator Created");
-                Undo.RegisterCompleteObjectUndo(this, "Decorator Added");
+                Undo.RegisterCreatedObjectUndo(conditional, "Conditional Created");
+                Undo.RegisterCompleteObjectUndo(this, "Conditional Added");
             }
 
-            ArrayUtility.Add(ref m_decorators, decorator);
+            ArrayUtility.Add(ref m_conditionals, conditional);
 
-            return decorator;
+            return conditional;
         }
         /// <summary>
-        /// Duplicate a given decorator
+        /// Duplicate a given conditional
         /// </summary>
-        /// <param name="decorator">Decorator to duplicate</param>
+        /// <param name="conditional">Conditional to duplicate</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
-        /// <returns>Duplciated decorator</returns>
-        public Decorator DuplciateDecorator(Decorator decorator, bool undo = true)
+        /// <returns>Duplciated conditional</returns>
+        public Conditional Duplciateconditional(Conditional conditional, bool undo = true)
         {
-            Decorator duplicate = ScriptableObject.Instantiate<Decorator>(decorator);
+            Conditional duplicate = ScriptableObject.Instantiate<Conditional>(conditional);
             duplicate.hideFlags = HideFlags.HideAndDontSave;
-            decorator.node = this;
+            conditional.node = this;
 
             string path = AssetDatabase.GetAssetPath(this);
 
@@ -494,38 +414,38 @@ namespace Schema
 
             if (undo)
             {
-                Undo.RegisterCreatedObjectUndo(duplicate, "Decorator Duplicated");
-                Undo.RegisterCompleteObjectUndo(this, "Decorator Duplicated");
+                Undo.RegisterCreatedObjectUndo(duplicate, "conditional Duplicated");
+                Undo.RegisterCompleteObjectUndo(this, "conditional Duplicated");
             }
 
-            ArrayUtility.Add(ref m_decorators, duplicate);
+            ArrayUtility.Add(ref m_conditionals, duplicate);
 
             return duplicate;
         }
         /// <summary>
-        /// Deletes a decorator from this node
+        /// Deletes a conditional from this node
         /// </summary>
-        /// <param name="decorator">Decorator to remove</param>
+        /// <param name="conditional">Conditional to remove</param>
         /// <param name="actionName">Name of the undo action</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
-        public void RemoveDecorator(Decorator decorator, string actionName = "Remove Decorator", bool undo = true)
+        public void RemoveConditional(Conditional conditional, string actionName = "Remove conditional", bool undo = true)
         {
-            if (!ArrayUtility.Contains(m_decorators, decorator))
+            if (!ArrayUtility.Contains(m_conditionals, conditional))
             {
-                Debug.LogWarning($"Decorator {decorator.name} does not exit on node {name}");
+                Debug.LogWarning($"conditional {conditional.name} does not exit on node {name}");
                 return;
             }
 
             if (undo)
             {
                 Undo.RegisterCompleteObjectUndo(this, actionName);
-                ArrayUtility.Remove(ref m_decorators, decorator);
-                Undo.DestroyObjectImmediate(decorator);
+                ArrayUtility.Remove(ref m_conditionals, conditional);
+                Undo.DestroyObjectImmediate(conditional);
             }
             else
             {
-                ArrayUtility.Remove(ref m_decorators, decorator);
-                ScriptableObject.DestroyImmediate(decorator, true);
+                ArrayUtility.Remove(ref m_conditionals, conditional);
+                ScriptableObject.DestroyImmediate(conditional, true);
             }
         }
         /// <summary>
@@ -571,38 +491,6 @@ namespace Schema
             {
                 if (node == null)
                     ArrayUtility.Remove(ref m_children, node);
-            }
-        }
-        /// <summary>
-        /// The current errors for this node
-        /// </summary>
-        /// <returns>A list of errors to display in the editor</returns>
-        public virtual List<Error> GetErrors() { return new List<Error>(); }
-        public static Texture2D GetNodeIcon(Type type)
-        {
-            DarkIconAttribute darkIcon = type.GetCustomAttribute<DarkIconAttribute>();
-            LightIconAttribute lightIcon = type.GetCustomAttribute<LightIconAttribute>();
-
-            //Use dark texture
-            if (EditorGUIUtility.isProSkin && darkIcon != null)
-            {
-                Texture2D ret = darkIcon.isEditorIcon
-                    ? (Texture2D)EditorGUIUtility.IconContent(darkIcon.location).image
-                    : Resources.Load<Texture2D>(darkIcon.location);
-
-                return ret;
-            }
-            else if (lightIcon != null)
-            {
-                Texture2D ret = lightIcon.isEditorIcon
-                    ? (Texture2D)EditorGUIUtility.IconContent(lightIcon.location).image
-                    : Resources.Load<Texture2D>(lightIcon.location);
-
-                return ret;
-            }
-            else
-            {
-                return null;
             }
         }
 #endif

@@ -15,7 +15,7 @@ using UnityEditor.ShortcutManagement;
 namespace SchemaEditor
 {
     //This class contains the basic information about the EditorWindow, including various preferences and basic methods (Delete, Select, etc.)
-    public partial class NodeEditor : EditorWindow, IHasCustomMenu, IControlIDProvider
+    public partial class NodeEditor : EditorWindow, IHasCustomMenu, ICanvasContextProvider
     {
         public static NodeEditor instance;
         private static Dictionary<Type, List<Type>> nodeTypes;
@@ -39,7 +39,7 @@ namespace SchemaEditor
                 //Debug.Log(t + ": " + String.Join(",", test));
                 nodeTypes.Add(t, test.ToList());
             }
-            decoratorTypes = HelperMethods.GetEnumerableOfType(typeof(Decorator)).ToArray();
+            decoratorTypes = HelperMethods.GetEnumerableOfType(typeof(Conditional)).ToArray();
         }
         [MenuItem("Window/AI/Behavior Editor")]
         static void OpenWindow()
@@ -67,7 +67,7 @@ namespace SchemaEditor
             target = graphObj;
             target.Initialize();
 
-            CreateComponentTree();
+            RebuildComponentTree();
 
             windowInfo.zoom = target.zoom;
             windowInfo.pan = target.pan;
@@ -121,6 +121,14 @@ namespace SchemaEditor
                 _controlID = GUIUtility.GetControlID(FocusType.Passive);
 
             return _controlID.Value;
+        }
+        public Rect GetRect()
+        {
+            return new Rect(0f, tabHeight, position.width, position.height);
+        }
+        public Rect GetZoomRect()
+        {
+            return window;
         }
         void TogglePrefs()
         {
@@ -183,23 +191,13 @@ namespace SchemaEditor
 
             List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
 
-            if (windowInfo.selectedDecorator != null)
-            {
-                targets.Add(windowInfo.selectedDecorator);
-            }
-            else if (windowInfo.selected.Count > 0)
-            {
-                windowInfo.selected.ForEach(x => Debug.Log(x));
-                targets.AddRange(windowInfo.selected);
-            }
-
             distinctTypes = targets.Select(x => x.GetType()).Distinct().ToList();
 
             if (distinctTypes.Count > 1) return;
 
             UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), null, ref editor);
 
-            target.TraverseTree();
+            target.Traverse();
             GetViewRect(100f, true);
         }
         //Validates connections between nodes also resets HideFlags
@@ -209,7 +207,7 @@ namespace SchemaEditor
 
             Undo.undoRedoPerformed += UndoPerformed;
 
-            CreateComponentTree();
+            RebuildComponentTree();
 
             instance = this;
             if (target != null && target.blackboard != null)
@@ -236,7 +234,7 @@ namespace SchemaEditor
 
             foreach (SchemaAgent agent in GameObject.FindObjectsOfType<SchemaAgent>())
             {
-                agent.editorTarget = null;
+                // agent.editorTarget = null;
                 SceneView.RepaintAll();
             }
 
@@ -284,13 +282,6 @@ namespace SchemaEditor
             }
 
             target.nodes.MoveItemAtIndexToFront(Array.IndexOf(target.nodes, node));
-
-            EditorApplication.delayCall += () => SceneView.RepaintAll();
-        }
-        private void Select(Decorator decorator)
-        {
-            windowInfo.selectedDecorator = decorator;
-            windowInfo.selected.Clear();
 
             EditorApplication.delayCall += () => SceneView.RepaintAll();
         }
@@ -380,22 +371,18 @@ namespace SchemaEditor
 
             SceneView.RepaintAll();
         }
-        private void Deselect(Decorator decorator)
-        {
-            windowInfo.selectedDecorator = null;
-
-            SceneView.RepaintAll();
-        }
         private void DeleteSelected()
         {
             target.DeleteNodes(windowInfo.selected);
 
-            target.TraverseTree();
+            target.Traverse();
 
             if (windowInfo.selected.Contains(windowInfo.hoveredNode))
                 windowInfo.hoveredNode = null;
 
             DestroyImmediate(editor);
+            DestroyImmediate(defaultNodeEditor);
+
             GetViewRect(100f, true);
 
             windowInfo.selected.Clear();
@@ -416,38 +403,10 @@ namespace SchemaEditor
                 {
                     DestroyImmediate(obj);
                 }
-                else if ((typeof(Decorator)).IsAssignableFrom(obj.GetType()) &&
-                !target.nodes.Any(node => node.decorators.Contains(obj)))
-                {
-                    DestroyImmediate(obj);
-                }
             });
             copyBuffer.Clear();
 
             copyBuffer.AddRange(temp);
-        }
-        private void Copy(Decorator decorator, bool clearSelected = true)
-        {
-            Decorator instance = ScriptableObject.Instantiate(decorator);
-
-            if (clearSelected)
-                windowInfo.selected.Clear();
-
-            copyBuffer.ForEach(obj =>
-            {
-                if ((typeof(Node).IsAssignableFrom(obj.GetType()) &&
-                !target.nodes.Contains(obj)))
-                {
-                    DestroyImmediate(obj);
-                }
-                else if ((typeof(Decorator)).IsAssignableFrom(obj.GetType()) &&
-                !target.nodes.Any(node => node.decorators.Contains(obj)))
-                {
-                    DestroyImmediate(obj);
-                }
-            });
-            copyBuffer.Clear();
-            copyBuffer.Add(decorator);
         }
         private void Paste()
         {
@@ -565,39 +524,8 @@ namespace SchemaEditor
             //     Select(node, true);
             // }
 
-            target.TraverseTree();
+            target.Traverse();
             GetViewRect(100f, true);
-        }
-        private void MoveDecoratorInNode(Decorator d, bool up)
-        {
-            if (d == null) return;
-
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
-
-            string name = String.Format("Move Decorator {0}", up ? "Up" : "Down");
-
-            Undo.RegisterCompleteObjectUndo(d.node, name);
-            Undo.RecordObject(d, name);
-
-            int decoratorIndex = Array.IndexOf(d.node.decorators, d);
-            d.node.decorators.Swap(decoratorIndex, up ? decoratorIndex - 1 : decoratorIndex + 1);
-        }
-        private void MoveDecoratorInNode(Decorator d, int index)
-        {
-            if (d == null || index < 0 || index > d.node.decorators.Length) return;
-            Debug.Log("Continuted");
-
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
-
-            string name = String.Format("Move Decorator To Index {0}", index);
-
-            Undo.RegisterCompleteObjectUndo(d.node, name);
-            Undo.RecordObject(d, name);
-
-            int decoratorIndex = Array.IndexOf(d.node.decorators, d);
-            d.node.decorators.Move(d, index);
         }
         // private void AddConnection(Node n1, Node n2, bool recordUndo)
         // {
@@ -667,13 +595,6 @@ namespace SchemaEditor
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Cut"), false, () => { }, editingPaused);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Copy"), false, () => { }, editingPaused);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => { }, editingPaused || copyBuffer.Count == 0);
-                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Delete"), false, () =>
-                    {
-                        Debug.Log(windowInfo.hoveredDecorator);
-                        windowInfo.hoveredDecorator.node.RemoveDecorator(windowInfo.hoveredDecorator);
-                    }, editingPaused);
-                    g.AddItem("Move Up %UP", false, () => MoveUpCommand(), editingPaused);
-                    g.AddItem("Move Down %DOWN", false, () => MoveDownCommand(), editingPaused);
                     break;
                 case Window.Hovering.Window:
                     g.AddItem(GenerateMenuItem("Schema/Add Node"), false, () => AddNodeCommand(), editingPaused);
@@ -725,22 +646,6 @@ namespace SchemaEditor
                 case Window.Hovering.None:
                     break;
             }
-
-            return g;
-        }
-
-
-        internal GenericMenu GenerateNodeContextMenu()
-        {
-            GenericMenu g = new GenericMenu();
-            g.AddItem(GenerateMenuItem("Main Menu/Edit/Cut"), false, () => { }, editingPaused);
-            g.AddItem(GenerateMenuItem("Main Menu/Edit/Copy"), false, () => Copy(windowInfo.selected), editingPaused);
-            g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => Paste(), editingPaused || copyBuffer.Count == 0);
-            g.AddItem(GenerateMenuItem("Main Menu/Edit/Delete"), false, () => DeleteSelected(), editingPaused);
-            g.AddItem("Break Connections %b", false, () => target.BreakConnections(windowInfo.selected), editingPaused);
-            g.AddSeparator("");
-            g.AddItem(GenerateMenuItem("Schema/Add Decorator"), false, () => AddDecoratorCommand(), editingPaused);
-            // g.AddItem(GenerateMenuItem("Schema/Add Child"), false, () => AddChildCommand(), !windowInfo.hoveredNode.canHaveChildren);
 
             return g;
         }
@@ -979,34 +884,6 @@ namespace SchemaEditor
 
             if (!instance.editingPaused)
                 instance.ToggleSearch();
-        }
-        [Shortcut("Schema/Join Frame", KeyCode.J, ShortcutModifiers.Action)]
-        private static void JoinFrameCommand()
-        {
-            IEnumerable<NodeComponent> selectedNodes = instance.canvas.selected.Where(x => x is NodeComponent).Cast<NodeComponent>();
-
-            if (instance == null || selectedNodes.Count() == 0) return;
-
-            SchemaEditor.Internal.ComponentSystem.Components.FrameComponent.FrameComponentCreateArgs frameComponentCreateArgs
-                = new Internal.ComponentSystem.Components.FrameComponent.FrameComponentCreateArgs();
-
-            frameComponentCreateArgs.frame = instance.target.AddFrame(selectedNodes.Select(x => x.node));
-
-            instance.canvas.Create<SchemaEditor.Internal.ComponentSystem.Components.FrameComponent>(frameComponentCreateArgs);
-        }
-        [Shortcut("Schema/Move Up", KeyCode.UpArrow, ShortcutModifiers.Action)]
-        private static void MoveUpCommand()
-        {
-            if (instance == null || instance.windowInfo.selectedDecorator == null) return;
-
-            instance.MoveDecoratorInNode(instance.windowInfo.selectedDecorator, true);
-        }
-        [Shortcut("Schema/Move Down", KeyCode.DownArrow, ShortcutModifiers.Action)]
-        private static void MoveDownCommand()
-        {
-            if (instance == null || instance.windowInfo.selectedDecorator == null) return;
-
-            instance.MoveDecoratorInNode(instance.windowInfo.selectedDecorator, false);
         }
         [Shortcut("Schema/Break Connections", KeyCode.B, ShortcutModifiers.Action | ShortcutModifiers.Alt)]
         private static void BreakConnectionsCommand()

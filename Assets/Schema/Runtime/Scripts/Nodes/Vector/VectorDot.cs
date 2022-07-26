@@ -16,12 +16,12 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Vector B")]
         public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
         [Tooltip("Blackboard variable to store the dot product in"), WriteOnly] public BlackboardEntrySelector<float> dot;
-        protected override void OnEnable()
+        protected override void OnObjectEnable()
         {
             vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
             vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
 
-            base.OnEnable();
+            ;
         }
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

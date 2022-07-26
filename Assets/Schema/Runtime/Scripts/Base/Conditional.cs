@@ -3,19 +3,29 @@ using UnityEditor;
 using System;
 using System.Reflection;
 using System.Linq;
+using Schema.Internal;
 
 namespace Schema
 {
     /// <summary>
     /// Base class for all Schema conditionals
     /// </summary>
-    public abstract class Conditional : ScriptableObject
+    public abstract class Conditional : GraphObject
     {
         /// <summary>
         /// Node that this conditional is attached to
         /// </summary>
         public Node node { get { return m_node; } set { m_node = value; } }
         [SerializeField, HideInInspector] private Node m_node;
+        public AbortsType abortsType { get { return m_abortsType; } set { m_abortsType = value; } }
+        [SerializeField, HideInInspector] private AbortsType m_abortsType;
+        /// <summary>
+        /// Evaluate this conditional
+        /// </summary>
+        /// <param name="conditionalMemory">Object containing the memory for the conditional</param>
+        /// <param name="agent">Agent executing thsi conditional</param>
+        /// <returns></returns>
+        public abstract bool Evaluate(object conditionalMemory, SchemaAgent agent);
         /// <summary>
         /// Runs once when all conditonals are first initialized. Similar to Start() in a MonoBehavior class
         /// </summary>
@@ -41,136 +51,15 @@ namespace Schema
         /// <param name="conditionalMemory">Object containing the memory for the conditional</param>
         /// <param name="agent">Agent executing this conditional</param>
         public virtual void Tick(object conditionalMemory, SchemaAgent agent) { }
-        void OnEnable()
-        {
-            NameAttribute attribute = GetType().GetCustomAttribute<NameAttribute>();
-
-            if (String.IsNullOrEmpty(name))
-                name = attribute != null ? attribute.name : String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
-        }
         /// <summary>
-        /// Attribute to override the default name of the conditional in the editor
+        /// Possible ways the tree will respond to changes in this conditional's state
         /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class NameAttribute : System.Attribute
+        public enum AbortsType
         {
-            public string name;
-            /// <summary>
-            /// Attribute to override the default name of the conditional in the edit or
-            /// </summary>
-            /// <param name="name">Default name of the conditional to use</param>
-            public NameAttribute(string name)
-            {
-                this.name = name;
-            }
+            None,
+            Self,
+            LowerPriority,
+            Both
         }
-        /// <summary>
-        /// Where Schema should load the dark mode icon within a resources folder
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class DarkIconAttribute : System.Attribute
-        {
-            public string location;
-            public bool isEditorIcon;
-            /// <summary>
-            /// Where Schema should load the dark mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
-            public DarkIconAttribute(string location)
-            {
-                this.location = location;
-            }
-            /// <summary>
-            /// Where Schema should load the dark mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
-            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
-            public DarkIconAttribute(string location, bool isEditorIcon)
-            {
-                this.location = location;
-                this.isEditorIcon = isEditorIcon;
-            }
-        }
-        /// <summary>
-        /// Where Schema should load the light mode icon within a resources folder
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class LightIconAttribute : System.Attribute
-        {
-            public string location;
-            public bool isEditorIcon;
-            /// <summary>
-            /// Where Schema should load the light mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load</param>
-            public LightIconAttribute(string location)
-            {
-                this.location = location;
-            }
-            /// <summary>
-            /// Where Schema should load the light mode icon within a resources folder
-            /// </summary>
-            /// <param name="location">Location of the icon to be loaded with Resources.Load, or if isEditorIcon is true, the name of the editor icon to load</param>
-            /// <param name="isEditorIcon">Whether the location specified is the name of an editor icon</param>
-            public LightIconAttribute(string location, bool isEditorIcon)
-            {
-                this.location = location;
-                this.isEditorIcon = isEditorIcon;
-            }
-        }
-#if UNITY_EDITOR
-        private Texture2D _icon;
-        /// <summary>
-        /// Icon of the conditional (editor only)
-        /// </summary>
-        public Texture2D icon
-        {
-            get
-            {
-                if (usingProSkin != EditorGUIUtility.isProSkin)
-                {
-                    _icon = GetConditionalIcon(GetType());
-                    usingProSkin = EditorGUIUtility.isProSkin;
-                }
-
-                return _icon;
-            }
-        }
-        private bool usingProSkin;
-        /// <summary>
-        /// Whether this conditional is expanded in the editor (Editor Only)
-        /// </summary>
-        public bool expanded { get { return m_expanded; } set { m_expanded = value; } }
-        [SerializeField, HideInInspector] private bool m_expanded;
-        public static Texture2D GetConditionalIcon(Type type)
-        {
-            DarkIconAttribute darkIcon = type.GetCustomAttribute<DarkIconAttribute>();
-            LightIconAttribute lightIcon = type.GetCustomAttribute<LightIconAttribute>();
-
-            Debug.Log(darkIcon);
-
-            //Use dark texture
-            if (EditorGUIUtility.isProSkin && darkIcon != null)
-            {
-                Texture2D ret = darkIcon.isEditorIcon
-                    ? (Texture2D)EditorGUIUtility.IconContent(darkIcon.location).image
-                    : Resources.Load<Texture2D>(darkIcon.location);
-
-                return ret;
-            }
-            else if (lightIcon != null)
-            {
-                Texture2D ret = lightIcon.isEditorIcon
-                    ? (Texture2D)EditorGUIUtility.IconContent(lightIcon.location).image
-                    : Resources.Load<Texture2D>(lightIcon.location);
-
-                return ret;
-            }
-            else
-            {
-                return null;
-            }
-        }
-#endif
     }
 }

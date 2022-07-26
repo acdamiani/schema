@@ -5,15 +5,19 @@ using SchemaEditor.Utilities;
 using SchemaEditor.Internal;
 using SchemaEditor.Internal.ComponentSystem;
 using System;
+using System.Text;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFramable
+public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFramable, IDeletable, IGraphObjectProvider, IViewElement
 {
     private static readonly RectOffset ContentPadding = new RectOffset(20, 20, 14, 14);
     public Node node { get; set; }
+    public string uID { get { return _uID; } }
+    private string _uID;
     public NodeComponentLayout layout { get; set; }
+    public ConnectionComponent parentConnection { get; set; }
     public static ConnectionComponent floatingConnection { get; set; }
     private Nullable<Vector2> beginDragPosition;
     private Vector2 beginDragNodePosition;
@@ -30,14 +34,41 @@ public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFrama
             throw new ArgumentException();
 
         if (createArgs.fromExisting != null)
+        {
             node = createArgs.fromExisting;
+            _uID = node.uID;
+
+            if (node.parent != null)
+            {
+                ConnectionComponent.ConnectionComponentCreateArgs connectionComponentCreateArgs = new ConnectionComponent.ConnectionComponentCreateArgs();
+
+                GUIComponent parentComponent = canvas.FindComponent(node.parent);
+
+                if (parentComponent == null)
+                {
+                    Debug.LogWarning($"Component for node {node} has no active parent component! When creating NodeCompnents from existing nodes, do so in PreOrder.");
+                }
+                else
+                {
+                    connectionComponentCreateArgs.from = (NodeComponent)parentComponent;
+                    connectionComponentCreateArgs.to = this;
+
+                    parentConnection = canvas.Create<ConnectionComponent>(connectionComponentCreateArgs);
+                }
+            }
+        }
         else
+        {
             node = createArgs.graph.AddNode(createArgs.nodeType, createArgs.position);
+        }
 
         layout = new NodeComponentLayout(this);
     }
     public override void OnGUI()
     {
+        if (node == null)
+            return;
+
         layout.Update();
 
         DoEvents();
@@ -46,10 +77,16 @@ public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFrama
 
         GUI.color = Styles.windowBackground;
 
-        if (node.CanHaveParent())
+        if (
+            node.connectionDescriptor == Node.ConnectionDescriptor.OnlyInConnection
+            || node.connectionDescriptor == Node.ConnectionDescriptor.Both
+        )
             GUI.DrawTexture(layout.inConnection, Styles.circle);
 
-        if (node.CanHaveChildren())
+        if (
+            node.connectionDescriptor == Node.ConnectionDescriptor.OnlyOutConnection
+            || node.connectionDescriptor == Node.ConnectionDescriptor.Both
+        )
             Styles.roundedBox.DrawIfRepaint(layout.outConnection, false, false, false, false);
 
         GUI.color = Styles.windowBackground;
@@ -73,7 +110,7 @@ public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFrama
         GUILayout.Space(ContentPadding.bottom);
         GUILayout.EndArea();
 
-        List<Error> errors = node.GetErrors();
+        List<Error> errors = Enumerable.Empty<Error>().ToList();
 
         if (errors.Count > 0)
         {
@@ -101,24 +138,32 @@ public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFrama
     private void DoEvents()
     {
         Event e = Event.current;
-        Vector2 mousePositionGrid = NodeEditor.WindowToGridPosition(NodeEditor.instance.eventNoZoom.mousePosition);
+        Vector2 mousePositionGrid = canvas.zoomer.WindowToGridPosition(canvas.mousePositionNoZoom);
 
         switch (e.rawType)
         {
             case EventType.MouseDown when e.button == 0:
-                if (layout.inConnectionSliced.Contains(e.mousePosition) && node.CanHaveParent())
+                if (layout.inConnectionSliced.Contains(e.mousePosition))
                 {
-                    ConnectionComponent.ConnectionComponentCreateArgs createArgs = new ConnectionComponent.ConnectionComponentCreateArgs();
-                    createArgs.to = this;
+                    if (node.CanHaveParent())
+                    {
+                        ConnectionComponent.ConnectionComponentCreateArgs createArgs = new ConnectionComponent.ConnectionComponentCreateArgs();
+                        createArgs.to = this;
 
-                    floatingConnection = NodeEditor.instance.canvas.Create<ConnectionComponent>(createArgs);
+                        floatingConnection = canvas.Create<ConnectionComponent>(createArgs);
+                    }
+                    else if (parentConnection != null)
+                    {
+                        parentConnection.to = null;
+                        floatingConnection = parentConnection;
+                    }
                 }
                 else if (layout.outConnectionSliced.Contains(e.mousePosition) && node.CanHaveChildren())
                 {
                     ConnectionComponent.ConnectionComponentCreateArgs createArgs = new ConnectionComponent.ConnectionComponentCreateArgs();
                     createArgs.from = this;
 
-                    floatingConnection = NodeEditor.instance.canvas.Create<ConnectionComponent>(createArgs);
+                    floatingConnection = canvas.Create<ConnectionComponent>(createArgs);
                 }
                 break;
             case EventType.MouseUp:
@@ -127,7 +172,7 @@ public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFrama
                 if (floatingConnection == null)
                     break;
 
-                NodeComponent hovered = NodeEditor.instance.canvas.hovered as NodeComponent;
+                NodeComponent hovered = canvas.hovered as NodeComponent;
 
                 if (hovered != null && hovered != this)
                 {
@@ -135,15 +180,14 @@ public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFrama
 
                     if (hoverType == HoverType.InConnection && floatingConnection.to == null)
                         floatingConnection.to = hovered;
-                    else if (hoverType == HoverType.OutConnection && floatingConnection.from == null)
+                    else if (hoverType == HoverType.OutConnection && floatingConnection.from == null && hovered.node.CanHaveChildren())
                         floatingConnection.from = hovered;
 
-                    floatingConnection.Join();
                     floatingConnection = null;
                 }
                 else
                 {
-                    NodeEditor.instance.canvas.Remove(floatingConnection);
+                    Destroy(floatingConnection);
                     floatingConnection = null;
                 }
 
@@ -203,14 +247,57 @@ public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFrama
             || layout.outConnection.Contains(mousePosition);
     }
     public override bool ResolveObject(UnityEngine.Object obj) { return obj == node; }
+    public override string GetDebugInfo()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.AppendLine(String.Format("<b>Name:</b> {0}", node.name));
+        sb.AppendLine(String.Format("<b>GUID:</b> {0}", node.uID));
+        sb.AppendLine(String.Format("<b>Status Indicator Enabled:</b> {0}", node.enableStatusIndicator));
+        sb.AppendLine(String.Format("<b>Connection Descriptor:</b> {0}", node.connectionDescriptor.ToString()));
+        sb.AppendLine(String.Format("<b>Graph Position:</b> {0}", node.graphPosition));
+        sb.AppendLine();
+
+        sb.AppendLine(String.Format("<b>Parent:</b> {0}", node.parent?.name));
+        sb.Append("<b>Children:</b> ");
+        sb.AppendLine(String.Join(", ", node.children.Select(x => x.name)));
+        sb.Append("<b>Conditionals:</b> ");
+        sb.AppendLine(String.Join(", ", node.conditionals.Select(x => x.name)));
+        sb.Append("<b>Modifiers:</b> ");
+        sb.AppendLine(String.Join(", ", node.modifiers.Select(x => x.name)));
+        sb.AppendLine();
+
+        sb.AppendLine(String.Format("<b>Body:</b> {0}", layout.body));
+        sb.AppendLine(String.Format("<b>Content:</b> {0}", layout.content));
+        sb.AppendLine(String.Format("<b>Shadow:</b> {0}", layout.shadow));
+        sb.AppendLine(String.Format("<b>InConnection:</b> {0}", layout.inConnection));
+        sb.AppendLine(String.Format("<b>OutConnection:</b> {0}", layout.outConnection));
+        sb.AppendLine(String.Format("<b>InConnectionSliced:</b> {0}", layout.inConnectionSliced));
+        sb.AppendLine(String.Format("<b>OutConnectionSliced:</b> {0}", layout.outConnectionSliced));
+        sb.AppendLine(String.Format("<b>ErrorBox:</b> {0}", layout.errorBox));
+        sb.Append(String.Format("<b>PriorityIndicator:</b> {0}", layout.priorityIndicator));
+
+        return sb.ToString();
+    }
     public bool IsSelectable() { return true; }
-    public bool IsHit(Vector2 mousePosition) { return layout.body.Contains(mousePosition); }
+    public bool IsHit(Vector2 mousePosition) { return layout.gridRect.Contains(canvas.zoomer.WindowToGridPosition(mousePosition)); }
     public bool Overlaps(Rect rect) { return layout.body.Overlaps(rect, true); }
     public void Select(bool additive) { isSelected = true; }
     public void Deselect() { isSelected = false; }
     public UnityEngine.Object GetEditable() { return node; }
     public bool IsEditable() { return true; }
     public bool IsFramable() { return true; }
+    public bool IsDeletable() { return isSelected; }
+    public void Delete() { node.graph.DeleteNodes(new List<Node>() { node }); }
+    public bool Equals(Schema.Internal.GraphObject graphObject)
+    {
+        Node node = graphObject as Node;
+
+        if (node != null)
+            return node.uID == uID;
+        else
+            return false;
+    }
     public class NodeComponentCreateArgs : CreateArgs
     {
         public Graph graph { get; set; }
@@ -266,7 +353,7 @@ public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFrama
             last = current;
 
             Rect r = gridRect;
-            r.position = NodeEditor.GridToWindowPositionNoClipped(r.position);
+            r.position = component.canvas.zoomer.GridToWindowPositionNoClipped(r.position);
 
             Vector2 v = Styles.roundedBox.CalcSize(new GUIContent(last.priority.ToString()));
             v = new Vector2(Mathf.Max(24, v.x + 10), Mathf.Max(24, v.y + 10));
@@ -292,7 +379,7 @@ public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFrama
         }
         private NodeComponent component { get; set; }
         private ShallowNode last { get; set; }
-        private Rect gridRect { get; set; }
+        public Rect gridRect { get; set; }
         public Rect body { get; set; }
         public Rect content { get; set; }
         public Rect shadow { get; set; }

@@ -10,15 +10,13 @@ public class DebugLogFormat : Action
 {
     [TextArea] public string message;
     public List<BlackboardEntrySelector> keys;
-    protected override void OnEnable()
+    protected override void OnObjectEnable()
     {
         if (keys != null)
         {
             foreach (BlackboardEntrySelector key in keys)
                 key.ApplyAllFilters();
         }
-
-        base.OnEnable();
     }
     private void OnValidate()
     {

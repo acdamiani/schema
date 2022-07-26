@@ -17,12 +17,12 @@ namespace Schema.Builtin.Nodes
         public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
         [Tooltip("Blackboard variable to store the new reflected vector in"), WriteOnly]
         public BlackboardEntrySelector reflected = new BlackboardEntrySelector();
-        protected override void OnEnable()
+        protected override void OnObjectEnable()
         {
             vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3));
             vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3));
 
-            base.OnEnable();
+            ;
         }
         void OnValidate()
         {

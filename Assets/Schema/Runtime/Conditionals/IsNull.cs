@@ -3,14 +3,14 @@ using System;
 using System.Reflection;
 using UnityEngine;
 
-public class IsNull : Decorator
+public class IsNull : Conditional
 {
     [Tooltip("Entry to check for null")] public BlackboardEntrySelector entry;
     class IsNullMemory
     {
         public object defaultValue;
     }
-    protected override void OnDecoratorEnable()
+    protected override void OnObjectEnable()
     {
         entry.ApplyAllFilters();
     }

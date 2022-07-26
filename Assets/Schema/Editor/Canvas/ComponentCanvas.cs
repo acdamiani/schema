@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SchemaEditor.Internal.ComponentSystem;
 using SchemaEditor.Internal;
 using Schema.Utilities;
 using UnityEngine;
@@ -16,14 +17,31 @@ namespace SchemaEditor.Internal
         private GUIComponent[] _selected = Array.Empty<GUIComponent>();
         public SelectionBoxComponent selectionBoxComponent { get { return _selectionBoxComponent; } }
         private SelectionBoxComponent _selectionBoxComponent;
-        private IControlIDProvider context;
-        public ComponentCanvas(IControlIDProvider context, SelectionBoxComponent.SelectionBoxComponentCreateArgs selectionBoxComponentCreateArgs)
+        public DebugViewComponent debugViewComponent { get { return _debugViewComponent; } }
+        private DebugViewComponent _debugViewComponent;
+        public ICanvasContextProvider context { get; }
+        public PannerZoomer zoomer { get; set; }
+        public Vector2 mousePositionNoZoom { get; }
+        private Vector2 _mousePositionNoZoom;
+        private Action<Rect, float, Vector2> _doGrid;
+        public ComponentCanvas(
+            ICanvasContextProvider context,
+            SelectionBoxComponent.SelectionBoxComponentCreateArgs selectionBoxComponentCreateArgs,
+            PannerZoomer zoomer,
+            Action<Rect, float, Vector2> doGrid
+        )
         {
             selectionBoxComponentCreateArgs.layer = 1;
             _selectionBoxComponent = Create<SelectionBoxComponent>(selectionBoxComponentCreateArgs);
             _selectionBoxComponent.hidden = true;
 
+            CreateArgs debugViewComponentArgs = new CreateArgs();
+            debugViewComponentArgs.layer = 100;
+            _debugViewComponent = Create<DebugViewComponent>(debugViewComponentArgs);
+
+            this.zoomer = zoomer;
             this.context = context;
+            this._doGrid = doGrid;
         }
         public T Create<T>(CreateArgs args) where T : GUIComponent, new()
         {
@@ -35,6 +53,13 @@ namespace SchemaEditor.Internal
             ArrayUtility.Add(ref _components, component);
 
             return component;
+        }
+        public GUIComponent FindComponent(Schema.Internal.GraphObject graphObject)
+        {
+            return (GUIComponent)_components
+                .Where(c => c is IGraphObjectProvider)
+                .Cast<IGraphObjectProvider>()
+                .FirstOrDefault(c => c.Equals(graphObject));
         }
         public void Remove(GUIComponent component)
         {
@@ -73,10 +98,32 @@ namespace SchemaEditor.Internal
         }
         public void Draw()
         {
+            _doGrid(context.GetZoomRect(), zoomer.zoom, zoomer.pan);
+
+            _mousePositionNoZoom = Event.current.mousePosition;
+
             GUIComponent[] c = (GUIComponent[])components.Clone();
-            Array.Sort(c, (a, b) => b.layer - a.layer);
+
+            Array.Sort(
+                c,
+                (a, b) => Event.current.type == EventType.Repaint
+                    ? b.layer - a.layer
+                    : a.layer - b.layer
+            );
 
             DoEvents(c);
+
+            c = c.Intersect(components).ToArray();
+
+            GUIComponent[] viewComponents = c.Where(c => c is IViewElement).ToArray();
+            c = c.Except(viewComponents).ToArray();
+
+            zoomer.Begin();
+
+            for (int i = viewComponents.Length - 1; i >= 0; i--)
+                viewComponents[i].OnGUI();
+
+            zoomer.End();
 
             for (int i = c.Length - 1; i >= 0; i--)
                 c[i].OnGUI();
@@ -105,18 +152,47 @@ namespace SchemaEditor.Internal
         }
         private void DoEvents(IEnumerable<GUIComponent> layeredComponents)
         {
-            switch (Event.current.type)
+            bool inSink = IsInSink(Event.current);
+
+            switch (Event.current.rawType)
             {
-                case EventType.MouseDown:
+                case EventType.MouseDown when !inSink:
                     OnMouseDown(Event.current, layeredComponents);
                     break;
-                case EventType.MouseDrag:
+                case EventType.MouseDrag when !inSink:
                     OnMouseDrag(Event.current);
                     break;
-                case EventType.ScrollWheel:
+                case EventType.ScrollWheel when !inSink:
                     OnMouseScroll(Event.current);
                     break;
+                case EventType.KeyDown:
+                    OnKeyDown(Event.current);
+                    break;
             }
+        }
+        private void OnKeyDown(Event keyEvent)
+        {
+            switch (keyEvent.keyCode)
+            {
+                case KeyCode.Delete:
+                    foreach (IDeletable deletable in components.Where(x => x is IDeletable).Cast<IDeletable>())
+                    {
+                        if (deletable.IsDeletable())
+                            deletable.Delete();
+                    }
+
+                    break;
+            }
+        }
+        private bool IsInSink(Event mouseEvent)
+        {
+            if (!mouseEvent.isMouse)
+                return false;
+
+            return components
+                .Where(c => c is ICanvasMouseEventSink)
+                .Cast<ICanvasMouseEventSink>()
+                .Any(c => c.GetRect().Contains(mouseEvent.mousePosition));
         }
         private void OnMouseDown(Event mouseEvent, IEnumerable<GUIComponent> layeredComponents)
         {
@@ -141,7 +217,8 @@ namespace SchemaEditor.Internal
                         if (!mouseEvent.shift && !selected.Contains(component))
                             DeselectAll();
 
-                        ArrayUtility.Add(ref _selected, component);
+                        if (Array.IndexOf(_selected, component) == -1)
+                            ArrayUtility.Add(ref _selected, component);
 
                         selectableComponent.Select(mouseEvent.shift);
 
@@ -150,7 +227,7 @@ namespace SchemaEditor.Internal
 
                     if (hovered == null)
                     {
-                        selectionBoxComponent.mouseDownPosition = NodeEditor.WindowToGridPosition(mouseEvent.mousePosition);
+                        selectionBoxComponent.mouseDownPosition = zoomer.WindowToGridPosition(mouseEvent.mousePosition);
                         selectionBoxComponent.hidden = false;
                     }
 

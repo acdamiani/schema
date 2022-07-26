@@ -9,10 +9,8 @@ namespace Schema
     [Serializable]
     public abstract class Action : Node
     {
-        public override bool CanHaveChildren()
-        {
-            return false;
-        }
+        public override ConnectionDescriptor connectionDescriptor => ConnectionDescriptor.OnlyInConnection;
+        public override bool CanHaveChildren() { return false; }
         /// <summary>
         /// Runs once when all nodes are first initialized. Similar to Start() in a MonoBehavior class
         /// </summary>

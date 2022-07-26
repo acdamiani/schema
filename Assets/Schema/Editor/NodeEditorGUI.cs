@@ -8,6 +8,7 @@ using Schema.Internal;
 using System.Linq;
 using SchemaEditor.Editors;
 using SchemaEditor.Internal;
+using SchemaEditor.Internal.ComponentSystem;
 
 namespace SchemaEditor
 {
@@ -15,7 +16,7 @@ namespace SchemaEditor
     {
         private Matrix4x4 prevMatrix;
         private bool drawBox;
-        private float tabHeight => isDocked() ? 19.0f : 21.0f;
+        public float tabHeight => isDocked() ? 19.0f : 21.0f;
         private Func<bool> isDocked => isDockedFunc ??= this.GetIsDockedDelegate();
         private Func<bool> isDockedFunc;
         private UnityEditor.Editor editor;
@@ -37,15 +38,13 @@ namespace SchemaEditor
 
             if (target != null)
             {
-                DrawGrid(window, windowInfo.zoom, windowInfo.pan);
+                //DrawGrid(window, windowInfo.zoom, windowInfo.pan);
 
                 eventNoZoom = new Event(Event.current);
 
-                BeginZoomed(window, windowInfo.zoom, tabHeight);
+                //BeginZoomed(window, windowInfo.zoom, tabHeight);
                 canvas.Draw();
-                EndZoomed();
-
-                ProcessEvents(Event.current);
+                //EndZoomed();
 
                 if (Event.current.type == EventType.Layout) LayoutGUI();
 
@@ -80,33 +79,33 @@ namespace SchemaEditor
 
                 Vector2 size;
 
-                if (windowInfo.selectedDecorator)
-                {
-                    //Draw legend here
+                // if (windowInfo.selectedDecorator)
+                // {
+                //     //Draw legend here
 
-                    size = EditorStyles.label.CalcSize(new GUIContent("Lower Priority Nodes"));
-                    GUI.Label(new Rect(position.width - size.x - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - size.y - 8f, size.x, size.y),
-                     new GUIContent("Lower Priority Nodes"), EditorStyles.label);
+                //     size = EditorStyles.label.CalcSize(new GUIContent("Lower Priority Nodes"));
+                //     GUI.Label(new Rect(position.width - size.x - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - size.y - 8f, size.x, size.y),
+                //      new GUIContent("Lower Priority Nodes"), EditorStyles.label);
 
-                    GUI.color = Styles.lowerPriorityColor;
-                    GUI.Label(new Rect(position.width - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - size.y / 2f - 16f, 16f, 16f),
-                        "",
-                        Styles.styles.decorator);
-                    GUI.color = Color.white;
+                //     GUI.color = Styles.lowerPriorityColor;
+                //     GUI.Label(new Rect(position.width - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - size.y / 2f - 16f, 16f, 16f),
+                //         "",
+                //         Styles.styles.decorator);
+                //     GUI.color = Color.white;
 
-                    float lastHeight = size.y + 16f;
-                    size = EditorStyles.label.CalcSize(new GUIContent("Self Nodes"));
+                //     float lastHeight = size.y + 16f;
+                //     size = EditorStyles.label.CalcSize(new GUIContent("Self Nodes"));
 
-                    //Draw legend here
-                    GUI.Label(new Rect(position.width - size.x - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - lastHeight - size.y - 8f, size.x, size.y),
-                     new GUIContent("Self Nodes"), EditorStyles.label);
+                //     //Draw legend here
+                //     GUI.Label(new Rect(position.width - size.x - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - lastHeight - size.y - 8f, size.x, size.y),
+                //      new GUIContent("Self Nodes"), EditorStyles.label);
 
-                    GUI.color = Styles.selfColor;
-                    GUI.Label(new Rect(position.width - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - lastHeight - size.y / 2f - 16f, 16f, 16f),
-                        "",
-                        Styles.styles.decorator);
-                    GUI.color = Color.white;
-                }
+                //     GUI.color = Styles.selfColor;
+                //     GUI.Label(new Rect(position.width - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - lastHeight - size.y / 2f - 16f, 16f, 16f),
+                //         "",
+                //         Styles.styles.decorator);
+                //     GUI.color = Color.white;
+                // }
 
                 if (activeAgent != null)
                 {
@@ -118,7 +117,6 @@ namespace SchemaEditor
                 if (Prefs.enableDebugView && windowInfo != null)
                 {
                     string content = @$"hoveredNode: {windowInfo.hoveredNode?.name}
-hoveredDecorator: {windowInfo.hoveredDecorator?.name}
 hoveredType: {windowInfo.hoveredType}
 hoveredConnection: {windowInfo.hoveredConnection}
 window: {window}
@@ -193,7 +191,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             Repaint();
         }
-
         void LayoutGUI()
         {
             List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
@@ -216,13 +213,13 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 target.blackboard.entries[Array.IndexOf(target.blackboard.entries, e)] = ScriptableObject.Instantiate(e);
             }
 
-            if (windowInfo.selectedDecorator != null)
-            {
-                targets.Add(windowInfo.selectedDecorator);
+            // if (windowInfo.selectedDecorator != null)
+            // {
+            //     targets.Add(windowInfo.selectedDecorator);
 
-                if (!defaultDecoratorEditor || defaultDecoratorEditor.target == null || defaultDecoratorEditor.target != windowInfo.selectedDecorator)
-                    UnityEditor.Editor.CreateCachedEditor(windowInfo.selectedDecorator, typeof(DefaultDecoratorEditor), ref defaultDecoratorEditor);
-            }
+            //     if (!defaultDecoratorEditor || defaultDecoratorEditor.target == null || defaultDecoratorEditor.target != windowInfo.selectedDecorator)
+            //         UnityEditor.Editor.CreateCachedEditor(windowInfo.selectedDecorator, typeof(DefaultDecoratorEditor), ref defaultDecoratorEditor);
+            // }
 
             IEnumerable<UnityEngine.Object> editableComponents = canvas.selected
                 .Where(x => x is IEditable)
@@ -238,40 +235,27 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             if (distinctTypes.Count > 1) return;
 
             //caches inspector once per OnGUI call so we don't get EventType.Layout and EventType.Repaint related errors
-            if (editor == null || editor.targets.Any(obj => obj == null) || !editor.targets.SequenceEqual(targets) && targets.Count > 0)
+            if ((editor == null || editor.targets.Any(obj => obj == null) || !editor.targets.SequenceEqual(targets)) && targets.Count > 0)
             {
                 UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), null, ref editor);
 
                 if (targets.Any(x => typeof(Node).IsAssignableFrom(x.GetType())))
                     UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), typeof(DefaultNodeEditor), ref defaultNodeEditor);
+                else
+                    DestroyImmediate(defaultNodeEditor);
             }
             else if (targets.Count == 0)
             {
                 editor = null;
             }
 
-            SchemaAgent agent = Selection.activeGameObject?.GetComponent<SchemaAgent>();
-
-            if (Application.isPlaying)
-            {
-                if (!activeAgent || (agent != null && agent != activeAgent && agent.target == target))
-                {
-                    activeAgent = agent;
-                    editingPaused = true;
-                }
-            }
-            else
-            {
-                activeAgent = null;
-            }
-
-            if (agent)
-            {
-                if (windowInfo.selectedDecorator != null)
-                    agent.editorTarget = windowInfo.selectedDecorator.node;
-                else if (editor != null && editor.targets.All(target => typeof(Node).IsAssignableFrom(target.GetType())))
-                    agent.editorTarget = (Node)editor.targets[0];
-            }
+            // if (agent)
+            // {
+            //     // if (windowInfo.selectedDecorator != null)
+            //     //     agent.editorTarget = windowInfo.selectedDecorator.node;
+            //     // else if (editor != null && editor.targets.All(target => typeof(Node).IsAssignableFrom(target.GetType())))
+            //     //     agent.editorTarget = (Node)editor.targets[0];
+            // }
 
             switch (searchWantsFocus)
             {
@@ -331,7 +315,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                     CurveUtility.Bezier bezier = new CurveUtility.Bezier(p0, p1, p2, p3);
 
-                    Node active = activeAgent?.GetRunningNode();
+                    // Node active = activeAgent?.GetRunningNode();
+                    Node active = null;
 
                     bool isActiveConnection = (EditorApplication.isPlaying
                         || EditorApplication.isPaused)
@@ -416,331 +401,331 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             }
             EndZoomed();
         }
-        private void DrawNodes()
-        {
-            Event current = Event.current;
-
-            //these will be overriden later if the nodes, decorators, or inspector contains the mouse position
-            if (window.Contains(current.mousePosition) && IsNotLayoutEvent(current))
-                windowInfo.hoveredType = Window.Hovering.Window;
-            else if (IsNotLayoutEvent(current))
-                windowInfo.hoveredType = Window.Hovering.None;
-
-            BeginZoomed(window, windowInfo.zoom, tabHeight);
-
-            Rect windowGridView = WindowToGridRect(window);
-
-            List<Node> nodes = target.nodes.ToList();
-
-            if (nodes != null)
-            {
-                Vector2 boxStartPos = GridToWindowPositionNoClipped(windowInfo.mouseDownPos);
-                Vector2 boxSize = current.mousePosition - boxStartPos;
-                if (boxSize.x < 0) { boxStartPos.x += boxSize.x; boxSize.x = Mathf.Abs(boxSize.x); }
-                if (boxSize.y < 0) { boxStartPos.y += boxSize.y; boxSize.y = Mathf.Abs(boxSize.y); }
-                Rect selectionBox = new Rect(boxStartPos, boxSize);
-
-                List<Node> selectionQueue = new List<Node>();
-
-                bool didHoverDecoratorThisFrame = false;
-
-                if (activeAgent != null)
-                {
-                    foreach (Node node in activeAgent.GetCalledNodes())
-                        NodeTicked(node);
-
-                    windowInfo.nodeStatus = activeAgent.GetNodeStatus();
-                }
-
-                for (int i = nodes.Count - 1; i >= 0; i--)
-                {
-                    Node node = nodes[i];
-                    Vector2 positionNoClipped = GridToWindowPositionNoClipped(node.graphPosition);
-                    Vector2 size = GetArea(node, false);
-                    Vector2 sizeWithPadding = GetAreaWithPadding(node, false);
-
-                    Rect contained = new Rect(positionNoClipped.x + GUIData.nodePadding, positionNoClipped.y + GUIData.nodePadding, size.x, size.y);
-                    Rect rect = new Rect(positionNoClipped, new Vector2(sizeWithPadding.x, sizeWithPadding.y));
-
-                    if (
-                        !windowGridView.Overlaps(
-                            new Rect(
-                                node.graphPosition - Vector2.one * GUIData.nodePadding,
-                                (sizeWithPadding + Vector2.one * GUIData.nodePadding * 2) * windowInfo.zoom)
-                            )
-                        )
-                        continue;
-
-                    if (node.CanHaveParent())
-                    {
-                        // float width = size.x - GUIData.nodePadding * 2;
-                        float width = 24f;
-                        Rect inConnection = new Rect(positionNoClipped.x + GUIData.nodePadding + size.x / 2f - width / 2f, positionNoClipped.y - width / 2f, width, 24f);
-                        Rect inConnectionHover = new Rect(inConnection.position.x, inConnection.position.y, inConnection.size.x, inConnection.size.y / 2f);
-
-                        if (inConnectionHover.Contains(current.mousePosition) && IsNotLayoutEvent(current))
-                        {
-                            windowInfo.hoveredType = Window.Hovering.InConnection;
-                            windowInfo.hoveredNode = node;
-                        }
-
-                        if (windowInfo.hoveredType == Window.Hovering.InConnection && windowInfo.hoveredNode == node && !drawBox)
-                            GUI.color = Color.white;
-                        else
-                            GUI.color = Prefs.portColor;
-
-                        GUI.DrawTexture(inConnection, Styles.circle);
-
-                        GUI.color = Color.white;
-
-                        // GUI.Box(inConnection, "", Styles.styles.decorator);
-                    }
-
-                    // if (node.maxChildren > 0)
-                    // {
-                    //     float width = rect.width - GUIData.nodePadding * 3f;
-                    //     Rect outConnection = new Rect(rect.x + rect.width / 2f - width / 2f, rect.yMax - 9f, width, 18f);
-                    //     Rect outConnectionHover = new Rect(outConnection.x, outConnection.y + outConnection.height / 2f, outConnection.width, outConnection.height / 2f);
-
-                    //     if (outConnectionHover.Contains(current.mousePosition) && IsNotLayoutEvent(current))
-                    //     {
-
-                    //         windowInfo.hoveredType = Window.Hovering.OutConnection;
-                    //         windowInfo.hoveredNode = node;
-                    //     }
-
-                    //     if (windowInfo.hoveredType == Window.Hovering.OutConnection && windowInfo.hoveredNode == node && !drawBox)
-                    //         GUI.color = Color.white;
-                    //     else
-                    //         GUI.color = NodeEditorPrefs.portColor;
-
-                    //     GUI.Box(outConnection, "", Styles.styles.decorator);
-                    // }
+        // private void DrawNodes()
+        // {
+        //     Event current = Event.current;
+
+        //     //these will be overriden later if the nodes, decorators, or inspector contains the mouse position
+        //     if (window.Contains(current.mousePosition) && IsNotLayoutEvent(current))
+        //         windowInfo.hoveredType = Window.Hovering.Window;
+        //     else if (IsNotLayoutEvent(current))
+        //         windowInfo.hoveredType = Window.Hovering.None;
+
+        //     BeginZoomed(window, windowInfo.zoom, tabHeight);
+
+        //     Rect windowGridView = WindowToGridRect(window);
+
+        //     List<Node> nodes = target.nodes.ToList();
+
+        //     if (nodes != null)
+        //     {
+        //         Vector2 boxStartPos = GridToWindowPositionNoClipped(windowInfo.mouseDownPos);
+        //         Vector2 boxSize = current.mousePosition - boxStartPos;
+        //         if (boxSize.x < 0) { boxStartPos.x += boxSize.x; boxSize.x = Mathf.Abs(boxSize.x); }
+        //         if (boxSize.y < 0) { boxStartPos.y += boxSize.y; boxSize.y = Mathf.Abs(boxSize.y); }
+        //         Rect selectionBox = new Rect(boxStartPos, boxSize);
+
+        //         List<Node> selectionQueue = new List<Node>();
+
+        //         bool didHoverDecoratorThisFrame = false;
+
+        //         if (activeAgent != null)
+        //         {
+        //             foreach (Node node in activeAgent.GetCalledNodes())
+        //                 NodeTicked(node);
+
+        //             windowInfo.nodeStatus = activeAgent.GetNodeStatus();
+        //         }
+
+        //         for (int i = nodes.Count - 1; i >= 0; i--)
+        //         {
+        //             Node node = nodes[i];
+        //             Vector2 positionNoClipped = GridToWindowPositionNoClipped(node.graphPosition);
+        //             Vector2 size = GetArea(node, false);
+        //             Vector2 sizeWithPadding = GetAreaWithPadding(node, false);
+
+        //             Rect contained = new Rect(positionNoClipped.x + GUIData.nodePadding, positionNoClipped.y + GUIData.nodePadding, size.x, size.y);
+        //             Rect rect = new Rect(positionNoClipped, new Vector2(sizeWithPadding.x, sizeWithPadding.y));
+
+        //             if (
+        //                 !windowGridView.Overlaps(
+        //                     new Rect(
+        //                         node.graphPosition - Vector2.one * GUIData.nodePadding,
+        //                         (sizeWithPadding + Vector2.one * GUIData.nodePadding * 2) * windowInfo.zoom)
+        //                     )
+        //                 )
+        //                 continue;
+
+        //             if (node.CanHaveParent())
+        //             {
+        //                 // float width = size.x - GUIData.nodePadding * 2;
+        //                 float width = 24f;
+        //                 Rect inConnection = new Rect(positionNoClipped.x + GUIData.nodePadding + size.x / 2f - width / 2f, positionNoClipped.y - width / 2f, width, 24f);
+        //                 Rect inConnectionHover = new Rect(inConnection.position.x, inConnection.position.y, inConnection.size.x, inConnection.size.y / 2f);
+
+        //                 if (inConnectionHover.Contains(current.mousePosition) && IsNotLayoutEvent(current))
+        //                 {
+        //                     windowInfo.hoveredType = Window.Hovering.InConnection;
+        //                     windowInfo.hoveredNode = node;
+        //                 }
+
+        //                 if (windowInfo.hoveredType == Window.Hovering.InConnection && windowInfo.hoveredNode == node && !drawBox)
+        //                     GUI.color = Color.white;
+        //                 else
+        //                     GUI.color = Prefs.portColor;
+
+        //                 GUI.DrawTexture(inConnection, Styles.circle);
+
+        //                 GUI.color = Color.white;
+
+        //                 // GUI.Box(inConnection, "", Styles.styles.decorator);
+        //             }
+
+        //             // if (node.maxChildren > 0)
+        //             // {
+        //             //     float width = rect.width - GUIData.nodePadding * 3f;
+        //             //     Rect outConnection = new Rect(rect.x + rect.width / 2f - width / 2f, rect.yMax - 9f, width, 18f);
+        //             //     Rect outConnectionHover = new Rect(outConnection.x, outConnection.y + outConnection.height / 2f, outConnection.width, outConnection.height / 2f);
+
+        //             //     if (outConnectionHover.Contains(current.mousePosition) && IsNotLayoutEvent(current))
+        //             //     {
+
+        //             //         windowInfo.hoveredType = Window.Hovering.OutConnection;
+        //             //         windowInfo.hoveredNode = node;
+        //             //     }
+
+        //             //     if (windowInfo.hoveredType == Window.Hovering.OutConnection && windowInfo.hoveredNode == node && !drawBox)
+        //             //         GUI.color = Color.white;
+        //             //     else
+        //             //         GUI.color = NodeEditorPrefs.portColor;
+
+        //             //     GUI.Box(outConnection, "", Styles.styles.decorator);
+        //             // }
 
-                    GUI.color = Styles.windowBackground;
+        //             GUI.color = Styles.windowBackground;
 
-                    GUI.Box(rect.Pad(new RectOffset(-14, -14, -14, -14)), "", Styles.shadow);
+        //             GUI.Box(rect.Pad(new RectOffset(-14, -14, -14, -14)), "", Styles.shadow);
 
-                    if (windowInfo.selected.Contains(node))
-                        GUI.color = Prefs.selectionColor;
-                    else if (windowInfo.alpha.ContainsKey(node.uID))
-                        GUI.color = Color.Lerp(new Color32(80, 80, 80, 255), Prefs.highlightColor, windowInfo.alpha[node.uID]);
-                    else if (windowInfo.selectedDecorator &&
-                        node.priority > 0 &&
-                        windowInfo.selectedDecorator.node.priority > 0 &&
-                        (windowInfo.selectedDecorator.abortsType == Decorator.ObserverAborts.Self ||
-                        windowInfo.selectedDecorator.abortsType == Decorator.ObserverAborts.Both
-                        ) &&
-                        IsSubTreeOf(windowInfo.selectedDecorator.node, node))
-                        GUI.color = Styles.selfColor;
-                    else if (windowInfo.selectedDecorator &&
-                        node.priority > 0 &&
-                        windowInfo.selectedDecorator.node.priority > 0 &&
-                        (windowInfo.selectedDecorator.abortsType == Decorator.ObserverAborts.LowerPriority ||
-                        windowInfo.selectedDecorator.abortsType == Decorator.ObserverAborts.Both
-                        ) &&
-                        IsLowerPriority(windowInfo.selectedDecorator.node, node) &&
-                        windowInfo.selectedDecorator.node.priority < node.priority)
-                        GUI.color = Styles.lowerPriorityColor;
-                    else
-                        GUI.color = EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : new Color32(176, 176, 176, 255);
+        //             if (windowInfo.selected.Contains(node))
+        //                 GUI.color = Prefs.selectionColor;
+        //             else if (windowInfo.alpha.ContainsKey(node.uID))
+        //                 GUI.color = Color.Lerp(new Color32(80, 80, 80, 255), Prefs.highlightColor, windowInfo.alpha[node.uID]);
+        //             else if (windowInfo.selectedDecorator &&
+        //                 node.priority > 0 &&
+        //                 windowInfo.selectedDecorator.node.priority > 0 &&
+        //                 (windowInfo.selectedDecorator.abortsType == Decorator.ObserverAborts.Self ||
+        //                 windowInfo.selectedDecorator.abortsType == Decorator.ObserverAborts.Both
+        //                 ) &&
+        //                 IsSubTreeOf(windowInfo.selectedDecorator.node, node))
+        //                 GUI.color = Styles.selfColor;
+        //             else if (windowInfo.selectedDecorator &&
+        //                 node.priority > 0 &&
+        //                 windowInfo.selectedDecorator.node.priority > 0 &&
+        //                 (windowInfo.selectedDecorator.abortsType == Decorator.ObserverAborts.LowerPriority ||
+        //                 windowInfo.selectedDecorator.abortsType == Decorator.ObserverAborts.Both
+        //                 ) &&
+        //                 IsLowerPriority(windowInfo.selectedDecorator.node, node) &&
+        //                 windowInfo.selectedDecorator.node.priority < node.priority)
+        //                 GUI.color = Styles.lowerPriorityColor;
+        //             else
+        //                 GUI.color = EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : new Color32(176, 176, 176, 255);
 
-                    GUI.Box(rect, "", Styles.styles.nodeSelected);
+        //             GUI.Box(rect, "", Styles.styles.nodeSelected);
 
-                    GUI.color = Color.white;
+        //             GUI.color = Color.white;
 
-                    bool blocked = false;
+        //             bool blocked = false;
 
-                    if (node.priority > 0)
-                    {
-                        Handles.color = Styles.windowAccent;
-                        Vector3[] circle = HelperMethods.Circle(new Vector2(rect.x, rect.center.y), 15f, 16);
-                        Handles.DrawAAConvexPolygon(circle);
-                        Handles.color = Color.white;
+        //             if (node.priority > 0)
+        //             {
+        //                 Handles.color = Styles.windowAccent;
+        //                 Vector3[] circle = HelperMethods.Circle(new Vector2(rect.x, rect.center.y), 15f, 16);
+        //                 Handles.DrawAAConvexPolygon(circle);
+        //                 Handles.color = Color.white;
 
-                        GUI.Label(new Rect(rect.x - 15f, rect.center.y - 15f, 30f, 30f), node.priority.ToString(), Styles.styles.title);
-                    }
+        //                 GUI.Label(new Rect(rect.x - 15f, rect.center.y - 15f, 30f, 30f), node.priority.ToString(), Styles.styles.title);
+        //             }
 
-                    GUIContent error = GetErrors(node);
+        //             GUIContent error = GetErrors(node);
 
-                    if (error != GUIContent.none)
-                    {
-                        float iconWidth = error.image.width;
-                        float iconHeight = error.image.height;
-                        GUI.Label(new Rect(rect.x + rect.width - iconWidth / 2f, rect.y + rect.height - iconHeight / 2f, iconWidth, iconHeight), error, GUIStyle.none);
-                    }
+        //             if (error != GUIContent.none)
+        //             {
+        //                 float iconWidth = error.image.width;
+        //                 float iconHeight = error.image.height;
+        //                 GUI.Label(new Rect(rect.x + rect.width - iconWidth / 2f, rect.y + rect.height - iconHeight / 2f, iconWidth, iconHeight), error, GUIStyle.none);
+        //             }
 
-                    if (Prefs.enableStatusIndicators && node.enableStatusIndicator && windowInfo.nodeStatus != null && Application.isPlaying && windowInfo.nodeStatus.ContainsKey(node.uID))
-                    {
-                        float iconSize = 32f;
+        //             if (Prefs.enableStatusIndicators && node.enableStatusIndicator && windowInfo.nodeStatus != null && Application.isPlaying && windowInfo.nodeStatus.ContainsKey(node.uID))
+        //             {
+        //                 float iconSize = 32f;
 
-                        bool? nodeStatus = windowInfo.nodeStatus[node.uID];
-                        if (nodeStatus == true)
-                            GUI.color = Prefs.successColor;
-                        else if (nodeStatus == false)
-                            GUI.color = Prefs.failureColor;
+        //                 bool? nodeStatus = windowInfo.nodeStatus[node.uID];
+        //                 if (nodeStatus == true)
+        //                     GUI.color = Prefs.successColor;
+        //                 else if (nodeStatus == false)
+        //                     GUI.color = Prefs.failureColor;
 
-                        GUI.Label(new Rect(rect.x + rect.width - iconSize / 2f, rect.y - iconSize / 2f, iconSize, iconSize),
-                            "",
-                            Styles.styles.decorator);
-                    }
+        //                 GUI.Label(new Rect(rect.x + rect.width - iconSize / 2f, rect.y - iconSize / 2f, iconSize, iconSize),
+        //                     "",
+        //                     Styles.styles.decorator);
+        //             }
 
-                    GUI.color = Color.white;
+        //             GUI.color = Color.white;
 
-                    GUILayout.BeginArea(contained);
-                    GUILayout.BeginVertical();
+        //             GUILayout.BeginArea(contained);
+        //             GUILayout.BeginVertical();
 
-                    List<float> positions = new List<float>();
+        //             List<float> positions = new List<float>();
 
-                    for (int j = 0; j < node.decorators.Length; j++)
-                    {
-                        Decorator d = node.decorators[j];
+        //             for (int j = 0; j < node.decorators.Length; j++)
+        //             {
+        //                 Decorator d = node.decorators[j];
 
-                        if (d == null)
-                            continue;
+        //                 if (d == null)
+        //                     continue;
 
-                        bool isSelected = windowInfo.selectedDecorator == d;
+        //                 bool isSelected = windowInfo.selectedDecorator == d;
 
-                        GUI.color = isSelected ? new Color(.6f, .6f, .1f, 1f) : new Color(.1f, .1f, .4f, 1f);
+        //                 GUI.color = isSelected ? new Color(.6f, .6f, .1f, 1f) : new Color(.1f, .1f, .4f, 1f);
 
-                        GUILayout.BeginVertical(Styles.styles.decorator);
+        //                 GUILayout.BeginVertical(Styles.styles.decorator);
 
-                        GUI.color = Color.white;
+        //                 GUI.color = Color.white;
 
-                        GUILayout.Label(d.name, Styles.styles.nodeLabel, GUILayout.Height(GUIData.labelHeight), GUILayout.ExpandWidth(true));
+        //                 GUILayout.Label(d.name, Styles.styles.nodeLabel, GUILayout.Height(GUIData.labelHeight), GUILayout.ExpandWidth(true));
 
-                        GUILayout.Label(d.GetInfoContent(), Styles.styles.nodeText);
+        //                 GUILayout.Label(d.GetInfoContent(), Styles.styles.nodeText);
 
-                        GUILayout.Space(GUIData.spacing / 2f);
+        //                 GUILayout.Space(GUIData.spacing / 2f);
 
-                        GUILayout.EndVertical();
+        //                 GUILayout.EndVertical();
 
-                        Rect last = GUILayoutUtility.GetLastRect();
+        //                 Rect last = GUILayoutUtility.GetLastRect();
 
-                        positions.Add(last.position.y - (GUIData.spacing / 2f));
+        //                 positions.Add(last.position.y - (GUIData.spacing / 2f));
 
-                        if (last.Contains(current.mousePosition))
-                        {
-                            windowInfo.hoveredDecorator = d;
-                            windowInfo.hoveredType = Window.Hovering.Decorator;
-                            didHoverDecoratorThisFrame = true;
-                            blocked = true;
-                        }
-                        else if (!didHoverDecoratorThisFrame)
-                        {
-                            windowInfo.hoveredDecorator = null;
-                        }
+        //                 if (last.Contains(current.mousePosition))
+        //                 {
+        //                     windowInfo.hoveredDecorator = d;
+        //                     windowInfo.hoveredType = Window.Hovering.Decorator;
+        //                     didHoverDecoratorThisFrame = true;
+        //                     blocked = true;
+        //                 }
+        //                 else if (!didHoverDecoratorThisFrame)
+        //                 {
+        //                     windowInfo.hoveredDecorator = null;
+        //                 }
 
-                        GUILayout.Space(GUIData.spacing);
+        //                 GUILayout.Space(GUIData.spacing);
 
-                        if (j == node.decorators.Length - 1)
-                        {
-                            //last item, add extra position to snap to
-                            positions.Add(last.position.y + last.size.y + (GUIData.spacing / 2f));
-                        }
-                    }
+        //                 if (j == node.decorators.Length - 1)
+        //                 {
+        //                     //last item, add extra position to snap to
+        //                     positions.Add(last.position.y + last.size.y + (GUIData.spacing / 2f));
+        //                 }
+        //             }
 
-                    Rect toDraw = new Rect();
-                    bool draw = node.decorators.Length > 0 && (windowInfo.hoveredNode == node || windowInfo.hoveredType == Window.Hovering.Window) && IsNotLayoutEvent(Event.current);
-
-                    if (draw)
-                    {
-                        float closest = positions[0];
-
-                        for (int j = 1; j < positions.Count; j++)
-                        {
-                            float pos = positions[j];
-
-                            closest = Mathf.Abs(current.mousePosition.y - pos) < Mathf.Abs(current.mousePosition.y - closest) ? pos : closest;
-                        }
-
-                        if (node.decorators.Contains(windowInfo.selectedDecorator))
-                            windowInfo.hoveredDecoratorIndex = positions.IndexOf(closest);
-
-                        toDraw = new Rect(new Vector2(0f, closest - GUIData.spacing / 8f), new Vector2(size.x, GUIData.spacing / 4f));
-                    }
-
-                    GUI.color = Styles.windowAccent;
-
-                    float contentHeight = Mathf.Max((node.icon == null ? 0 : node.icon.height + 10f) + GUIData.labelHeight, GUIData.minContentHeight);
-
-                    GUILayout.BeginVertical(Styles.roundedBox, GUILayout.Height(contentHeight));
-
-                    GUI.color = Color.white;
-
-                    if (node.icon != null)
-                    {
-                        GUILayout.Space(5f);
-                        GUILayout.BeginHorizontal();
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label(node.icon);
-                        GUILayout.FlexibleSpace();
-                        GUILayout.EndHorizontal();
-                        GUILayout.Space(5f);
-                    }
-                    GUILayout.Label(node.name, Styles.styles.nodeLabel, GUILayout.ExpandHeight(true));
-
-                    GUILayout.EndVertical();
-
-                    GUILayout.EndVertical();
-
-                    GUILayout.EndArea();
-
-                    if (draw && windowInfo.lastClicked == Window.Hovering.Decorator && windowInfo.didDragSinceMouseUp && node.decorators.Contains(windowInfo.selectedDecorator))
-                    {
-                        toDraw.position += contained.position;
-
-                        EditorGUI.DrawRect(toDraw, new Color32(200, 200, 200, 255));
-                    }
-
-
-                    if (rect.Contains(current.mousePosition) && IsNotLayoutEvent(current))
-                    {
-                        windowInfo.hoveredNode = node;
-                        if (!blocked)
-                        {
-                            windowInfo.hoveredType = Window.Hovering.Node;
-                        }
-                    }
-
-                    if (rect.Overlaps(selectionBox) && IsNotLayoutEvent(current) && drawBox && windowInfo.didDragSinceMouseUp)
-                    {
-                        selectionQueue.Add(node);
-                    }
-                    else if (drawBox && windowInfo.didDragSinceMouseUp && IsNotLayoutEvent(current))
-                    {
-                        if (windowInfo.selected.Contains(node))
-                        {
-                            windowInfo.selected.Remove(node);
-                        }
-                    }
-                }
-
-                List<string> keys = windowInfo.alpha.Keys.ToList();
-
-                foreach (string node in keys)
-                {
-                    windowInfo.alpha[node] -= 2f * Mathf.Clamp(windowInfo.deltaTime, 0f, float.MaxValue);
-
-                    if (windowInfo.alpha[node] <= 0f)
-                    {
-                        windowInfo.alpha.Remove(node);
-                    }
-                }
-
-                for (int i = selectionQueue.Count - 1; i >= 0; i--)
-                {
-                    if (!windowInfo.selected.Contains(selectionQueue[i]))
-                    {
-                        Select(selectionQueue[i], true);
-                    }
-                }
-            }
-
-            GUI.color = Color.white;
-
-            EndZoomed();
-        }
+        //             Rect toDraw = new Rect();
+        //             bool draw = node.decorators.Length > 0 && (windowInfo.hoveredNode == node || windowInfo.hoveredType == Window.Hovering.Window) && IsNotLayoutEvent(Event.current);
+
+        //             if (draw)
+        //             {
+        //                 float closest = positions[0];
+
+        //                 for (int j = 1; j < positions.Count; j++)
+        //                 {
+        //                     float pos = positions[j];
+
+        //                     closest = Mathf.Abs(current.mousePosition.y - pos) < Mathf.Abs(current.mousePosition.y - closest) ? pos : closest;
+        //                 }
+
+        //                 if (node.decorators.Contains(windowInfo.selectedDecorator))
+        //                     windowInfo.hoveredDecoratorIndex = positions.IndexOf(closest);
+
+        //                 toDraw = new Rect(new Vector2(0f, closest - GUIData.spacing / 8f), new Vector2(size.x, GUIData.spacing / 4f));
+        //             }
+
+        //             GUI.color = Styles.windowAccent;
+
+        //             float contentHeight = Mathf.Max((node.icon == null ? 0 : node.icon.height + 10f) + GUIData.labelHeight, GUIData.minContentHeight);
+
+        //             GUILayout.BeginVertical(Styles.roundedBox, GUILayout.Height(contentHeight));
+
+        //             GUI.color = Color.white;
+
+        //             if (node.icon != null)
+        //             {
+        //                 GUILayout.Space(5f);
+        //                 GUILayout.BeginHorizontal();
+        //                 GUILayout.FlexibleSpace();
+        //                 GUILayout.Label(node.icon);
+        //                 GUILayout.FlexibleSpace();
+        //                 GUILayout.EndHorizontal();
+        //                 GUILayout.Space(5f);
+        //             }
+        //             GUILayout.Label(node.name, Styles.styles.nodeLabel, GUILayout.ExpandHeight(true));
+
+        //             GUILayout.EndVertical();
+
+        //             GUILayout.EndVertical();
+
+        //             GUILayout.EndArea();
+
+        //             if (draw && windowInfo.lastClicked == Window.Hovering.Decorator && windowInfo.didDragSinceMouseUp && node.decorators.Contains(windowInfo.selectedDecorator))
+        //             {
+        //                 toDraw.position += contained.position;
+
+        //                 EditorGUI.DrawRect(toDraw, new Color32(200, 200, 200, 255));
+        //             }
+
+
+        //             if (rect.Contains(current.mousePosition) && IsNotLayoutEvent(current))
+        //             {
+        //                 windowInfo.hoveredNode = node;
+        //                 if (!blocked)
+        //                 {
+        //                     windowInfo.hoveredType = Window.Hovering.Node;
+        //                 }
+        //             }
+
+        //             if (rect.Overlaps(selectionBox) && IsNotLayoutEvent(current) && drawBox && windowInfo.didDragSinceMouseUp)
+        //             {
+        //                 selectionQueue.Add(node);
+        //             }
+        //             else if (drawBox && windowInfo.didDragSinceMouseUp && IsNotLayoutEvent(current))
+        //             {
+        //                 if (windowInfo.selected.Contains(node))
+        //                 {
+        //                     windowInfo.selected.Remove(node);
+        //                 }
+        //             }
+        //         }
+
+        //         List<string> keys = windowInfo.alpha.Keys.ToList();
+
+        //         foreach (string node in keys)
+        //         {
+        //             windowInfo.alpha[node] -= 2f * Mathf.Clamp(windowInfo.deltaTime, 0f, float.MaxValue);
+
+        //             if (windowInfo.alpha[node] <= 0f)
+        //             {
+        //                 windowInfo.alpha.Remove(node);
+        //             }
+        //         }
+
+        //         for (int i = selectionQueue.Count - 1; i >= 0; i--)
+        //         {
+        //             if (!windowInfo.selected.Contains(selectionQueue[i]))
+        //             {
+        //                 Select(selectionQueue[i], true);
+        //             }
+        //         }
+        //     }
+
+        //     GUI.color = Color.white;
+
+        //     EndZoomed();
+        // }
 
         private void NodeTicked(Node node)
         {
@@ -763,26 +748,26 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             float height = Mathf.Max((node.icon == null ? 0 : node.icon.height + 10f) + GUIData.labelHeight, GUIData.minContentHeight);
             float width = Mathf.Max(Styles.styles.nodeLabel.CalcSize(new GUIContent(node.name)).x, node.icon == null ? 0 : node.icon.width);
 
-            foreach (Decorator decorator in node.decorators)
-            {
-                Debug.Log(decorator);
+            // foreach (Decorator decorator in node.decorators)
+            // {
+            //     Debug.Log(decorator);
 
-                if (decorator == null)
-                    continue;
+            //     if (decorator == null)
+            //         continue;
 
-                float decoratorLabelWidth = Styles.styles.nodeLabel.CalcSize(new GUIContent(decorator.name)).x;
+            //     float decoratorLabelWidth = Styles.styles.nodeLabel.CalcSize(new GUIContent(decorator.name)).x;
 
-                width = Mathf.Max(width, decoratorLabelWidth);
-                height += GUIData.labelHeight;
+            //     width = Mathf.Max(width, decoratorLabelWidth);
+            //     height += GUIData.labelHeight;
 
-                Vector2 infoSize = Styles.styles.nodeText.CalcSize(decorator.GetInfoContent());
+            //     Vector2 infoSize = Styles.styles.nodeText.CalcSize(decorator.GetInfoContent());
 
-                height += infoSize.y;
-                width = Mathf.Max(width, infoSize.x);
+            //     height += infoSize.y;
+            //     width = Mathf.Max(width, infoSize.x);
 
-                //The 4 is accounting for the area that GUILayout.BeginVertical adds when applying a background for decorators. Not sure why this happens.
-                height += GUIData.spacing * 1.5f + 4;
-            }
+            //     //The 4 is accounting for the area that GUILayout.BeginVertical adds when applying a background for decorators. Not sure why this happens.
+            //     height += GUIData.spacing * 1.5f + 4;
+            // }
 
             Vector2 final = new Vector2(width + 40f, height);
 
@@ -804,33 +789,33 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         private void DrawWindow()
         {
             //Draw selection box
-            if (drawBox)
-            {
-                Vector2 curPos = WindowToGridPosition(Event.current.mousePosition);
-                Vector2 size = curPos - windowInfo.mouseDownPos;
-                Rect r = new Rect(windowInfo.mouseDownPos, size);
-                r.position = GridToWindowPosition(r.position);
-                r.size /= windowInfo.zoom;
+            // if (drawBox)
+            // {
+            //     Vector2 curPos = WindowToGridPosition(Event.current.mousePosition);
+            //     Vector2 size = curPos - windowInfo.mouseDownPos;
+            //     Rect r = new Rect(windowInfo.mouseDownPos, size);
+            //     r.position = GridToWindowPosition(r.position);
+            //     r.size /= windowInfo.zoom;
 
-                Handles.DrawSolidRectangleWithOutline(r, new Color(0, 0, 0, 0.1f), new Color(1, 1, 1, 0.6f));
-            }
+            //     Handles.DrawSolidRectangleWithOutline(r, new Color(0, 0, 0, 0.1f), new Color(1, 1, 1, 0.6f));
+            // }
 
-            if (windowInfo.selected.Count == 1 || windowInfo.selectedDecorator != null)
-            {
-                string stringContent = windowInfo.selectedDecorator != null ? windowInfo.selectedDecorator.description : windowInfo.selected[0].description;
+            // if (windowInfo.selected.Count == 1 || windowInfo.selectedDecorator != null)
+            // {
+            //     string stringContent = windowInfo.selectedDecorator != null ? windowInfo.selectedDecorator.description : windowInfo.selected[0].description;
 
-                if (!String.IsNullOrEmpty(stringContent))
-                {
-                    GUIStyle s = new GUIStyle(EditorStyles.boldLabel);
-                    s.fixedWidth = window.width - GUIData.nodePadding * 2f;
-                    s.wordWrap = true;
+            //     if (!String.IsNullOrEmpty(stringContent))
+            //     {
+            //         GUIStyle s = new GUIStyle(EditorStyles.boldLabel);
+            //         s.fixedWidth = window.width - GUIData.nodePadding * 2f;
+            //         s.wordWrap = true;
 
-                    GUIContent content = new GUIContent(stringContent);
-                    float height = s.CalcHeight(content, s.fixedWidth);
-                    Vector2 size = new Vector2(s.fixedWidth, height);
-                    GUI.Label(new Rect(new Vector2(GUIData.nodePadding, position.height - GUIData.nodePadding - height), size), content, s);
-                }
-            }
+            //         GUIContent content = new GUIContent(stringContent);
+            //         float height = s.CalcHeight(content, s.fixedWidth);
+            //         Vector2 size = new Vector2(s.fixedWidth, height);
+            //         GUI.Label(new Rect(new Vector2(GUIData.nodePadding, position.height - GUIData.nodePadding - height), size), content, s);
+            //     }
+            // }
         }
         private void DrawMinimap()
         {
@@ -879,7 +864,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             bool hoveredNode = false;
             for (int i = target.nodes.Length - 1; i >= 0; i--)
             {
-                Node active = activeAgent?.GetRunningNode();
+                Node active = null;
 
                 Node node = target.nodes[i];
 
@@ -1196,7 +1181,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             if (editor != null)
             {
-                bool isInspectingDecorator = editor.targets.OfType<Decorator>().Count() > 0;
+                bool isInspectingDecorator = false;
 
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.BeginDisabledGroup(Application.isPlaying);
@@ -1313,21 +1298,27 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             GUILayout.EndVertical();
         }
-        private void CreateComponentTree()
+        private void RebuildComponentTree()
         {
+            if (target == null)
+                return;
+
             SelectionBoxComponent.SelectionBoxComponentCreateArgs sBoxCreateArgs = new SelectionBoxComponent.SelectionBoxComponentCreateArgs();
             sBoxCreateArgs.hideOnMouseUp = true;
 
             if (canvas == null)
-                canvas = new ComponentCanvas(this, sBoxCreateArgs);
+            {
+                PannerZoomer zoomer = new PannerZoomer(this, 0.05f, target.zoom, target.pan, () => isDocked() ? 19.0f : 21.0f);
 
-            if (target == null)
-                return;
+                zoomer.onPanChange += (pan) => target.pan = pan;
+                zoomer.onZoomChange += (zoom) => target.zoom = zoom;
 
-            foreach (Node node in target.nodes)
+                canvas = new ComponentCanvas(this, sBoxCreateArgs, zoomer, DrawGrid);
+            }
+
+            foreach (Node node in target.nodes.OrderBy(x => x.priority))
             {
                 NodeComponent.NodeComponentCreateArgs args = new NodeComponent.NodeComponentCreateArgs();
-
                 args.fromExisting = node;
 
                 canvas.Create<NodeComponent>(args);
@@ -1405,8 +1396,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             GUI.EndClip();
 
             GUIUtility.ScaleAroundPivot(Vector2.one / zoom, rect.size * 0.5f);
-            Vector4 padding = new Vector4(0, topPadding, 0, 0);
-            padding *= zoom;
             GUI.BeginClip(new Rect(-((rect.width * zoom) - rect.width) * 0.5f, -(((rect.height * zoom) - rect.height) * 0.5f) + (topPadding * zoom),
                 rect.width * zoom,
                 rect.height * zoom));
@@ -1439,8 +1428,11 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         ///<summary>
         ///Draws the grid to the screen based on zoom and pan
         ///</summary>
-        public void DrawGrid(Rect rect, float zoom, Vector2 panOffset, float transitionPoint = 2f, float transitionWindow = 0.25f)
+        public void DrawGrid(Rect rect, float zoom, Vector2 panOffset)
         {
+            float transitionPoint = 2f;
+            float transitionWindow = 0.25f;
+
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size * .5f;
@@ -1475,16 +1467,12 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             {
                 get
                 {
-                    if (editor.target)
-                        editor.target.zoom = _zoom;
                     return _zoom;
                 }
                 set
                 {
                     float val = Mathf.Clamp(value, 1f, 2.5f);
                     _zoom = val;
-                    if (editor.target)
-                        editor.target.zoom = val;
                 }
             }
             public Dictionary<string, float> alpha = new Dictionary<string, float>();
@@ -1501,23 +1489,17 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 get
                 {
                     //Remove inconsistencies between the target and actual value (if undo occurs, for example)
-                    if (editor.target)
-                        editor.target.pan = _pan;
                     return _pan;
                 }
                 set
                 {
                     _pan = value;
-                    if (editor.target)
-                        editor.target.pan = value;
                 }
             }
             public Vector2 mouseDownPos;
             public List<Node> selected = new List<Node>();
             public Queue<Node> changedNodes = new Queue<Node>();
-            public Decorator selectedDecorator;
             public Node hoveredNode;
-            public Decorator hoveredDecorator;
             public Hovering hoveredType;
             public Node hoveredConnection;
             public bool shouldCheckConnectionHover;

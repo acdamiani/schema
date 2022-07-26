@@ -3,12 +3,72 @@ using SchemaEditor;
 using SchemaEditor.Internal;
 using UnityEngine;
 using UnityEditor;
+using SchemaEditor.Internal.ComponentSystem;
 using System;
 
-public sealed class ConnectionComponent : GUIComponent
+public sealed class ConnectionComponent : GUIComponent, IViewElement
 {
-    public NodeComponent from { get; set; }
-    public NodeComponent to { get; set; }
+    public NodeComponent from
+    {
+        get { return _from; }
+        set
+        {
+            _from = value;
+
+            if (_from == null && _to == null)
+                Destroy(this);
+            else if (_from != null)
+                connectionFrom = _from;
+        }
+    }
+    public NodeComponent to
+    {
+        get { return _to; }
+        set
+        {
+            _to = value;
+
+            if (_to == null && _from == null)
+                Destroy(this);
+            else if (_to != null)
+                connectionTo = _to;
+        }
+    }
+    private NodeComponent _from;
+    private NodeComponent _to;
+    private NodeComponent connectionFrom
+    {
+        get { return _connectionFrom; }
+        set
+        {
+            if (value != _connectionFrom && _connectionTo != null)
+            {
+                value.node.AddConnection(_connectionTo.node);
+                value.node.graph.Traverse();
+            }
+
+            _connectionFrom = value;
+        }
+    }
+    private NodeComponent _connectionFrom;
+    private NodeComponent connectionTo
+    {
+        get { return _connectionTo; }
+        set
+        {
+            if (value != _connectionTo && _connectionFrom != null)
+            {
+                value.parentConnection = this;
+                if (_connectionTo != null)
+                    _connectionTo.parentConnection = null;
+                _connectionFrom.node.AddConnection(value.node);
+                _connectionFrom.node.graph.Traverse();
+            }
+
+            _connectionTo = value;
+        }
+    }
+    private NodeComponent _connectionTo;
     public override void Create(CreateArgs args)
     {
         ConnectionComponentCreateArgs createArgs = args as ConnectionComponentCreateArgs;
@@ -16,8 +76,11 @@ public sealed class ConnectionComponent : GUIComponent
         if (createArgs == null)
             throw new ArgumentException();
 
-        from = createArgs.from;
-        to = createArgs.to;
+        _from = createArgs.from;
+        _to = createArgs.to;
+
+        _connectionFrom = createArgs.from;
+        _connectionTo = createArgs.to;
 
         if (from == null && to == null)
             throw new ArgumentNullException();
@@ -44,12 +107,12 @@ public sealed class ConnectionComponent : GUIComponent
 
         Handles.DrawBezier(p0, p3, p1, p2, Color.white, Styles.curve, NodeEditor.instance.windowInfo.zoom * 5f);
     }
-    public void Join()
+    protected override void OnDestroy()
     {
-        if (from == null || to == null)
+        if (connectionFrom == null || connectionTo == null)
             return;
 
-        from.node.AddConnection(to.node);
+        connectionFrom.node.RemoveConnection(connectionTo.node);
     }
     public class ConnectionComponentCreateArgs : CreateArgs
     {

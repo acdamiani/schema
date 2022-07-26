@@ -32,11 +32,11 @@ public sealed class SelectionBoxComponent : GUIComponent
         if (hideOnMouseUp && e.rawType == EventType.MouseUp)
             hidden = true;
 
-        Vector2 curPos = NodeEditor.WindowToGridPosition(e.mousePosition);
+        Vector2 curPos = canvas.zoomer.WindowToGridPosition(e.mousePosition);
         Vector2 size = curPos - mouseDownPosition;
         Rect r = new Rect(mouseDownPosition, size);
-        r.position = NodeEditor.GridToWindowPosition(r.position);
-        r.size /= NodeEditor.instance.windowInfo.zoom;
+        r.position = canvas.zoomer.GridToWindowPosition(r.position);
+        r.size /= canvas.zoomer.zoom;
 
         _selectionRect = r;
 

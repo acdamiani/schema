@@ -9,7 +9,6 @@ using Schema.Utilities;
 public static class QuickSearch
 {
     private static readonly RectOffset windowPadding = new RectOffset(100, 100, 250, 100);
-    private static readonly float keydownTimeWindow = 0.05f;
     private static readonly KeyCode[] validMovementCodes = new KeyCode[] { KeyCode.UpArrow, KeyCode.DownArrow };
     private static Rect searchRect;
     private static Schema.Graph target;
@@ -169,7 +168,7 @@ public static class QuickSearch
         if (Event.current.type == EventType.Repaint)
             EditorStyles.label.Draw(rect, content, false, false, false, false);
 
-        content = new GUIContent(type.Name, icons.GetOrCreate(type, () => Schema.Node.GetNodeIcon(type)));
+        content = new GUIContent(type.Name, icons.GetOrCreate(type, () => Schema.Internal.GraphObject.GetIcon(type)));
 
         rect.x += rect.width;
         rect.width = EditorStyles.label.CalcSize(content).x;
@@ -191,7 +190,7 @@ public static class QuickSearch
 
         foreach (Type nodeType in results)
         {
-            Texture2D icon = icons.GetOrCreate(nodeType, () => Schema.Node.GetNodeIcon(nodeType));
+            Texture2D icon = icons.GetOrCreate(nodeType, () => Schema.Internal.GraphObject.GetIcon(nodeType));
             GUIContent content = new GUIContent(nodeType.Name, icon);
 
             DoSingleResult(
