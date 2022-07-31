@@ -41,7 +41,15 @@ namespace Schema
             set
             {
                 m_graphPosition = value;
+
+#if UNITY_EDITOR
+                if (posNoCheck)
+                    modifiedPositions.Add(this);
+                else
+                    parent?.OrderChildren();
+#else
                 parent?.OrderChildren();
+#endif
             }
         }
         [SerializeField, HideInInspector] private Vector2 m_graphPosition;
@@ -492,6 +500,27 @@ namespace Schema
                 if (node == null)
                     ArrayUtility.Remove(ref m_children, node);
             }
+        }
+        private static List<Node> modifiedPositions = new List<Node>();
+        private static bool posNoCheck;
+        public static void BeginPosNoCheck()
+        {
+            if (posNoCheck)
+                Debug.LogWarning("Call EndPosNoCheck before BeginPosNoCheck.");
+
+            posNoCheck = true;
+        }
+        public static void EndPosNoCheck()
+        {
+            if (!posNoCheck)
+                Debug.LogWarning("Call BeginPosNoCheck before EndPosNoCheck.");
+
+            posNoCheck = false;
+
+            foreach (Node n in modifiedPositions)
+                n.parent?.OrderChildren();
+
+            modifiedPositions.Clear();
         }
 #endif
     }

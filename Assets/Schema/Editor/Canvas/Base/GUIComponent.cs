@@ -2,7 +2,7 @@ using Schema;
 using System;
 using UnityEngine;
 
-namespace SchemaEditor.Internal
+namespace SchemaEditor.Internal.ComponentSystem
 {
     [Serializable]
     public abstract class GUIComponent

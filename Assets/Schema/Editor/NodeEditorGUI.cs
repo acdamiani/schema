@@ -9,6 +9,7 @@ using System.Linq;
 using SchemaEditor.Editors;
 using SchemaEditor.Internal;
 using SchemaEditor.Internal.ComponentSystem;
+using SchemaEditor.Internal.ComponentSystem.Components;
 
 namespace SchemaEditor
 {
@@ -38,13 +39,7 @@ namespace SchemaEditor
 
             if (target != null)
             {
-                //DrawGrid(window, windowInfo.zoom, windowInfo.pan);
-
-                eventNoZoom = new Event(Event.current);
-
-                //BeginZoomed(window, windowInfo.zoom, tabHeight);
                 canvas.Draw();
-                //EndZoomed();
 
                 if (Event.current.type == EventType.Layout) LayoutGUI();
 
@@ -52,28 +47,9 @@ namespace SchemaEditor
                     window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
                 else
                     window = new Rect(0f, 0f, position.width, position.height);
-                windowInfo.selected.RemoveAll(node => node == null);
 
-                for (int i = 0; i < windowInfo.changedNodes.Count; i++)
-                    GetArea(windowInfo.changedNodes.Dequeue(), true);
-
-                // DrawConnections();
-                // DrawNodes();
-                DrawWindow();
-                DrawMinimap();
-
-                if (windowInfo.searchIsShown)
-                {
-                    BeginWindows();
-
-                    if (QuickSearch.DoWindow(window, target, requestingConnection, AddNode, (float)EditorApplication.timeSinceStartup))
-                        windowInfo.searchIsShown = false;
-
-                    EndWindows();
-                }
-
-                DrawToolbar();
                 DrawInspector();
+                DrawToolbar();
 
                 Blackboard.instance = target.blackboard;
 
@@ -819,6 +795,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         }
         private void DrawMinimap()
         {
+            return;
             if (!windowInfo.drawMinimap)
                 return;
 
@@ -827,7 +804,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             Rect viewRect = GetViewRect(minimapPadding, false);
 
             float minimapHeight = viewRect.height / viewRect.width * Prefs.minimapWidth;
-            float viewWidth = minimapHeight >= Prefs.maxMinimapHeight ? Prefs.minimapWidth / minimapHeight * Prefs.maxMinimapHeight : Prefs.minimapWidth;
+            float viewWidth = minimapHeight > Prefs.maxMinimapHeight ? Prefs.minimapWidth / minimapHeight * Prefs.maxMinimapHeight : Prefs.minimapWidth;
             minimapHeight = Mathf.Clamp(minimapHeight, 0f, Prefs.maxMinimapHeight);
 
             Rect boxPos = Rect.zero;
@@ -939,21 +916,39 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             if (GUILayout.Button("Add Node", EditorStyles.toolbarButton))
             {
-                windowInfo.searchWantsNode = true;
-                ToggleSearch();
+                QuickSearch search = new QuickSearch(t =>
+                {
+                    NodeComponent.NodeComponentCreateArgs nodeCreateArgs = new NodeComponent.NodeComponentCreateArgs();
+                    nodeCreateArgs.graph = target;
+                    nodeCreateArgs.nodeType = t;
+                    nodeCreateArgs.position = canvas.zoomer.WindowToGridPosition(window.center);
+
+                    canvas.Create<NodeComponent>(nodeCreateArgs);
+                });
+
+                WindowComponent.WindowComponentCreateArgs createArgs = new WindowComponent.WindowComponentCreateArgs();
+
+                createArgs.id = 1;
+                createArgs.layer = 100;
+                createArgs.rect = new Rect(100f, 100f, 500f, 500f);
+                createArgs.style = Styles.quickSearch;
+                createArgs.title = GUIContent.none;
+                createArgs.windowProvider = search;
+
+                canvas.Create<WindowComponent>(createArgs);
             }
 
-            List<float> f = new List<float>();
+            EditorGUI.BeginDisabledGroup(canvas.selected.Length == 0 || !canvas.selected.All(c => c is NodeComponent || c is ConnectionComponent));
 
-            if (GUILayout.Button("Add Decorator", EditorStyles.toolbarButton))
+            if (GUILayout.Button("Add Conditional", EditorStyles.toolbarButton))
             {
-                windowInfo.searchWantsNode = false;
-                ToggleSearch();
             }
 
-            if (GUILayout.Button("Prettify", EditorStyles.toolbarButton))
+            EditorGUI.EndDisabledGroup();
+
+            if (GUILayout.Button("Arrange", EditorStyles.toolbarButton))
             {
-                GraphUtility.Prettify(target.nodes);
+                GraphUtility.Arrange(target.nodes);
                 GetViewRect(100f, true);
             }
 
@@ -1011,8 +1006,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             EditorGUI.DrawRect(divider, Styles.windowAccent);
 
-            if (IsNotLayoutEvent(Event.current) && inspectorArea.Contains(Event.current.mousePosition)) windowInfo.hoveredType = Window.Hovering.Inspector;
-
             if (!windowInfo.settingsShown)
             {
                 Rect inspectorContainer = new Rect(
@@ -1068,6 +1061,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             }
             else
             {
+
                 Rect prefsWindow = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2f, 0f, inspectorWidth + GUIData.sidebarPadding * 2f, position.height);
 
                 GUILayout.BeginArea(prefsWindow);
@@ -1306,6 +1300,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             SelectionBoxComponent.SelectionBoxComponentCreateArgs sBoxCreateArgs = new SelectionBoxComponent.SelectionBoxComponentCreateArgs();
             sBoxCreateArgs.hideOnMouseUp = true;
 
+            MinimapComponent.MinimapComponentCreateArgs minimapCreateArgs = new MinimapComponent.MinimapComponentCreateArgs();
+            minimapCreateArgs.offset = () => new Vector2(0f, EditorStyles.toolbar.fixedHeight);
+
             if (canvas == null)
             {
                 PannerZoomer zoomer = new PannerZoomer(this, 0.05f, target.zoom, target.pan, () => isDocked() ? 19.0f : 21.0f);
@@ -1313,7 +1310,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 zoomer.onPanChange += (pan) => target.pan = pan;
                 zoomer.onZoomChange += (zoom) => target.zoom = zoom;
 
-                canvas = new ComponentCanvas(this, sBoxCreateArgs, zoomer, DrawGrid);
+                canvas = new ComponentCanvas(this, sBoxCreateArgs, minimapCreateArgs, zoomer, DrawGrid);
             }
 
             foreach (Node node in target.nodes.OrderBy(x => x.priority))
@@ -1322,6 +1319,23 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 args.fromExisting = node;
 
                 canvas.Create<NodeComponent>(args);
+
+                if (node.GetType() == typeof(SampleValue))
+                {
+                    ConditionalComponent.ConditionalComponentCreateArgs cCreateArgs = new ConditionalComponent.ConditionalComponentCreateArgs();
+
+                    if (node.conditionals.Length == 0)
+                    {
+                        cCreateArgs.node = node;
+                        cCreateArgs.conditionalType = typeof(Schema.Builtin.Conditionals.IsNull);
+                    }
+                    else
+                    {
+                        cCreateArgs.fromExisting = node.conditionals[0];
+                    }
+
+                    canvas.Create<ConditionalComponent>(cCreateArgs);
+                }
             }
         }
         List<Type> GetSearchResults(string query)

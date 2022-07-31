@@ -393,5 +393,14 @@ namespace Schema.Utilities
                 return new Rect(rect.x, forwards ? rect.y : position, rect.width, rect.yMax - position);
             }
         }
+        public static Rect Normalize(this Rect rect)
+        {
+            rect.x = Mathf.Min(rect.x + rect.width, rect.x);
+            rect.y = Mathf.Min(rect.y + rect.height, rect.y);
+            rect.width = Mathf.Abs(rect.width);
+            rect.height = Mathf.Abs(rect.height);
+
+            return rect;
+        }
     }
 }

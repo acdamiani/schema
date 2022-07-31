@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets/Example Scene/Enemy/PlaySound.cs" />
+     <Compile Include="Assets/Example Scene/TestWindow.cs" />
      <Compile Include="Assets/Example Scene/Enemy/Enemy.cs" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2021.3.6f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

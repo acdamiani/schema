@@ -10,6 +10,7 @@ using Schema.Internal;
 using Schema.Utilities;
 using SchemaEditor.Utilities;
 using SchemaEditor.Internal;
+using SchemaEditor.Internal.ComponentSystem.Components;
 using UnityEditor.ShortcutManagement;
 
 namespace SchemaEditor
@@ -122,14 +123,15 @@ namespace SchemaEditor
 
             return _controlID.Value;
         }
-        public Rect GetRect()
+        public Rect GetRect() { return new Rect(0f, tabHeight, position.width, position.height); }
+        public Rect GetViewRect() { return window; }
+        public EditorWindow GetEditorWindow() { return this; }
+        public float GetToolbarHeight()
         {
-            return new Rect(0f, tabHeight, position.width, position.height);
+            try { return EditorStyles.toolbar.fixedHeight; }
+            catch { return 0f; }
         }
-        public Rect GetZoomRect()
-        {
-            return window;
-        }
+        public ComponentCanvas GetCanvas() { return canvas; }
         void TogglePrefs()
         {
             windowInfo.settingsShown = !windowInfo.settingsShown;
@@ -184,18 +186,9 @@ namespace SchemaEditor
 
         void UndoPerformed()
         {
-            windowInfo.selected.RemoveAll(node => node == null);
+            canvas.Reset();
 
-            foreach (Node node in target.nodes)
-                windowInfo.changedNodes.Enqueue(node);
-
-            List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
-
-            distinctTypes = targets.Select(x => x.GetType()).Distinct().ToList();
-
-            if (distinctTypes.Count > 1) return;
-
-            UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), null, ref editor);
+            RebuildComponentTree();
 
             target.Traverse();
             GetViewRect(100f, true);

@@ -35,6 +35,38 @@ public static class CurveUtility
 
             return new Rect(x, y, xMax - x, yMax - y);
         }
+        public bool Hit(Vector2 position, float maxDist, int subdivisions = 8)
+        {
+            float step = 1f / subdivisions;
+
+            Vector2 closest = Vector2.positiveInfinity;
+
+            for (int i = 1; i <= subdivisions; i++)
+            {
+                Vector2 a = Position(step * (i - 1));
+                Vector2 b = Position(step * i);
+
+                Vector2 ap = position - a;
+                Vector2 ab = b - a;
+
+                float abMag = ab.sqrMagnitude;
+                float dot = Vector2.Dot(ap, ab);
+                float dist = dot / abMag;
+
+                Vector2 c;
+
+                if (dist < 0)
+                    c = a;
+                else if (dist > 1)
+                    c = b;
+                else
+                    c = a + ab * dist;
+
+                closest = Vector2.Distance(closest, position) < Vector2.Distance(c, position) ? closest : c;
+            }
+
+            return Vector2.Distance(closest, position) < maxDist;
+        }
         public void Split()
         {
             Vector2 e = (p0 + p1) / 2f;

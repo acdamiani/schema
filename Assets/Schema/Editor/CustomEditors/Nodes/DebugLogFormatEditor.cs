@@ -31,7 +31,7 @@ namespace SchemaEditor.Editors.Nodes
             string[] names = null;
 
             if (debugLog != null && debugLog.keys != null)
-                names = debugLog.keys.Select(key => key.entryName).ToArray();
+                names = debugLog.keys.Select(key => key.name).ToArray();
 
             serializedObject.Update();
 

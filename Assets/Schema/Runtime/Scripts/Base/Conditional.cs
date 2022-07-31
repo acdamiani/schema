@@ -52,6 +52,10 @@ namespace Schema
         /// <param name="agent">Agent executing this conditional</param>
         public virtual void Tick(object conditionalMemory, SchemaAgent agent) { }
         /// <summary>
+        /// Get the text content to be shown in the editor
+        /// </summary>
+        public virtual GUIContent GetConditionalContent() { return new GUIContent(GetType().Name); }
+        /// <summary>
         /// Possible ways the tree will respond to changes in this conditional's state
         /// </summary>
         public enum AbortsType

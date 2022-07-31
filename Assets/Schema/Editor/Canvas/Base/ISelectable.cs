@@ -4,6 +4,7 @@ namespace SchemaEditor.Internal
 {
     public interface ISelectable
     {
+        bool IsSelected();
         bool IsSelectable();
         bool IsHit(Vector2 mousePosition);
         bool Overlaps(Rect rect);

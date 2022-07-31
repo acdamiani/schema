@@ -36,7 +36,6 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets/Schema/Editor/Utilities/Cache.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/NavMeshAreaMaskDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetRotationEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/MoveToRandomEditor.cs" />
@@ -58,6 +57,7 @@
      <Compile Include="Assets/Schema/Editor/QuickSearch.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Window/IWindowComponentProvider.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomWeightedEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetPositionEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetMatrixValueEditor.cs" />
@@ -71,15 +71,18 @@
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntrySelectorDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/RaycastEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/ConnectionComponent.cs" />
+     <Compile Include="Assets/Schema/Editor/Utilities/CacheDictionary.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/EditorReflection.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetScaleEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorEvents.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Components/BlockerComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SoundHeardEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IDeletable.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/RandomRangeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultNodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/ConditionalComponent.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Components/WindowComponent.cs" />
      <Compile Include="Assets/Schema/Editor/SchemaGUI.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/SelectionBoxComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/GraphEditor.cs" />
@@ -95,8 +98,10 @@
      <Compile Include="Assets/Schema/Editor/Canvas/Base/ISelectable.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/ComponentSelectorDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/GUIComponent.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/PannerZoomer.cs" />
      <Compile Include="Assets/Schema/Editor/EditorInspector.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorGUI.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Components/MinimapComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/CancelInvokeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PatrolRouteEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/DisableOnPlayDrawer.cs" />
@@ -105,7 +110,6 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/VectorAngleEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/NodeComponent.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/GraphUtility.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/PannerZoomer.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
     <Reference Include="UnityEngine">

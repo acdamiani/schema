@@ -4,12 +4,18 @@ namespace SchemaEditor.Internal.ComponentSystem
 {
     public class PannerZoomer
     {
-        public float zoomSpeed { get { return _zoomSpeed; } }
-        private float _zoomSpeed;
-        public float zoom { get { return _zoom; } }
+        public float zoomSpeed { get; }
+        public float zoom
+        {
+            get { return _zoom; }
+            set
+            {
+                _zoom = Mathf.Clamp(value, 1f, 2.5f);
+                onZoomChange?.Invoke(_zoom);
+            }
+        }
         private float _zoom;
-        public Vector2 pan { get { return _pan; } }
-        private Vector2 _pan;
+        public Vector2 pan { get; set; }
         public Rect rect { get { return context.GetRect(); } }
         private Matrix4x4 prevMatrix;
         public ICanvasContextProvider context { get; set; }
@@ -20,59 +26,67 @@ namespace SchemaEditor.Internal.ComponentSystem
         public event OnPanChangeHandler onPanChange;
         public PannerZoomer(ICanvasContextProvider context, float zoomSpeed, float initialZoom, Vector2 initialPan, System.Func<float> topOffset)
         {
-            this._zoomSpeed = zoomSpeed;
-            this._zoom = initialZoom;
-            this._pan = initialPan;
+            this.zoomSpeed = zoomSpeed;
+            this.zoom = initialZoom;
+            this.pan = initialPan;
             this._topOffset = topOffset;
 
             this.context = context;
         }
         public void Begin()
         {
-            if (Event.current.rawType == EventType.ScrollWheel)
+            if (Event.current.rawType == EventType.MouseDown && Event.current.button == 2)
             {
-                _zoom += Event.current.delta.y * zoomSpeed;
-                _zoom = Mathf.Clamp(_zoom, 1f, 2.5f);
-
-                onZoomChange?.Invoke(_zoom);
+                context.GetCanvas().cursor = UnityEditor.MouseCursor.Pan;
+            }
+            else if (Event.current.rawType == EventType.MouseUp)
+            {
+                context.GetCanvas().cursor = UnityEditor.MouseCursor.Arrow;
             }
             else if (Event.current.rawType == EventType.MouseDrag && Event.current.button == 2)
             {
-                _pan += Event.current.delta * zoom;
+                pan += Event.current.delta * zoom;
 
-                onPanChange?.Invoke(_pan);
+                onPanChange?.Invoke(pan);
             }
 
             prevMatrix = GUI.matrix;
             GUI.EndClip();
 
-            Rect zoomable = context.GetZoomRect();
+            Rect zoomRect = context.GetViewRect();
 
-            GUIUtility.ScaleAroundPivot(Vector2.one / zoom, zoomable.size * 0.5f);
-            GUI.BeginClip(new Rect(-((zoomable.width * zoom) - zoomable.width) * 0.5f, -(((zoomable.height * zoom) - zoomable.height) * 0.5f) + (_topOffset() * zoom),
-                zoomable.width * zoom,
-                zoomable.height * zoom));
+            GUIUtility.ScaleAroundPivot(Vector2.one / zoom, zoomRect.size * 0.5f);
+            GUI.BeginClip(new Rect(-((zoomRect.width * zoom) - zoomRect.width) * 0.5f, -(((zoomRect.height * zoom) - zoomRect.height) * 0.5f) + (_topOffset() * zoom),
+                zoomRect.width * zoom,
+                zoomRect.height * zoom));
         }
         public void End()
         {
             GUI.EndClip();
             GUI.BeginClip(context.GetRect());
+
             GUI.matrix = prevMatrix;
         }
         public Vector2 GridToWindowPositionNoClipped(Vector2 position)
         {
-            Vector2 center = context.GetZoomRect().size * 0.5f;
+            Vector2 center = context.GetViewRect().size * 0.5f;
             float xOffset = center.x * zoom + (pan.x + position.x);
             float yOffset = center.y * zoom + (pan.y + position.y);
             return new Vector2(xOffset, yOffset);
         }
         public Vector2 WindowToGridPosition(Vector2 position)
         {
-            return (position - (context.GetZoomRect().size * 0.5f) - (pan / zoom)) * zoom;
+            return (position - (context.GetViewRect().size * 0.5f) - (pan / zoom)) * zoom;
         }
         public Vector2 GridToWindowPosition(Vector2 position)
         {
-            return (context.GetZoomRect().size * 0.5f) + (pan / zoom) + (position / zoom);
+            return (context.GetViewRect().size * 0.5f) + (pan / zoom) + (position / zoom);
+        }
+        public Rect WindowToGridRect(Rect rect)
+        {
+            rect.position = WindowToGridPosition(rect.position);
+            rect.size *= zoom;
+            return rect;
         }
     }
 }

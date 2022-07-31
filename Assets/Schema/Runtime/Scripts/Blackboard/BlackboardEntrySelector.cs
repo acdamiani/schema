@@ -59,7 +59,7 @@ namespace Schema
         /// <summary>
         /// Name of the entry referenced by this selector
         /// </summary>
-        public string entryName { get { return m_isDynamic ? m_dynamicName : m_entry?.name; } }
+        public string name { get { return m_isDynamic ? m_dynamicName : m_entry?.name; } }
         [SerializeField] private string m_valuePath;
         [SerializeField] private string m_dynamicName;
         /// <summary>

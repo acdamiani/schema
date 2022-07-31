@@ -1,6 +1,4 @@
-using Schema;
-using SchemaEditor;
-using SchemaEditor.Internal;
+using SchemaEditor.Internal.ComponentSystem;
 using UnityEngine;
 using UnityEditor;
 using System;

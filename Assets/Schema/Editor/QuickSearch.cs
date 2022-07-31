@@ -4,53 +4,39 @@ using UnityEditor.IMGUI.Controls;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using SchemaEditor.Internal.ComponentSystem;
 using Schema.Utilities;
 
-public static class QuickSearch
+public class QuickSearch : IWindowComponentProvider
 {
-    private static readonly RectOffset windowPadding = new RectOffset(100, 100, 250, 100);
-    private static readonly KeyCode[] validMovementCodes = new KeyCode[] { KeyCode.UpArrow, KeyCode.DownArrow };
-    private static Rect searchRect;
-    private static Schema.Graph target;
-    private static SearchField searchField;
-    private static string searchText = "";
-    private static int refinementLength;
-    private static CacheDictionary<Type, string> categories = new CacheDictionary<Type, string>();
-    private static CacheDictionary<Type, string> descriptions = new CacheDictionary<Type, string>();
-    private static CacheDictionary<string, IEnumerable<Type>> search = new CacheDictionary<string, IEnumerable<Type>>();
-    private static CacheDictionary<Type, Texture2D> icons = new CacheDictionary<Type, Texture2D>();
-    private static IEnumerable<Type> nodeTypes = HelperMethods.GetEnumerableOfType(typeof(Schema.Node));
-    private static List<string> favorites = SchemaEditor.NodeEditor.Prefs.GetList("SCHEMA_PREF__favorites").ToList();
-    private static int selected = -1;
-    private static bool searchFavorites;
-    private static float keydownTime;
-    private static Vector2 scroll;
-    private static bool focusSearch;
-    private static Vector2 mouseOverPosition;
-    private static float toolbarHeight;
-    private static bool didAddNode;
-    private static Schema.Node targetNode;
-    private static Action<Type> createNodeAction;
-    public static bool DoWindow(Rect window, Schema.Graph target, Schema.Node targetNode, Action<Type> createNodeAction, float timeSinceStartup)
+    private readonly KeyCode[] validMovementCodes = new KeyCode[] { KeyCode.UpArrow, KeyCode.DownArrow };
+    private Rect rect;
+    private SearchField searchField;
+    private string searchText = "";
+    private int refinementLength;
+    private CacheDictionary<Type, string> categories = new CacheDictionary<Type, string>();
+    private CacheDictionary<Type, string> descriptions = new CacheDictionary<Type, string>();
+    private CacheDictionary<string, IEnumerable<Type>> search = new CacheDictionary<string, IEnumerable<Type>>();
+    private CacheDictionary<Type, Texture2D> icons = new CacheDictionary<Type, Texture2D>();
+    private IEnumerable<Type> nodeTypes = HelperMethods.GetEnumerableOfType(typeof(Schema.Node));
+    private List<string> favorites = SchemaEditor.NodeEditor.Prefs.GetList("SCHEMA_PREF__favorites").ToList();
+    private int selected = -1;
+    private bool searchFavorites;
+    private float keydownTime;
+    private Vector2 scroll;
+    private Vector2 mouseOverPosition;
+    private float toolbarHeight;
+    private bool didAddNode;
+    private Action<Type> createNodeAction;
+    public QuickSearch(Action<Type> onSelectAction)
     {
-        didAddNode = false;
-
-        QuickSearch.searchRect = new Rect(
-            window.x + windowPadding.left,
-            window.y + windowPadding.top,
-            window.width - windowPadding.left - windowPadding.right,
-            window.height - windowPadding.top - windowPadding.bottom
-        );
-        QuickSearch.target = target;
-        QuickSearch.targetNode = targetNode;
-        QuickSearch.createNodeAction = createNodeAction;
-
-        GUILayout.Window(1, searchRect, OnGUI, "", Styles.quickSearch);
-        GUI.FocusWindow(1);
-
-        return didAddNode;
+        this.createNodeAction = onSelectAction;
     }
-    public static void OnGUI(int id)
+    public void HandleWinInfo(Rect rect, GUIContent title, GUIStyle style)
+    {
+        this.rect = rect;
+    }
+    public void OnGUI(int id)
     {
         if (searchField == null)
         {
@@ -60,15 +46,24 @@ public static class QuickSearch
 
         searchField.SetFocus();
 
-        GUILayout.BeginHorizontal(EditorStyles.toolbar);
+        GUILayout.BeginHorizontal(Styles.searchTopBar);
 
-        GUILayout.Space(8);
+        Rect r = GUILayoutUtility.GetRect(GUIContent.none, Styles.searchTopBarButton);
+        r.y += Styles.searchLarge.fixedHeight / 2f - r.height / 2f;
+
+        searchFavorites = GUI.Toggle(r, searchFavorites, Styles.Icons.GetEditor("FolderFavorite Icon"), Styles.searchTopBarButton);
 
         GUI.SetNextControlName("searchField");
 
+        r = GUILayoutUtility.GetRect(new GUIContent(searchText), Styles.searchLarge);
+
         if (Event.current.keyCode != KeyCode.Return)
-            searchText = searchField.OnToolbarGUI(searchText);
-        searchFavorites = GUILayout.Toggle(searchFavorites, "Favorites", EditorStyles.toolbarButton, GUILayout.Width(125));
+            searchText = searchField.OnGUI(r, searchText, Styles.searchLarge, Styles.cancelButton, GUIStyle.none);
+
+        GUI.DrawTexture(new Rect(r.x + 16f, r.center.y, 16f, 16f).UseCenter(), Styles.Icons.GetEditor("Search Icon"));
+
+        if (!String.IsNullOrEmpty(searchText))
+            GUI.DrawTexture(new Rect(r.xMax - 16f, r.center.y, 16f, 16f).UseCenter(), Styles.Icons.GetResource("close", false));
 
         GUILayout.EndHorizontal();
 
@@ -84,15 +79,17 @@ public static class QuickSearch
             GUIStyle.none,
             GUIStyle.none,
             Styles.padding8x,
-            GUILayout.Width(searchRect.width),
+            GUILayout.Width(rect.width),
             GUILayout.ExpandHeight(true)
         );
 
         DoResults();
 
         GUILayout.EndScrollView();
+
+        GUI.DragWindow();
     }
-    private static void DoSingleResult(Type type, string favoriteName, int index, Action onClick)
+    private void DoSingleResult(Type type, string favoriteName, int index, Action onClick)
     {
         Event current = Event.current;
 
@@ -145,7 +142,7 @@ public static class QuickSearch
 
         GUILayout.EndHorizontal();
     }
-    private static void DoCompleteLabel(Rect rect, Type type)
+    private void DoCompleteLabel(Rect rect, Type type)
     {
         rect = rect.Pad(new RectOffset(4, 4, 0, 0));
 
@@ -178,7 +175,7 @@ public static class QuickSearch
 
         EditorGUIUtility.SetIconSize(iconSize);
     }
-    private static void DoResults()
+    private void DoResults()
     {
         GUILayout.BeginVertical();
 
@@ -199,7 +196,6 @@ public static class QuickSearch
                 i,
                 () =>
                 {
-                    Debug.Log(createNodeAction);
                     createNodeAction(nodeType);
                     didAddNode = true;
                 }
@@ -210,7 +206,7 @@ public static class QuickSearch
 
         GUILayout.EndVertical();
     }
-    private static void MoveSelectionByEvent()
+    private void MoveSelectionByEvent()
     {
         Event current = Event.current;
 
@@ -228,19 +224,19 @@ public static class QuickSearch
             MoveSelection(current.delta.y < 0, resultsLength);
         }
     }
-    private static void MoveSelection(bool isUp, int resultsCount)
+    private void MoveSelection(bool isUp, int resultsCount)
     {
         selected = isUp ? selected - 1 : selected + 1;
         selected = CorrectSelection(selected);
 
-        float positionInView = selected * 24 + 8;
+        float positionInView = selected * 24f + Styles.padding8x.padding.top;
 
         if (positionInView - scroll.y < 0)
             scroll.y = positionInView;
-        else if (positionInView + 24 - scroll.y > searchRect.height - toolbarHeight)
-            scroll.y = positionInView - searchRect.height + toolbarHeight + 24 + 8;
+        else if (positionInView + 24 - scroll.y > rect.height - toolbarHeight)
+            scroll.y = positionInView - rect.height + toolbarHeight + 24 + 8;
     }
-    private static int CorrectSelection(int selected)
+    private int CorrectSelection(int selected)
     {
         int resultsLength = search.GetOrCreate(searchText, () => SearchThroughResults(nodeTypes, searchText)).Count();
 
@@ -249,7 +245,7 @@ public static class QuickSearch
 
         return selected;
     }
-    private static IEnumerable<Type> SearchThroughResults(IEnumerable<Type> types, string query)
+    private IEnumerable<Type> SearchThroughResults(IEnumerable<Type> types, string query)
     {
         if (String.IsNullOrWhiteSpace(query))
         {

@@ -32,9 +32,12 @@ namespace Schema.Internal
             if (String.IsNullOrEmpty(name))
                 name = attribute != null ? attribute.name : String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
 
+
 #if UNITY_EDITOR
             m_icon = GetIcon(GetType());
 #endif
+
+            OnObjectEnable();
         }
 #if UNITY_EDITOR
         /// <summary>

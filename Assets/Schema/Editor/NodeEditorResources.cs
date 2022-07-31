@@ -6,16 +6,30 @@ internal static class Styles
 {
     public static class Icons
     {
-        private static System.Collections.Generic.Dictionary<string, Texture2D> cache
+        private static System.Collections.Generic.Dictionary<string, Texture2D> editorCache
             = new System.Collections.Generic.Dictionary<string, Texture2D>();
-        public static Texture2D Get(string iconName)
+        private static System.Collections.Generic.Dictionary<string, Texture2D> resourceCache
+            = new System.Collections.Generic.Dictionary<string, Texture2D>();
+        public static Texture2D GetEditor(string iconName)
         {
             iconName = (EditorGUIUtility.isProSkin ? "d_" : "") + iconName;
 
-            cache.TryGetValue(iconName, out Texture2D value);
+            editorCache.TryGetValue(iconName, out Texture2D value);
 
             if (value == null)
-                cache[iconName] = value = (Texture2D)EditorGUIUtility.IconContent(iconName).image;
+                editorCache[iconName] = value = (Texture2D)EditorGUIUtility.IconContent(iconName).image;
+
+            return value;
+        }
+        public static Texture2D GetResource(string iconName, bool doPrefix = true)
+        {
+            if (doPrefix)
+                iconName = (EditorGUIUtility.isProSkin ? "d_" : "") + iconName;
+
+            resourceCache.TryGetValue(iconName, out Texture2D value);
+
+            if (value == null)
+                resourceCache[iconName] = value = Resources.Load<Texture2D>(iconName);
 
             return value;
         }
@@ -127,8 +141,8 @@ internal static class Styles
             if (_quickSearch == null)
             {
                 _quickSearch = new GUIStyle();
-                _quickSearch.normal.background = searchBackground;
-                _quickSearch.border = new RectOffset(2, 2, 2, 2);
+                _quickSearch.normal.background = Icons.GetResource("search_bg", false);
+                _quickSearch.border = new RectOffset(8, 8, 8, 8);
                 _quickSearch.padding = new RectOffset(2, 2, 2, 2);
             }
 
@@ -263,12 +277,25 @@ internal static class Styles
                 _conditional.imagePosition = ImagePosition.TextOnly;
                 _conditional.fontSize = 15;
                 _conditional.normal.textColor = Color.white;
-                _conditional.normal.background = Resources.Load<Texture2D>("round");
-                _conditional.border = new RectOffset(8, 8, 8, 8);
                 _conditional.padding = new RectOffset(8, 8, 8, 8);
             }
 
             return _conditional;
+        }
+    }
+    private static GUIStyle _element;
+    public static GUIStyle element
+    {
+        get
+        {
+            if (_element == null)
+            {
+                _element = new GUIStyle();
+                _element.normal.background = Icons.GetResource("element", false);
+                _element.border = new RectOffset(16, 16, 16, 16);
+            }
+
+            return _element;
         }
     }
     private static GUIStyle _center;
@@ -283,6 +310,71 @@ internal static class Styles
             }
 
             return _center;
+        }
+    }
+    private static GUIStyle _searchLarge;
+    public static GUIStyle searchLarge
+    {
+        get
+        {
+            if (_searchLarge == null)
+            {
+                _searchLarge = new GUIStyle(EditorStyles.toolbarTextField);
+                _searchLarge.fixedHeight = 30f;
+                _searchLarge.stretchWidth = true;
+                _searchLarge.fontSize = 16;
+                _searchLarge.padding = new RectOffset(30, 0, 0, 0);
+            }
+
+            return _searchLarge;
+        }
+    }
+    private static GUIStyle _searchTopBar;
+    public static GUIStyle searchTopBar
+    {
+        get
+        {
+            if (_searchTopBar == null)
+            {
+                _searchTopBar = new GUIStyle(EditorStyles.toolbar);
+                _searchTopBar.fixedHeight = 0;
+                _searchTopBar.padding = new RectOffset(4, 4, 4, 4);
+                _searchTopBar.stretchWidth = true;
+            }
+
+            return _searchTopBar;
+        }
+    }
+    private static GUIStyle _searchTopBarButton;
+    public static GUIStyle searchTopBarButton
+    {
+        get
+        {
+            if (_searchTopBarButton == null)
+            {
+                _searchTopBarButton = new GUIStyle(GUI.skin.button);
+                _searchTopBarButton.imagePosition = ImagePosition.ImageOnly;
+                _searchTopBarButton.padding = new RectOffset(4, 4, 4, 4);
+                _searchTopBarButton.fixedHeight = 24f;
+                _searchTopBarButton.fixedWidth = 24f;
+            }
+
+            return _searchTopBarButton;
+        }
+    }
+    private static GUIStyle _cancelButton;
+    public static GUIStyle cancelButton
+    {
+        get
+        {
+            if (_cancelButton == null)
+            {
+                _cancelButton = new GUIStyle();
+                _cancelButton.fixedHeight = 24f;
+                _cancelButton.fixedWidth = 24f;
+            }
+
+            return _cancelButton;
         }
     }
     private static StylesObj _styles;
