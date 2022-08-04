@@ -39,6 +39,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (
                 (Event.current.rawType == EventType.MouseDown && !insideWindow)
                 || (Event.current.rawType == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+                || windowProvider.Close()
             )
             {
                 Destroy(this);

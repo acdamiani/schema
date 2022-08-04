@@ -41,7 +41,7 @@ namespace SchemaEditor
             {
                 canvas.Draw();
 
-                if (Event.current.type == EventType.Layout) LayoutGUI();
+                CreateEditors();
 
                 if (windowInfo.inspectorToggled)
                     window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
@@ -167,7 +167,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             Repaint();
         }
-        void LayoutGUI()
+        void CreateEditors()
         {
             List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
             List<BlackboardEntry> duplicateEntries = new List<BlackboardEntry>();
@@ -213,36 +213,18 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             //caches inspector once per OnGUI call so we don't get EventType.Layout and EventType.Repaint related errors
             if ((editor == null || editor.targets.Any(obj => obj == null) || !editor.targets.SequenceEqual(targets)) && targets.Count > 0)
             {
-                UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), null, ref editor);
+                DestroyImmediate(editor);
+                DestroyImmediate(defaultNodeEditor);
+
+                editor = Editor.CreateEditor(targets.ToArray());
 
                 if (targets.Any(x => typeof(Node).IsAssignableFrom(x.GetType())))
-                    UnityEditor.Editor.CreateCachedEditor(targets.ToArray(), typeof(DefaultNodeEditor), ref defaultNodeEditor);
-                else
-                    DestroyImmediate(defaultNodeEditor);
+                    defaultNodeEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultNodeEditor));
             }
             else if (targets.Count == 0)
             {
-                editor = null;
-            }
-
-            // if (agent)
-            // {
-            //     // if (windowInfo.selectedDecorator != null)
-            //     //     agent.editorTarget = windowInfo.selectedDecorator.node;
-            //     // else if (editor != null && editor.targets.All(target => typeof(Node).IsAssignableFrom(target.GetType())))
-            //     //     agent.editorTarget = (Node)editor.targets[0];
-            // }
-
-            switch (searchWantsFocus)
-            {
-                case true when shouldFocusSearch:
-                    EditorGUI.FocusTextInControl("SearchTextField");
-                    searchWantsFocus = false;
-                    shouldFocusSearch = false;
-                    break;
-                case true when !shouldFocusSearch:
-                    shouldFocusSearch = true;
-                    break;
+                DestroyImmediate(editor);
+                DestroyImmediate(defaultNodeEditor);
             }
         }
 
@@ -916,15 +898,18 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             if (GUILayout.Button("Add Node", EditorStyles.toolbarButton))
             {
-                QuickSearch search = new QuickSearch(t =>
-                {
-                    NodeComponent.NodeComponentCreateArgs nodeCreateArgs = new NodeComponent.NodeComponentCreateArgs();
-                    nodeCreateArgs.graph = target;
-                    nodeCreateArgs.nodeType = t;
-                    nodeCreateArgs.position = canvas.zoomer.WindowToGridPosition(window.center);
+                QuickSearch search = new QuickSearch(
+                    HelperMethods.GetEnumerableOfType(typeof(Node)),
+                    t =>
+                    {
+                        NodeComponent.NodeComponentCreateArgs nodeCreateArgs = new NodeComponent.NodeComponentCreateArgs();
+                        nodeCreateArgs.graph = target;
+                        nodeCreateArgs.nodeType = t;
+                        nodeCreateArgs.position = canvas.zoomer.WindowToGridPosition(window.center);
 
-                    canvas.Create<NodeComponent>(nodeCreateArgs);
-                });
+                        canvas.Create<NodeComponent>(nodeCreateArgs);
+                    }
+                );
 
                 WindowComponent.WindowComponentCreateArgs createArgs = new WindowComponent.WindowComponentCreateArgs();
 
@@ -938,10 +923,43 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 canvas.Create<WindowComponent>(createArgs);
             }
 
-            EditorGUI.BeginDisabledGroup(canvas.selected.Length == 0 || !canvas.selected.All(c => c is NodeComponent || c is ConnectionComponent));
+            EditorGUI.BeginDisabledGroup(
+                canvas.selected.Length == 0 ||
+                !canvas.selected.All(c =>
+                    (c is NodeComponent
+                        && (((NodeComponent)c).node.connectionDescriptor == Node.ConnectionDescriptor.Both
+                            || ((NodeComponent)c).node.connectionDescriptor == Node.ConnectionDescriptor.OnlyInConnection))
+                    || c is ConnectionComponent
+                )
+            );
 
             if (GUILayout.Button("Add Conditional", EditorStyles.toolbarButton))
             {
+                QuickSearch search = new QuickSearch(
+                    HelperMethods.GetEnumerableOfType(typeof(Conditional)),
+                    t =>
+                    {
+                        foreach (GUIComponent component in canvas.selected)
+                        {
+                            ConditionalComponent.ConditionalComponentCreateArgs conditionalCreateArgs = new ConditionalComponent.ConditionalComponentCreateArgs();
+                            conditionalCreateArgs.node = component is NodeComponent ? ((NodeComponent)component).node : ((ConnectionComponent)component).to.node;
+                            conditionalCreateArgs.conditionalType = t;
+
+                            canvas.Create<ConditionalComponent>(conditionalCreateArgs);
+                        }
+                    }
+                );
+
+                WindowComponent.WindowComponentCreateArgs createArgs = new WindowComponent.WindowComponentCreateArgs();
+
+                createArgs.id = 1;
+                createArgs.layer = 100;
+                createArgs.rect = new Rect((window.width - 500f) / 2f, (window.width - 500f) / 2f, 500f, 500f);
+                createArgs.style = Styles.quickSearch;
+                createArgs.title = GUIContent.none;
+                createArgs.windowProvider = search;
+
+                canvas.Create<WindowComponent>(createArgs);
             }
 
             EditorGUI.EndDisabledGroup();
@@ -1319,23 +1337,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 args.fromExisting = node;
 
                 canvas.Create<NodeComponent>(args);
-
-                if (node.GetType() == typeof(SampleValue))
-                {
-                    ConditionalComponent.ConditionalComponentCreateArgs cCreateArgs = new ConditionalComponent.ConditionalComponentCreateArgs();
-
-                    if (node.conditionals.Length == 0)
-                    {
-                        cCreateArgs.node = node;
-                        cCreateArgs.conditionalType = typeof(Schema.Builtin.Conditionals.IsNull);
-                    }
-                    else
-                    {
-                        cCreateArgs.fromExisting = node.conditionals[0];
-                    }
-
-                    canvas.Create<ConditionalComponent>(cCreateArgs);
-                }
             }
         }
         List<Type> GetSearchResults(string query)

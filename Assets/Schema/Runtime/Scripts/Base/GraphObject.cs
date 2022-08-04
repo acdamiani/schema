@@ -85,6 +85,32 @@ namespace Schema.Internal
             }
         }
 #endif
+        public static string GetDescription<T>() where T : GraphObject
+        {
+            return GetDescription(typeof(T));
+        }
+        public static string GetDescription(Type type)
+        {
+            if (!(typeof(GraphObject).IsAssignableFrom(type)))
+                throw new ArgumentException("Type parameter does not inherit from GraphObject");
+
+            DescriptionAttribute description = type.GetCustomAttribute<DescriptionAttribute>();
+
+            return description?.description ?? "";
+        }
+        public static string GetCategory<T>() where T : GraphObject
+        {
+            return GetCategory(typeof(T));
+        }
+        public static string GetCategory(Type type)
+        {
+            if (!(typeof(GraphObject).IsAssignableFrom(type)))
+                throw new ArgumentException("Type parameter does not inherit from GraphObject.");
+
+            CategoryAttribute category = type.GetCustomAttribute<CategoryAttribute>();
+
+            return category?.category ?? "";
+        }
         internal void ResetGUID()
         {
             m_uID = Guid.NewGuid().ToString("N");
@@ -174,6 +200,22 @@ namespace Schema.Internal
             public DescriptionAttribute(string description)
             {
                 this.description = description;
+            }
+        }
+        /// <summary>
+        /// Define a custom category for a node
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class CategoryAttribute : System.Attribute
+        {
+            public string category;
+            /// <summary>
+            /// Define a custom category for a node
+            /// </summary>
+            /// <param name="category">Content to use for the category in the search menu</param>
+            public CategoryAttribute(string category)
+            {
+                this.category = category;
             }
         }
     }

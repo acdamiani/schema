@@ -56,6 +56,7 @@
      <Compile Include="Assets/Schema/Editor/ShortcutManager.cs" />
      <Compile Include="Assets/Schema/Editor/QuickSearch.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/IDuplicatable.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Window/IWindowComponentProvider.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomWeightedEditor.cs" />

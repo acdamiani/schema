@@ -20,6 +20,11 @@ namespace Schema
         public AbortsType abortsType { get { return m_abortsType; } set { m_abortsType = value; } }
         [SerializeField, HideInInspector] private AbortsType m_abortsType;
         /// <summary>
+        /// Invert the condition (a result of false will run the node, a result of true will not)
+        /// </summary>
+        public bool invert { get { return m_invert; } set { m_invert = value; } }
+        [SerializeField, HideInInspector] private bool m_invert;
+        /// <summary>
         /// Evaluate this conditional
         /// </summary>
         /// <param name="conditionalMemory">Object containing the memory for the conditional</param>

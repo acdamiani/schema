@@ -73,28 +73,10 @@ namespace Schema
         /// </summary>
         public bool enableStatusIndicator { get { return m_enableStatusIndicator; } private set { m_enableStatusIndicator = value; } }
         [Tooltip("Toggle the status indicator for this node"), HideInInspector, SerializeField] private bool m_enableStatusIndicator = true;
-        private string _description;
-        private bool didGetDescriptionAttribute;
         /// <summary>
         /// How this node can be connected to other nodes (do not override)
         /// </summary>
         public virtual ConnectionDescriptor connectionDescriptor => ConnectionDescriptor.Both;
-        /// <summary>
-        /// Description for this node, given by the Description attribute
-        /// </summary>
-        public string description
-        {
-            get
-            {
-                if (!didGetDescriptionAttribute)
-                {
-                    didGetDescriptionAttribute = true;
-                    _description = GetType().GetCustomAttribute<DescriptionAttribute>()?.description;
-                }
-
-                return _description;
-            }
-        }
         internal Type GetMemoryType()
         {
             Type[] types = GetType().GetTypeInfo().DeclaredNestedTypes.ToArray();
@@ -138,62 +120,12 @@ namespace Schema
 
             return ret;
         }
-        /// <summary>
-        /// Define a custom category for a node
-        /// </summary>
-        [System.AttributeUsage(AttributeTargets.Class)]
-        protected class CategoryAttribute : System.Attribute
-        {
-            public string category;
-            /// <summary>
-            /// Define a custom category for a node
-            /// </summary>
-            /// <param name="category">Content to use for the category in the search menu</param>
-            public CategoryAttribute(string category)
-            {
-                this.category = category;
-            }
-        }
         public enum ConnectionDescriptor
         {
             OnlyInConnection,
             OnlyOutConnection,
             Floating,
             Both
-        }
-        public static string GetNodeCategory(Type nodeType)
-        {
-            CategoryAttribute attribute = nodeType.GetCustomAttribute<CategoryAttribute>();
-
-            return attribute?.category;
-        }
-        public static string GetNodeDescription(Type nodeType)
-        {
-            DescriptionAttribute attribute = nodeType.GetCustomAttribute<DescriptionAttribute>();
-
-            return attribute?.description;
-        }
-        public static Dictionary<string, IEnumerable<Type>> GetNodeCategories()
-        {
-            Dictionary<string, List<Type>> dict = new Dictionary<string, List<Type>>();
-
-            foreach (Type nodeType in Schema.Utilities.HelperMethods.GetEnumerableOfType(typeof(Node)))
-            {
-                CategoryAttribute attribute = nodeType.GetCustomAttribute<CategoryAttribute>();
-
-                List<Type> t = null;
-
-                string key = attribute == null ? "" : attribute.category;
-
-                dict.TryGetValue(key, out t);
-
-                if (t == null)
-                    dict[key] = new List<Type>() { nodeType };
-                else
-                    t.Add(nodeType);
-            }
-
-            return dict.ToDictionary(x => x.Key, x => x.Value.AsEnumerable());
         }
 #if UNITY_EDITOR
         /// <summary>
@@ -409,7 +341,7 @@ namespace Schema
         /// <param name="conditional">Conditional to duplicate</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
         /// <returns>Duplciated conditional</returns>
-        public Conditional Duplciateconditional(Conditional conditional, bool undo = true)
+        public Conditional DuplicateConditional(Conditional conditional, bool undo = true)
         {
             Conditional duplicate = ScriptableObject.Instantiate<Conditional>(conditional);
             duplicate.hideFlags = HideFlags.HideAndDontSave;
@@ -429,6 +361,23 @@ namespace Schema
             ArrayUtility.Add(ref m_conditionals, duplicate);
 
             return duplicate;
+        }
+        /// <summary>
+        /// Move a conditional to an index
+        /// </summary>
+        /// <param name="conditional">The conditional to move</param>
+        /// <param name="index">Index to move the conditional to</param>
+        /// <param name="undo">Whether to register this operation in the unod stack</param>
+        public void MoveConditional(Conditional conditional, int index, bool undo = true)
+        {
+            if (!conditionals.Contains(conditional))
+                return;
+
+            if (undo)
+                Undo.RegisterCompleteObjectUndo(this, "Moved Conditional");
+
+            ArrayUtility.Remove(ref m_conditionals, conditional);
+            ArrayUtility.Insert(ref m_conditionals, index, conditional);
         }
         /// <summary>
         /// Deletes a conditional from this node
@@ -487,6 +436,48 @@ namespace Schema
             ArrayUtility.Add(ref m_modifiers, modifier);
 
             return modifier;
+        }
+        /// <summary>
+        /// Deletes a modifier from this node
+        /// </summary>
+        /// <param name="modifier">Modifier to remove</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        public void RemoveModifier(Modifier modifier, bool undo = true)
+        {
+            if (!m_modifiers.Contains(modifier))
+            {
+                Debug.LogWarning($"conditional {modifier.name} does not exit on node {name}");
+                return;
+            }
+
+            if (undo)
+            {
+                Undo.RegisterCompleteObjectUndo(this, "Remove Modifier");
+                ArrayUtility.Remove(ref m_modifiers, modifier);
+                Undo.DestroyObjectImmediate(modifier);
+            }
+            else
+            {
+                ArrayUtility.Remove(ref m_modifiers, modifier);
+                ScriptableObject.DestroyImmediate(modifier, true);
+            }
+        }
+        /// <summary>
+        /// Move a modifier to an index
+        /// </summary>
+        /// <param name="conditional">The conditional to move</param>
+        /// <param name="index">Index to move the conditional to</param>
+        /// <param name="undo">Whether to register this operation in the unod stack</param>
+        public void MoveModifier(Modifier modifier, int index, bool undo = true)
+        {
+            if (!m_modifiers.Contains(modifier))
+                return;
+
+            if (undo)
+                Undo.RegisterCompleteObjectUndo(this, "Move Modifier");
+
+            ArrayUtility.Remove(ref m_modifiers, modifier);
+            ArrayUtility.Insert(ref m_modifiers, index, modifier);
         }
         /// <summary>
         /// Remove all null nodes attached to this one

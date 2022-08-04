@@ -3,6 +3,7 @@ using UnityEditor;
 using System;
 using System.Text;
 using Schema.Utilities;
+using System.Linq;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
@@ -39,7 +40,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             EditorGUI.LabelField(rect.Pad(5), new GUIContent(componentDebugInfo), label);
 
             if (GUI.Toggle(new Rect(rect.xMax - 44f, rect.y + 2f, 42f, 32f), pinned != null, "Pin"))
-                pinned = pinned ?? canvas.selected[0];
+                pinned = pinned ?? canvas.selected.ElementAtOrDefault(0);
             else
                 pinned = null;
         }
@@ -49,6 +50,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             sb.AppendLine(String.Format("<b>Hovered:</b> {0}", canvas.hovered));
             sb.AppendLine(String.Format("<b>Zoom:</b> {0}", canvas.zoomer.zoom));
             sb.AppendLine(String.Format("<b>Pan:</b> {0}", canvas.zoomer.pan));
+            sb.AppendLine(String.Format("<b>Components:</b> {0}", String.Join(", ", canvas.components.Select(x => x.GetType().Name))));
+            sb.AppendLine();
 
             return sb.ToString();
         }

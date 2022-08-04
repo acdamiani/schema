@@ -36,6 +36,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (createArgs == null)
                 throw new ArgumentException();
 
+            createArgs.layer = 2;
+
             if (createArgs.fromExisting != null)
             {
                 _node = createArgs.fromExisting;
@@ -63,6 +65,16 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             else
             {
                 _node = createArgs.graph.AddNode(createArgs.nodeType, createArgs.position);
+                _uID = _node.uID;
+            }
+
+            foreach (Conditional conditional in _node.conditionals)
+            {
+                ConditionalComponent.ConditionalComponentCreateArgs conditionalComponentCreateArgs = new ConditionalComponent.ConditionalComponentCreateArgs();
+
+                conditionalComponentCreateArgs.fromExisting = conditional;
+
+                canvas.Create<ConditionalComponent>(conditionalComponentCreateArgs);
             }
 
             layout = new NodeComponentLayout(this);
@@ -176,17 +188,32 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                         HoverType hoverType = hovered.GetHoverType(Event.current.mousePosition);
 
                         if (hoverType == HoverType.InConnection && floatingConnection.to == null)
+                        {
                             floatingConnection.to = hovered;
+                        }
                         else if (hoverType == HoverType.OutConnection && floatingConnection.from == null && hovered.node.CanHaveChildren())
+                        {
                             floatingConnection.from = hovered;
+                        }
                         else
+                        {
+                            floatingConnection.Delete();
                             Destroy(floatingConnection);
+
+                            if (floatingConnection.to == null)
+                                DoConnectionDrop(floatingConnection.from, mousePositionGrid, true);
+                        }
 
                         floatingConnection = null;
                     }
                     else
                     {
+                        floatingConnection.Delete();
                         Destroy(floatingConnection);
+
+                        if (floatingConnection.to == null)
+                            DoConnectionDrop(floatingConnection.from, mousePositionGrid, true);
+
                         floatingConnection = null;
                     }
 
@@ -227,6 +254,47 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                     break;
             }
+        }
+        private void DoConnectionDrop(NodeComponent old, Vector2 position, bool inConnection)
+        {
+            return;
+            QuickSearch search = new QuickSearch(
+                HelperMethods.GetEnumerableOfType(typeof(Node)),
+                t =>
+                {
+                    NodeComponent.NodeComponentCreateArgs nodeCreateArgs = new NodeComponent.NodeComponentCreateArgs();
+                    nodeCreateArgs.graph = node.graph;
+                    nodeCreateArgs.nodeType = t;
+                    nodeCreateArgs.position = position;
+
+                    NodeComponent n = canvas.Create<NodeComponent>(nodeCreateArgs);
+                    n.layout.Update();
+
+                    n.node.graphPosition = new Vector2(n.node.graphPosition.x - n.layout.gridRect.width / 2f, n.node.graphPosition.y);
+
+                    ConnectionComponent.ConnectionComponentCreateArgs connectionCreateArgs = new ConnectionComponent.ConnectionComponentCreateArgs();
+                    connectionCreateArgs.from = old;
+                    connectionCreateArgs.to = n;
+                    connectionCreateArgs.add = true;
+
+                    ConnectionComponent c = canvas.Create<ConnectionComponent>(connectionCreateArgs);
+                    n.parentConnection = c;
+                }
+            );
+
+            WindowComponent.WindowComponentCreateArgs createArgs = new WindowComponent.WindowComponentCreateArgs();
+
+            float xDiff = (canvas.context.GetViewRect().width - 500f) / 2f;
+            float yDiff = (canvas.context.GetViewRect().height - 500f) / 2f;
+
+            createArgs.id = 1;
+            createArgs.layer = 100;
+            createArgs.rect = new Rect(xDiff, yDiff, 500f, 500f);
+            createArgs.style = Styles.quickSearch;
+            createArgs.title = GUIContent.none;
+            createArgs.windowProvider = search;
+
+            canvas.Create<WindowComponent>(createArgs);
         }
         public HoverType GetHoverType(Vector2 mousePosition)
         {
@@ -287,7 +355,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public bool IsEditable() { return true; }
         public bool IsFramable() { return true; }
         public bool IsDeletable() { return isSelected; }
-        public void Delete() { node.graph.DeleteNodes(new List<Node>() { node }); }
+        public void Delete()
+        {
+            node.graph.DeleteNodes(new List<Node>() { node });
+            Destroy(parentConnection);
+        }
         public bool Equals(Schema.Internal.GraphObject graphObject)
         {
             Node node = graphObject as Node;

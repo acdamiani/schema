@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SchemaEditor.Internal
+namespace SchemaEditor.Internal.ComponentSystem
 {
     public interface ISelectable
     {

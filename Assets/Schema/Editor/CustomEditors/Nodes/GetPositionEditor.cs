@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetPosition)), CanEditMultipleObjects]
+    [CustomEditor(typeof(Schema.Builtin.Nodes.GetPosition)), CanEditMultipleObjects]
     public class GetPositionEditor : Editor
     {
         SerializedProperty useSelf;

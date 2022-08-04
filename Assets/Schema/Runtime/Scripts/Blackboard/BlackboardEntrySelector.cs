@@ -39,6 +39,21 @@ namespace Schema
         public T inspectorValue { get { return m_inspectorValue; } set { m_inspectorValue = value; } }
         [SerializeField] private T m_inspectorValue;
         /// <summary>
+        /// Name of the entry referenced by this selector
+        /// </summary>
+        public new string name { get { return GetName(); } }
+        private string GetName()
+        {
+            if (isDynamic)
+                return dynamicName;
+            else if (entry != null)
+                return entry.name;
+            else if (inspectorValue != null)
+                return inspectorValue.ToString();
+
+            return "null";
+        }
+        /// <summary>
         /// Create a blackboard entry selector
         /// </summary>
         public BlackboardEntrySelector() : base(typeof(T)) { }

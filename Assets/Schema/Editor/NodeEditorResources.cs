@@ -275,6 +275,7 @@ internal static class Styles
                 _conditional = new GUIStyle();
                 _conditional.alignment = TextAnchor.MiddleRight;
                 _conditional.imagePosition = ImagePosition.TextOnly;
+                _conditional.fixedHeight = 32f;
                 _conditional.fontSize = 15;
                 _conditional.normal.textColor = Color.white;
                 _conditional.padding = new RectOffset(8, 8, 8, 8);

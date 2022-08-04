@@ -1,4 +1,5 @@
 using UnityEngine;
+using Schema.Internal;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using System;
@@ -17,8 +18,8 @@ public class QuickSearch : IWindowComponentProvider
     private CacheDictionary<Type, string> categories = new CacheDictionary<Type, string>();
     private CacheDictionary<Type, string> descriptions = new CacheDictionary<Type, string>();
     private CacheDictionary<string, IEnumerable<Type>> search = new CacheDictionary<string, IEnumerable<Type>>();
+    private CacheDictionary<string, IEnumerable<Type>> searchedFavorites = new CacheDictionary<string, IEnumerable<Type>>();
     private CacheDictionary<Type, Texture2D> icons = new CacheDictionary<Type, Texture2D>();
-    private IEnumerable<Type> nodeTypes = HelperMethods.GetEnumerableOfType(typeof(Schema.Node));
     private List<string> favorites = SchemaEditor.NodeEditor.Prefs.GetList("SCHEMA_PREF__favorites").ToList();
     private int selected = -1;
     private bool searchFavorites;
@@ -28,13 +29,20 @@ public class QuickSearch : IWindowComponentProvider
     private float toolbarHeight;
     private bool didAddNode;
     private Action<Type> createNodeAction;
-    public QuickSearch(Action<Type> onSelectAction)
+    private IEnumerable<Type> types;
+    private bool close;
+    public QuickSearch(IEnumerable<Type> types, Action<Type> onSelectAction)
     {
+        this.types = types.Where(t => typeof(GraphObject).IsAssignableFrom(t));
         this.createNodeAction = onSelectAction;
     }
     public void HandleWinInfo(Rect rect, GUIContent title, GUIStyle style)
     {
         this.rect = rect;
+    }
+    public bool Close()
+    {
+        return close;
     }
     public void OnGUI(int id)
     {
@@ -93,6 +101,13 @@ public class QuickSearch : IWindowComponentProvider
     {
         Event current = Event.current;
 
+        float positionInView = index * 24f + Styles.padding8x.padding.top;
+
+        GUILayoutUtility.GetRect(0f, 24f);
+
+        if (positionInView + 24 < scroll.y || positionInView > rect.height - toolbarHeight + scroll.y)
+            return;
+
         int realSelection = CorrectSelection(selected);
 
         GUILayout.BeginHorizontal(GUILayout.Height(24));
@@ -137,6 +152,7 @@ public class QuickSearch : IWindowComponentProvider
             case EventType.KeyDown when current.keyCode == KeyCode.Return && index == realSelection:
             case EventType.MouseDown when insideRect:
                 onClick.Invoke();
+                close = true;
                 break;
         }
 
@@ -149,7 +165,7 @@ public class QuickSearch : IWindowComponentProvider
         Vector2 iconSize = EditorGUIUtility.GetIconSize();
         EditorGUIUtility.SetIconSize(new Vector2(16, 16));
 
-        string category = Schema.Node.GetNodeCategory(type) ?? "";
+        string category = categories.GetOrCreate(type, () => GraphObject.GetCategory(type));
 
         if (!String.IsNullOrEmpty(category))
         {
@@ -165,7 +181,7 @@ public class QuickSearch : IWindowComponentProvider
         if (Event.current.type == EventType.Repaint)
             EditorStyles.label.Draw(rect, content, false, false, false, false);
 
-        content = new GUIContent(type.Name, icons.GetOrCreate(type, () => Schema.Internal.GraphObject.GetIcon(type)));
+        content = new GUIContent(type.Name, icons.GetOrCreate(type, () => GraphObject.GetIcon(type)));
 
         rect.x += rect.width;
         rect.width = EditorStyles.label.CalcSize(content).x;
@@ -181,7 +197,10 @@ public class QuickSearch : IWindowComponentProvider
 
         MoveSelectionByEvent();
 
-        IEnumerable<Type> results = search.GetOrCreate(searchText, () => SearchThroughResults(nodeTypes, searchText));
+        IEnumerable<Type> results = search.GetOrCreate(searchText, () => SearchThroughResults(types, searchText));
+
+        if (searchFavorites)
+            results = results.Where(x => favorites.Contains(x.Name));
 
         int i = 0;
 
@@ -210,7 +229,7 @@ public class QuickSearch : IWindowComponentProvider
     {
         Event current = Event.current;
 
-        int resultsLength = search.GetOrCreate(searchText, () => SearchThroughResults(nodeTypes, searchText)).Count();
+        int resultsLength = search.GetOrCreate(searchText, () => SearchThroughResults(types, searchText)).Count();
 
         if (current.type == EventType.KeyDown)
         {
@@ -231,14 +250,14 @@ public class QuickSearch : IWindowComponentProvider
 
         float positionInView = selected * 24f + Styles.padding8x.padding.top;
 
-        if (positionInView - scroll.y < 0)
+        if (positionInView < scroll.y)
             scroll.y = positionInView;
         else if (positionInView + 24 - scroll.y > rect.height - toolbarHeight)
             scroll.y = positionInView - rect.height + toolbarHeight + 24 + 8;
     }
     private int CorrectSelection(int selected)
     {
-        int resultsLength = search.GetOrCreate(searchText, () => SearchThroughResults(nodeTypes, searchText)).Count();
+        int resultsLength = search.GetOrCreate(searchText, () => SearchThroughResults(types, searchText)).Count();
 
         selected = selected < 0 ? 0 : selected;
         selected = selected > resultsLength - 1 ? resultsLength - 1 : selected;
@@ -248,9 +267,7 @@ public class QuickSearch : IWindowComponentProvider
     private IEnumerable<Type> SearchThroughResults(IEnumerable<Type> types, string query)
     {
         if (String.IsNullOrWhiteSpace(query))
-        {
             return types;
-        }
 
         query = query.ToLower();
         string[] queries = query.Split(' ').Where(s => s != "").ToArray();
@@ -261,7 +278,7 @@ public class QuickSearch : IWindowComponentProvider
         {
             foreach (string q in queries)
             {
-                string category = categories.GetOrCreate(ty, () => Schema.Node.GetNodeCategory(ty)) ?? "";
+                string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
                 string search = category.ToLower() + ty.Name.ToLower();
 
                 int s = Search(q, search);

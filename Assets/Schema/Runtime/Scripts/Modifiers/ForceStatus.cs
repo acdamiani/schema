@@ -1,5 +1,6 @@
 namespace Schema.Builtin.Modifiers
 {
+    [AllowOne]
     [DarkIcon("console.infoicon", true)]
     public class ForceStatus : Modifier
     {

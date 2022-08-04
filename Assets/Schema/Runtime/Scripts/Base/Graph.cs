@@ -208,7 +208,7 @@ namespace Schema
             foreach (Node child in duplicateChildren)
                 duplicate.AddConnection(child, undo: false);
 
-            node.conditionals = node.conditionals.Select(x => node.Duplciateconditional(x, undo)).ToArray();
+            node.conditionals = node.conditionals.Select(x => node.DuplicateConditional(x, undo)).ToArray();
 
             return duplicate;
         }

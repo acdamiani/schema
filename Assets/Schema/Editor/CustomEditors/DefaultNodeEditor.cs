@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEditor;
+using System;
 using System.Linq;
 using Schema;
+using Schema.Utilities;
 using SchemaEditor;
 using System.Collections.Generic;
 
@@ -13,6 +15,7 @@ public class DefaultNodeEditor : Editor
     SerializedProperty comment;
     SerializedProperty modifiers;
     Node node;
+    private CacheDictionary<Type, bool> allowedOne = new CacheDictionary<Type, bool>();
     void OnEnable()
     {
         nodeName = serializedObject.FindProperty("m_Name");
@@ -29,28 +32,53 @@ public class DefaultNodeEditor : Editor
         EditorGUILayout.PropertyField(nodeName);
         EditorGUILayout.PropertyField(comment);
         EditorGUILayout.PropertyField(enableStatusIndicator);
-        EditorGUILayout.PropertyField(modifiers);
 
-        DoModifers(node.modifiers);
+        if (target.GetType() != typeof(Root))
+            DoModifers(node.modifiers);
 
         serializedObject.ApplyModifiedProperties();
     }
+    private GenericMenu AddModifierMenu()
+    {
+        IEnumerable<Type> types = HelperMethods.GetEnumerableOfType(typeof(Modifier));
+
+        GenericMenu menu = new GenericMenu();
+
+        foreach (Type t in types)
+        {
+            Texture2D icon = Modifier.GetModifierIcon(t);
+
+            menu.AddItem(
+                new GUIContent(t.Name, icon),
+                false,
+                () => node.AddModifier(t),
+                allowedOne.GetOrCreate(t, () => Modifier.AllowedOne(t)) && node.modifiers.Any(x => x.GetType() == t)
+            );
+        }
+
+        return menu;
+    }
     private void DoModifers(IEnumerable<Modifier> modifiers)
     {
-        if (GUILayout.Button("Add Modifier"))
-            node.AddModifier(typeof(Schema.Builtin.Modifiers.ForceStatus));
+        Rect r;
+
+        GUILayout.Label("Modifiers", EditorStyles.boldLabel);
 
         Vector2 iconSize = EditorGUIUtility.GetIconSize();
         EditorGUIUtility.SetIconSize(Vector2.one * 16f);
 
+        int i = 0;
+
         foreach (Modifier m in modifiers)
         {
+            bool removed = false;
+
             GUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal(GUILayout.Height(24f));
 
             GUILayout.Space(2f);
 
-            Rect r = GUILayoutUtility.GetRect(12f, 12f, GUIStyle.none, GUILayout.ExpandWidth(false));
+            r = GUILayoutUtility.GetRect(12f, 12f, GUIStyle.none, GUILayout.ExpandWidth(false));
             r.y += 6f;
 
             GUI.color = new Color(0.75f, 0.75f, 0.75f, 1f);
@@ -78,8 +106,17 @@ public class DefaultNodeEditor : Editor
 
             GUILayout.Space(-3);
 
-            GUILayout.Button(new GUIContent(Styles.moveUp, "Move Modifier Up"), EditorStyles.miniButtonMid, GUILayout.ExpandWidth(false));
-            GUILayout.Button(new GUIContent(Styles.moveDown, "Move Modifier Down"), EditorStyles.miniButtonRight, GUILayout.ExpandWidth(false));
+            if (
+                GUILayout.Button(new GUIContent(Styles.moveUp, "Move Modifier Up"), EditorStyles.miniButtonMid, GUILayout.ExpandWidth(false))
+                && i > 0
+            )
+                node.MoveModifier(m, i - 1);
+
+            if (
+                GUILayout.Button(new GUIContent(Styles.moveDown, "Move Modifier Down"), EditorStyles.miniButtonRight, GUILayout.ExpandWidth(false))
+                && i < modifiers.Count() - 1
+            )
+                node.MoveModifier(m, i + 1);
 
             EditorGUIUtility.SetIconSize(Vector2.one * 12f);
 
@@ -87,19 +124,34 @@ public class DefaultNodeEditor : Editor
             r.y += 6f;
 
             GUI.color = new Color(0.75f, 0.75f, 0.75f, 1f);
-            GUI.Button(r, new GUIContent(Styles.close, "Remove Modifier"), GUIStyle.none);
+
+            if (GUI.Button(r, new GUIContent(Styles.close, "Remove Modifier"), GUIStyle.none))
+            {
+                node.RemoveModifier(m);
+                removed = true;
+            }
+
             GUI.color = Color.white;
 
             GUILayout.Space(2f);
 
             EditorGUILayout.EndHorizontal();
 
-            if (m.expanded)
+            if (m.expanded && !removed)
                 ObjectEditor.DoEditor(m);
 
             GUILayout.EndVertical();
+
+            i++;
         }
 
         EditorGUIUtility.SetIconSize(iconSize);
+
+        bool add = GUILayout.Button("Add Modifier");
+
+        r = GUILayoutUtility.GetLastRect();
+
+        if (add)
+            AddModifierMenu().DropDown(new Rect(r.x, r.yMax, 0f, 0f));
     }
 }

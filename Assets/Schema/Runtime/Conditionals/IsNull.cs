@@ -10,8 +10,7 @@ namespace Schema.Builtin.Conditionals
     [LightIcon("Conditionals/IsNull")]
     public class IsNull : Conditional
     {
-        [Tooltip("Entry to check for null")] public BlackboardEntrySelector entry;
-        [Tooltip("Evaluate as true when variable is not null")] public bool invert;
+        [Tooltip("Entry to check for null")] public BlackboardEntrySelector entry = new BlackboardEntrySelector();
         class IsNullMemory
         {
             public object defaultValue;

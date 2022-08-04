@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(ConeCheck)), CanEditMultipleObjects]
+    [CustomEditor(typeof(Schema.Builtin.Conditionals.ConeCheck)), CanEditMultipleObjects]
     public class ConeCheckEditor : Editor
     {
         private int tab;

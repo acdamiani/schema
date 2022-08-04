@@ -8,7 +8,7 @@ using System;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
-    public sealed class ConnectionComponent : GUIComponent, IViewElement, ISelectable
+    public sealed class ConnectionComponent : GUIComponent, IViewElement, ISelectable, IDeletable
     {
         public bool isSelected { get { return _isSelected; } }
         private bool _isSelected;
@@ -47,7 +47,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             {
                 if (value != _connectionFrom && _connectionTo != null)
                 {
-                    _connectionFrom.node.RemoveConnection(_connectionTo.node);
+                    if (_connectionFrom != null)
+                        _connectionFrom.node.RemoveConnection(_connectionTo.node);
                     value.node.AddConnection(_connectionTo.node);
                     value.node.graph.Traverse();
                 }
@@ -95,6 +96,9 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (from == null && to == null)
                 throw new ArgumentNullException();
 
+            if (createArgs.add)
+                _from.node.AddConnection(_to.node);
+
             curve = new CurveUtility.Bezier(Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero);
         }
         public override void OnGUI()
@@ -136,7 +140,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public void Deselect() { _isSelected = false; }
         public bool Overlaps(Rect rect) { return curve.Intersect(rect); }
         public bool IsHit(Vector2 position) { return curve.Hit(position, 5f * canvas.zoomer.zoom); }
-        protected override void OnDestroy()
+        public bool IsDeletable() { return isSelected; }
+        public void Delete()
         {
             if (connectionFrom == null || connectionTo == null)
                 return;
@@ -147,6 +152,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         {
             public NodeComponent from { get; set; }
             public NodeComponent to { get; set; }
+            public bool add { get; set; }
         }
     }
 }

@@ -89,6 +89,11 @@ namespace Schema
                 name = attribute != null ? attribute.name : String.Concat(this.GetType().Name.Select(x => Char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
         }
         /// <summary>
+        /// Allow only one of these modifiers to be attached to a node at a given time
+        /// </summary>
+        [System.AttributeUsage(AttributeTargets.Class)]
+        protected class AllowOneAttribute : System.Attribute { }
+        /// <summary>
         /// Attribute to override the default name of the modifier in the editor
         /// </summary>
         [System.AttributeUsage(AttributeTargets.Class)]
@@ -157,6 +162,10 @@ namespace Schema
                 this.location = location;
                 this.isEditorIcon = isEditorIcon;
             }
+        }
+        public static bool AllowedOne(Type type)
+        {
+            return type.GetCustomAttribute<AllowOneAttribute>() != null;
         }
 #if UNITY_EDITOR
         private Texture2D _icon;

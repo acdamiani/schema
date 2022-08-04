@@ -7,5 +7,6 @@ namespace SchemaEditor.Internal.ComponentSystem
     {
         void HandleWinInfo(Rect rect, GUIContent title, GUIStyle style);
         void OnGUI(int id);
+        bool Close();
     }
 }

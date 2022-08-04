@@ -20,6 +20,15 @@ public static class GraphUtility
 
         Node.EndPosNoCheck();
     }
+    private static Vector2 GetNodeSize(this Node node)
+    {
+        NodeComponent nodeComponent = NodeEditor.instance.canvas.FindComponent(node) as NodeComponent;
+
+        if (nodeComponent == null)
+            return Vector2.zero;
+
+        return nodeComponent.layout.body.size;
+    }
     private static Vector2 GetSize(this Node node)
     {
         NodeComponent nodeComponent = NodeEditor.instance.canvas.FindComponent(node) as NodeComponent;
@@ -27,7 +36,25 @@ public static class GraphUtility
         if (nodeComponent == null)
             return Vector2.zero;
 
-        return nodeComponent.layout.gridRect.size;
+        float xMin = nodeComponent.layout.body.xMin;
+        float yMin = nodeComponent.layout.body.yMin;
+        float xMax = nodeComponent.layout.body.xMax;
+        float yMax = nodeComponent.layout.body.yMax;
+
+        foreach (Conditional conditional in node.conditionals)
+        {
+            ConditionalComponent conditionalComponent = NodeEditor.instance.canvas.FindComponent(conditional) as ConditionalComponent;
+
+            if (conditionalComponent == null)
+                return Vector2.zero;
+
+            xMin = Mathf.Min(xMin, conditionalComponent.rect.xMin);
+            yMin = Mathf.Min(yMin, conditionalComponent.rect.yMin);
+            xMax = Mathf.Max(xMax, conditionalComponent.rect.xMax);
+            yMax = Mathf.Max(yMax, conditionalComponent.rect.yMax);
+        }
+
+        return Rect.MinMaxRect(xMin, yMin, xMax, yMax).size;
     }
     private static void Calc(Node node)
     {
@@ -38,10 +65,17 @@ public static class GraphUtility
 
         if (node.GetType() == typeof(Root))
         {
-            node.graphPosition = new Vector2(
-                node.children[0].graphPosition.x + node.children[0].GetSize().x / 2f - nodeSize.x / 2f,
-                node.graphPosition.y
-            );
+            if (node.children.Length > 0)
+            {
+                node.graphPosition = new Vector2(
+                    node.children[0].graphPosition.x + node.children[0].GetSize().x / 2f - nodeSize.x / 2f,
+                    0f
+                );
+            }
+            else
+            {
+                node.graphPosition = Vector2.zero;
+            }
 
             return;
         }
@@ -109,7 +143,14 @@ public static class GraphUtility
         if (node.children.Length > 0 && nodeIndex != 0)
             GetOverlapDist(node);
 
-        node.graphPosition = new Vector2(node.graphPosition.x, node.GetParentCount() * 300f);
+        node.graphPosition = new Vector2(
+            node.graphPosition.x,
+            node.GetParentSize() + node.GetParentCount() * 100f
+        );
+
+        Debug.LogFormat("{0} {1}:{2}", node.name, node.GetSize(), node.GetNodeSize());
+
+        // node.graphPosition += node.GetSize() - node.GetNodeSize();
     }
     private static void GetOverlapDist(Node node)
     {
@@ -244,6 +285,19 @@ public static class GraphUtility
         }
 
         return count;
+    }
+    private static float GetParentSize(this Node node)
+    {
+        float size = 0f;
+        Node current = node;
+
+        while (current.parent != null)
+        {
+            current = current.parent;
+            size += current.GetSize().y;
+        }
+
+        return size;
     }
     private static void MoveTree(Node root, float value)
     {

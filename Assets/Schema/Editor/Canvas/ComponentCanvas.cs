@@ -39,7 +39,7 @@ namespace SchemaEditor.Internal
             selectionBoxComponent.hidden = true;
 
             CreateArgs empty = new CreateArgs();
-            empty.layer = 100;
+            empty.layer = 50;
 
             debugViewComponent = Create<DebugViewComponent>(empty);
 
@@ -57,11 +57,10 @@ namespace SchemaEditor.Internal
         public T Create<T>(CreateArgs args) where T : GUIComponent, new()
         {
             T component = new T();
+            ArrayUtility.Add(ref _components, component);
             ((GUIComponent)component).canvas = this;
             component.Create(args);
             component.layer = args.layer;
-
-            ArrayUtility.Add(ref _components, component);
 
             return component;
         }
@@ -210,12 +209,7 @@ namespace SchemaEditor.Internal
             switch (keyEvent.keyCode)
             {
                 case KeyCode.Delete:
-                    foreach (IDeletable deletable in components.Where(x => x is IDeletable).Cast<IDeletable>())
-                    {
-                        if (deletable.IsDeletable())
-                            deletable.Delete();
-                    }
-
+                    DeleteSelected();
                     break;
             }
         }
@@ -271,6 +265,12 @@ namespace SchemaEditor.Internal
                     DeselectAll();
 
                     break;
+                case 1:
+                    GenericMenu menu = BuildContextMenu();
+
+                    menu.ShowAsContext();
+
+                    break;
             }
         }
         private void OnMouseDrag(Event mouseEvent)
@@ -320,6 +320,31 @@ namespace SchemaEditor.Internal
                     selectableComponent.Select(true);
                 }
             }
+        }
+        private void DeleteSelected()
+        {
+            foreach (GUIComponent component in components.Where(x => x is IDeletable))
+            {
+                IDeletable deletable = (IDeletable)component;
+
+                if (deletable.IsDeletable())
+                {
+                    deletable.Delete();
+
+                    ArrayUtility.Remove(ref _components, component);
+
+                    if (_selected.Contains(component))
+                        ArrayUtility.Remove(ref _selected, component);
+                }
+            }
+        }
+        private GenericMenu BuildContextMenu()
+        {
+            GenericMenu menu = new GenericMenu();
+
+            menu.AddItem("Delete", false, DeleteSelected, false);
+
+            return menu;
         }
     }
 }

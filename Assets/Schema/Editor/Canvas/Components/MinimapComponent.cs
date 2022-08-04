@@ -135,21 +135,18 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         }
         private Rect GetGraphRect(float padding)
         {
-            if (listModified)
-            {
-                IEnumerable<NodeComponent> nodeComponents = canvas.components
-                    .Where(x => x is NodeComponent)
-                    .Cast<NodeComponent>();
+            IEnumerable<NodeComponent> nodeComponents = canvas.components
+                .Where(x => x is NodeComponent)
+                .Cast<NodeComponent>();
 
-                float xMin = nodeComponents.Min(x => x.layout.gridRect.x) - padding;
-                float xMax = nodeComponents.Max(x => x.layout.gridRect.x + x.layout.gridRect.width) + padding;
-                float yMin = nodeComponents.Min(x => x.layout.gridRect.y) - padding;
-                float yMax = nodeComponents.Max(x => x.layout.gridRect.y + x.layout.gridRect.height) + padding;
+            float xMin = nodeComponents.Min(x => x.layout.gridRect.x) - padding;
+            float xMax = nodeComponents.Max(x => x.layout.gridRect.x + x.layout.gridRect.width) + padding;
+            float yMin = nodeComponents.Min(x => x.layout.gridRect.y) - padding;
+            float yMax = nodeComponents.Max(x => x.layout.gridRect.y + x.layout.gridRect.height) + padding;
 
-                graphRect = Rect.MinMaxRect(xMin, yMin, xMax, yMax);
+            graphRect = Rect.MinMaxRect(xMin, yMin, xMax, yMax);
 
-                listModified = false;
-            }
+            listModified = false;
 
             return graphRect;
         }
