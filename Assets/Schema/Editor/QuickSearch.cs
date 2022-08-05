@@ -103,10 +103,11 @@ public class QuickSearch : IWindowComponentProvider
 
         float positionInView = index * 24f + Styles.padding8x.padding.top;
 
-        GUILayoutUtility.GetRect(0f, 24f);
-
         if (positionInView + 24 < scroll.y || positionInView > rect.height - toolbarHeight + scroll.y)
+        {
+            GUILayoutUtility.GetRect(0f, 24f);
             return;
+        }
 
         int realSelection = CorrectSelection(selected);
 

@@ -170,32 +170,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         void CreateEditors()
         {
             List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
-            List<BlackboardEntry> duplicateEntries = new List<BlackboardEntry>();
-
-            for (int i = 0; i < target.blackboard.entries.Length; i++)
-            {
-                for (int j = 0; j < target.blackboard.entries.Length; j++)
-                {
-                    if (j == i || duplicateEntries.Contains(target.blackboard.entries[j]))
-                        continue;
-
-                    if (target.blackboard.entries[i] == target.blackboard.entries[j])
-                        duplicateEntries.Add(target.blackboard.entries[j]);
-                }
-            }
-
-            foreach (BlackboardEntry e in duplicateEntries)
-            {
-                target.blackboard.entries[Array.IndexOf(target.blackboard.entries, e)] = ScriptableObject.Instantiate(e);
-            }
-
-            // if (windowInfo.selectedDecorator != null)
-            // {
-            //     targets.Add(windowInfo.selectedDecorator);
-
-            //     if (!defaultDecoratorEditor || defaultDecoratorEditor.target == null || defaultDecoratorEditor.target != windowInfo.selectedDecorator)
-            //         UnityEditor.Editor.CreateCachedEditor(windowInfo.selectedDecorator, typeof(DefaultDecoratorEditor), ref defaultDecoratorEditor);
-            // }
 
             IEnumerable<UnityEngine.Object> editableComponents = canvas.selected
                 .Where(x => x is IEditable)
@@ -210,21 +184,33 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             if (distinctTypes.Count > 1) return;
 
-            //caches inspector once per OnGUI call so we don't get EventType.Layout and EventType.Repaint related errors
-            if ((editor == null || editor.targets.Any(obj => obj == null) || !editor.targets.SequenceEqual(targets)) && targets.Count > 0)
+            if (editor == null)
             {
-                DestroyImmediate(editor);
-                DestroyImmediate(defaultNodeEditor);
-
-                editor = Editor.CreateEditor(targets.ToArray());
-
-                if (targets.Any(x => typeof(Node).IsAssignableFrom(x.GetType())))
-                    defaultNodeEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultNodeEditor));
+                if (targets.Count > 0)
+                    editor = Editor.CreateEditor(targets.ToArray());
             }
-            else if (targets.Count == 0)
+            else if (!editor.targets.SequenceEqual(targets))
             {
                 DestroyImmediate(editor);
-                DestroyImmediate(defaultNodeEditor);
+
+                if (targets.Count > 0)
+                    editor = Editor.CreateEditor(targets.ToArray());
+            }
+
+            if (targets.All(x => x is Node))
+            {
+                if (defaultNodeEditor == null)
+                {
+                    if (targets.Count > 0)
+                        defaultNodeEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultNodeEditor));
+                }
+                else if (!defaultNodeEditor.targets.SequenceEqual(targets))
+                {
+                    DestroyImmediate(defaultNodeEditor);
+
+                    if (targets.Count > 0)
+                        defaultNodeEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultNodeEditor));
+                }
             }
         }
 

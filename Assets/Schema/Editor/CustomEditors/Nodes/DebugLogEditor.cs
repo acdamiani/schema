@@ -10,10 +10,12 @@ namespace SchemaEditor.Editors.Nodes
     public class DebugLogEditor : Editor
     {
         SerializedProperty message;
+        SerializedProperty logType;
         GUIStyle boxStyle;
         void OnEnable()
         {
             message = serializedObject.FindProperty("message");
+            logType = serializedObject.FindProperty("logType");
         }
         public override void OnInspectorGUI()
         {
@@ -28,6 +30,7 @@ namespace SchemaEditor.Editors.Nodes
             serializedObject.Update();
 
             EditorGUILayout.PropertyField(message);
+            EditorGUILayout.PropertyField(logType);
 
             EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
             EditorGUILayout.SelectableLabel(message.stringValue, boxStyle);

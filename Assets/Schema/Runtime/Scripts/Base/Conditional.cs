@@ -70,5 +70,17 @@ namespace Schema
             LowerPriority,
             Both
         }
+#if UNITY_EDITOR
+        public static Conditional Instantiate(Conditional conditional)
+        {
+            Conditional copy = ScriptableObject.Instantiate<Conditional>(conditional);
+
+            copy.name = conditional.name;
+            copy.ResetGUID();
+            copy.node = null;
+
+            return copy;
+        }
+#endif
     }
 }

@@ -12,7 +12,8 @@ using System.Linq;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
-    public sealed class NodeComponent : GUIComponent, ISelectable, IEditable, IFramable, IDeletable, IGraphObjectProvider, IViewElement
+    public sealed class NodeComponent
+        : GUIComponent, ISelectable, IEditable, IFramable, IDeletable, IGraphObjectProvider, IViewElement
     {
         private static readonly RectOffset ContentPadding = new RectOffset(20, 20, 14, 14);
         public Node node { get { return _node; } }
@@ -358,7 +359,17 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public void Delete()
         {
             node.graph.DeleteNodes(new List<Node>() { node });
-            Destroy(parentConnection);
+
+            if (parentConnection != null)
+                Destroy(parentConnection);
+
+            IEnumerable<ConditionalComponent> conditionalComponents = canvas.components
+                .Where(x => x is ConditionalComponent)
+                .Cast<ConditionalComponent>()
+                .Where(x => x.conditional.node == node);
+
+            foreach (ConditionalComponent conditional in conditionalComponents)
+                Destroy(conditional);
         }
         public bool Equals(Schema.Internal.GraphObject graphObject)
         {

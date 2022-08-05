@@ -128,6 +128,33 @@ namespace Schema
             Both
         }
 #if UNITY_EDITOR
+        public static Node Instantiate(Node node)
+        {
+            Node copy = ScriptableObject.Instantiate<Node>(node);
+
+            copy.name = node.name;
+            copy.ResetGUID();
+            copy.BreakConnections();
+            copy.priority = 0;
+
+            for (int i = 0; i < copy.conditionals.Length; i++)
+            {
+                Conditional copiedConditional = Conditional.Instantiate(copy.conditionals[i]);
+
+                copiedConditional.node = copy;
+                copy.conditionals[i] = copiedConditional;
+            }
+
+            for (int i = 0; i < copy.modifiers.Length; i++)
+            {
+                Modifier copiedModifier = Modifier.Instantiate(copy.modifiers[i]);
+
+                copiedModifier.node = copy;
+                copy.modifiers[i] = copiedModifier;
+            }
+
+            return copy;
+        }
         /// <summary>
         /// Order child list by their graph positions
         /// </summary>

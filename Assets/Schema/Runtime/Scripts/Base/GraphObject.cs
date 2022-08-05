@@ -84,6 +84,10 @@ namespace Schema.Internal
                 return null;
             }
         }
+        public void ResetGUID()
+        {
+            m_uID = Guid.NewGuid().ToString("N");
+        }
 #endif
         public static string GetDescription<T>() where T : GraphObject
         {
@@ -110,10 +114,6 @@ namespace Schema.Internal
             CategoryAttribute category = type.GetCustomAttribute<CategoryAttribute>();
 
             return category?.category ?? "";
-        }
-        internal void ResetGUID()
-        {
-            m_uID = Guid.NewGuid().ToString("N");
         }
         public IEnumerable<Error> GetErrors() { return Enumerable.Empty<Error>(); }
         /// <summary>

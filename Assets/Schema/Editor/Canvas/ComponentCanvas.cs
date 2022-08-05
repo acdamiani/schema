@@ -338,11 +338,23 @@ namespace SchemaEditor.Internal
                 }
             }
         }
+        private void DoCopy()
+        {
+            IEnumerable<NodeComponent> selectedNodes = selected
+                .Where(x => x is NodeComponent)
+                .Cast<NodeComponent>();
+
+            if (selectedNodes.Count() == 0)
+                return;
+
+            Copy.DoCopy(this, selectedNodes);
+        }
         private GenericMenu BuildContextMenu()
         {
             GenericMenu menu = new GenericMenu();
 
             menu.AddItem("Delete", false, DeleteSelected, false);
+            menu.AddItem("Copy", false, DoCopy, false);
 
             return menu;
         }

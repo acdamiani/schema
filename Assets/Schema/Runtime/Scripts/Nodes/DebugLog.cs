@@ -12,11 +12,29 @@ namespace Schema.Builtin.Nodes
     public class DebugLog : Action
     {
         [TextArea] public string message;
+        public LogType logType;
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
-            Debug.Log(message);
+            switch (logType)
+            {
+                case LogType.Log:
+                    Debug.Log(message);
+                    break;
+                case LogType.Warning:
+                    Debug.LogWarning(message);
+                    break;
+                case LogType.Error:
+                    Debug.LogError(message);
+                    break;
+            }
 
             return NodeStatus.Success;
+        }
+        public enum LogType
+        {
+            Log,
+            Warning,
+            Error
         }
     }
 }

@@ -25,6 +25,25 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         private static Vector2 dxdyMouseDown;
         private static int desiredIndex;
         private static int originalIndex;
+        public Rect GetRect()
+        {
+            int index = Array.IndexOf(conditional.node.conditionals, conditional);
+            int length = conditional.node.conditionals.Length;
+
+            float height = 32f;
+
+            int upCount = length - index;
+
+            GUIContent content = conditional.GetConditionalContent();
+            Texture2D icon = conditional.icon;
+
+            Vector2 contentSize = Styles.conditional.CalcSize(content);
+            contentSize.x += icon != null ? 20f : 0f;
+
+            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f, parent.layout.body.y - (height + 18f) * upCount);
+
+            return new Rect(pos.x, pos.y, contentSize.x, height);
+        }
         public override void Create(CreateArgs args)
         {
             ConditionalComponentCreateArgs createArgs = args as ConditionalComponentCreateArgs;

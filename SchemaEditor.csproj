@@ -48,7 +48,9 @@
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IEditable.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntryDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/ICopyable.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/CurveUtility.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Copy.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IViewElement.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IGraphObjectProvider.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/PlaySoundEditor.cs" />

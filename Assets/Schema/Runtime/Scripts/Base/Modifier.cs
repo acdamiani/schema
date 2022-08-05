@@ -168,6 +168,15 @@ namespace Schema
             return type.GetCustomAttribute<AllowOneAttribute>() != null;
         }
 #if UNITY_EDITOR
+        public static Modifier Instantiate(Modifier modifier)
+        {
+            Modifier copy = ScriptableObject.Instantiate<Modifier>(modifier);
+
+            copy.name = modifier.name;
+            copy.node = null;
+
+            return copy;
+        }
         private Texture2D _icon;
         /// <summary>
         /// Icon of the modifier (editor only)

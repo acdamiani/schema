@@ -30,7 +30,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             string componentDebugInfo = current != null ? current.GetDebugInfo() : "";
 
-            componentDebugInfo = DoInternalDebug() + componentDebugInfo;
+            componentDebugInfo = DoInternalDebug(current) + componentDebugInfo;
 
             float height = label.CalcHeight(new GUIContent(componentDebugInfo), 400f);
 
@@ -39,12 +39,15 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             GUI.Box(rect, GUIContent.none, GUI.skin.window);
             EditorGUI.LabelField(rect.Pad(5), new GUIContent(componentDebugInfo), label);
 
-            if (GUI.Toggle(new Rect(rect.xMax - 44f, rect.y + 2f, 42f, 32f), pinned != null, "Pin"))
-                pinned = pinned ?? canvas.selected.ElementAtOrDefault(0);
-            else
-                pinned = null;
+            if (GUI.Button(new Rect(rect.xMax - 44f, rect.y + 2f, 42f, 32f), "T"))
+                canvas.zoomer.pan = Vector2.zero;
+
+            // if (GUI.Toggle(new Rect(rect.xMax - 44f, rect.y + 2f, 42f, 32f), pinned != null, "Pin"))
+            //     pinned = pinned ?? canvas.selected.ElementAtOrDefault(0);
+            // else
+            //     pinned = null;
         }
-        private string DoInternalDebug()
+        private string DoInternalDebug(GUIComponent current)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(String.Format("<b>Hovered:</b> {0}", canvas.hovered));
@@ -52,6 +55,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             sb.AppendLine(String.Format("<b>Pan:</b> {0}", canvas.zoomer.pan));
             sb.AppendLine(String.Format("<b>Components:</b> {0}", String.Join(", ", canvas.components.Select(x => x.GetType().Name))));
             sb.AppendLine();
+
+            if (current != null)
+            {
+                sb.AppendLine(String.Format("<b>Layer:</b> {0}", current.layer));
+            }
 
             return sb.ToString();
         }

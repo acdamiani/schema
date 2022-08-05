@@ -103,6 +103,15 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         }
         public override void OnGUI()
         {
+            if (
+                (connectionFrom != null && connectionFrom.node == null)
+                || (connectionTo != null && connectionTo.node == null)
+            )
+            {
+                Destroy(this);
+                return;
+            }
+
             Vector2 p0;
             Vector2 p3;
 
