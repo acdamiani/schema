@@ -94,7 +94,7 @@ public static class GraphUtility
 
         Vector2 min = NodeEditor.instance.canvas.zoomer.WindowToGridPosition(new Vector2(xMin, yMin));
 
-        if (min != node.graphPosition)
+        if (node.conditionals.Length > 0)
             Debug.LogFormat("Name: {0}, real: {1}, calc: {2}", node.name, node.graphPosition, min);
 
         return min;

@@ -358,18 +358,21 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public bool IsDeletable() { return isSelected; }
         public void Delete()
         {
-            node.graph.DeleteNodes(new List<Node>() { node });
-
-            if (parentConnection != null)
-                Destroy(parentConnection);
-
             IEnumerable<ConditionalComponent> conditionalComponents = canvas.components
                 .Where(x => x is ConditionalComponent)
                 .Cast<ConditionalComponent>()
                 .Where(x => x.conditional.node == node);
 
             foreach (ConditionalComponent conditional in conditionalComponents)
+            {
+                node.RemoveConditional(conditional.conditional);
                 Destroy(conditional);
+            }
+
+            node.graph.DeleteNodes(new List<Node>() { node });
+
+            if (parentConnection != null)
+                Destroy(parentConnection);
         }
         public bool Equals(Schema.Internal.GraphObject graphObject)
         {

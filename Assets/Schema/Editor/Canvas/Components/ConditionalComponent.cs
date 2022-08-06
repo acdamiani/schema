@@ -10,7 +10,7 @@ using Schema.Utilities;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
-    public sealed class ConditionalComponent : GUIComponent, IViewElement, ISelectable, IEditable, IGraphObjectProvider
+    public sealed class ConditionalComponent : GUIComponent, IViewElement, ISelectable, IEditable, IGraphObjectProvider, IDeletable
     {
         public Rect rect { get { return _rect; } }
         private Rect _rect;
@@ -61,10 +61,10 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             else
             {
                 _conditional = createArgs.node.AddConditional(createArgs.conditionalType);
+                _uID = _conditional.uID;
             }
 
             parent = (NodeComponent)canvas.FindComponent(_conditional.node);
-            Debug.Log(parent);
         }
         public override void OnGUI()
         {
@@ -173,6 +173,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public void Deselect() { _isSelected = false; }
         public UnityEngine.Object GetEditable() { return conditional; }
         public bool IsEditable() { return true; }
+        public bool IsDeletable() { return isSelected; }
+        public void Delete() { conditional.node.RemoveConditional(conditional); }
         public bool Equals(GraphObject graphObject)
         {
             Conditional conditional = graphObject as Conditional;
