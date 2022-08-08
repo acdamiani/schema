@@ -4,13 +4,17 @@ using UnityEngine;
 namespace Schema.Builtin.Modifiers
 {
     [AllowOne]
-    [DisableIfTypes(typeof(Loop), typeof(LoopUntil))]
-    [DarkIcon("Modifiers/LoopForever")]
-    public class LoopForever : Modifier
+    [DisableIfTypes(typeof(LoopForever), typeof(Loop))]
+    [DarkIcon("Modifiers/LoopUntil")]
+    public class LoopUntil : Modifier
     {
+        public BlackboardEntrySelector<bool> condition;
         public override Message Modify(object modifierMemory, SchemaAgent agent, NodeStatus status)
         {
-            return Message.Repeat;
+            if (!condition.value)
+                return Message.Repeat;
+
+            return Message.None;
         }
         public enum ForcedStatus
         {

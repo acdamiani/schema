@@ -1,5 +1,5 @@
-// using UnityEngine;
-// using UnityEditor;
+using UnityEngine;
+using UnityEditor;
 
 // [CustomEditor(typeof(SchemaAgent))]
 // public class SchemaAgentEditor : Editor

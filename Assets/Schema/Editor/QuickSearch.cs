@@ -242,6 +242,8 @@ public class QuickSearch : IWindowComponentProvider
         else if (current.type == EventType.ScrollWheel && current.delta.y != 0)
         {
             MoveSelection(current.delta.y < 0, resultsLength);
+
+            current.Use();
         }
     }
     private void MoveSelection(bool isUp, int resultsCount)
@@ -254,7 +256,7 @@ public class QuickSearch : IWindowComponentProvider
         if (positionInView < scroll.y)
             scroll.y = positionInView;
         else if (positionInView + 24 - scroll.y > rect.height - toolbarHeight)
-            scroll.y = positionInView - rect.height + toolbarHeight + 24 + 8;
+            scroll.y = positionInView - rect.height + toolbarHeight + 36;
     }
     private int CorrectSelection(int selected)
     {

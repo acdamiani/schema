@@ -155,7 +155,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (connectionFrom == null || connectionTo == null)
                 return;
 
-            connectionFrom.node.RemoveConnection(connectionTo.node);
+            connectionFrom.node?.RemoveConnection(connectionTo.node);
         }
         public class ConnectionComponentCreateArgs : CreateArgs
         {

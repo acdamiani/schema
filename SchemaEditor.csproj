@@ -74,7 +74,6 @@
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntrySelectorDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/RaycastEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/ConnectionComponent.cs" />
-     <Compile Include="Assets/Schema/Editor/Utilities/CacheDictionary.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/EditorReflection.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetScaleEditor.cs" />

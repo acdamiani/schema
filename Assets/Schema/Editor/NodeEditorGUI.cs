@@ -169,6 +169,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         }
         void CreateEditors()
         {
+            if (blackboardEditor == null)
+                blackboardEditor = Editor.CreateEditor(target.blackboard, typeof(BlackboardEditor));
+
             List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
 
             IEnumerable<UnityEngine.Object> editableComponents = canvas.selected
@@ -1065,7 +1068,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             }
             else
             {
-
                 Rect prefsWindow = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2f, 0f, inspectorWidth + GUIData.sidebarPadding * 2f, position.height);
 
                 GUILayout.BeginArea(prefsWindow);
@@ -1200,16 +1202,11 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         }
         void DrawBlackboard(Blackboard blackboard)
         {
-            EditorGUI.BeginDisabledGroup(editingPaused);
             GUILayout.Space(GUIData.sidebarPadding);
             GUILayout.Label("Blackboard", Styles.styles.title);
             GUILayout.Space(GUIData.sidebarPadding);
 
-            if (!blackboardEditor || blackboardEditor.target != blackboard)
-                UnityEditor.Editor.CreateCachedEditor(blackboard, typeof(BlackboardEditor), ref blackboardEditor);
             blackboardEditor.OnInspectorGUI();
-
-            EditorGUI.EndDisabledGroup();
         }
         private void ToggleSearch()
         {

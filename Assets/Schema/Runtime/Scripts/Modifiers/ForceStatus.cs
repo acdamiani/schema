@@ -4,13 +4,18 @@ namespace Schema.Builtin.Modifiers
     [DarkIcon("console.infoicon", true)]
     public class ForceStatus : Modifier
     {
-        public ForcedStatus status;
-        public override void OnNodeEnter(object modifierMemory, SchemaAgent agent)
+        public ForcedStatus forcedStatus;
+        public override Message Modify(object modifierMemory, SchemaAgent agent, NodeStatus status)
         {
-            if (status == ForcedStatus.Success)
-                SendMessage(Message.ForceSuccess);
-            else if (status == ForcedStatus.Success)
-                SendMessage(Message.ForceFailure);
+            switch (forcedStatus)
+            {
+                case ForcedStatus.Success:
+                    return Message.ForceSuccess;
+                case ForcedStatus.Failure:
+                    return Message.ForceFailure;
+                default:
+                    return Message.None;
+            }
         }
         public enum ForcedStatus
         {

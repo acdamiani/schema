@@ -1,12 +1,11 @@
 using Schema;
+using Schema.Internal;
 using Schema.Utilities;
-using SchemaEditor;
 using SchemaEditor.Utilities;
-using SchemaEditor.Internal;
-using SchemaEditor.Internal.ComponentSystem;
 using System;
 using System.Text;
 using UnityEngine;
+using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -30,6 +29,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public float yMin => layout.body.y;
         public float xMax => layout.body.xMax;
         public float yMax => layout.body.yMax;
+        private Color statusColor;
+        private float cLerp;
+        private bool isActive;
+        private NodeStatus status;
+        private float t;
         public override void Create(CreateArgs args)
         {
             NodeComponentCreateArgs createArgs = args as NodeComponentCreateArgs;
@@ -89,6 +93,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             DoEvents();
 
+            HandleSelection(UnityEditor.Selection.gameObjects);
+
             Color guiColor = GUI.color;
 
             GUI.color = Styles.windowBackground;
@@ -108,7 +114,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             GUI.color = Styles.windowBackground;
             Styles.element.DrawIfRepaint(layout.shadow, false, false, false, false);
 
-            GUI.color = isSelected ? NodeEditor.Prefs.selectionColor : Styles.outlineColor;
+            Color c = isSelected ? NodeEditor.Prefs.selectionColor : Styles.outlineColor;
+            cLerp -= (Time.realtimeSinceStartup - t);
+            cLerp = Mathf.Clamp01(cLerp);
+
+            GUI.color = Color.Lerp(c, statusColor, cLerp);
             Styles.styles.nodeSelected.DrawIfRepaint(layout.body, false, false, false, false);
 
             GUI.color = Styles.windowAccent;
@@ -120,20 +130,30 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             GUI.Label(layout.content.Pad(new RectOffset(0, 0, ContentPadding.top, ContentPadding.bottom)), new GUIContent(node.name, node.icon), Styles.nodeLabel);
 
-            List<Error> errors = Enumerable.Empty<Error>().ToList();
+            // IEnumerable<Error> errors = new List<Error>() { new Error("Hello World", Error.Severity.Warning) };
 
-            if (errors.Count > 0)
+            // if (errors.Count() > 0)
+            // {
+            //     string errorTooltip = String.Join("\n", errors.Select(error => error.message));
+
+            //     GUI.color = Styles.outlineColor;
+            //     Styles.roundedBox.DrawIfRepaint(layout.errorBox, false, false, false, false);
+
+            //     Rect tex = layout.errorBox.Pad(4);
+            //     tex.position += new Vector2(1, 0);
+
+            //     GUI.color = Color.white;
+            //     GUI.Label(tex, new GUIContent(Styles.warnIcon, errorTooltip), GUIStyle.none);
+            // }
+
+            if (node.modifiers.Length > 0)
             {
-                string errorTooltip = String.Join("\n", errors.Select(error => error.message));
-
                 GUI.color = Styles.outlineColor;
-                Styles.roundedBox.DrawIfRepaint(layout.errorBox, false, false, false, false);
-
-                Rect tex = layout.errorBox.Pad(4);
-                tex.position += new Vector2(1, 0);
+                GUIContent content = new GUIContent("", "Node has active modifiers");
+                Styles.roundedBox.DrawIfRepaint(layout.modifierBox, content, false, false, false, false);
 
                 GUI.color = Color.white;
-                GUI.Label(tex, new GUIContent(Styles.warnIcon, errorTooltip), GUIStyle.none);
+                GUI.DrawTexture(layout.modifierBox.Pad(4), Styles.Icons.GetResource("Modifier", false));
             }
 
             if (node.priority > 0)
@@ -144,6 +164,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             }
 
             GUI.color = guiColor;
+
+            t = Time.realtimeSinceStartup;
         }
         private void DoEvents()
         {
@@ -374,6 +396,38 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (parentConnection != null)
                 Destroy(parentConnection);
         }
+        public void HandleSelection(IEnumerable<GameObject> selection)
+        {
+            if (!Application.isPlaying || selection.Count() != 1)
+                return;
+
+            SchemaAgent agent = selection
+                .ElementAt(0)
+                .GetComponent<SchemaAgent>();
+
+            if (agent == null || agent.target != node.graph)
+                return;
+
+            ExecutionContext executionContext = agent.tree.GetExecutionContext(agent);
+
+            if (executionContext.node.index == node.priority - 1)
+            {
+                cLerp = 1.0f;
+
+                switch (executionContext.status)
+                {
+                    case NodeStatus.Success:
+                        statusColor = NodeEditor.Prefs.successColor;
+                        break;
+                    case NodeStatus.Failure:
+                        statusColor = NodeEditor.Prefs.failureColor;
+                        break;
+                    case NodeStatus.Running:
+                        statusColor = NodeEditor.Prefs.highlightColor;
+                        break;
+                }
+            }
+        }
         public bool Equals(Schema.Internal.GraphObject graphObject)
         {
             Node node = graphObject as Node;
@@ -446,11 +500,12 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 body = r;
                 shadow = body.Pad(-10);
                 content = body.Pad(14);
-                errorBox = new Rect(body.xMax, body.yMax, 40f, 40f).UseCenter();
+                errorBox = new Rect(body.xMax, body.yMax, 28f, 28f).UseCenter();
                 inConnection = new Rect(body.center.x, body.y - component.node.conditionals.Length * 50f - 6f, 24f, 12f).UseCenter();
                 outConnection = new Rect(body.center.x, body.yMax, body.width - 48f, 24f).UseCenter();
                 outConnectionSliced = outConnection.Slice(0.5f, false, false);
                 priorityIndicator = new Rect(body.x, body.center.y, v.x, v.y).UseCenter();
+                modifierBox = new Rect(body.xMax, body.y, 28f, 28f).UseCenter();
             }
             private void DoRect()
             {
@@ -472,6 +527,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             public Rect outConnectionSliced { get; set; }
             public Rect errorBox { get; set; }
             public Rect priorityIndicator { get; set; }
+            public Rect modifierBox { get; set; }
         }
     }
 }

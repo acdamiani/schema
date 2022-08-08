@@ -5,8 +5,8 @@ using System.Linq;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("debuglog")]
-    [LightIcon("Light/DebugLog")]
+    [DarkIcon("Nodes/d_Debug")]
+    [LightIcon("UnityEditor.ConsoleWindow@2x", true)]
     [Category("Debug")]
     [Description("Logs a rich-text enabled message to the console")]
     public class DebugLog : Action

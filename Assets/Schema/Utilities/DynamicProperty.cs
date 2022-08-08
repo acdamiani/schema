@@ -189,7 +189,6 @@ public static class DynamicProperty
         {
             return new Func<object, object>(o => null);
         }
-
 #endif
     }
     private static Action<object, object> CreateSetMethod(MemberInfo memberInfo)

@@ -225,19 +225,17 @@ namespace Schema.Utilities
 
             return current;
         }
-        // public static Type FindType(string fullName)
-        // {
-        //     return
-        //         AppDomain.CurrentDomain.GetAssemblies()
-        //             .Where(a => !a.IsDynamic)
-        //             .SelectMany(a => a.GetTypes())
-        //             .FirstOrDefault(t => t.FullName.Equals(fullName));
-        // }
+        public static Type GetMemoryType(this Type type)
+        {
+            return type
+                .GetTypeInfo()
+                .DeclaredNestedTypes
+                .ElementAtOrDefault(0);
+        }
         public static bool IsCastable(this Type from, Type to, bool implicitly = false)
         {
             return to.IsAssignableFrom(from) || from.HasCastDefined(to, implicitly);
         }
-
         static bool HasCastDefined(this Type from, Type to, bool implicitly)
         {
             if ((from.IsPrimitive || from.IsEnum) && (to.IsPrimitive || to.IsEnum))

@@ -8,7 +8,7 @@ using UnityEngine;
 [Description("Executes a series of nodes one after another, disregarding node status")]
 public class Series : Flow
 {
-    public override int Tick(NodeStatus status, int index)
+    public override int Tick(object nodeMemory, NodeStatus status, int index)
     {
         if (index + 1 > children.Length - 1) return -1;
         else return index + 1;

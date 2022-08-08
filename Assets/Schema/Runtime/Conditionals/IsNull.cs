@@ -13,7 +13,7 @@ namespace Schema.Builtin.Conditionals
         [Tooltip("Entry to check for null")] public BlackboardEntrySelector entry = new BlackboardEntrySelector();
         class IsNullMemory
         {
-            public object defaultValue;
+            public bool doReturn;
         }
         protected override void OnObjectEnable()
         {
@@ -23,18 +23,16 @@ namespace Schema.Builtin.Conditionals
         {
             IsNullMemory memory = (IsNullMemory)decoratorMemory;
 
-            Type entryType = entry.entryType;
+            memory.doReturn = entry.entry.type.IsValueType;
 
-            if (entryType.IsValueType)
-                memory.defaultValue = Activator.CreateInstance(entryType);
-            else
-                memory.defaultValue = null;
+            Debug.Log(entry.entry.type);
         }
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
             IsNullMemory memory = (IsNullMemory)decoratorMemory;
 
-            Debug.Log(memory.defaultValue);
+            if (memory.doReturn)
+                return true;
 
             return entry.value != null;
         }

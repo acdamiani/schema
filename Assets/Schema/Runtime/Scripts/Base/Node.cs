@@ -73,19 +73,11 @@ namespace Schema
         /// </summary>
         public bool enableStatusIndicator { get { return m_enableStatusIndicator; } private set { m_enableStatusIndicator = value; } }
         [Tooltip("Toggle the status indicator for this node"), HideInInspector, SerializeField] private bool m_enableStatusIndicator = true;
+        internal Stack<Modifier.Message> messageStack = new Stack<Modifier.Message>();
         /// <summary>
         /// How this node can be connected to other nodes (do not override)
         /// </summary>
         public virtual ConnectionDescriptor connectionDescriptor => ConnectionDescriptor.Both;
-        internal Type GetMemoryType()
-        {
-            Type[] types = GetType().GetTypeInfo().DeclaredNestedTypes.ToArray();
-
-            if (types.Length == 0)
-                return null;
-
-            return types[0];
-        }
         /// <summary>
         /// Whether a parent node is allowed for this node
         /// </summary>
@@ -230,6 +222,9 @@ namespace Schema
         /// <param name="undo">Whether to register this operation in the undo stack</param>
         public void RemoveConnection(Node from, string actionName = "Remove Connection", bool undo = true)
         {
+            if (from == null)
+                return;
+
             if (undo)
             {
                 Undo.RegisterCompleteObjectUndo(this, actionName);

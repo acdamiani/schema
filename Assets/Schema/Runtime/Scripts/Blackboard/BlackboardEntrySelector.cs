@@ -100,11 +100,13 @@ namespace Schema
 
                 if (m_isDynamic)
                 {
-                    return BlackboardDataContainer.GetDynamic(m_dynamicName);
+                    return ExecutableTree.current.blackboard.GetDynamic(m_dynamicName);
                 }
                 else if (entry != null)
                 {
-                    object obj = BlackboardDataContainer.Get(m_entry, SchemaManager.pid);
+                    object obj = ExecutableTree.current.blackboard.Get(m_entry);
+
+                    Debug.Log(obj);
 
                     if (obj == null)
                         return null;
@@ -124,13 +126,13 @@ namespace Schema
 
                 if (m_isDynamic)
                 {
-                    BlackboardDataContainer.SetDynamic(m_dynamicName, value);
+                    ExecutableTree.current.blackboard.SetDynamic(m_dynamicName, value);
                 }
                 else if (m_entry != null)
                 {
                     if (!String.IsNullOrEmpty(m_valuePath.Trim('/')))
                     {
-                        object valueObj = BlackboardDataContainer.Get(m_entry, SchemaManager.pid);
+                        object valueObj = ExecutableTree.current.blackboard.Get(m_entry);
 
                         if (valueObj == null)
                             return;
@@ -139,7 +141,7 @@ namespace Schema
                     }
                     else
                     {
-                        BlackboardDataContainer.Set(m_entry, SchemaManager.pid, value);
+                        ExecutableTree.current.blackboard.Set(m_entry, value);
                     }
                 }
             }

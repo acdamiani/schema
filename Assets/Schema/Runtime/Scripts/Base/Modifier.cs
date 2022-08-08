@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
@@ -28,42 +29,22 @@ namespace Schema
         /// <param name="agent">Agent executing this modifier</param>
         public virtual void OnInitialize(object modifierMemory, SchemaAgent agent) { }
         /// <summary>
-        /// Runs once once before the node is first ticked
-        /// </summary>
-        /// <param name="modifierMemory">Object containing the memory for the modifier</param>
-        /// <param name="agent">Agent executing this modifier</param>
-        public virtual void OnNodeEnter(object modifierMemory, SchemaAgent agent) { }
-        /// <summary>
-        /// Runs once when the attached node has finished its execution
+        /// Runs once when the attached node has finished its execution. Where you can modify the state of the tree
         /// </summary>
         /// <param name="modifierMemory">Object containing the memory for the modifier</param>
         /// <param name="agent">Agent executing this modifier</param>
         /// <param name="status">The status that the node executed with</param>
-        public virtual void OnNodeExit(object modifierMemory, SchemaAgent agent, NodeStatus status) { }
-        /// <summary>
-        /// Runs before the attached node is ticked
-        /// </summary>
-        /// <param name="modifierMemory">Object containing the memory for the modifier</param>
-        /// <param name="agent">Agent executing this modifier</param>
-        public virtual void Tick(object modifierMemory, SchemaAgent agent) { }
+        public virtual Message Modify(object modifierMemory, SchemaAgent agent, NodeStatus status) { return Message.None; }
         public enum Message
         {
             /// <summary>
-            /// Quit the node immediately with a failure status
+            /// Do nothing
             /// </summary>
-            QuitWithFailure,
+            None,
             /// <summary>
-            /// Quit the node immediately with a success status
-            /// </summary>
-            QuitWithSuccess,
-            /// <summary>
-            /// Immediately restart the node's execution
+            /// Restart the node's execution
             /// </summary>
             Repeat,
-            /// <summary>
-            /// Repeat the node when it has finished executing
-            /// </summary>
-            WaitAndRepeat,
             /// <summary>
             /// Wait for the node to finish executing, and force a success status
             /// </summary>
@@ -72,14 +53,6 @@ namespace Schema
             /// Wait for the node to finish executing, and force a failure status
             /// </summary>
             ForceFailure,
-        }
-        /// <summary>
-        /// Send a message to the Schema runtime to change the flow of the behavior tree
-        /// </summary>
-        /// <param name="message">The message to send</param>
-        protected void SendMessage(Message message)
-        {
-
         }
         void OnEnable()
         {
@@ -93,6 +66,21 @@ namespace Schema
         /// </summary>
         [System.AttributeUsage(AttributeTargets.Class)]
         protected class AllowOneAttribute : System.Attribute { }
+        /// <summary>
+        /// Disable adding this modifier if any of the specified types are present
+        /// </summary>
+        protected class DisableIfTypesAttribute : System.Attribute
+        {
+            public IEnumerable<Type> types;
+            /// <summary>
+            /// Allow only one of these modifiers to be attached to a node at a given time
+            /// </summary>
+            public DisableIfTypesAttribute(params Type[] types)
+            {
+                this.types = types
+                    .Where(x => typeof(Modifier).IsAssignableFrom(x));
+            }
+        }
         /// <summary>
         /// Attribute to override the default name of the modifier in the editor
         /// </summary>
@@ -163,6 +151,15 @@ namespace Schema
                 this.isEditorIcon = isEditorIcon;
             }
         }
+        public static IEnumerable<Type> DisallowedTypes(Type type)
+        {
+            DisableIfTypesAttribute attribute = type.GetCustomAttribute<DisableIfTypesAttribute>();
+
+            if (attribute == null)
+                return Enumerable.Empty<Type>();
+            else
+                return attribute.types;
+        }
         public static bool AllowedOne(Type type)
         {
             return type.GetCustomAttribute<AllowOneAttribute>() != null;
@@ -204,8 +201,6 @@ namespace Schema
         {
             DarkIconAttribute darkIcon = type.GetCustomAttribute<DarkIconAttribute>();
             LightIconAttribute lightIcon = type.GetCustomAttribute<LightIconAttribute>();
-
-            Debug.Log(darkIcon);
 
             //Use dark texture
             if (EditorGUIUtility.isProSkin && darkIcon != null)

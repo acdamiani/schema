@@ -5,7 +5,7 @@ using Schema;
 [LightIcon("Light/SelectRandom")]
 public class SelectRandom : Flow
 {
-    public override int Tick(NodeStatus status, int index)
+    public override int Tick(object nodeMemory, NodeStatus status, int index)
     {
         if (index > -1) return -1;
 

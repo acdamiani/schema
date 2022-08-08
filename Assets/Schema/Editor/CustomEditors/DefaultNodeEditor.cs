@@ -15,7 +15,9 @@ public class DefaultNodeEditor : Editor
     SerializedProperty comment;
     SerializedProperty modifiers;
     Node node;
+    private CacheDictionary<Type, Texture2D> icons = new CacheDictionary<Type, Texture2D>();
     private CacheDictionary<Type, bool> allowedOne = new CacheDictionary<Type, bool>();
+    private CacheDictionary<Type, IEnumerable<Type>> disabled = new CacheDictionary<Type, IEnumerable<Type>>();
     void OnEnable()
     {
         nodeName = serializedObject.FindProperty("m_Name");
@@ -46,13 +48,18 @@ public class DefaultNodeEditor : Editor
 
         foreach (Type t in types)
         {
-            Texture2D icon = Modifier.GetModifierIcon(t);
+            Texture2D icon = icons.GetOrCreate(t, () => Modifier.GetModifierIcon(t));
+
+            IEnumerable<Type> disallowed = disabled.GetOrCreate(t, () => Modifier.DisallowedTypes(t));
+
+            bool isAllowedOne = allowedOne.GetOrCreate(t, () => Modifier.AllowedOne(t)) && node.modifiers.Any(x => x.GetType() == t);
+            bool isDisallowed = disallowed.Count() > 0 && node.modifiers.Any(x => disallowed.Contains(x.GetType()));
 
             menu.AddItem(
                 new GUIContent(t.Name, icon),
                 false,
                 () => node.AddModifier(t),
-                allowedOne.GetOrCreate(t, () => Modifier.AllowedOne(t)) && node.modifiers.Any(x => x.GetType() == t)
+                isAllowedOne || isDisallowed
             );
         }
 

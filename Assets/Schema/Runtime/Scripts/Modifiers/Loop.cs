@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Schema.Builtin.Modifiers
 {
     [AllowOne]
+    [DisableIfTypes(typeof(LoopForever), typeof(LoopUntil))]
     [DarkIcon("Modifiers/Loop")]
     public class Loop : Modifier
     {
@@ -16,19 +17,18 @@ namespace Schema.Builtin.Modifiers
         {
             loopCount = Mathf.Clamp(loopCount, 1, Int32.MaxValue);
         }
-        public override void OnNodeEnter(object modifierMemory, SchemaAgent agent)
-        {
-            ((LoopMemory)modifierMemory).count = 0;
-        }
-        public override void OnNodeExit(object modifierMemory, SchemaAgent agent, NodeStatus status)
+        public override Message Modify(object modifierMemory, SchemaAgent agent, NodeStatus status)
         {
             LoopMemory memory = (LoopMemory)modifierMemory;
 
             if (memory.count < loopCount)
             {
-                SendMessage(Message.WaitAndRepeat);
                 memory.count++;
+                return Message.Repeat;
             }
+
+            memory.count = 0;
+            return Message.None;
         }
         public enum ForcedStatus
         {

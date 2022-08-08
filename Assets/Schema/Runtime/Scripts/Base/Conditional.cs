@@ -37,24 +37,6 @@ namespace Schema
         /// <param name="conditionalMemory">Object containing the memory for the conditional</param>
         /// <param name="agent">Agent executing this conditional</param>
         public virtual void OnInitialize(object conditionalMemory, SchemaAgent agent) { }
-        /// <summary>
-        /// Runs once once before the conditional is first ticked
-        /// </summary>
-        /// <param name="conditionalMemory">Object containing the memory for the conditional</param>
-        /// <param name="agent">Agent executing this conditional</param>
-        public virtual void OnNodeEnter(object conditionalMemory, SchemaAgent agent) { }
-        /// <summary>
-        /// Runs once when the attached node has finished its execution
-        /// </summary>
-        /// <param name="conditionalMemory">Object containing the memory for the conditional</param>
-        /// <param name="agent">Agent executing this conditional</param>
-        /// <param name="status">The status that the node executed with</param>
-        public virtual void OnNodeExit(object conditionalMemory, SchemaAgent agent, NodeStatus status) { }
-        /// <summary>
-        /// Runs before the attached node is ticked
-        /// </summary>
-        /// <param name="conditionalMemory">Object containing the memory for the conditional</param>
-        /// <param name="agent">Agent executing this conditional</param>
         public virtual void Tick(object conditionalMemory, SchemaAgent agent) { }
         /// <summary>
         /// Get the text content to be shown in the editor

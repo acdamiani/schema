@@ -11,14 +11,14 @@ namespace Schema.Builtin.Nodes
     public class SelectRandomWeighted : Flow
     {
         public SerializableDictionary<string, int> weights;
-        public override void OnNodeEnter(object flowMemory, SchemaAgent agent)
+        public override void OnFlowEnter(object flowMemory, SchemaAgent agent)
         {
             foreach (Node child in children.Where(child => !weights.ContainsKey(child.uID)))
             {
                 weights.Add(child.uID, 1);
             }
         }
-        public override int Tick(NodeStatus status, int index)
+        public override int Tick(object nodeMemory, NodeStatus status, int index)
         {
             if (index > -1) return -1;
 
