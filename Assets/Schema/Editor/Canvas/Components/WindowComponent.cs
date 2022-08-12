@@ -12,6 +12,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public GUIContent title { get; set; }
         public GUIStyle style { get; set; }
         private IWindowComponentProvider windowProvider { get; set; }
+        public bool canClose { get; set; }
 
         public Rect GetRect()
         {
@@ -30,6 +31,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             windowProvider = createArgs.windowProvider;
             title = createArgs.title;
             style = createArgs.style;
+            canClose = createArgs.canClose;
         }
 
         public override void OnGUI()
@@ -39,9 +41,10 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             bool insideWindow = rect.Contains(Event.current.mousePosition);
 
             if (
-                (Event.current.rawType == EventType.MouseDown && !insideWindow)
+                canClose &&
+                ((Event.current.rawType == EventType.MouseDown && !insideWindow)
                 || (Event.current.rawType == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
-                || windowProvider.Close()
+                || windowProvider.ShouldClose())
             )
             {
                 Destroy(this);
@@ -50,14 +53,12 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             EditorWindow e = canvas.context.GetEditorWindow();
 
-            if (e != null)
-                e.BeginWindows();
+            e?.BeginWindows();
 
             windowProvider.HandleWinInfo(rect, title, style);
             rect = GUI.Window(id, rect, windowProvider.OnGUI, title, style);
 
-            if (e != null)
-                e.EndWindows();
+            e?.EndWindows();
         }
 
         public class WindowComponentCreateArgs : CreateArgs
@@ -67,6 +68,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             public int id { get; set; }
             public GUIContent title { get; set; }
             public GUIStyle style { get; set; }
+            public bool canClose { get; set; }
         }
     }
 }

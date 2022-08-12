@@ -417,7 +417,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             createArgs.id = 1;
             createArgs.layer = 100;
             createArgs.rect = new Rect(xDiff, yDiff, 500f, 500f);
-            createArgs.style = Styles.quickSearch;
+            createArgs.style = Styles.window;
             createArgs.title = GUIContent.none;
             createArgs.windowProvider = search;
 

@@ -44,7 +44,7 @@ public class QuickSearch : IWindowComponentProvider
         this.rect = rect;
     }
 
-    public bool Close()
+    public bool ShouldClose()
     {
         return close;
     }
@@ -292,18 +292,18 @@ public class QuickSearch : IWindowComponentProvider
         List<Type> ret = new List<Type>();
 
         foreach (Type ty in types)
-        foreach (string q in queries)
-        {
-            string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
-            string search = category.ToLower() + ty.Name.ToLower();
-
-            int s = Search(q, search);
-            if (s != -1)
+            foreach (string q in queries)
             {
-                ret.Add(ty);
-                break;
+                string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
+                string search = category.ToLower() + ty.Name.ToLower();
+
+                int s = Search(q, search);
+                if (s != -1)
+                {
+                    ret.Add(ty);
+                    break;
+                }
             }
-        }
 
         return ret;
     }

@@ -43,118 +43,20 @@ namespace SchemaEditor
         {
             windowInfo.mousePosition = Event.current.mousePosition;
 
-            if (target != null)
+            CalculateWindow();
+
+            RebuildComponentTree();
+
+            canvas.Draw();
+
+            if (target != null && canvas != null)
             {
-                canvas.Draw();
-
                 CreateEditors();
-
-                if (windowInfo.inspectorToggled)
-                    window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2,
-                        position.height);
-                else
-                    window = new Rect(0f, 0f, position.width, position.height);
 
                 DrawInspector();
                 DrawToolbar();
 
                 Blackboard.instance = target.blackboard;
-
-                Vector2 size;
-
-                // if (windowInfo.selectedDecorator)
-                // {
-                //     //Draw legend here
-
-                //     size = EditorStyles.label.CalcSize(new GUIContent("Lower Priority Nodes"));
-                //     GUI.Label(new Rect(position.width - size.x - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - size.y - 8f, size.x, size.y),
-                //      new GUIContent("Lower Priority Nodes"), EditorStyles.label);
-
-                //     GUI.color = Styles.lowerPriorityColor;
-                //     GUI.Label(new Rect(position.width - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - size.y / 2f - 16f, 16f, 16f),
-                //         "",
-                //         Styles.styles.decorator);
-                //     GUI.color = Color.white;
-
-                //     float lastHeight = size.y + 16f;
-                //     size = EditorStyles.label.CalcSize(new GUIContent("Self Nodes"));
-
-                //     //Draw legend here
-                //     GUI.Label(new Rect(position.width - size.x - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 32f, position.height - lastHeight - size.y - 8f, size.x, size.y),
-                //      new GUIContent("Self Nodes"), EditorStyles.label);
-
-                //     GUI.color = Styles.selfColor;
-                //     GUI.Label(new Rect(position.width - (windowInfo.inspectorWidth + GUIData.sidebarPadding * 2) - 24f, position.height - lastHeight - size.y / 2f - 16f, 16f, 16f),
-                //         "",
-                //         Styles.styles.decorator);
-                //     GUI.color = Color.white;
-                // }
-
-                if (activeAgent != null)
-                {
-                    string content = $"Viewing GameObject {activeAgent.gameObject.name}. t={Time.time}";
-                    size = EditorStyles.boldLabel.CalcSize(new GUIContent(content));
-                    GUI.Label(new Rect(8f, 32f, size.x, size.y), content, EditorStyles.boldLabel);
-                }
-
-                if (Prefs.enableDebugView && windowInfo != null)
-                {
-                    string content = @$"hoveredNode: {windowInfo.hoveredNode?.name}
-hoveredType: {windowInfo.hoveredType}
-hoveredConnection: {windowInfo.hoveredConnection}
-window: {window}
-gridWindow: {WindowToGridRect(window)}
-mousePos: {Event.current.mousePosition}
-zoom: {windowInfo.zoom}
-pan: {windowInfo.pan}
-
-";
-
-                    if (windowInfo.selected.Count == 1)
-                        content += @$"Position: {windowInfo.selected[0].graphPosition.ToString()}
-Area: {GetAreaWithPadding(windowInfo.selected[0], false).ToString()}
-Parent: {windowInfo.selected[0].parent?.name}
-Children: {string.Join(", ", windowInfo.selected[0]?.children.Select(node => node.name))}";
-
-                    size = EditorStyles.miniLabel.CalcSize(new GUIContent(content));
-                    GUI.Label(new Rect(8f, 32f, size.x, size.y), content, EditorStyles.miniLabel);
-                }
-
-                editingPaused = Application.isPlaying;
-
-                if (editingPaused)
-                {
-                    string content = "In edit mode, only modification of Node and Decorator properties is allowed.";
-                    size = EditorStyles.boldLabel.CalcSize(new GUIContent(content));
-                    GUI.Label(new Rect(8f, position.height - size.y - 8f, size.x, size.y), content,
-                        EditorStyles.boldLabel);
-                }
-
-                if (windowInfo.isPanning)
-                    SetCursor(MouseCursor.Pan);
-                else if (requestingConnection != null && windowInfo.lastClicked == Window.Hovering.OutConnection)
-                    SetCursor(MouseCursor.ArrowPlus);
-                else if (windowInfo.resizingInspector || windowInfo.hoverDivider)
-                    SetCursor(MouseCursor.ResizeHorizontal);
-
-                if (needsPan)
-                {
-                    if (windowInfo.isPanning)
-                        needsPan = false;
-
-                    windowInfo.pan = Vector2.Lerp(windowInfo.pan, windowInfo.nextPan,
-                        Mathf.SmoothStep(0f, 1f,
-                            (Time.realtimeSinceStartup - windowInfo.recordedTime) / windowInfo.panDuration));
-
-                    Vector2 diff = windowInfo.pan - windowInfo.nextPan;
-
-                    if (Mathf.Abs(diff.x) < 0.01f && Mathf.Abs(diff.y) < 0.01f)
-                        needsPan = false;
-                }
-            }
-            else
-            {
-                DrawGrid(position, 1f, Vector2.zero);
             }
 
             if (windowInfo != null && Event.current.type == EventType.Repaint)
@@ -170,15 +72,22 @@ Children: {string.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             List<Object> targets = new List<Object>();
 
-            IEnumerable<Object> editableComponents = canvas.selected
-                .Where(x => x is IEditable)
-                .Cast<IEditable>()
-                .Where(x => x.IsEditable())
-                .Select(x => x.GetEditable());
+            IEnumerable<Object> editableComponents;
 
-            targets = editableComponents.ToList();
+            if (canvas == null)
+            {
+                editableComponents = Enumerable.Empty<Object>();
+            }
+            else
+            {
+                editableComponents = canvas.selected
+                    .Where(x => x is IEditable)
+                    .Cast<IEditable>()
+                    .Where(x => x.IsEditable())
+                    .Select(x => x.GetEditable());
+            }
 
-            targets = targets.Where(x => x != null).ToList();
+            targets = editableComponents.Where(x => x != null).ToList();
             distinctTypes = targets.Select(x => x.GetType()).Distinct().ToList();
 
             if (distinctTypes.Count > 1) return;
@@ -670,9 +579,13 @@ Children: {string.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         //     EndZoomed();
         // }
 
-        private void NodeTicked(Node node)
+        private void CalculateWindow()
         {
-            windowInfo.alpha[node.uID] = 1f;
+            if (windowInfo.inspectorToggled)
+                window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2,
+                    position.height);
+            else
+                window = new Rect(0f, 0f, position.width, position.height);
         }
 
         /// <summary>
@@ -794,7 +707,7 @@ Children: {string.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 createArgs.id = 1;
                 createArgs.layer = 100;
                 createArgs.rect = new Rect(100f, 100f, 500f, 500f);
-                createArgs.style = Styles.quickSearch;
+                createArgs.style = Styles.window;
                 createArgs.title = GUIContent.none;
                 createArgs.windowProvider = search;
 
@@ -836,7 +749,7 @@ Children: {string.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 createArgs.id = 1;
                 createArgs.layer = 100;
                 createArgs.rect = new Rect((window.width - 500f) / 2f, (window.width - 500f) / 2f, 500f, 500f);
-                createArgs.style = Styles.quickSearch;
+                createArgs.style = Styles.window;
                 createArgs.title = GUIContent.none;
                 createArgs.windowProvider = search;
 
@@ -1123,83 +1036,14 @@ Children: {string.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         {
             if (windowInfo == null) return;
 
-            Event current = Event.current;
-            Vector2 mousePosition = Event.current.mousePosition;
-            bool mouseClick = false;
-
-            if (current.type == EventType.MouseDown && current.button == 0) mouseClick = true;
-
-            Texture2D splash = null;
-            float scale = 0.5f;
-
-            Rect splashRect = GUILayoutUtility.GetRect(splash.width * scale, splash.height * scale);
-            GUI.DrawTexture(splashRect, splash);
-
-            GUILayout.Label("Recent Files", EditorStyles.whiteLargeLabel);
-
-            string[] recent = EditorPrefs.GetString("Schema Recently Opened", "")
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            Dictionary<string, string> recentFiles = new Dictionary<string, string>();
-
-            //Try to convert them to file names. If this fails, it means the file does not exist anymore
-            for (int j = 0; j < recent.Length; j++)
-            {
-                string n = Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(recent[j]));
-                recentFiles.Add(recent[j], n);
-            }
-
-            windowInfo.splashScroll = GUILayout.BeginScrollView(new Vector2(0f, windowInfo.splashScroll)).y;
-            foreach (KeyValuePair<string, string> s in recentFiles)
-            {
-                if (GUI.GetNameOfFocusedControl().Equals(s.Key))
-                    GUI.backgroundColor = GUI.skin.settings.selectionColor;
-                else
-                    GUI.backgroundColor = new Color(0, 0, 0, 0);
-
-                GUI.SetNextControlName(s.Key);
-                GUILayout.Box(s.Value, Styles.searchResult, GUILayout.ExpandWidth(true));
-
-                if (mouseClick && GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition))
-                    GUI.FocusControl(s.Key);
-            }
-
-            GUILayout.EndScrollView();
-
-            GUI.backgroundColor = Color.white;
-
-            GUILayout.FlexibleSpace();
-
-            GUILayout.BeginVertical(GUILayout.Height(EditorStyles.toolbar.fixedHeight));
-
-            GUILayout.FlexibleSpace();
-
-            GUILayout.BeginHorizontal();
-
-            EditorGUI.BeginDisabledGroup(!recentFiles.Keys.Contains(GUI.GetNameOfFocusedControl()));
-            if (GUILayout.Button("Load", GUILayout.Width(100f)))
-                OpenGraph(AssetDatabase.LoadAssetAtPath<Graph>(
-                    AssetDatabase.GUIDToAssetPath(GUI.GetNameOfFocusedControl())));
-            EditorGUI.EndDisabledGroup();
-
-            GUILayout.FlexibleSpace();
-
-            if (GUILayout.Button("New Graph", GUILayout.Width(100f)))
-            {
-                Graph graph = CreateInstance<Graph>();
-                AssetDatabase.CreateAsset(graph, "Assets/NewGraph.asset");
-                Open(graph);
-            }
-
-            GUILayout.EndHorizontal();
-
-            GUILayout.FlexibleSpace();
-
-            GUILayout.EndVertical();
         }
 
         private void RebuildComponentTree()
         {
             if (target == null)
+                DoSplashCanvas();
+
+            if (target == null || canvas != null)
                 return;
 
             SelectionBoxComponent.SelectionBoxComponentCreateArgs sBoxCreateArgs =
@@ -1228,6 +1072,33 @@ Children: {string.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                 canvas.Create<NodeComponent>(args);
             }
+        }
+
+        private void DoSplashCanvas()
+        {
+            if (canvas != null)
+                return;
+
+            windowInfo.inspectorToggled = false;
+
+            CalculateWindow();
+
+            canvas = new ComponentCanvas(this, null, null, null, DrawGrid);
+
+            WindowComponent.WindowComponentCreateArgs windowCreateArgs
+                = new WindowComponent.WindowComponentCreateArgs();
+
+            float height = 512f;
+            float width = 512f;
+
+            windowCreateArgs.id = 1;
+            windowCreateArgs.rect = new Rect((window.width - width) / 2f, (window.height - height) / 2f, width, height);
+            windowCreateArgs.style = Styles.window;
+            windowCreateArgs.title = new GUIContent("Open Graph");
+            windowCreateArgs.windowProvider = new Splash();
+            windowCreateArgs.canClose = false;
+
+            canvas.Create<WindowComponent>(windowCreateArgs);
         }
 
         private List<Type> GetSearchResults(string query)
@@ -1276,14 +1147,14 @@ Children: {string.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             for (int j = 1; j <= m; d[0, j] = j++) ;
 
             for (int i = 1; i <= n; i++)
-            for (int j = 1; j <= m; j++)
-            {
-                int cost = t[j - 1] == s[i - 1] ? 0 : 1;
-                int min1 = d[i - 1, j] + 1;
-                int min2 = d[i, j - 1] + 1;
-                int min3 = d[i - 1, j - 1] + cost;
-                d[i, j] = Math.Min(Math.Min(min1, min2), min3);
-            }
+                for (int j = 1; j <= m; j++)
+                {
+                    int cost = t[j - 1] == s[i - 1] ? 0 : 1;
+                    int min1 = d[i - 1, j] + 1;
+                    int min2 = d[i, j - 1] + 1;
+                    int min3 = d[i - 1, j - 1] + cost;
+                    d[i, j] = Math.Min(Math.Min(min1, min2), min3);
+                }
 
             return d[n, m];
         }

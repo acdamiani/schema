@@ -48,7 +48,7 @@ namespace SchemaEditor
         private static Texture2D _close;
         private static GUIStyle _title;
 
-        private static GUIStyle _quickSearch;
+        private static GUIStyle _window;
 
         private static GUIStyle _blackboardScroll;
 
@@ -83,9 +83,6 @@ namespace SchemaEditor
         private static GUIStyle _blackboardEntry;
 
         private static GUIStyle _outline;
-
-        private static readonly string _megamind =
-            "4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCUTm8gZW50cmllcz/igJTigJTigJTigJTigJTigJTigJTigJTigJQK4qCA4qOe4qK94qKq4qKj4qKj4qKj4qKr4qG64qG14qOd4qGu4qOX4qK34qK94qK94qK94qOu4qG34qG94qOc4qOc4qKu4qK64qOc4qK34qK94qKd4qG94qOdCuKguOKhuOKgnOKgleKgleKggeKigeKih+Kij+KiveKiuuKjquKhs+KhneKjjuKjj+Kir+KinuKhv+Kjn+Kjt+Kjs+Kir+Kht+KjveKiveKir+Kjs+Kjq+KghwrioIDioIDiooDiooDiooTioqzioqrioarioY7io4bioYjioJrioJzioJXioIfioJfioJ3iopXioq/ioqvio57io6/io7/io7viob3io4/iopfio5fioI/ioIAK4qCA4qCq4qGq4qGq4qOq4qKq4qK64qK44qKi4qKT4qKG4qKk4qKA4qCA4qCA4qCA4qCA4qCI4qKK4qKe4qG+4qO/4qGv4qOP4qKu4qC34qCB4qCA4qCACuKggOKggOKggOKgiOKgiuKghuKhg+KgleKileKih+Kih+Kih+Kih+Kih+Kij+KijuKijuKihuKihOKggOKikeKjveKjv+KineKgsuKgieKggOKggOKggOKggArioIDioIDioIDioIDioIDiob/ioILioKDioIDioYfioofioJXioojio4DioIDioIHioKHioKPioaPioavio4Lio7/ioK/ioqrioLDioILioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qGm4qGZ4qGC4qKA4qKk4qKj4qCj4qGI4qO+4qGD4qCg4qCE4qCA4qGE4qKx4qOM4qO24qKP4qKK4qCC4qCA4qCA4qCA4qCA4qCA4qCACuKggOKggOKggOKggOKineKhsuKjnOKhruKhj+KijuKijOKiguKgmeKgouKgkOKigOKimOKiteKjveKjv+Khv+KggeKggeKggOKggOKggOKggOKggOKggOKggArioIDioIDioIDioIDioKjio7riobrioZXioZXiobHioZHioYbioZXioYXioZXioZziobzior3iobvioI/ioIDioIDioIDioIDioIDioIDioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qO84qOz4qOr4qO+4qO14qOX4qG14qGx4qGh4qKj4qKR4qKV4qKc4qKV4qGd4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCACuKggOKggOKggOKjtOKjv+KjvuKjv+Kjv+Kjv+Khv+KhveKhkeKijOKgquKhouKho+Kjo+Khn+KggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggArioIDioIDioIDioZ/iob7io7/ior/ior/iorXio73io77io7zio5jiorjiorjio57ioZ/ioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qCB4qCH4qCh4qCp4qGr4qK/4qOd4qG74qGu4qOS4qK94qCL4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCACuKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlOKAlA==";
 
         public static Color windowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
         public static Color windowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
@@ -165,19 +162,19 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle quickSearch
+        public static GUIStyle window
         {
             get
             {
-                if (_quickSearch == null)
+                if (_window == null)
                 {
-                    _quickSearch = new GUIStyle();
-                    _quickSearch.normal.background = Icons.GetResource("QuickSearch/search_bg");
-                    _quickSearch.border = new RectOffset(8, 8, 8, 8);
-                    _quickSearch.padding = new RectOffset(2, 2, 2, 2);
+                    _window = new GUIStyle();
+                    _window.normal.background = Icons.GetResource("QuickSearch/search_bg");
+                    _window.border = new RectOffset(8, 8, 8, 8);
+                    _window.padding = new RectOffset(2, 2, 2, 2);
                 }
 
-                return _quickSearch;
+                return _window;
             }
         }
 
@@ -441,11 +438,9 @@ namespace SchemaEditor
                     _blackboardEntry.hover.textColor = Color.white;
                     _blackboardEntry.hover.background =
                         GenerateSolid(new Color(0.5f, 0.5f, 0.5f, 0.5f), Vector2Int.one);
-                    _blackboardEntry.active.textColor = Color.white;
-                    _blackboardEntry.active.background =
+                    _blackboardEntry.onNormal.textColor = Color.white;
+                    _blackboardEntry.onNormal.background =
                         GenerateSolid(GUI.skin.settings.selectionColor, Vector2Int.one);
-                    _blackboardEntry.focused.textColor = Color.white;
-                    _blackboardEntry.focused.background = _blackboardEntry.active.background;
                 }
 
                 return _blackboardEntry;
@@ -464,17 +459,6 @@ namespace SchemaEditor
                 }
 
                 return _outline;
-            }
-        }
-
-        public static string megamind
-        {
-            get
-            {
-                byte[] data = Convert.FromBase64String(_megamind);
-                string decodedString = Encoding.UTF8.GetString(data);
-
-                return decodedString;
             }
         }
 
@@ -502,18 +486,18 @@ namespace SchemaEditor
             Texture2D tex = new Texture2D(64, 64);
             Color[] cols = new Color[64 * 64];
             for (int y = 0; y < 64; y++)
-            for (int x = 0; x < 64; x++)
-            {
-                Color col = bg;
+                for (int x = 0; x < 64; x++)
+                {
+                    Color col = bg;
 
-                if (!large && (y % 16 == 0 || x % 16 == 0))
-                    col = Color.Lerp(dots, bg, 0.65f);
+                    if (!large && (y % 16 == 0 || x % 16 == 0))
+                        col = Color.Lerp(dots, bg, 0.65f);
 
-                if (y == 0 || x == 0) col = Color.Lerp(dots, bg, 0.65f);
-                if (y == 63 || x == 63) col = Color.Lerp(dots, bg, 0.35f);
+                    if (y == 0 || x == 0) col = Color.Lerp(dots, bg, 0.65f);
+                    if (y == 63 || x == 63) col = Color.Lerp(dots, bg, 0.35f);
 
-                cols[y * 64 + x] = col;
-            }
+                    cols[y * 64 + x] = col;
+                }
 
             tex.SetPixels(cols);
             tex.wrapMode = TextureWrapMode.Repeat;
@@ -527,8 +511,8 @@ namespace SchemaEditor
         {
             Texture2D tex = new Texture2D(size.y, size.x);
             for (int y = 0; y < size.y; y++)
-            for (int x = 0; x < size.x; x++)
-                tex.SetPixel(x, y, color);
+                for (int x = 0; x < size.x; x++)
+                    tex.SetPixel(x, y, color);
 
             tex.wrapMode = TextureWrapMode.Repeat;
             tex.name = "Solid";
@@ -543,12 +527,12 @@ namespace SchemaEditor
             Texture2D tex = new Texture2D(64, 64);
             Color[] cols = new Color[64 * 64];
             for (int y = 0; y < 64; y++)
-            for (int x = 0; x < 64; x++)
-            {
-                Color col = line;
-                if (y != 31 && x != 31) col.a = 0;
-                cols[y * 64 + x] = col;
-            }
+                for (int x = 0; x < 64; x++)
+                {
+                    Color col = line;
+                    if (y != 31 && x != 31) col.a = 0;
+                    cols[y * 64 + x] = col;
+                }
 
             tex.SetPixels(cols);
             tex.wrapMode = TextureWrapMode.Clamp;

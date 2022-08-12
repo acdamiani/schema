@@ -40,11 +40,15 @@ namespace SchemaEditor
         //Validates connections between nodes also resets HideFlags
         private void OnEnable()
         {
+            if (windowInfo.inspectorToggled)
+                window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2,
+                    position.height);
+            else
+                window = new Rect(0f, 0f, position.width, position.height);
+
             wantsMouseMove = true;
 
             Undo.undoRedoPerformed += UndoPerformed;
-
-            RebuildComponentTree();
 
             instance = this;
             if (target != null && target.blackboard != null)
@@ -147,6 +151,8 @@ namespace SchemaEditor
 
         public void Open(Graph graphObj)
         {
+            canvas = null;
+
             windowInfo = new Window();
             windowInfo.editor = this;
             instance = this;
@@ -159,8 +165,6 @@ namespace SchemaEditor
 
             target = graphObj;
             target.Initialize();
-
-            RebuildComponentTree();
 
             windowInfo.zoom = target.zoom;
             windowInfo.pan = target.pan;
@@ -201,7 +205,6 @@ namespace SchemaEditor
             Undo.ClearAll();
 
             Blackboard.instance = target.blackboard;
-            GetViewRect(100f, true);
         }
 
         private void TogglePrefs()
@@ -261,8 +264,6 @@ namespace SchemaEditor
         private void UndoPerformed()
         {
             canvas.Reset();
-
-            RebuildComponentTree();
 
             target.Traverse();
             GetViewRect(100f, true);

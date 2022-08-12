@@ -50,6 +50,7 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/RandomRangeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultNodeEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Splash.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/ConditionalComponent.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/WindowComponent.cs" />
      <Compile Include="Assets/Schema/Editor/SchemaGUI.cs" />
@@ -64,6 +65,7 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEntryEditor.cs" />
      <Compile Include="Assets/Schema/Editor/DownloadIconEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/ConeCheckEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Icons.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IEditable.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/QuaternionAngleAxisEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/ObjectEditor.cs" />
@@ -85,6 +87,7 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IDuplicatable.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/PannerZoomer.cs" />
+     <Compile Include="Assets/Schema/Editor/Styles.cs" />
      <Compile Include="Assets/Schema/Editor/EditorInspector.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Window/IWindowComponentProvider.cs" />
@@ -111,8 +114,6 @@
      <Compile Include="Assets/Schema/Editor/Canvas/Components/NodeComponent.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/GraphUtility.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
-     <Compile Include="Assets/Schema/Editor/Styles.cs" />
-     <Compile Include="Assets/Schema/Editor/Icons.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
     <Reference Include="UnityEngine">

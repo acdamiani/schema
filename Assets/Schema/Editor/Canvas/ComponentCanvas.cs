@@ -31,17 +31,23 @@ namespace SchemaEditor.Internal
             Action<Rect, float, Vector2> doGrid
         )
         {
-            selectionBoxComponentCreateArgs.layer = 1;
-            selectionBoxComponent = Create<SelectionBoxComponent>(selectionBoxComponentCreateArgs);
-            selectionBoxComponent.hidden = true;
+            if (selectionBoxComponentCreateArgs != null)
+            {
+                selectionBoxComponentCreateArgs.layer = 1;
+                selectionBoxComponent = Create<SelectionBoxComponent>(selectionBoxComponentCreateArgs);
+                selectionBoxComponent.hidden = true;
+            }
 
             CreateArgs empty = new();
             empty.layer = 50;
 
             debugViewComponent = Create<DebugViewComponent>(empty);
 
-            minimapComponentCreateArgs.layer = 100;
-            minimapComponent = Create<MinimapComponent>(minimapComponentCreateArgs);
+            if (minimapComponentCreateArgs != null)
+            {
+                minimapComponentCreateArgs.layer = 100;
+                minimapComponent = Create<MinimapComponent>(minimapComponentCreateArgs);
+            }
 
             BlockerComponent.BlockerComponentCreateArgs blockerComponentCreateArgs = new();
             blockerComponentCreateArgs.rect =
@@ -158,7 +164,13 @@ namespace SchemaEditor.Internal
 
             EditorGUIUtility.AddCursorRect(context.GetRect(), cursor);
 
-            _doGrid(context.GetViewRect(), zoomer.zoom, zoomer.pan);
+            if (_doGrid != null)
+            {
+                if (zoomer != null)
+                    _doGrid(context.GetViewRect(), zoomer.zoom, zoomer.pan);
+                else
+                    _doGrid(context.GetViewRect(), 1f, Vector2.zero);
+            }
 
             mousePositionNoZoom = Event.current.mousePosition;
 
@@ -178,13 +190,16 @@ namespace SchemaEditor.Internal
             GUIComponent[] viewComponents = c.Where(c => c is IViewElement).ToArray();
             c = c.Except(viewComponents).ToArray();
 
-            zoomer.Begin();
+            if (zoomer != null)
+            {
+                zoomer.Begin();
 
-            for (int i = viewComponents.Length - 1; i >= 0; i--)
-                if (!IsInSink(Event.current) || viewComponents[i] is ICanvasMouseEventSink)
-                    viewComponents[i].OnGUI();
+                for (int i = viewComponents.Length - 1; i >= 0; i--)
+                    if (!IsInSink(Event.current) || viewComponents[i] is ICanvasMouseEventSink)
+                        viewComponents[i].OnGUI();
 
-            zoomer.End();
+                zoomer.End();
+            }
 
             for (int i = c.Length - 1; i >= 0; i--)
                 if (!IsInSink(Event.current) || c[i] is ICanvasMouseEventSink)
@@ -277,7 +292,7 @@ namespace SchemaEditor.Internal
                         return;
                     }
 
-                    if (hovered == null)
+                    if (hovered == null && selectionBoxComponent != null)
                     {
                         selectionBoxComponent.mouseDownPosition = zoomer.WindowToGridPosition(mouseEvent.mousePosition);
                         selectionBoxComponent.hidden = false;
@@ -297,7 +312,7 @@ namespace SchemaEditor.Internal
 
         private void OnMouseDrag(Event mouseEvent)
         {
-            if (!selectionBoxComponent.hidden)
+            if (selectionBoxComponent != null && !selectionBoxComponent.hidden)
                 DoBoxOverlap(selectionBoxComponent.selectionRect, mouseEvent);
         }
 

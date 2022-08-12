@@ -60,8 +60,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(string.Format("<b>Hovered:</b> {0}", canvas.hovered));
-            sb.AppendLine(string.Format("<b>Zoom:</b> {0}", canvas.zoomer.zoom));
-            sb.AppendLine(string.Format("<b>Pan:</b> {0}", canvas.zoomer.pan));
+            sb.AppendLine(string.Format("<b>Zoom:</b> {0}", canvas.zoomer?.zoom));
+            sb.AppendLine(string.Format("<b>Pan:</b> {0}", canvas.zoomer?.pan));
             sb.AppendLine(string.Format("<b>Components:</b> {0}",
                 string.Join(", ", canvas.components.Select(x => x.GetType().Name))));
             sb.AppendLine();
