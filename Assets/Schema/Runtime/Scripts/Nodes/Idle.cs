@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Schema.Builtin.Nodes
 {
     [Description("Will stop execution of the tree perpetually, until flow is pulled from it by a Decorator.")]

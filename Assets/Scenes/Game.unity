@@ -331,6 +331,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_target: {fileID: 11400000, guid: 5b179ad30cdc58ca7a8047f8ac8d9564, type: 2}
+  m_maxStepsPerTick: 1000
 --- !u!4 &1632037850
 Transform:
   m_ObjectHideFlags: 0

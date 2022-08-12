@@ -1,38 +1,44 @@
-using UnityEngine;
-using UnityEditor;
 using System;
 using System.Collections.Generic;
-using Schema;
-using Schema.Utilities;
-using Schema.Internal;
+using System.IO;
 using System.Linq;
+using Schema;
+using Schema.Internal;
+using Schema.Utilities;
 using SchemaEditor.Editors;
 using SchemaEditor.Internal;
 using SchemaEditor.Internal.ComponentSystem;
 using SchemaEditor.Internal.ComponentSystem.Components;
+using UnityEditor;
+using UnityEditor.IMGUI.Controls;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SchemaEditor
 {
     public partial class NodeEditor
     {
-        private Matrix4x4 prevMatrix;
-        private bool drawBox;
-        public float tabHeight => isDocked() ? 19.0f : 21.0f;
-        private Func<bool> isDocked => isDockedFunc ??= this.GetIsDockedDelegate();
-        private Func<bool> isDockedFunc;
-        private UnityEditor.Editor editor;
-        private UnityEditor.Editor blackboardEditor;
-        private UnityEditor.Editor defaultNodeEditor;
-        private UnityEditor.Editor defaultDecoratorEditor;
-        private List<Type> distinctTypes;
+        public Rect window;
         private SchemaAgent activeAgent;
+        private Editor blackboardEditor;
+        public ComponentCanvas canvas;
+        private Editor defaultDecoratorEditor;
+        private Editor defaultNodeEditor;
+        private List<Type> distinctTypes;
+        private bool drawBox;
         private bool editingPaused;
+        private Editor editor;
+        private Func<bool> isDockedFunc;
         private bool needsPan;
+
+        private Matrix4x4 prevMatrix;
+
         //Focus of the search box needs to be delayed by one frame, or else the keyboard shortcut triggering the search box will type in the box
         private bool searchWantsFocus;
         private bool shouldFocusSearch;
-        public Rect window;
-        public ComponentCanvas canvas;
+        public float tabHeight => isDocked() ? 19.0f : 21.0f;
+        private Func<bool> isDocked => isDockedFunc ??= this.GetIsDockedDelegate();
+
         private void OnGUI()
         {
             windowInfo.mousePosition = Event.current.mousePosition;
@@ -44,7 +50,8 @@ namespace SchemaEditor
                 CreateEditors();
 
                 if (windowInfo.inspectorToggled)
-                    window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2, position.height);
+                    window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - GUIData.sidebarPadding * 2,
+                        position.height);
                 else
                     window = new Rect(0f, 0f, position.width, position.height);
 
@@ -104,12 +111,10 @@ pan: {windowInfo.pan}
 ";
 
                     if (windowInfo.selected.Count == 1)
-                    {
                         content += @$"Position: {windowInfo.selected[0].graphPosition.ToString()}
 Area: {GetAreaWithPadding(windowInfo.selected[0], false).ToString()}
 Parent: {windowInfo.selected[0].parent?.name}
-Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => node.name))}";
-                    }
+Children: {string.Join(", ", windowInfo.selected[0]?.children.Select(node => node.name))}";
 
                     size = EditorStyles.miniLabel.CalcSize(new GUIContent(content));
                     GUI.Label(new Rect(8f, 32f, size.x, size.y), content, EditorStyles.miniLabel);
@@ -121,28 +126,25 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 {
                     string content = "In edit mode, only modification of Node and Decorator properties is allowed.";
                     size = EditorStyles.boldLabel.CalcSize(new GUIContent(content));
-                    GUI.Label(new Rect(8f, position.height - size.y - 8f, size.x, size.y), content, EditorStyles.boldLabel);
+                    GUI.Label(new Rect(8f, position.height - size.y - 8f, size.x, size.y), content,
+                        EditorStyles.boldLabel);
                 }
 
                 if (windowInfo.isPanning)
-                {
                     SetCursor(MouseCursor.Pan);
-                }
                 else if (requestingConnection != null && windowInfo.lastClicked == Window.Hovering.OutConnection)
-                {
                     SetCursor(MouseCursor.ArrowPlus);
-                }
                 else if (windowInfo.resizingInspector || windowInfo.hoverDivider)
-                {
                     SetCursor(MouseCursor.ResizeHorizontal);
-                }
 
                 if (needsPan)
                 {
                     if (windowInfo.isPanning)
                         needsPan = false;
 
-                    windowInfo.pan = Vector2.Lerp(windowInfo.pan, windowInfo.nextPan, Mathf.SmoothStep(0f, 1f, (Time.realtimeSinceStartup - windowInfo.recordedTime) / windowInfo.panDuration));
+                    windowInfo.pan = Vector2.Lerp(windowInfo.pan, windowInfo.nextPan,
+                        Mathf.SmoothStep(0f, 1f,
+                            (Time.realtimeSinceStartup - windowInfo.recordedTime) / windowInfo.panDuration));
 
                     Vector2 diff = windowInfo.pan - windowInfo.nextPan;
 
@@ -153,13 +155,6 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             else
             {
                 DrawGrid(position, 1f, Vector2.zero);
-
-                const float width = 450f;
-                const float height = 500f;
-
-                BeginWindows();
-                GUILayout.Window(1, new Rect(position.width / 2f - width / 2f, position.height / 2f - height / 2f, width, height), DoSplashWindow, "", Styles.styles.addNodeWindow);
-                EndWindows();
             }
 
             if (windowInfo != null && Event.current.type == EventType.Repaint)
@@ -167,14 +162,15 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             Repaint();
         }
-        void CreateEditors()
+
+        private void CreateEditors()
         {
             if (blackboardEditor == null)
                 blackboardEditor = Editor.CreateEditor(target.blackboard, typeof(BlackboardEditor));
 
-            List<UnityEngine.Object> targets = new List<UnityEngine.Object>();
+            List<Object> targets = new List<Object>();
 
-            IEnumerable<UnityEngine.Object> editableComponents = canvas.selected
+            IEnumerable<Object> editableComponents = canvas.selected
                 .Where(x => x is IEditable)
                 .Cast<IEditable>()
                 .Where(x => x.IsEditable())
@@ -217,137 +213,137 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             }
         }
 
-        ///<summary>
-        ///Draws links between nodes and their children and parents
-        ///</summary>
-        private void DrawConnections()
-        {
-            BeginZoomed(window, windowInfo.zoom, tabHeight);
+        // ///<summary>
+        // ///Draws links between nodes and their children and parents
+        // ///</summary>
+        // private void DrawConnections()
+        // {
+        //     BeginZoomed(window, windowInfo.zoom, tabHeight);
 
-            Vector2 mousePos = Event.current.mousePosition;
+        //     Vector2 mousePos = Event.current.mousePosition;
 
-            Rect windowGrid = WindowToGridRect(window);
+        //     Rect windowGrid = WindowToGridRect(window);
 
-            foreach (Node node in target.nodes)
-            {
-                Vector2 nodeSize = GetArea(node, false);
+        //     foreach (Node node in target.nodes)
+        //     {
+        //         Vector2 nodeSize = GetArea(node, false);
 
-                foreach (Node child in node.children)
-                {
-                    if (orphanNode == child) continue;
+        //         foreach (Node child in node.children)
+        //         {
+        //             if (orphanNode == child) continue;
 
-                    Vector2 childSize = GetArea(child, false);
+        //             Vector2 childSize = GetArea(child, false);
 
-                    Vector2 gridFrom = new Vector2(
-                        node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
-                        node.graphPosition.y + (nodeSize.y + GUIData.nodePadding * 2 + 9f) * windowInfo.zoom);
-                    Vector2 gridTo = new Vector2(
-                        child.graphPosition.x + (childSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
-                        child.graphPosition.y - 8f * windowInfo.zoom);
+        //             Vector2 gridFrom = new Vector2(
+        //                 node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
+        //                 node.graphPosition.y + (nodeSize.y + GUIData.nodePadding * 2 + 9f) * windowInfo.zoom);
+        //             Vector2 gridTo = new Vector2(
+        //                 child.graphPosition.x + (childSize.x + GUIData.nodePadding * 2) * windowInfo.zoom / 2f,
+        //                 child.graphPosition.y - 8f * windowInfo.zoom);
 
-                    Vector2 from = GridToWindowPositionNoClipped(new Vector2(
-                        node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
-                        node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 9f));
-                    Vector2 to = GridToWindowPositionNoClipped(new Vector2(
-                        child.graphPosition.x + (childSize.x + GUIData.nodePadding * 2) / 2f,
-                        child.graphPosition.y - 8f));
+        //             Vector2 from = GridToWindowPositionNoClipped(new Vector2(
+        //                 node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
+        //                 node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 9f));
+        //             Vector2 to = GridToWindowPositionNoClipped(new Vector2(
+        //                 child.graphPosition.x + (childSize.x + GUIData.nodePadding * 2) / 2f,
+        //                 child.graphPosition.y - 8f));
 
-                    if (!windowGrid.Contains(gridFrom) && !windowGrid.Contains(gridTo))
-                        continue;
+        //             if (!windowGrid.Contains(gridFrom) && !windowGrid.Contains(gridTo))
+        //                 continue;
 
-                    Vector2 p0 = from;
-                    Vector2 p1 = from + Vector2.up * 50f;
-                    Vector2 p2 = to - Vector2.up * 50f;
-                    Vector2 p3 = to;
+        //             Vector2 p0 = from;
+        //             Vector2 p1 = from + Vector2.up * 50f;
+        //             Vector2 p2 = to - Vector2.up * 50f;
+        //             Vector2 p3 = to;
 
-                    CurveUtility.Bezier bezier = new CurveUtility.Bezier(p0, p1, p2, p3);
+        //             Bezier bezier = new Bezier(p0, p1, p2, p3);
 
-                    // Node active = activeAgent?.GetRunningNode();
-                    Node active = null;
+        //             // Node active = activeAgent?.GetRunningNode();
+        //             Node active = null;
 
-                    bool isActiveConnection = (EditorApplication.isPlaying
-                        || EditorApplication.isPaused)
-                        && active != null
-                        && IsSubTreeOf(node, active)
-                        && (child == active || IsSubTreeOf(child, active));
+        //             bool isActiveConnection = (EditorApplication.isPlaying
+        //                 || EditorApplication.isPaused)
+        //                 && active != null
+        //                 && IsSubTreeOf(node, active)
+        //                 && (child == active || IsSubTreeOf(child, active));
 
-                    bool intersect = false;
+        //             bool intersect = false;
 
-                    Node selected = null;
+        //             Node selected = null;
 
-                    if (windowInfo.selected.Count == 1)
-                        selected = windowInfo.selected[0];
+        //             if (windowInfo.selected.Count == 1)
+        //                 selected = windowInfo.selected[0];
 
-                    if (selected != null && selected.CanHaveParent() && selected.CanHaveChildren() && selected.parent != node && selected != node)
-                        intersect = bezier.Intersect(
-                            new Rect(
-                                GridToWindowPositionNoClipped(selected.graphPosition),
-                                GetAreaWithPadding(selected, false)
-                            )
-                        );
+        //             if (selected != null && selected.CanHaveParent() && selected.CanHaveChildren() && selected.parent != node && selected != node)
+        //                 intersect = bezier.Intersect(
+        //                     new Rect(
+        //                         GridToWindowPositionNoClipped(selected.graphPosition),
+        //                         GetAreaWithPadding(selected, false)
+        //                     )
+        //                 );
 
-                    if (intersect && windowInfo.hoveredConnection != child && windowInfo.shouldCheckConnectionHover)
-                        windowInfo.hoveredConnection = child;
-                    else if (!intersect && windowInfo.hoveredConnection == child && windowInfo.shouldCheckConnectionHover)
-                        windowInfo.hoveredConnection = null;
+        //             if (intersect && windowInfo.hoveredConnection != child && windowInfo.shouldCheckConnectionHover)
+        //                 windowInfo.hoveredConnection = child;
+        //             else if (!intersect && windowInfo.hoveredConnection == child && windowInfo.shouldCheckConnectionHover)
+        //                 windowInfo.hoveredConnection = null;
 
-                    Color connectionColor = isActiveConnection ? Prefs.highlightColor : (windowInfo.hoveredConnection == child ? Prefs.selectionColor : Prefs.connectionColor);
+        //             Color connectionColor = isActiveConnection ? Prefs.highlightColor : (windowInfo.hoveredConnection == child ? Prefs.selectionColor : Prefs.connectionColor);
 
-                    Handles.DrawBezier(p0, p3, p1, p2, connectionColor, Styles.curve, 5f * windowInfo.zoom);
+        //             Handles.DrawBezier(p0, p3, p1, p2, connectionColor, Styles.curve, 5f * windowInfo.zoom);
 
-                    // Handles.DrawBezier(
-                    //     p0,
-                    //     p3,
-                    //     p1,
-                    //     p2,
-                    //     isActiveConnection ? NodeEditorPrefs.highlightColor : (windowInfo.hoveredConnection == child ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f)),
-                    //     null,
-                    //     5f * windowInfo.zoom
-                    // );
+        //             // Handles.DrawBezier(
+        //             //     p0,
+        //             //     p3,
+        //             //     p1,
+        //             //     p2,
+        //             //     isActiveConnection ? NodeEditorPrefs.highlightColor : (windowInfo.hoveredConnection == child ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f)),
+        //             //     null,
+        //             //     5f * windowInfo.zoom
+        //             // );
 
-                    if (isActiveConnection)
-                    {
-                        const float fac = 1.5f;
-                        const int points = 4;
+        //             if (isActiveConnection)
+        //             {
+        //                 const float fac = 1.5f;
+        //                 const int points = 4;
 
-                        for (int i = 0; i < points; i++)
-                        {
-                            float t = (float)((EditorApplication.timeSinceStartup % fac) / fac);
-                            t += 1f / (float)points * i;
-                            t = t > 1 ? t % 1 : t;
-                            Vector2 p = bezier.Position(t);
+        //                 for (int i = 0; i < points; i++)
+        //                 {
+        //                     float t = (float)((EditorApplication.timeSinceStartup % fac) / fac);
+        //                     t += 1f / (float)points * i;
+        //                     t = t > 1 ? t % 1 : t;
+        //                     Vector2 p = bezier.Position(t);
 
-                            GUI.color = Prefs.highlightColor;
-                            GUI.DrawTexture(new Rect(p.x - 4f * windowInfo.zoom, p.y - 4f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom), Styles.circle);
-                        }
-                    }
+        //                     GUI.color = Prefs.highlightColor;
+        //                     GUI.DrawTexture(new Rect(p.x - 4f * windowInfo.zoom, p.y - 4f * windowInfo.zoom, 8f * windowInfo.zoom, 8f * windowInfo.zoom), Icons.GetResource("round", false));
+        //                 }
+        //             }
 
-                    GUI.color = Color.white;
-                }
-            }
+        //             GUI.color = Color.white;
+        //         }
+        //     }
 
-            if (requestingConnection != null)
-            {
-                Node node = requestingConnection;
-                Vector2 nodeSize = GetArea(node, false);
+        //     if (requestingConnection != null)
+        //     {
+        //         Node node = requestingConnection;
+        //         Vector2 nodeSize = GetArea(node, false);
 
-                Vector2 from = GridToWindowPositionNoClipped(new Vector2(
-                    node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
-                    node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 9f));
-                Vector2 to = mousePos;
+        //         Vector2 from = GridToWindowPositionNoClipped(new Vector2(
+        //             node.graphPosition.x + (nodeSize.x + GUIData.nodePadding * 2) / 2f,
+        //             node.graphPosition.y + nodeSize.y + GUIData.nodePadding * 2 + 9f));
+        //         Vector2 to = mousePos;
 
-                Handles.DrawBezier(
-                    from,
-                    to,
-                    from + Vector2.up * 50f,
-                    to - Vector2.up * 50f,
-                    Color.white,
-                    null,
-                    3f * windowInfo.zoom
-                );
-            }
-            EndZoomed();
-        }
+        //         Handles.DrawBezier(
+        //             from,
+        //             to,
+        //             from + Vector2.up * 50f,
+        //             to - Vector2.up * 50f,
+        //             Color.white,
+        //             null,
+        //             3f * windowInfo.zoom
+        //         );
+        //     }
+        //     EndZoomed();
+        // }
         // private void DrawNodes()
         // {
         //     Event current = Event.current;
@@ -678,22 +674,22 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         {
             windowInfo.alpha[node.uID] = 1f;
         }
-        ///<summary>
-        ///This function calculates the area of a node, based on its text and calculates decorators (based on contents themselves, does not factor in padding)
-        ///</summary>
+
+        /// <summary>
+        ///     This function calculates the area of a node, based on its text and calculates decorators (based on contents
+        ///     themselves, does not factor in padding)
+        /// </summary>
         internal static Vector2 GetArea(Node node, bool recalculate)
         {
             if (node == null) return Vector2.zero;
 
             //try to get from dictionary
-            if (GUIData.sizes.ContainsKey(node) && !recalculate)
-            {
-                return GUIData.sizes[node];
-            }
+            if (GUIData.sizes.ContainsKey(node) && !recalculate) return GUIData.sizes[node];
 
             //get size of contents
-            float height = Mathf.Max((node.icon == null ? 0 : node.icon.height + 10f) + GUIData.labelHeight, GUIData.minContentHeight);
-            float width = Mathf.Max(Styles.styles.nodeLabel.CalcSize(new GUIContent(node.name)).x, node.icon == null ? 0 : node.icon.width);
+            float height = Mathf.Max((node.icon == null ? 0 : node.icon.height + 10f) + GUIData.labelHeight,
+                GUIData.minContentHeight);
+            float width = 0f;
 
             // foreach (Decorator decorator in node.decorators)
             // {
@@ -725,14 +721,17 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             return final;
         }
+
         internal static Vector2 GetAreaWithPadding(Node node, bool recalculate)
         {
             return GetArea(node, recalculate) + Vector2.one * GUIData.nodePadding * 2;
         }
+
         private static bool IsNotLayoutEvent(Event e)
         {
             return e.type != EventType.Layout;
         }
+
         private void DrawWindow()
         {
             //Draw selection box
@@ -764,118 +763,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             //     }
             // }
         }
-        private void DrawMinimap()
-        {
-            return;
-            if (!windowInfo.drawMinimap)
-                return;
 
-            float minimapPadding = 100f;
-
-            Rect viewRect = GetViewRect(minimapPadding, false);
-
-            float minimapHeight = viewRect.height / viewRect.width * Prefs.minimapWidth;
-            float viewWidth = minimapHeight > Prefs.maxMinimapHeight ? Prefs.minimapWidth / minimapHeight * Prefs.maxMinimapHeight : Prefs.minimapWidth;
-            minimapHeight = Mathf.Clamp(minimapHeight, 0f, Prefs.maxMinimapHeight);
-
-            Rect boxPos = Rect.zero;
-
-            switch (Prefs.minimapPosition)
-            {
-                case 0:
-                    boxPos = new Rect(10f, position.height - minimapHeight - 10f, Prefs.minimapWidth, minimapHeight);
-                    break;
-                case 1:
-                    boxPos = new Rect(10f, EditorStyles.toolbar.fixedHeight + 10f, Prefs.minimapWidth, minimapHeight);
-                    break;
-                case 2:
-                    boxPos = new Rect(window.width - 10f - Prefs.minimapWidth, position.height - minimapHeight - 10f, Prefs.minimapWidth, minimapHeight);
-                    break;
-                case 3:
-                    boxPos = new Rect(window.width - 10f - Prefs.minimapWidth, EditorStyles.toolbar.fixedHeight + 10f, Prefs.minimapWidth, minimapHeight);
-                    break;
-            }
-
-            Rect gridViewRect = WindowToGridRect(window);
-            gridViewRect.position = GridToMinimapPosition(gridViewRect.position, viewWidth, minimapPadding);
-            gridViewRect.position = new Vector2(gridViewRect.position.x + boxPos.width / 2f - viewWidth / 2f, gridViewRect.position.y);
-            gridViewRect.size = gridViewRect.size / viewRect.width * viewWidth;
-
-            Handles.DrawSolidRectangleWithOutline(boxPos, new Color(0.1f, 0.1f, 0.1f, Prefs.minimapOpacity), Prefs.minimapOutlineColor);
-
-            GUILayout.BeginArea(boxPos);
-
-            Rect localRect = new Rect(0f, 0f, boxPos.width, boxPos.height);
-
-            Color nodeOutlineColor = new Color(0.15f, 0.15f, 0.15f, 1f);
-
-            bool hoveredNode = false;
-            for (int i = target.nodes.Length - 1; i >= 0; i--)
-            {
-                Node active = null;
-
-                Node node = target.nodes[i];
-
-                Vector2 size = GetAreaWithPadding(node, false) / viewRect.width * viewWidth;
-                Vector2 position = GridToMinimapPosition(node.graphPosition, viewWidth, minimapPadding);
-                position.x += boxPos.width / 2f - viewWidth / 2f;
-
-                foreach (Node child in node.children)
-                {
-                    bool isActiveConnection = (EditorApplication.isPlaying
-                        || EditorApplication.isPaused)
-                        && active != null
-                        && IsSubTreeOf(node, active)
-                        && (child == active || IsSubTreeOf(child, active));
-
-                    Vector2 childSize = GetAreaWithPadding(child, false) / viewRect.width * viewWidth;
-                    Vector2 childPosition = GridToMinimapPosition(child.graphPosition, viewWidth, minimapPadding);
-                    childPosition.x += boxPos.width / 2f - viewWidth / 2f;
-
-                    Color c = Handles.color;
-                    Handles.color = isActiveConnection ? Prefs.highlightColor : Color.white;
-                    Handles.DrawAAPolyLine(new Vector2(position.x + size.x / 2f, position.y + size.y), new Vector2(childPosition.x + childSize.x / 2f, childPosition.y));
-                    Handles.color = c;
-                }
-
-                Rect nodeRect = new Rect(position, size);
-
-                Color nodeColor;
-
-                if (windowInfo.selected.Contains(node))
-                    nodeColor = Color.white;
-                else if (active == node)
-                    nodeColor = Prefs.highlightColor;
-                else
-                    nodeColor = nodeOutlineColor;
-
-                Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.windowBackground, nodeColor);
-
-                if (nodeRect.Contains(Event.current.mousePosition))
-                {
-                    windowInfo.hoveredNode = node;
-                    windowInfo.hoveredType = Window.Hovering.MinimapNode;
-                    hoveredNode = true;
-                }
-                else if (!hoveredNode && localRect.Contains(Event.current.mousePosition))
-                {
-                    windowInfo.hoveredType = Window.Hovering.Minimap;
-                }
-            }
-
-            Handles.DrawSolidRectangleWithOutline(gridViewRect, new Color(0f, 0f, 0f, 0f), Color.gray);
-
-            string names = String.Join(", ", windowInfo.selected.Select(node => node.name));
-            if (names.Length > 35)
-                names = names.Substring(0, 35) + "...";
-            GUIContent content = new GUIContent(names);
-            Vector2 contentSize = EditorStyles.miniLabel.CalcSize(content);
-            GUI.Label(new Rect(boxPos.width - contentSize.x - 5f, 5f, contentSize.x, contentSize.y), content, EditorStyles.miniLabel);
-
-            GUILayout.EndArea();
-
-            windowInfo.minimapView = gridViewRect;
-        }
         private void DrawToolbar()
         {
             Rect toolbar = new Rect(0f, 0f, window.width, EditorStyles.toolbar.fixedHeight);
@@ -891,7 +779,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     HelperMethods.GetEnumerableOfType(typeof(Node)),
                     t =>
                     {
-                        NodeComponent.NodeComponentCreateArgs nodeCreateArgs = new NodeComponent.NodeComponentCreateArgs();
+                        NodeComponent.NodeComponentCreateArgs nodeCreateArgs =
+                            new NodeComponent.NodeComponentCreateArgs();
                         nodeCreateArgs.graph = target;
                         nodeCreateArgs.nodeType = t;
                         nodeCreateArgs.position = canvas.zoomer.WindowToGridPosition(window.center);
@@ -916,8 +805,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 canvas.selected.Length == 0 ||
                 !canvas.selected.All(c =>
                     (c is NodeComponent
-                        && (((NodeComponent)c).node.connectionDescriptor == Node.ConnectionDescriptor.Both
-                            || ((NodeComponent)c).node.connectionDescriptor == Node.ConnectionDescriptor.OnlyInConnection))
+                     && (((NodeComponent)c).node.connectionDescriptor == Node.ConnectionDescriptor.Both
+                         || ((NodeComponent)c).node.connectionDescriptor == Node.ConnectionDescriptor.OnlyInConnection))
                     || c is ConnectionComponent
                 )
             );
@@ -930,8 +819,11 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     {
                         foreach (GUIComponent component in canvas.selected)
                         {
-                            ConditionalComponent.ConditionalComponentCreateArgs conditionalCreateArgs = new ConditionalComponent.ConditionalComponentCreateArgs();
-                            conditionalCreateArgs.node = component is NodeComponent ? ((NodeComponent)component).node : ((ConnectionComponent)component).to.node;
+                            ConditionalComponent.ConditionalComponentCreateArgs conditionalCreateArgs =
+                                new ConditionalComponent.ConditionalComponentCreateArgs();
+                            conditionalCreateArgs.node = component is NodeComponent
+                                ? ((NodeComponent)component).node
+                                : ((ConnectionComponent)component).to.node;
                             conditionalCreateArgs.conditionalType = t;
 
                             canvas.Create<ConditionalComponent>(conditionalCreateArgs);
@@ -961,29 +853,32 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             GUILayout.FlexibleSpace();
 
-            windowInfo.useLiveLink = GUILayout.Toggle(windowInfo.useLiveLink, "Live Link", EditorStyles.toolbarButton);
-            windowInfo.drawMinimap = GUILayout.Toggle(windowInfo.drawMinimap, "Minimap", EditorStyles.toolbarButton);
+            Prefs.liveLink = GUILayout.Toggle(Prefs.liveLink, "Live Link", EditorStyles.toolbarButton);
+            Prefs.minimapEnabled = GUILayout.Toggle(Prefs.minimapEnabled, "Minimap", EditorStyles.toolbarButton);
             Prefs.gridSnap = GUILayout.Toggle(Prefs.gridSnap, "Grid Snap", EditorStyles.toolbarButton);
 
-            if (!windowInfo.inspectorToggled && GUILayout.Button(Styles.visibilityToggleOffContent, EditorStyles.toolbarButton))
+            if (!windowInfo.inspectorToggled && GUILayout.Button(Icons.GetEditor("animationvisibilitytoggleon"),
+                    EditorStyles.toolbarButton))
                 windowInfo.inspectorToggled = true;
 
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
         }
 
-        ///<summary>
-        ///Draws the inspector for either the selected node or decorator
-        ///</summary>
+        /// <summary>
+        ///     Draws the inspector for either the selected node or decorator
+        /// </summary>
         private void DrawInspector()
         {
             if (!windowInfo.inspectorToggled)
                 return;
 
             float inspectorWidth = windowInfo.inspectorWidth;
-            Rect inspectorArea = new Rect(position.width - (inspectorWidth + GUIData.sidebarPadding * 2), 0f, inspectorWidth + GUIData.sidebarPadding * 2, position.height);
+            Rect inspectorArea = new Rect(position.width - (inspectorWidth + GUIData.sidebarPadding * 2), 0f,
+                inspectorWidth + GUIData.sidebarPadding * 2, position.height);
 
-            Rect divider = new Rect(inspectorArea.x - 1f, EditorStyles.toolbar.fixedHeight, 1f, position.height - EditorStyles.toolbar.fixedHeight);
+            Rect divider = new Rect(inspectorArea.x - 1f, EditorStyles.toolbar.fixedHeight, 1f,
+                position.height - EditorStyles.toolbar.fixedHeight);
             Rect dividerRegion = new Rect(divider.x - 4.5f, divider.y, 10f, position.height);
 
             EditorGUI.DrawRect(inspectorArea, Styles.windowBackground);
@@ -1007,7 +902,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             if (windowInfo.resizingInspector)
             {
-                float desired = Screen.width - Event.current.mousePosition.x - GUIData.sidebarPadding * 2 + windowInfo.resizeClickOffset;
+                float desired = Screen.width - Event.current.mousePosition.x - GUIData.sidebarPadding * 2 +
+                                windowInfo.resizeClickOffset;
                 windowInfo.inspectorWidth = desired;
             }
 
@@ -1027,22 +923,22 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
                 string[] values = Enum.GetNames(typeof(Window.InspectorView));
 
-                GUIContent[] content = new GUIContent[2] { new GUIContent(values[0], Styles.inspectorIcon), new GUIContent(values[1], Styles.hiearchyIcon) };
+                GUIContent[] content = new GUIContent[2]
+                    { new(values[0], Styles.inspectorIcon), new(values[1], Styles.hiearchyIcon) };
 
                 GUILayout.FlexibleSpace();
 
                 for (int i = 0; i < content.Length; i++)
-                {
-                    if (GUILayout.Toggle((int)windowInfo.inspectorView == i, content[i], EditorStyles.toolbarButton, GUILayout.Width(100)))
+                    if (GUILayout.Toggle((int)windowInfo.inspectorView == i, content[i], EditorStyles.toolbarButton,
+                            GUILayout.Width(100)))
                         windowInfo.inspectorView = (Window.InspectorView)i;
-                }
 
                 GUILayout.FlexibleSpace();
 
                 if (GUILayout.Button(
-                    Styles.visibilityToggleOnContent,
-                    EditorStyles.toolbarButton
-                )) windowInfo.inspectorToggled = false;
+                        Icons.GetEditor("animationvisibilitytoggleon"),
+                        EditorStyles.toolbarButton
+                    )) windowInfo.inspectorToggled = false;
 
                 GUILayout.EndHorizontal();
 
@@ -1060,6 +956,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                         DrawBlackboard(target.blackboard);
                         break;
                 }
+
                 GUILayout.EndVertical();
                 GUILayout.Space(GUIData.nodePadding);
                 GUILayout.EndHorizontal();
@@ -1068,7 +965,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             }
             else
             {
-                Rect prefsWindow = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2f, 0f, inspectorWidth + GUIData.sidebarPadding * 2f, position.height);
+                Rect prefsWindow = new Rect(position.width - inspectorWidth - GUIData.sidebarPadding * 2f, 0f,
+                    inspectorWidth + GUIData.sidebarPadding * 2f, position.height);
 
                 GUILayout.BeginArea(prefsWindow);
 
@@ -1077,9 +975,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 GUILayout.FlexibleSpace();
 
                 if (GUILayout.Button(
-                    Styles.visibilityToggleOnContent,
-                    EditorStyles.toolbarButton
-                )) windowInfo.inspectorToggled = false;
+                        Icons.GetEditor("animationvisibilitytoggleon"),
+                        EditorStyles.toolbarButton
+                    )) windowInfo.inspectorToggled = false;
 
                 GUILayout.EndHorizontal();
 
@@ -1095,10 +993,11 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 GUILayout.EndArea();
             }
         }
-        void DrawPreferencesWindow()
+
+        private void DrawPreferencesWindow()
         {
             GUILayout.Space(GUIData.sidebarPadding);
-            GUILayout.Label("Preferences", Styles.styles.title);
+            GUILayout.Label("Preferences", EditorStyles.largeLabel);
             GUILayout.Space(GUIData.sidebarPadding);
 
             EditorGUILayout.LabelField("General", EditorStyles.boldLabel);
@@ -1142,7 +1041,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             EditorGUILayout.LabelField("Minimap", EditorStyles.boldLabel);
             EditorGUILayout.LabelField("Minimap Position");
-            Prefs.minimapPosition = GUILayout.Toolbar(Prefs.minimapPosition, new string[] { "Bottom Left", "Top Left", "Bottom Right", "Top Right" });
+            Prefs.minimapPosition = GUILayout.Toolbar(Prefs.minimapPosition,
+                new[] { "Bottom Left", "Top Left", "Bottom Right", "Top Right" });
             Prefs.minimapWidth = EditorGUILayout.FloatField("Minimap Width", Prefs.minimapWidth);
             Prefs.maxMinimapHeight = EditorGUILayout.FloatField("Max Minimap Height", Prefs.maxMinimapHeight);
             Prefs.minimapOpacity = EditorGUILayout.Slider("Minimap Opacity", Prefs.minimapOpacity, 0f, 1f);
@@ -1161,13 +1061,13 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 Prefs.ResetToDefault();
         }
 
-        ///<summary>
-        ///Where the drawing of the inspector takes place
-        ///</summary>
-        void DrawInspectorWindow()
+        /// <summary>
+        ///     Where the drawing of the inspector takes place
+        /// </summary>
+        private void DrawInspectorWindow()
         {
             GUILayout.Space(GUIData.sidebarPadding);
-            GUILayout.Label("Inspector", Styles.styles.title);
+            GUILayout.Label("Inspector", EditorStyles.largeLabel);
             GUILayout.Space(GUIData.sidebarPadding);
 
             if (distinctTypes.Count > 1)
@@ -1195,26 +1095,31 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     defaultNodeEditor.OnInspectorGUI();
                     EditorGUILayout.LabelField("");
                 }
+
                 EditorGUILayout.LabelField(editor.targets[0].name, EditorStyles.boldLabel);
                 editor.OnInspectorGUI();
                 EditorGUI.EndDisabledGroup();
             }
         }
-        void DrawBlackboard(Blackboard blackboard)
+
+        private void DrawBlackboard(Blackboard blackboard)
         {
             GUILayout.Space(GUIData.sidebarPadding);
-            GUILayout.Label("Blackboard", Styles.styles.title);
+            GUILayout.Label("Blackboard", EditorStyles.largeLabel);
             GUILayout.Space(GUIData.sidebarPadding);
 
             blackboardEditor.OnInspectorGUI();
         }
+
         private void ToggleSearch()
         {
             windowInfo.searchIsShown = !windowInfo.searchIsShown;
-            windowInfo.searchRect.position = new Vector2(window.size.x / 2f - windowInfo.searchRect.width / 2f, window.size.y / 2f - windowInfo.searchRect.height / 2f);
+            windowInfo.searchRect.position = new Vector2(window.size.x / 2f - windowInfo.searchRect.width / 2f,
+                window.size.y / 2f - windowInfo.searchRect.height / 2f);
             windowInfo.searchText = "";
         }
-        void DoSplashWindow(int winID)
+
+        private void DoSplashWindow(int winID)
         {
             if (windowInfo == null) return;
 
@@ -1222,12 +1127,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             Vector2 mousePosition = Event.current.mousePosition;
             bool mouseClick = false;
 
-            if (current.type == EventType.MouseDown && current.button == 0)
-            {
-                mouseClick = true;
-            }
+            if (current.type == EventType.MouseDown && current.button == 0) mouseClick = true;
 
-            Texture2D splash = Styles.splashImage;
+            Texture2D splash = null;
             float scale = 0.5f;
 
             Rect splashRect = GUILayoutUtility.GetRect(splash.width * scale, splash.height * scale);
@@ -1235,13 +1137,14 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             GUILayout.Label("Recent Files", EditorStyles.whiteLargeLabel);
 
-            string[] recent = EditorPrefs.GetString("Schema Recently Opened", "").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] recent = EditorPrefs.GetString("Schema Recently Opened", "")
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             Dictionary<string, string> recentFiles = new Dictionary<string, string>();
 
             //Try to convert them to file names. If this fails, it means the file does not exist anymore
             for (int j = 0; j < recent.Length; j++)
             {
-                string n = System.IO.Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(recent[j]));
+                string n = Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(recent[j]));
                 recentFiles.Add(recent[j], n);
             }
 
@@ -1254,13 +1157,12 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                     GUI.backgroundColor = new Color(0, 0, 0, 0);
 
                 GUI.SetNextControlName(s.Key);
-                GUILayout.Box(s.Value, Styles.styles.searchResult, GUILayout.ExpandWidth(true));
+                GUILayout.Box(s.Value, Styles.searchResult, GUILayout.ExpandWidth(true));
 
                 if (mouseClick && GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition))
-                {
                     GUI.FocusControl(s.Key);
-                }
             }
+
             GUILayout.EndScrollView();
 
             GUI.backgroundColor = Color.white;
@@ -1275,14 +1177,15 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             EditorGUI.BeginDisabledGroup(!recentFiles.Keys.Contains(GUI.GetNameOfFocusedControl()));
             if (GUILayout.Button("Load", GUILayout.Width(100f)))
-                OpenGraph(AssetDatabase.LoadAssetAtPath<Graph>(AssetDatabase.GUIDToAssetPath(GUI.GetNameOfFocusedControl())));
+                OpenGraph(AssetDatabase.LoadAssetAtPath<Graph>(
+                    AssetDatabase.GUIDToAssetPath(GUI.GetNameOfFocusedControl())));
             EditorGUI.EndDisabledGroup();
 
             GUILayout.FlexibleSpace();
 
             if (GUILayout.Button("New Graph", GUILayout.Width(100f)))
             {
-                Graph graph = ScriptableObject.CreateInstance<Graph>();
+                Graph graph = CreateInstance<Graph>();
                 AssetDatabase.CreateAsset(graph, "Assets/NewGraph.asset");
                 Open(graph);
             }
@@ -1293,23 +1196,27 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
 
             GUILayout.EndVertical();
         }
+
         private void RebuildComponentTree()
         {
             if (target == null)
                 return;
 
-            SelectionBoxComponent.SelectionBoxComponentCreateArgs sBoxCreateArgs = new SelectionBoxComponent.SelectionBoxComponentCreateArgs();
+            SelectionBoxComponent.SelectionBoxComponentCreateArgs sBoxCreateArgs =
+                new SelectionBoxComponent.SelectionBoxComponentCreateArgs();
             sBoxCreateArgs.hideOnMouseUp = true;
 
-            MinimapComponent.MinimapComponentCreateArgs minimapCreateArgs = new MinimapComponent.MinimapComponentCreateArgs();
+            MinimapComponent.MinimapComponentCreateArgs minimapCreateArgs =
+                new MinimapComponent.MinimapComponentCreateArgs();
             minimapCreateArgs.offset = () => new Vector2(0f, EditorStyles.toolbar.fixedHeight);
 
             if (canvas == null)
             {
-                PannerZoomer zoomer = new PannerZoomer(this, 0.05f, target.zoom, target.pan, () => isDocked() ? 19.0f : 21.0f);
+                PannerZoomer zoomer = new PannerZoomer(this, 0.05f, target.zoom, target.pan,
+                    () => isDocked() ? 19.0f : 21.0f);
 
-                zoomer.onPanChange += (pan) => target.pan = pan;
-                zoomer.onZoomChange += (zoom) => target.zoom = zoom;
+                zoomer.onPanChange += pan => target.pan = pan;
+                zoomer.onZoomChange += zoom => target.zoom = zoom;
 
                 canvas = new ComponentCanvas(this, sBoxCreateArgs, minimapCreateArgs, zoomer, DrawGrid);
             }
@@ -1322,35 +1229,34 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 canvas.Create<NodeComponent>(args);
             }
         }
-        List<Type> GetSearchResults(string query)
+
+        private List<Type> GetSearchResults(string query)
         {
             string[] words = query.Trim().Split(' ');
 
-            List<Type> types = windowInfo.searchWantsNode ? nodeTypes.Values.SelectMany(x => x).ToList() : decoratorTypes.ToList();
+            List<Type> types = windowInfo.searchWantsNode
+                ? nodeTypes.Values.SelectMany(x => x).ToList()
+                : decoratorTypes.ToList();
 
-            if (String.IsNullOrEmpty(query))
+            if (string.IsNullOrEmpty(query))
                 return types;
 
             List<Type> ret = new List<Type>();
 
             foreach (Type t in types)
-            {
                 for (int i = 0; i < words.Length; i++)
                 {
                     string word = words[i];
 
-                    if (t.Name.ToLower().Contains(word.ToLower()) && !ret.Contains(t))
-                    {
-                        ret.Add(t);
-                    }
+                    if (t.Name.ToLower().Contains(word.ToLower()) && !ret.Contains(t)) ret.Add(t);
                 }
-            }
 
             ret = ret.OrderBy(t => StringSimilarity(t.Name, query)).ToList();
 
             return ret;
         }
-        int StringSimilarity(string s, string t)
+
+        private int StringSimilarity(string s, string t)
         {
             if (string.IsNullOrEmpty(s))
             {
@@ -1359,10 +1265,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
                 return t.Length;
             }
 
-            if (string.IsNullOrEmpty(t))
-            {
-                return s.Length;
-            }
+            if (string.IsNullOrEmpty(t)) return s.Length;
 
             int n = s.Length;
             int m = t.Length;
@@ -1373,35 +1276,36 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             for (int j = 1; j <= m; d[0, j] = j++) ;
 
             for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= m; j++)
             {
-                for (int j = 1; j <= m; j++)
-                {
-                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-                    int min1 = d[i - 1, j] + 1;
-                    int min2 = d[i, j - 1] + 1;
-                    int min3 = d[i - 1, j - 1] + cost;
-                    d[i, j] = Math.Min(Math.Min(min1, min2), min3);
-                }
+                int cost = t[j - 1] == s[i - 1] ? 0 : 1;
+                int min1 = d[i - 1, j] + 1;
+                int min2 = d[i, j - 1] + 1;
+                int min3 = d[i - 1, j - 1] + cost;
+                d[i, j] = Math.Min(Math.Min(min1, min2), min3);
             }
+
             return d[n, m];
         }
-        ///<summary>
-        ///Helper functions to zoom and pan the UI (taken from the XNode framework with some modifications)
-        ///</summary>
+
+        /// <summary>
+        ///     Helper functions to zoom and pan the UI (taken from the XNode framework with some modifications)
+        /// </summary>
         public void BeginZoomed(Rect rect, float zoom, float topPadding)
         {
             prevMatrix = GUI.matrix;
             GUI.EndClip();
 
             GUIUtility.ScaleAroundPivot(Vector2.one / zoom, rect.size * 0.5f);
-            GUI.BeginClip(new Rect(-((rect.width * zoom) - rect.width) * 0.5f, -(((rect.height * zoom) - rect.height) * 0.5f) + (topPadding * zoom),
+            GUI.BeginClip(new Rect(-(rect.width * zoom - rect.width) * 0.5f,
+                -((rect.height * zoom - rect.height) * 0.5f) + topPadding * zoom,
                 rect.width * zoom,
                 rect.height * zoom));
         }
 
-        ///<summary>
-        ///Helper functions to zoom and pan the UI (taken from the XNode framework with some modification)
-        ///</summary>
+        /// <summary>
+        ///     Helper functions to zoom and pan the UI (taken from the XNode framework with some modification)
+        /// </summary>
         public void EndZoomed()
         {
             GUI.EndClip();
@@ -1410,7 +1314,7 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         }
 
         /// <summary>
-        /// Pans the view smoothly over time
+        ///     Pans the view smoothly over time
         /// </summary>
         /// <param name="to">Position to pan to (in scaled coordinates)</param>
         /// <param name="duration">How long, in seconds, it takes to pan to the given point</param>
@@ -1423,9 +1327,9 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             needsPan = true;
         }
 
-        ///<summary>
-        ///Draws the grid to the screen based on zoom and pan
-        ///</summary>
+        /// <summary>
+        ///     Draws the grid to the screen based on zoom and pan
+        /// </summary>
         public void DrawGrid(Rect rect, float zoom, Vector2 panOffset)
         {
             float transitionPoint = 2f;
@@ -1436,7 +1340,8 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             Vector2 center = rect.size * .5f;
             Texture2D gridTex = zoom > 2f ? Styles.gridTexture2x : Styles.gridTexture;
 
-            float fac = 1f - (Mathf.Clamp(zoom - (transitionPoint - transitionWindow), 0f, transitionWindow * 2f) / (transitionWindow * 2f));
+            float fac = 1f - Mathf.Clamp(zoom - (transitionPoint - transitionWindow), 0f, transitionWindow * 2f) /
+                (transitionWindow * 2f);
 
             // Offset from origin in tile units
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
@@ -1459,44 +1364,34 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
         [Serializable]
         public class Window
         {
-            public NodeEditor editor;
-            private float _zoom = 1f;
-            public float zoom
+            public enum Hovering
             {
-                get
-                {
-                    return _zoom;
-                }
-                set
-                {
-                    float val = Mathf.Clamp(value, 1f, 2.5f);
-                    _zoom = val;
-                }
+                Node,
+                InConnection,
+                OutConnection,
+                Decorator,
+                Inspector,
+                Window,
+                Minimap,
+                MinimapNode,
+                None
             }
-            public Dictionary<string, float> alpha = new Dictionary<string, float>();
-            public Dictionary<string, bool?> nodeStatus;
+
+            public enum InspectorView
+            {
+                Inspector,
+                Blackboard
+            }
+
+            public NodeEditor editor;
             public bool isPanning;
             public Vector2 nextPan;
             public float recordedTime;
             public float timeLastFrame;
-            public float deltaTime => Time.realtimeSinceStartup - timeLastFrame;
             public float panDuration;
-            private Vector2 _pan;
-            public Vector2 pan
-            {
-                get
-                {
-                    //Remove inconsistencies between the target and actual value (if undo occurs, for example)
-                    return _pan;
-                }
-                set
-                {
-                    _pan = value;
-                }
-            }
             public Vector2 mouseDownPos;
-            public List<Node> selected = new List<Node>();
-            public Queue<Node> changedNodes = new Queue<Node>();
+            public List<Node> selected = new();
+            public Queue<Node> changedNodes = new();
             public Node hoveredNode;
             public Hovering hoveredType;
             public Node hoveredConnection;
@@ -1512,56 +1407,59 @@ Children: {String.Join(", ", windowInfo.selected[0]?.children.Select(node => nod
             public bool searchIsShown;
             public bool searchWantsNode = true;
             public bool searchAddChildren;
-            public float searchbarScroll = 0f;
+            public float searchbarScroll;
             public string searchText;
             public float splashScroll;
             public Rect minimapView;
             public bool settingsShown;
             public bool useLiveLink;
-            public UnityEditor.IMGUI.Controls.SearchField search;
-            private float _inspectorWidth = 350f;
-            public float inspectorWidth
-            {
-                get
-                {
-                    return _inspectorWidth;
-                }
-                set
-                {
-                    _inspectorWidth = Mathf.Clamp(value, 350f, editor.position.width - 100f);
-                }
-            }
             public bool resizingInspector;
             public bool hoverDivider;
             public float resizeClickOffset;
             public bool drawMinimap = true;
             public Vector2 mousePosition;
-            [SerializeField] internal Rect searchRect = new Rect(0f, 0f, 250f, 350f);
-            public enum Hovering
+            [SerializeField] internal Rect searchRect = new(0f, 0f, 250f, 350f);
+            private float _inspectorWidth = 350f;
+            private Vector2 _pan;
+            private float _zoom = 1f;
+            public Dictionary<string, float> alpha = new();
+            public Dictionary<string, bool?> nodeStatus;
+            public SearchField search;
+
+            public float zoom
             {
-                Node,
-                InConnection,
-                OutConnection,
-                Decorator,
-                Inspector,
-                Window,
-                Minimap,
-                MinimapNode,
-                None
+                get => _zoom;
+                set
+                {
+                    float val = Mathf.Clamp(value, 1f, 2.5f);
+                    _zoom = val;
+                }
             }
-            public enum InspectorView
+
+            public float deltaTime => Time.realtimeSinceStartup - timeLastFrame;
+
+            public Vector2 pan
             {
-                Inspector,
-                Blackboard
+                get =>
+                    //Remove inconsistencies between the target and actual value (if undo occurs, for example)
+                    _pan;
+                set => _pan = value;
+            }
+
+            public float inspectorWidth
+            {
+                get => _inspectorWidth;
+                set => _inspectorWidth = Mathf.Clamp(value, 350f, editor.position.width - 100f);
             }
         }
-        ///<summary>
-        ///Contains utility info for the GUI
-        ///</summary>
+
+        /// <summary>
+        ///     Contains utility info for the GUI
+        /// </summary>
         [Serializable]
         internal static class GUIData
         {
-            public static SerializableDictionary<Node, Vector2> sizes = new SerializableDictionary<Node, Vector2>();
+            public static SerializableDictionary<Node, Vector2> sizes = new();
             public static readonly float nodePadding = 15f;
             public static readonly float sidebarPadding = 15f;
             public static readonly float labelHeight = 30f;

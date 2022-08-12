@@ -4,15 +4,25 @@ namespace Schema.Internal
 {
     public class NodeInstruction
     {
+        [Flags]
+        public enum Instruction
+        {
+            None = 0,
+            Quit = 1,
+            ForceStatus = 2,
+            Repeat = 4
+        }
+
         public bool active { get; set; }
         public NodeStatus statusOverride { get; set; }
-        public Instruction instruction { get { return _instruction; } }
-        private Instruction _instruction;
+        public Instruction instruction { get; private set; }
+
         public void Reset()
         {
-            _instruction = Instruction.None;
+            instruction = Instruction.None;
             active = false;
         }
+
         public void Instruct(params Instruction[] instructions)
         {
             active = true;
@@ -21,17 +31,9 @@ namespace Schema.Internal
             {
                 Instruction cur = instructions[i];
 
-                if (!_instruction.HasFlag(cur))
-                    _instruction |= cur;
+                if (!instruction.HasFlag(cur))
+                    instruction |= cur;
             }
-        }
-        [Flags]
-        public enum Instruction
-        {
-            None = 0,
-            Quit = 1,
-            ForceStatus = 2,
-            Repeat = 4
         }
     }
 }

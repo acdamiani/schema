@@ -1,21 +1,24 @@
 using System;
+using Schema.Builtin.Nodes;
 using Schema.Internal;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(Schema.Builtin.Nodes.RandomRange)), CanEditMultipleObjects]
+    [CustomEditor(typeof(RandomRange))]
+    [CanEditMultipleObjects]
     public class RangeEditor : Editor
     {
-        SerializedProperty selector;
-        SerializedProperty intMax;
-        SerializedProperty intMin;
-        SerializedProperty floatMax;
-        SerializedProperty floatMin;
-        float mi;
-        float ma;
-        void OnEnable()
+        private SerializedProperty floatMax;
+        private SerializedProperty floatMin;
+        private SerializedProperty intMax;
+        private SerializedProperty intMin;
+        private float ma;
+        private float mi;
+        private SerializedProperty selector;
+
+        private void OnEnable()
         {
             selector = serializedObject.FindProperty("target");
             intMax = serializedObject.FindProperty("intMax");
@@ -23,6 +26,7 @@ namespace SchemaEditor.Editors.Nodes
             intMin = serializedObject.FindProperty("intMin");
             floatMin = serializedObject.FindProperty("floatMin");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

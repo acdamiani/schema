@@ -9,7 +9,10 @@ namespace Schema.Builtin.Nodes
     public class GetSiblingIndex : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
-        [Tooltip("Index of the sibling Transform"), WriteOnly] public BlackboardEntrySelector<int> siblingIndex;
+
+        [Tooltip("Index of the sibling Transform")] [WriteOnly]
+        public BlackboardEntrySelector<int> siblingIndex;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t = agent.GetComponent(transform);

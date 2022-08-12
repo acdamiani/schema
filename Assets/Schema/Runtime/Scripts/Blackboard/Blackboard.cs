@@ -1,48 +1,58 @@
-using UnityEngine;
 using System;
-using System.Reflection;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Schema.Utilities;
 using UnityEditor;
+using UnityEngine;
 
 namespace Schema.Internal
 {
     [Serializable]
     public class Blackboard : ScriptableObject
     {
-#if UNITY_EDITOR
-        public static Blackboard instance;
-        public static Blackboard global { get { return _global == null ? _global = LoadGlobal() : _global; } }
-        private static Blackboard _global;
-        public delegate void EntryListChangedCallback(Blackboard changed);
-        public delegate void EntryTypeChangedCallback(BlackboardEntry changed);
-        public static event EntryListChangedCallback entryListChanged;
-        public static event EntryTypeChangedCallback entryTypeChanged;
-#endif
-        public static Type[] blackboardTypes { get { return _blackboardTypes == null ? _blackboardTypes = GetBlackboardTypes() : _blackboardTypes; } }
         private static Type[] _blackboardTypes;
-        public static Type[] mappedBlackboardTypes { get { return _mappedBlackboardTypes == null ? _mappedBlackboardTypes = GetMappedBlackboardTypes() : _mappedBlackboardTypes; } }
         private static Type[] _mappedBlackboardTypes;
-        /// <summary>
-        /// Array of entries for the Blackboard
-        /// </summary>
-        public BlackboardEntry[] entries { get { return m_entries; } }
         [SerializeField] private BlackboardEntry[] m_entries = Array.Empty<BlackboardEntry>();
-        void OnEnable()
+
+        public static Type[] blackboardTypes =>
+            _blackboardTypes == null ? _blackboardTypes = GetBlackboardTypes() : _blackboardTypes;
+
+        public static Type[] mappedBlackboardTypes => _mappedBlackboardTypes == null
+            ? _mappedBlackboardTypes = GetMappedBlackboardTypes()
+            : _mappedBlackboardTypes;
+
+        /// <summary>
+        ///     Array of entries for the Blackboard
+        /// </summary>
+        public BlackboardEntry[] entries => m_entries;
+
+        private void OnEnable()
         {
             foreach (BlackboardEntry entry in entries)
                 entry.blackboard = this;
         }
+
         private static Type[] GetBlackboardTypes()
         {
-            return HelperMethods.GetEnumerableOfType(typeof(Schema.EntryType)).ToArray();
+            return HelperMethods.GetEnumerableOfType(typeof(EntryType)).ToArray();
         }
+
         private static Type[] GetMappedBlackboardTypes()
         {
             return blackboardTypes.Select(x => EntryType.GetMappedType(x)).ToArray();
         }
+#if UNITY_EDITOR
+        public static Blackboard instance;
+        public static Blackboard global => _global == null ? _global = LoadGlobal() : _global;
+        private static Blackboard _global;
+
+        public delegate void EntryListChangedCallback(Blackboard changed);
+
+        public delegate void EntryTypeChangedCallback(BlackboardEntry changed);
+
+        public static event EntryListChangedCallback entryListChanged;
+        public static event EntryTypeChangedCallback entryTypeChanged;
+#endif
 #if UNITY_EDITOR
         public int GetTypeMask(IEnumerable<string> filters)
         {
@@ -59,33 +69,35 @@ namespace Schema.Internal
 
             return mask;
         }
+
         private static Blackboard LoadGlobal()
         {
             Blackboard loaded = Resources.Load<Blackboard>("GlobalBlackboard");
 
             if (loaded == null)
             {
-                loaded = ScriptableObject.CreateInstance<Blackboard>();
+                loaded = CreateInstance<Blackboard>();
                 AssetDatabase.CreateAsset(loaded, "Assets/Resources/GlobalBlackboard.asset");
             }
 
             return loaded;
         }
+
         /// <summary>
-        /// Add an entry to the Blackboard
+        ///     Add an entry to the Blackboard
         /// </summary>
         /// <param name="type">Type of entry to add</param>
         /// <param name="actionName">Name of the undo action</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
         public void AddEntry(Type type, string actionName = "Add Entry", bool undo = true)
         {
-            BlackboardEntry entry = ScriptableObject.CreateInstance<BlackboardEntry>();
+            BlackboardEntry entry = CreateInstance<BlackboardEntry>();
             entry.blackboard = this;
-            entry.name = UniqueName(HelperMethods.GetFriendlyTypeName(type) + "Key", entries.Select(e => e.name).ToList());
+            entry.name = UniqueName(type.GetFriendlyTypeName() + "Key", entries.Select(e => e.name).ToList());
             entry.type = type;
             entry.hideFlags = HideFlags.HideInHierarchy;
 
-            if (!String.IsNullOrEmpty(AssetDatabase.GetAssetPath(this)))
+            if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(this)))
                 AssetDatabase.AddObjectToAsset(entry, this);
 
             if (undo)
@@ -98,6 +110,7 @@ namespace Schema.Internal
 
             entryListChanged?.Invoke(this);
         }
+
         private string UniqueName(string desiredName, List<string> names)
         {
             int i = 0;
@@ -107,6 +120,7 @@ namespace Schema.Internal
 
             return desiredName + (i == 0 ? "" : i.ToString());
         }
+
         public void RemoveEntry(BlackboardEntry entry, string actionName = "Remove Entry", bool undo = true)
         {
             if (undo)
@@ -118,11 +132,12 @@ namespace Schema.Internal
             else
             {
                 ArrayUtility.Remove(ref m_entries, entry);
-                ScriptableObject.DestroyImmediate(entry, true);
+                DestroyImmediate(entry, true);
             }
 
             entryListChanged?.Invoke(this);
         }
+
         public void RemoveEntry(int index, string actionName = "Remove Entry", bool undo = true)
         {
             if (index > entries.Length - 1) return;
@@ -138,11 +153,12 @@ namespace Schema.Internal
             else
             {
                 ArrayUtility.Remove(ref m_entries, entry);
-                ScriptableObject.DestroyImmediate(entry, true);
+                DestroyImmediate(entry, true);
             }
 
             entryListChanged?.Invoke(this);
         }
+
         public static void InvokeEntryTypeChanged(BlackboardEntry entry)
         {
             entryTypeChanged?.Invoke(entry);

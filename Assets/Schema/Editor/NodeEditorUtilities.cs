@@ -1,27 +1,28 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using UnityEditor;
+using UnityEditor.ProjectWindowCallback;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 //Utility script for file creation
 namespace Schema.Utilities
 {
     public static class NodeEditorUtilities
     {
-        private static Texture2D scriptIcon = (EditorGUIUtility.IconContent("cs Script Icon").image as Texture2D);
-        internal static void AddItem(this GenericMenu menu, GUIContent content, bool on, GenericMenu.MenuFunction func, bool disabled)
+        private static readonly Texture2D
+            scriptIcon = EditorGUIUtility.IconContent("cs Script Icon").image as Texture2D;
+
+        internal static void AddItem(this GenericMenu menu, GUIContent content, bool on, GenericMenu.MenuFunction func,
+            bool disabled)
         {
             if (disabled)
                 menu.AddDisabledItem(content, on);
             else
                 menu.AddItem(content, on, func);
         }
-        internal static void AddItem(this GenericMenu menu, string content, bool on, GenericMenu.MenuFunction func, bool disabled)
+
+        internal static void AddItem(this GenericMenu menu, string content, bool on, GenericMenu.MenuFunction func,
+            bool disabled)
         {
             menu.AddItem(new GUIContent(content), on, func, disabled);
         }
@@ -30,10 +31,7 @@ namespace Schema.Utilities
         {
             string[] guids = AssetDatabase.FindAssets(fileName);
 
-            if (guids.Length == 0)
-            {
-                Debug.LogWarning($"Could not find file {fileName}");
-            }
+            if (guids.Length == 0) Debug.LogWarning($"Could not find file {fileName}");
 
             string path = AssetDatabase.GUIDToAssetPath(guids[0]);
 
@@ -46,19 +44,10 @@ namespace Schema.Utilities
             );
         }
 
-        private class DoCreateCodeFile : UnityEditor.ProjectWindowCallback.EndNameEditAction
+        internal static Object CreateScript(string pathName, string templatePath)
         {
-            public override void Action(int instanceId, string pathName, string resourceFile)
-            {
-                Object o = CreateScript(pathName, resourceFile);
-                ProjectWindowUtil.ShowCreatedAsset(o);
-            }
-        }
-
-        internal static UnityEngine.Object CreateScript(string pathName, string templatePath)
-        {
-            string className = Path.GetFileNameWithoutExtension(pathName).Replace(" ", String.Empty);
-            string templateText = String.Empty;
+            string className = Path.GetFileNameWithoutExtension(pathName).Replace(" ", string.Empty);
+            string templateText = string.Empty;
 
             UTF8Encoding encoding = new UTF8Encoding(true, false);
 
@@ -77,17 +66,24 @@ namespace Schema.Utilities
                 AssetDatabase.ImportAsset(pathName);
                 return AssetDatabase.LoadAssetAtPath(pathName, typeof(Object));
             }
-            else
-            {
-                Debug.LogError($"The template file was not found: {templatePath}");
-                return null;
-            }
+
+            Debug.LogError($"The template file was not found: {templatePath}");
+            return null;
         }
 
         [MenuItem("Assets/Create/Schema/Custom Node", false, 85)]
         private static void CreateNode()
         {
             CreateFromTemplate("Schema_NodeTemplate.cs", "CustomNode.cs");
+        }
+
+        private class DoCreateCodeFile : EndNameEditAction
+        {
+            public override void Action(int instanceId, string pathName, string resourceFile)
+            {
+                Object o = CreateScript(pathName, resourceFile);
+                ProjectWindowUtil.ShowCreatedAsset(o);
+            }
         }
     }
 }

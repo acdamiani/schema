@@ -1,4 +1,3 @@
-using Schema;
 using UnityEngine;
 
 namespace Schema.Builtin.Nodes
@@ -10,21 +9,18 @@ namespace Schema.Builtin.Nodes
     public class FindGameObjectWithTag : Action
     {
         public TagList gameObjectTag;
-        [Tooltip("The Blackboard Key in which to store the found object"), WriteOnly]
+
+        [Tooltip("The Blackboard Key in which to store the found object")] [WriteOnly]
         public BlackboardEntrySelector<GameObject> gameObject;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             GameObject found = GameObject.FindGameObjectWithTag(gameObjectTag.tag);
 
-            if (!found)
-            {
-                return NodeStatus.Failure;
-            }
-            else
-            {
-                gameObject.value = found;
-                return NodeStatus.Success;
-            }
+            if (!found) return NodeStatus.Failure;
+
+            gameObject.value = found;
+            return NodeStatus.Success;
         }
     }
 }

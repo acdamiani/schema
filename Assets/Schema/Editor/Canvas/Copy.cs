@@ -1,10 +1,7 @@
-using UnityEngine;
-using Schema;
-using Schema.Internal;
-using SchemaEditor.Internal.ComponentSystem.Components;
-using SchemaEditor.Internal;
 using System.Collections.Generic;
 using System.Linq;
+using Schema;
+using SchemaEditor.Internal.ComponentSystem.Components;
 
 namespace SchemaEditor.Internal
 {
@@ -26,8 +23,6 @@ namespace SchemaEditor.Internal
 
                 copiesForwards.TryGetValue(original.parent, out Node parent);
 
-                Debug.Log(parent);
-
                 if (parent != null)
                     parent.AddConnection(copy);
             }
@@ -38,6 +33,7 @@ namespace SchemaEditor.Internal
                 createArgs.fromExisting = copy;
 
                 canvas.Create<NodeComponent>(createArgs);
+                copy.graph.AddNode(copy, copy.graphPosition);
             }
         }
     }

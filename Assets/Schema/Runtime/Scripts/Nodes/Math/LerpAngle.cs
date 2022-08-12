@@ -9,11 +9,20 @@ namespace Schema.Builtin.Nodes
     public class LerpAngle : Action
     {
         [Tooltip("Current angle")] public BlackboardEntrySelector<float> current;
-        [Tooltip("Whether the current angle is measured in radians")] public bool currentIsRadians;
+
+        [Tooltip("Whether the current angle is measured in radians")]
+        public bool currentIsRadians;
+
         [Tooltip("Target angle")] public BlackboardEntrySelector<float> target;
-        [Tooltip("Whether the target angle is measured in radians")] public bool targetIsRadians;
+
+        [Tooltip("Whether the target angle is measured in radians")]
+        public bool targetIsRadians;
+
         [Tooltip("Parameter t to lerp by")] public BlackboardEntrySelector<float> t;
-        [Tooltip("The lerped angle"), WriteOnly] public BlackboardEntrySelector<float> result;
+
+        [Tooltip("The lerped angle")] [WriteOnly]
+        public BlackboardEntrySelector<float> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             float a1 = currentIsRadians ? current.value * Mathf.Rad2Deg : current.value;

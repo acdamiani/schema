@@ -1,8 +1,3 @@
-using UnityEngine;
-using UnityEditor;
-using UnityEditorInternal;
-using System.Collections.Generic;
-
 // [CustomEditor(typeof(SoundHeard))]
 // public class SoundHeardEditor : Editor
 // {
@@ -63,3 +58,4 @@ using System.Collections.Generic;
 //         return new AnimationCurve(keys.ToArray());
 //     }
 // }
+

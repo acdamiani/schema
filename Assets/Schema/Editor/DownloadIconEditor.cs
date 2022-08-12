@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using System.Reflection;
 
 [CustomEditor(typeof(DownloadIcon))]
 public class DownloadIconEditor : Editor
@@ -9,9 +8,6 @@ public class DownloadIconEditor : Editor
     {
         base.OnInspectorGUI();
 
-        if (GUILayout.Button("Click"))
-        {
-            DownloadIcon.Download();
-        }
+        if (GUILayout.Button("Click")) DownloadIcon.Download();
     }
 }

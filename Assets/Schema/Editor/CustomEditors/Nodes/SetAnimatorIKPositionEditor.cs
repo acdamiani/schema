@@ -1,18 +1,20 @@
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(SetAnimatorIKPosition)), CanEditMultipleObjects]
+    [CustomEditor(typeof(SetAnimatorIKPosition))]
+    [CanEditMultipleObjects]
     public class SetAnimatorIKPositionEditor : Editor
     {
-        SerializedProperty isHint;
-        SerializedProperty animator;
-        SerializedProperty hint;
-        SerializedProperty goal;
-        SerializedProperty position;
-        SerializedProperty rotation;
-        void OnEnable()
+        private SerializedProperty animator;
+        private SerializedProperty goal;
+        private SerializedProperty hint;
+        private SerializedProperty isHint;
+        private SerializedProperty position;
+        private SerializedProperty rotation;
+
+        private void OnEnable()
         {
             animator = serializedObject.FindProperty("animator");
             isHint = serializedObject.FindProperty("isHint");
@@ -20,6 +22,7 @@ namespace SchemaEditor.Editors.Nodes
             goal = serializedObject.FindProperty("goal");
             position = serializedObject.FindProperty("goalPosition");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -32,7 +35,8 @@ namespace SchemaEditor.Editors.Nodes
             else
                 EditorGUILayout.PropertyField(goal);
 
-            EditorGUILayout.PropertyField(position, new GUIContent(isHint.boolValue ? "Hint Position" : "Goal Position"));
+            EditorGUILayout.PropertyField(position,
+                new GUIContent(isHint.boolValue ? "Hint Position" : "Goal Position"));
 
             serializedObject.ApplyModifiedProperties();
         }

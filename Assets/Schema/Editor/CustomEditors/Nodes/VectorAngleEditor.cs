@@ -1,23 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Schema.Builtin.Nodes;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(VectorAngle)), CanEditMultipleObjects]
+    [CustomEditor(typeof(VectorAngle))]
+    [CanEditMultipleObjects]
     public class VectorAngleEditor : Editor
     {
-        SerializedProperty a;
-        SerializedProperty b;
-        SerializedProperty signed;
-        SerializedProperty axis;
-        SerializedProperty angle;
-        SerializedProperty overrideAxis;
-        SerializedProperty dir;
-        void OnEnable()
+        private SerializedProperty a;
+        private SerializedProperty angle;
+        private SerializedProperty axis;
+        private SerializedProperty b;
+        private SerializedProperty dir;
+        private SerializedProperty overrideAxis;
+        private SerializedProperty signed;
+
+        private void OnEnable()
         {
             a = serializedObject.FindProperty("vectorOne");
             b = serializedObject.FindProperty("vectorTwo");
@@ -27,6 +26,7 @@ namespace SchemaEditor.Editors.Nodes
             overrideAxis = serializedObject.FindProperty("overrideAxis");
             dir = serializedObject.FindProperty("direction");
         }
+
         public override void OnInspectorGUI()
         {
             VectorAngle vectorAngle = (VectorAngle)target;
@@ -45,8 +45,8 @@ namespace SchemaEditor.Editors.Nodes
 
             if (signed.boolValue &&
                 (vectorAngle.vectorOne.entryType == typeof(Vector3) ||
-                vectorAngle.vectorTwo.entryType == typeof(Vector3))
-            )
+                 vectorAngle.vectorTwo.entryType == typeof(Vector3))
+               )
             {
                 EditorGUILayout.PropertyField(overrideAxis);
 

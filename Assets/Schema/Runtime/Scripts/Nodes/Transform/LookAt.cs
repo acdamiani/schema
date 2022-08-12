@@ -10,7 +10,10 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
         [Tooltip("Target transform")] public ComponentSelector<Transform> target;
-        [Tooltip("Up direction (defaults to Vector3.up)")] public BlackboardEntrySelector<Vector3> worldUp = new BlackboardEntrySelector<Vector3>(Vector3.up);
+
+        [Tooltip("Up direction (defaults to Vector3.up)")]
+        public BlackboardEntrySelector<Vector3> worldUp = new(Vector3.up);
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t1 = agent.GetComponent(transform);

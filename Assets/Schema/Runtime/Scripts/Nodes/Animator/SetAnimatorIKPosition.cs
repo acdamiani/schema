@@ -11,6 +11,7 @@ public class SetAnimatorIKPosition : Action
     public AvatarIKHint hint;
     public bool isHint;
     public BlackboardEntrySelector<Vector3> goalPosition;
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Animator a = agent.GetComponent(animator);

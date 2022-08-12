@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 
-[System.Serializable]
+[Serializable]
 public class NavMeshAreaMask
 {
-    public List<string> areas = new List<string>();
+    public List<string> areas = new();
     public int mask = -1;
 }

@@ -10,6 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
         [Tooltip("Sibling index")] public BlackboardEntrySelector<int> siblingIndex;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t = agent.GetComponent(transform);

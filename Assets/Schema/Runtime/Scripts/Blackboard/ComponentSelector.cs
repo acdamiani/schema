@@ -1,15 +1,17 @@
 using System;
+using Schema.Internal;
 using UnityEngine;
 
 namespace Schema
 {
     [Serializable]
-    public sealed class ComponentSelector<T> : Schema.Internal.ComponentSelectorBase where T : Component
+    public sealed class ComponentSelector<T> : ComponentSelectorBase where T : Component
     {
-        public bool useSelf { get { return m_useSelf; } }
         [SerializeField] private bool m_useSelf = true;
         [SerializeField] private string m_fieldValueType = typeof(T).AssemblyQualifiedName;
         private T cache;
+        public bool useSelf => m_useSelf;
+
         public T GetValue(GameObject gameObject)
         {
             if (cache == null)
@@ -26,15 +28,17 @@ namespace Schema
 
             return cache;
         }
+
         public T GetValue(Component component)
         {
             return GetValue(component.gameObject);
         }
     }
+
     public static class ComponentSelectorExtensions
     {
         /// <summary>
-        /// Get component of type using a ComponentSelector
+        ///     Get component of type using a ComponentSelector
         /// </summary>
         /// <typeparam name="T">Type of component to retrieve. Must match type of selector</typeparam>
         /// <param name="component">Component to retreive the other component from</param>
@@ -44,8 +48,9 @@ namespace Schema
         {
             return selector.GetValue(component);
         }
+
         /// <summary>
-        /// Get component of type using a ComponentSelector
+        ///     Get component of type using a ComponentSelector
         /// </summary>
         /// <typeparam name="T">Type of component to retrieve. Must match type of selector</typeparam>
         /// <param name="gameObject">GameObject to retreive the other component from</param>
@@ -64,8 +69,8 @@ namespace Schema.Internal
     public abstract class ComponentSelectorBase : BlackboardEntrySelector<GameObject>
     {
         /// <summary>
-        /// The gameObject entry to get the component from, null if useSelf is true (read only)
+        ///     The gameObject entry to get the component from, null if useSelf is true (read only)
         /// </summary>
-        public new GameObject value { get { return base.value; } }
+        public new GameObject value => base.value;
     }
 }

@@ -8,7 +8,9 @@ namespace Schema.Builtin.Nodes
     [Description("Stop all coroutines on a MonoBehavior")]
     public class StopAllCoroutines : Action
     {
-        [Tooltip("MonoBehaviour with the running coroutine that you would like to terminate")] public BlackboardEntrySelector<MonoBehaviour> monoBehaviour;
+        [Tooltip("MonoBehaviour with the running coroutine that you would like to terminate")]
+        public BlackboardEntrySelector<MonoBehaviour> monoBehaviour;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             if (monoBehaviour.value == null)

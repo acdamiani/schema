@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
@@ -12,17 +12,28 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Origin of the sphere")] public BlackboardEntrySelector<Vector3> origin;
         [Tooltip("Radius of the sphere")] public BlackboardEntrySelector<float> radius;
-        [Tooltip("Direction in which to cast the sphere")] public BlackboardEntrySelector<Vector3> direction;
-        [Tooltip("Max length of the cast")] public BlackboardEntrySelector<float> maxDistance = new BlackboardEntrySelector<float>(Mathf.Infinity);
-        [Tooltip("Layer mask to use when casting the box")] public LayerMask layerMask;
-        [Tooltip("Specifies whether this query should hit triggers")] public QueryTriggerInteraction queryTriggerInteraction;
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object"), WriteOnly] public BlackboardEntrySelector hit = new BlackboardEntrySelector();
+
+        [Tooltip("Direction in which to cast the sphere")]
+        public BlackboardEntrySelector<Vector3> direction;
+
+        [Tooltip("Max length of the cast")] public BlackboardEntrySelector<float> maxDistance = new(Mathf.Infinity);
+
+        [Tooltip("Layer mask to use when casting the box")]
+        public LayerMask layerMask;
+
+        [Tooltip("Specifies whether this query should hit triggers")]
+        public QueryTriggerInteraction queryTriggerInteraction;
+
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object")] [WriteOnly]
+        public BlackboardEntrySelector hit = new();
+
         protected override void OnObjectEnable()
         {
             hit.ApplyFilters(typeof(GameObject), typeof(List<GameObject>), typeof(Transform), typeof(List<Transform>));
 
             ;
         }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             RaycastHit[] raycastHits = Physics.SphereCastAll(

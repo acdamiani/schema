@@ -1,17 +1,25 @@
-using UnityEngine;
-using UnityEditor;
-using System;
+using System.Linq;
 using System.Text;
 using Schema.Utilities;
-using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
     public sealed class DebugViewComponent : GUIComponent, ICanvasMouseEventSink
     {
         public GUIComponent pinned;
-        public override void Create(CreateArgs args) { }
         private Rect rect;
+
+        public Rect GetRect()
+        {
+            return pinned != null || canvas.selected.Length == 1 ? rect : Rect.zero;
+        }
+
+        public override void Create(CreateArgs args)
+        {
+        }
+
         public override void OnGUI()
         {
             rect = canvas.context.GetRect();
@@ -34,7 +42,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             float height = label.CalcHeight(new GUIContent(componentDebugInfo), 400f);
 
-            rect = new Rect(this.rect.position.x + 10f, this.rect.position.y + 10f, 410f, height + 10f);
+            rect = new Rect(rect.position.x + 10f, rect.position.y + 10f, 410f, height + 10f);
 
             GUI.Box(rect, GUIContent.none, GUI.skin.window);
             EditorGUI.LabelField(rect.Pad(5), new GUIContent(componentDebugInfo), label);
@@ -47,22 +55,20 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             // else
             //     pinned = null;
         }
+
         private string DoInternalDebug(GUIComponent current)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(String.Format("<b>Hovered:</b> {0}", canvas.hovered));
-            sb.AppendLine(String.Format("<b>Zoom:</b> {0}", canvas.zoomer.zoom));
-            sb.AppendLine(String.Format("<b>Pan:</b> {0}", canvas.zoomer.pan));
-            sb.AppendLine(String.Format("<b>Components:</b> {0}", String.Join(", ", canvas.components.Select(x => x.GetType().Name))));
+            sb.AppendLine(string.Format("<b>Hovered:</b> {0}", canvas.hovered));
+            sb.AppendLine(string.Format("<b>Zoom:</b> {0}", canvas.zoomer.zoom));
+            sb.AppendLine(string.Format("<b>Pan:</b> {0}", canvas.zoomer.pan));
+            sb.AppendLine(string.Format("<b>Components:</b> {0}",
+                string.Join(", ", canvas.components.Select(x => x.GetType().Name))));
             sb.AppendLine();
 
-            if (current != null)
-            {
-                sb.AppendLine(String.Format("<b>Layer:</b> {0}", current.layer));
-            }
+            if (current != null) sb.AppendLine(string.Format("<b>Layer:</b> {0}", current.layer));
 
             return sb.ToString();
         }
-        public Rect GetRect() { return pinned != null || canvas.selected.Length == 1 ? rect : Rect.zero; }
     }
 }

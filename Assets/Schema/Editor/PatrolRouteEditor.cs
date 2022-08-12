@@ -1,24 +1,19 @@
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
+using UnityEngine.AI;
 
 [CustomEditor(typeof(PatrolRoute))]
 public class PatrolRouteEditor : Editor
 {
-    private bool isDragging = false;
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
+    private bool isDragging;
 
-        if (GUILayout.Button("Clear Path"))
-            ((PatrolRoute)target).points.Clear();
-    }
     private void OnSceneGUI()
     {
         HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
 
         PatrolRoute route = (PatrolRoute)target;
 
-        if ((Event.current.type == EventType.MouseDown) && Event.current.button == 0)
+        if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
         {
             Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
             RaycastHit hit;
@@ -38,14 +33,15 @@ public class PatrolRouteEditor : Editor
                         isDragging = true;
                         route.selected = i;
                     }
+
                     i++;
                 }
 
                 if (!isDragging)
                 {
-                    UnityEngine.AI.NavMeshHit navHit;
+                    NavMeshHit navHit;
 
-                    if (UnityEngine.AI.NavMesh.SamplePosition(position, out navHit, 1.0f, UnityEngine.AI.NavMesh.AllAreas))
+                    if (NavMesh.SamplePosition(position, out navHit, 1.0f, NavMesh.AllAreas))
                     {
                         Undo.RecordObject(route, "Add Point");
                         route.selected = route.points.Count;
@@ -72,6 +68,7 @@ public class PatrolRouteEditor : Editor
                         route.selected = -1;
                         Event.current.Use();
                     }
+
                     break;
             }
         }
@@ -84,15 +81,21 @@ public class PatrolRouteEditor : Editor
             if (Physics.Raycast(ray, out hit))
             {
                 Vector3 position = hit.point;
-                UnityEngine.AI.NavMeshHit navMeshHit;
+                NavMeshHit navMeshHit;
 
-                if (UnityEngine.AI.NavMesh.SamplePosition(position, out navMeshHit, 1.0f, -1))
-                {
+                if (NavMesh.SamplePosition(position, out navMeshHit, 1.0f, -1))
                     route.points[route.selected] = navMeshHit.position;
-                }
             }
         }
 
         SceneView.RepaintAll();
+    }
+
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+
+        if (GUILayout.Button("Clear Path"))
+            ((PatrolRoute)target).points.Clear();
     }
 }

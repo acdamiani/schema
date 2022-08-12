@@ -1,7 +1,4 @@
-using Schema;
 using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Schema.Builtin.Nodes
 {
@@ -11,8 +8,16 @@ namespace Schema.Builtin.Nodes
     [Description("Logs a rich-text enabled message to the console")]
     public class DebugLog : Action
     {
+        public enum LogType
+        {
+            Log,
+            Warning,
+            Error
+        }
+
         [TextArea] public string message;
         public LogType logType;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             switch (logType)
@@ -29,12 +34,6 @@ namespace Schema.Builtin.Nodes
             }
 
             return NodeStatus.Success;
-        }
-        public enum LogType
-        {
-            Log,
-            Warning,
-            Error
         }
     }
 }

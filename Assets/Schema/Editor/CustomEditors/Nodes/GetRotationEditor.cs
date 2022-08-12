@@ -1,17 +1,18 @@
-using UnityEngine;
 using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetRotation)), CanEditMultipleObjects]
+    [CustomEditor(typeof(GetRotation))]
+    [CanEditMultipleObjects]
     public class GetRotationEditor : Editor
     {
-        SerializedProperty useSelf;
-        SerializedProperty eulerAngles;
-        SerializedProperty gameObjectKey;
-        SerializedProperty eulerKey;
-        SerializedProperty quaternionKey;
-        void OnEnable()
+        private SerializedProperty eulerAngles;
+        private SerializedProperty eulerKey;
+        private SerializedProperty gameObjectKey;
+        private SerializedProperty quaternionKey;
+        private SerializedProperty useSelf;
+
+        private void OnEnable()
         {
             useSelf = serializedObject.FindProperty("useSelf");
             eulerAngles = serializedObject.FindProperty("eulerAngles");
@@ -19,6 +20,7 @@ namespace SchemaEditor.Editors.Nodes
             eulerKey = serializedObject.FindProperty("eulerKey");
             quaternionKey = serializedObject.FindProperty("quaternionKey");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

@@ -1,18 +1,19 @@
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetAnimatorVariable)), CanEditMultipleObjects]
+    [CustomEditor(typeof(GetAnimatorVariable))]
+    [CanEditMultipleObjects]
     public class GetAnimatorVariableEditor : Editor
     {
-        SerializedProperty type;
-        SerializedProperty parameterName;
-        SerializedProperty floatValue;
-        SerializedProperty intValue;
-        SerializedProperty boolValue;
+        private SerializedProperty boolValue;
+        private SerializedProperty floatValue;
+        private SerializedProperty intValue;
+        private SerializedProperty parameterName;
+        private SerializedProperty type;
 
-        void OnEnable()
+        private void OnEnable()
         {
             type = serializedObject.FindProperty("type");
             parameterName = serializedObject.FindProperty("parameterName");
@@ -20,6 +21,7 @@ namespace SchemaEditor.Editors.Nodes
             intValue = serializedObject.FindProperty("intValue");
             boolValue = serializedObject.FindProperty("boolValue");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

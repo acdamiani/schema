@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -11,16 +10,18 @@ public class CoverVolume : MonoBehaviour
     public float spacing = .5f;
     public float preferredDist = 1.0f;
     public NavMeshAreaMask filter;
+
     public Vector3[] GeneratePoints()
     {
         //Generate evenly distributed points inside bounds
-        Vector3 root = transform.position + MultiplyComponents(transform.lossyScale, center) - MultiplyComponents(transform.lossyScale, size) / 2f;
+        Vector3 root = transform.position + MultiplyComponents(transform.lossyScale, center) -
+                       MultiplyComponents(transform.lossyScale, size) / 2f;
 
         List<Vector3> p = new List<Vector3>();
 
-        float halfX = (size.x * transform.lossyScale.x) / 2f;
-        float halfY = (size.y * transform.lossyScale.y) / 2f;
-        float halfZ = (size.z * transform.lossyScale.z) / 2f;
+        float halfX = size.x * transform.lossyScale.x / 2f;
+        float halfY = size.y * transform.lossyScale.y / 2f;
+        float halfZ = size.z * transform.lossyScale.z / 2f;
 
         //Through the perils of float math, a small epsilon is required ot ensure that the correct number of points are generated for spacing that should evenly go into size
         int numX = Mathf.FloorToInt(size.x * transform.lossyScale.x / spacing + 0.01f) + 1;
@@ -28,35 +29,33 @@ public class CoverVolume : MonoBehaviour
         int numZ = Mathf.FloorToInt(size.z * transform.lossyScale.z / spacing + 0.01f) + 1;
 
         for (int x = 0; x < numX; x++)
+        for (int y = 0; y < numY; y++)
+        for (int z = 0; z < numZ; z++)
         {
-            for (int y = 0; y < numY; y++)
+            Vector3 point = new Vector3(x * spacing - halfX, y * spacing - halfY, z * spacing - halfZ);
+
+            //Apply transform to Vector to get world position (current point is relative to the center)
+            Matrix4x4 m = Matrix4x4.TRS(
+                transform.position + transform.rotation * MultiplyComponents(transform.lossyScale, center),
+                transform.rotation, Vector3.one);
+            point = m.MultiplyPoint(point);
+
+            NavMeshHit hit;
+
+            if (NavMesh.SamplePosition(point, out hit, spacing / 2f, filter.mask))
             {
-                for (int z = 0; z < numZ; z++)
-                {
-                    Vector3 point = new Vector3(x * spacing - halfX, y * spacing - halfY, z * spacing - halfZ);
+                //Double check that the point is inside the cube
+                Vector3 pos = hit.position;
 
-                    //Apply transform to Vector to get world position (current point is relative to the center)
-                    Matrix4x4 m = Matrix4x4.TRS(transform.position + transform.rotation * MultiplyComponents(transform.lossyScale, center), transform.rotation, Vector3.one);
-                    point = m.MultiplyPoint(point);
+                //Multiply position by the inverse of the transform matrix to translate it back into local space
+                pos = m.inverse.MultiplyPoint(pos);
 
-                    NavMeshHit hit;
+                //Check to see if point is inside the bounds of the cube
+                if (!PositionInsideCube(pos, Vector3.zero, MultiplyComponents(transform.lossyScale, size), 0.01f))
+                    continue;
 
-                    if (NavMesh.SamplePosition(point, out hit, spacing / 2f, filter.mask))
-                    {
-                        //Double check that the point is inside the cube
-                        Vector3 pos = hit.position;
-
-                        //Multiply position by the inverse of the transform matrix to translate it back into local space
-                        pos = m.inverse.MultiplyPoint(pos);
-
-                        //Check to see if point is inside the bounds of the cube
-                        if (!PositionInsideCube(pos, Vector3.zero, MultiplyComponents(transform.lossyScale, size), 0.01f))
-                            continue;
-
-                        //Then add the unrotated point if it has
-                        p.Add(hit.position);
-                    }
-                }
+                //Then add the unrotated point if it has
+                p.Add(hit.position);
             }
         }
 
@@ -119,24 +118,29 @@ public class CoverVolume : MonoBehaviour
 
         return maxDist;
     }
-    float SqrDiagonalDist(Vector3 size)
+
+    private float SqrDiagonalDist(Vector3 size)
     {
         return Mathf.Pow(size.x, 2) + Mathf.Pow(size.y, 2) + Mathf.Pow(size.z, 2);
     }
-    Vector3 MultiplyComponents(Vector3 a, Vector3 b)
+
+    private Vector3 MultiplyComponents(Vector3 a, Vector3 b)
     {
         return new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
     }
 
-    bool PositionInsideCube(Vector3 position, Vector3 cubeCenter, Vector3 cubeSize, float epsilon)
+    private bool PositionInsideCube(Vector3 position, Vector3 cubeCenter, Vector3 cubeSize, float epsilon)
     {
-        if (position.x + epsilon < cubeCenter.x - cubeSize.x / 2f || position.x - epsilon > cubeCenter.x + cubeSize.x / 2f)
+        if (position.x + epsilon < cubeCenter.x - cubeSize.x / 2f ||
+            position.x - epsilon > cubeCenter.x + cubeSize.x / 2f)
             return false;
 
-        if (position.y + epsilon < cubeCenter.y - cubeSize.y / 2f || position.y - epsilon > cubeCenter.y + cubeSize.y / 2f)
+        if (position.y + epsilon < cubeCenter.y - cubeSize.y / 2f ||
+            position.y - epsilon > cubeCenter.y + cubeSize.y / 2f)
             return false;
 
-        if (position.z + epsilon < cubeCenter.z - cubeSize.z / 2f || position.z - epsilon > cubeCenter.z + cubeSize.z / 2f)
+        if (position.z + epsilon < cubeCenter.z - cubeSize.z / 2f ||
+            position.z - epsilon > cubeCenter.z + cubeSize.z / 2f)
             return false;
 
         return true;

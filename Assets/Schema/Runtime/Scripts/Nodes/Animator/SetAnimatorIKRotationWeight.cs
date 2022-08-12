@@ -9,6 +9,7 @@ public class SetAnimatorIKRotationWeight : Action
     public ComponentSelector<Animator> animator;
     public AvatarIKGoal goal;
     public BlackboardEntrySelector<float> weight;
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Animator a = agent.GetComponent(animator);

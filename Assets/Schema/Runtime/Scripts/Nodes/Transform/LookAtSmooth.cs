@@ -5,14 +5,17 @@ using UnityEngine;
 [LightIcon("Transform Icon", true)]
 [Category("Transform")]
 [Description("Rotate a Transform towards a target smoothly")]
-public class LookAtSmooth : Schema.Action
+public class LookAtSmooth : Action
 {
     [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
     [Tooltip("Target to rotate towards")] public ComponentSelector<Transform> target;
+
     [Tooltip("Speed of rotation, in deg/sec")]
     public float speed;
+
     [Tooltip("Enable smooth interpolation")]
     public bool slerp = true;
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Transform self = agent.GetComponent(transform);
@@ -30,7 +33,6 @@ public class LookAtSmooth : Schema.Action
 
         if (Mathf.Abs(angleDiff) > 0.0001f)
             return NodeStatus.Running;
-        else
-            return NodeStatus.Success;
+        return NodeStatus.Success;
     }
 }

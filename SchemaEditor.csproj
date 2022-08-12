@@ -36,82 +36,83 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets/Schema/Editor/PropertyDrawers/NavMeshAreaMaskDrawer.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetRotationEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/MoveToRandomEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/NodeEditorUtilities.cs" />
-     <Compile Include="Assets/Schema/Editor/NodeEditorFileHandler.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/Utilities/EditorHelperMethods.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogFormatEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/ConeCheckEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Base/IEditable.cs" />
-     <Compile Include="Assets/Schema/Editor/NodeEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntryDrawer.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Base/ICopyable.cs" />
-     <Compile Include="Assets/Schema/Editor/Utilities/CurveUtility.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Copy.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Base/IViewElement.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Base/IGraphObjectProvider.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/PlaySoundEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Base/ICanvasMouseEventSink.cs" />
-     <Compile Include="Assets/Schema/Editor/ShortcutManager.cs" />
-     <Compile Include="Assets/Schema/Editor/QuickSearch.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Base/IDuplicatable.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/Window/IWindowComponentProvider.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomWeightedEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetPositionEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetMatrixValueEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CoverVolumeEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/SchemaAgentEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/ComponentCanvas.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Base/IFramable.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Components/DebugViewComponent.cs" />
-     <Compile Include="Assets/Schema/Editor/NodeEditorResources.cs" />
-     <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntrySelectorDrawer.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/RaycastEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Components/ConnectionComponent.cs" />
-     <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/EditorReflection.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetScaleEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorEvents.cs" />
+     <Compile Include="Assets/Schema/Editor/PropertyDrawers/NavMeshAreaMaskDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetRotationEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/MoveToRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/BlockerComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SoundHeardEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/NodeEditorUtilities.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IDeletable.cs" />
+     <Compile Include="Assets/Schema/Editor/NodeEditorFileHandler.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/RandomRangeEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultNodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/ConditionalComponent.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/WindowComponent.cs" />
      <Compile Include="Assets/Schema/Editor/SchemaGUI.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/SelectionBoxComponent.cs" />
+     <Compile Include="Assets/Schema/Editor/Utilities/EditorHelperMethods.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/GraphEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Window/ICanvasContextProvider.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogFormatEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Resources/a.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetBoundsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorIKPositionWeightEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEntryEditor.cs" />
      <Compile Include="Assets/Schema/Editor/DownloadIconEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/ConeCheckEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/IEditable.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/QuaternionAngleAxisEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/ObjectEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/NodeEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntryDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/ICopyable.cs" />
+     <Compile Include="Assets/Schema/Editor/Utilities/CurveUtility.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Copy.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorIKPositionEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/ISelectable.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/IViewElement.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/IGraphObjectProvider.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/PlaySoundEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/ComponentSelectorDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/ICanvasMouseEventSink.cs" />
+     <Compile Include="Assets/Schema/Editor/ShortcutManager.cs" />
+     <Compile Include="Assets/Schema/Editor/QuickSearch.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/GUIComponent.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/IDuplicatable.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/PannerZoomer.cs" />
      <Compile Include="Assets/Schema/Editor/EditorInspector.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Window/IWindowComponentProvider.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomWeightedEditor.cs" />
      <Compile Include="Assets/Schema/Editor/NodeEditorGUI.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetPositionEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetMatrixValueEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CoverVolumeEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/MinimapComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/CancelInvokeEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/SchemaAgentEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PatrolRouteEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/ComponentCanvas.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/DisableOnPlayDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Base/IFramable.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetAnimatorVariableEditor.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Components/DebugViewComponent.cs" />
+     <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntrySelectorDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/RaycastEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagFilterDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/Canvas/Components/ConnectionComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/VectorAngleEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/NodeComponent.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/GraphUtility.cs" />
+     <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
+     <Compile Include="Assets/Schema/Editor/Styles.cs" />
+     <Compile Include="Assets/Schema/Editor/Icons.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />
     <Reference Include="UnityEngine">
@@ -375,20 +376,8 @@
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.17.1/Lib/Editor/PlasticSCM/Unity.Plastic.Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.VisualScripting.YamlDotNet">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.visualscripting@1.7.8/Editor/VisualScripting.Core/Dependencies/YamlDotNet/Unity.VisualScripting.YamlDotNet.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.TextureAssets">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.visualscripting@1.7.8/Editor/VisualScripting.Core/EditorAssetResources/Unity.VisualScripting.TextureAssets.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.IonicZip">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.visualscripting@1.7.8/Editor/VisualScripting.Core/Dependencies/DotNetZip/Unity.VisualScripting.IonicZip.dll</HintPath>
-    </Reference>
     <Reference Include="log4netPlastic">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.collab-proxy@1.17.1/Lib/Editor/PlasticSCM/log4netPlastic.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
-        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.visualscripting@1.7.8/Runtime/VisualScripting.Flow/Dependencies/NCalc/Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/PackageCache/com.unity.nuget.newtonsoft-json@3.0.2/Runtime/Newtonsoft.Json.dll</HintPath>

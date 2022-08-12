@@ -10,7 +10,10 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
         [Tooltip("Parent transform")] public ComponentSelector<Transform> parentTransform;
-        [Tooltip("Whether the transform is a child of the parent transform"), WriteOnly] public BlackboardEntrySelector<bool> isChild;
+
+        [Tooltip("Whether the transform is a child of the parent transform")] [WriteOnly]
+        public BlackboardEntrySelector<bool> isChild;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t1 = agent.GetComponent(transform);

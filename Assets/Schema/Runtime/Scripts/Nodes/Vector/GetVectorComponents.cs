@@ -1,5 +1,4 @@
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
@@ -9,15 +8,19 @@ namespace Schema.Builtin.Nodes
     [Category("Vector")]
     public class GetVectorComponents : Action
     {
-        [Tooltip("Vector to use to get components")] public BlackboardEntrySelector vector = new BlackboardEntrySelector();
+        [Tooltip("Vector to use to get components")]
+        public BlackboardEntrySelector vector = new();
+
         [WriteOnly] public BlackboardEntrySelector<float> x;
         [WriteOnly] public BlackboardEntrySelector<float> y;
         [WriteOnly] public BlackboardEntrySelector<float> z;
         [WriteOnly] public BlackboardEntrySelector<float> w;
+
         protected override void OnObjectEnable()
         {
             vector.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
         }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             if (vector.entryType == typeof(Vector2))

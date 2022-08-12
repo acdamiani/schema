@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using System;
-using UnityEngine;
+using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Utilities
 {
@@ -14,15 +14,17 @@ namespace SchemaEditor.Utilities
             menu.ShowAsContext();
             Event.current.mousePosition = cache;
         }
+
         public static void ShowAsContext(this GenericMenu menu, float x, float y)
         {
             menu.ShowAsContext(new Vector2(x, y));
         }
+
         public static void Move<T>(this List<T> list, T item, int newIndex)
         {
             if (item != null)
             {
-                var oldIndex = list.IndexOf(item);
+                int oldIndex = list.IndexOf(item);
                 if (oldIndex > -1)
                 {
                     list.RemoveAt(oldIndex);
@@ -34,6 +36,7 @@ namespace SchemaEditor.Utilities
                 }
             }
         }
+
         public static void Move<T>(this T[] array, T item, int newIndex)
         {
             if (item != null)
@@ -50,20 +53,23 @@ namespace SchemaEditor.Utilities
                 }
             }
         }
-        public static void DrawIfRepaint(this GUIStyle style, Rect position, bool isHover, bool isActive, bool on, bool hasKeyboardFocus)
+
+        public static void DrawIfRepaint(this GUIStyle style, Rect position, bool isHover, bool isActive, bool on,
+            bool hasKeyboardFocus)
         {
             if (Event.current.type != EventType.Repaint)
                 return;
 
             style.Draw(position, isHover, isActive, on, hasKeyboardFocus);
         }
-        public static void DrawIfRepaint(this GUIStyle style, Rect position, GUIContent content, bool isHover, bool isActive, bool on, bool hasKeyboardFocus)
+
+        public static void DrawIfRepaint(this GUIStyle style, Rect position, GUIContent content, bool isHover,
+            bool isActive, bool on, bool hasKeyboardFocus)
         {
             if (Event.current.type != EventType.Repaint)
                 return;
 
             style.Draw(position, content, isHover, isActive, on, hasKeyboardFocus);
         }
-
     }
 }

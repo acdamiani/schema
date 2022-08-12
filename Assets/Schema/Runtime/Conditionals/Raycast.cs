@@ -1,19 +1,29 @@
-using UnityEngine;
-using Schema;
-using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
     [Description("Cast a ray absolutely or dynamically towards an object or point")]
     public class Raycast : Conditional
     {
+        public enum RaycastType
+        {
+            Absolute,
+            Dynamic
+        }
+
         [Tooltip("Offset of the ray")] public Vector3 offset;
-        [Tooltip("Direction of the ray, in euler angles")] public Vector3 direction;
-        [Tooltip("Maximum distance of the ray")] public float maxDistance;
+
+        [Tooltip("Direction of the ray, in euler angles")]
+        public Vector3 direction;
+
+        [Tooltip("Maximum distance of the ray")]
+        public float maxDistance;
+
         [Tooltip("Point to cast ray towards")] public BlackboardEntrySelector<Vector3> point;
         public RaycastType type;
         public TagFilter tagFilter;
+
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
             return TestCone(agent);
@@ -53,11 +63,6 @@ namespace Schema.Builtin.Conditionals
             }
 
             return hits.Any(hit => tagFilter.tags.Contains(hit.transform.tag));
-        }
-        public enum RaycastType
-        {
-            Absolute,
-            Dynamic
         }
     }
 }

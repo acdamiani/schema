@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
@@ -11,20 +8,34 @@ namespace Schema.Builtin.Nodes
     [Description("Get the angle between two vectors A and B")]
     public class VectorAngle : Action
     {
-        [Tooltip("Vector A")]
-        public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
-        [Tooltip("Vector B")]
-        public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
+        public enum Dir
+        {
+            Up,
+            Down,
+            Left,
+            Right,
+            Forward,
+            Backward
+        }
+
+        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new();
+
+        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new();
+
         [Tooltip("Whether to get the signed angle")]
         public bool signed;
+
         [Tooltip("Axis of rotation when evaluating the signed angle")]
         public BlackboardEntrySelector<Vector3> axis;
+
         [Tooltip("Direction to use for the axis of rotation")]
         public Dir direction;
-        [Tooltip("Use a custom axis")]
-        public bool overrideAxis;
-        [Tooltip("Blackboard variable to store the angle between the vectors"), WriteOnly]
+
+        [Tooltip("Use a custom axis")] public bool overrideAxis;
+
+        [Tooltip("Blackboard variable to store the angle between the vectors")] [WriteOnly]
         public BlackboardEntrySelector<float> angle;
+
         protected override void OnObjectEnable()
         {
             vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3));
@@ -32,6 +43,7 @@ namespace Schema.Builtin.Nodes
 
             ;
         }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             if (signed)
@@ -41,11 +53,8 @@ namespace Schema.Builtin.Nodes
                     Vector3 a = Vector3.zero;
 
                     if (overrideAxis)
-                    {
                         a = axis.value;
-                    }
                     else
-                    {
                         switch (direction)
                         {
                             case Dir.Up:
@@ -67,7 +76,6 @@ namespace Schema.Builtin.Nodes
                                 a = Vector3.forward;
                                 break;
                         }
-                    }
 
                     angle.value = Vector3.SignedAngle((Vector3)vectorOne.value, (Vector3)vectorTwo.value, a);
                 }
@@ -82,15 +90,6 @@ namespace Schema.Builtin.Nodes
             }
 
             return NodeStatus.Success;
-        }
-        public enum Dir
-        {
-            Up,
-            Down,
-            Left,
-            Right,
-            Forward,
-            Backward
         }
     }
 }

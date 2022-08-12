@@ -1,30 +1,90 @@
+using System;
 using Schema;
 using Schema.Internal;
-using SchemaEditor;
-using SchemaEditor.Utilities;
-using SchemaEditor.Internal;
-using UnityEngine;
-using UnityEditor;
-using System;
 using Schema.Utilities;
+using SchemaEditor.Utilities;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
-    public sealed class ConditionalComponent : GUIComponent, IViewElement, ISelectable, IEditable, IGraphObjectProvider, IDeletable
+    public sealed class ConditionalComponent : GUIComponent, IViewElement, ISelectable, IEditable, IGraphObjectProvider,
+        IDeletable
     {
-        public Rect rect { get { return _rect; } }
-        private Rect _rect;
-        private NodeComponent parent;
-        public Conditional conditional { get { return _conditional; } }
-        private Conditional _conditional;
-        public string uID { get { return _uID; } }
-        private string _uID;
-        public bool isSelected { get { return _isSelected; } }
-        private bool _isSelected;
         private static ConditionalComponent moving;
         private static Vector2 dxdyMouseDown;
         private static int desiredIndex;
         private static int originalIndex;
+        private Rect _rect;
+        private NodeComponent parent;
+        public Rect rect => _rect;
+        public Conditional conditional { get; private set; }
+
+        public string uID { get; private set; }
+
+        public bool isSelected { get; private set; }
+
+        public bool IsDeletable()
+        {
+            return isSelected;
+        }
+
+        public void Delete()
+        {
+            conditional.node.RemoveConditional(conditional);
+        }
+
+        public Object GetEditable()
+        {
+            return conditional;
+        }
+
+        public bool IsEditable()
+        {
+            return true;
+        }
+
+        public bool Equals(GraphObject graphObject)
+        {
+            Conditional conditional = graphObject as Conditional;
+
+            if (conditional != null)
+                return conditional.uID == uID;
+            return false;
+        }
+
+        public bool IsSelectable()
+        {
+            return true;
+        }
+
+        public bool IsSelected()
+        {
+            return isSelected;
+        }
+
+        public bool IsHit(Vector2 position)
+        {
+            return rect.Contains(position);
+        }
+
+        public bool Overlaps(Rect rect)
+        {
+            return this.rect.Overlaps(rect, true);
+        }
+
+        public void Select(bool additive)
+        {
+            isSelected = true;
+            dxdyMouseDown = canvas.mousePositionNoZoom - rect.position;
+            originalIndex = Array.IndexOf(conditional.node.conditionals, conditional);
+        }
+
+        public void Deselect()
+        {
+            isSelected = false;
+        }
+
         public Rect GetRect()
         {
             int index = Array.IndexOf(conditional.node.conditionals, conditional);
@@ -40,10 +100,12 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             Vector2 contentSize = Styles.conditional.CalcSize(content);
             contentSize.x += icon != null ? 20f : 0f;
 
-            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f, parent.layout.body.y - (height + 18f) * upCount);
+            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f,
+                parent.layout.body.y - (height + 18f) * upCount);
 
             return new Rect(pos.x, pos.y, contentSize.x, height);
         }
+
         public override void Create(CreateArgs args)
         {
             ConditionalComponentCreateArgs createArgs = args as ConditionalComponentCreateArgs;
@@ -55,17 +117,18 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             if (createArgs.fromExisting != null)
             {
-                _conditional = createArgs.fromExisting;
-                _uID = _conditional.uID;
+                conditional = createArgs.fromExisting;
+                uID = conditional.uID;
             }
             else
             {
-                _conditional = createArgs.node.AddConditional(createArgs.conditionalType);
-                _uID = _conditional.uID;
+                conditional = createArgs.node.AddConditional(createArgs.conditionalType);
+                uID = conditional.uID;
             }
 
-            parent = (NodeComponent)canvas.FindComponent(_conditional.node);
+            parent = (NodeComponent)canvas.FindComponent(conditional.node);
         }
+
         public override void OnGUI()
         {
             if (parent == null)
@@ -102,7 +165,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             Vector2 contentSize = Styles.conditional.CalcSize(content);
             contentSize.x += icon != null ? 20f : 0f;
 
-            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f, parent.layout.body.y - (height + 18f) * upCount);
+            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f,
+                parent.layout.body.y - (height + 18f) * upCount);
 
             _rect = new Rect(pos.x, pos.y, contentSize.x, height);
 
@@ -110,10 +174,10 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             Rect decorator_out = new Rect(_rect.center.x - 24f, _rect.yMax, 48f, 18f);
 
-            GUI.DrawTexture(decorator_out, Styles.Icons.GetResource("decorator_out", false));
+            GUI.DrawTexture(decorator_out, Icons.GetResource("decorator_out", false));
             GUI.DrawTextureWithTexCoords(
                 new Rect(_rect.center.x - 12f, decorator_out.yMax - 12f, 24f, 12f),
-                Styles.Icons.GetResource("in_connection", false),
+                Icons.GetResource("in_connection", false),
                 new Rect(0f, 0.5f, 1f, 0.5f)
             );
 
@@ -123,10 +187,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             if (moving == this)
             {
-                GUI.backgroundColor = new Color(Styles.windowBackground.r, Styles.windowBackground.g, Styles.windowBackground.b, 0.5f);
+                GUI.backgroundColor = new Color(Styles.windowBackground.r, Styles.windowBackground.g,
+                    Styles.windowBackground.b, 0.5f);
                 Styles.element.DrawIfRepaint(_rect.Pad(-10), false, false, false, false);
                 GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
-                Styles.styles.nodeSelected.DrawIfRepaint(_rect, false, false, false, false);
+                Styles.outline.DrawIfRepaint(_rect, false, false, false, false);
 
                 r = new Rect(Event.current.mousePosition - dxdyMouseDown, new Vector2(contentSize.x, height));
             }
@@ -135,55 +200,35 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             Styles.element.DrawIfRepaint(r.Pad(-10), false, false, false, false);
             Styles.conditional.DrawIfRepaint(r, content, false, false, false, false);
             GUI.backgroundColor = isSelected ? NodeEditor.Prefs.selectionColor : Styles.outlineColor;
-            Styles.styles.nodeSelected.DrawIfRepaint(r, false, false, false, false);
+            Styles.outline.DrawIfRepaint(r, false, false, false, false);
 
             if (icon != null)
                 GUI.DrawTexture(new Rect(r.x + Styles.conditional.padding.left, r.y + 8f, 16f, 16f), icon);
 
             GUI.backgroundColor = Color.white;
         }
+
         private void DoEvents()
         {
             Event e = Event.current;
 
             switch (e.rawType)
             {
-                case EventType.MouseDrag when e.button == 0 && canvas.selected.Length == 1 && isSelected && canvas.selectionBoxComponent.hidden:
+                case EventType.MouseDrag when e.button == 0 && canvas.selected.Length == 1 && isSelected &&
+                                              canvas.selectionBoxComponent.hidden:
                     moving = this;
 
                     break;
                 case EventType.MouseUp when e.button == 0:
                     if (moving != null)
-                        moving.conditional.node.MoveConditional(moving.conditional, Mathf.Clamp(desiredIndex, 0, moving.conditional.node.conditionals.Length - 1));
+                        moving.conditional.node.MoveConditional(moving.conditional,
+                            Mathf.Clamp(desiredIndex, 0, moving.conditional.node.conditionals.Length - 1));
 
                     moving = null;
                     break;
             }
         }
-        public bool IsSelectable() { return true; }
-        public bool IsSelected() { return isSelected; }
-        public bool IsHit(Vector2 position) { return rect.Contains(position); }
-        public bool Overlaps(Rect rect) { return this.rect.Overlaps(rect, true); }
-        public void Select(bool additive)
-        {
-            _isSelected = true;
-            dxdyMouseDown = canvas.mousePositionNoZoom - rect.position;
-            originalIndex = Array.IndexOf(conditional.node.conditionals, conditional);
-        }
-        public void Deselect() { _isSelected = false; }
-        public UnityEngine.Object GetEditable() { return conditional; }
-        public bool IsEditable() { return true; }
-        public bool IsDeletable() { return isSelected; }
-        public void Delete() { conditional.node.RemoveConditional(conditional); }
-        public bool Equals(GraphObject graphObject)
-        {
-            Conditional conditional = graphObject as Conditional;
 
-            if (conditional != null)
-                return conditional.uID == uID;
-            else
-                return false;
-        }
         public class ConditionalComponentCreateArgs : CreateArgs
         {
             public Node node { get; set; }

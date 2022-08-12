@@ -9,7 +9,10 @@ namespace Schema.Builtin.Nodes
     public class PerlinNoise : Action
     {
         [Tooltip("Location of sample point")] public BlackboardEntrySelector<Vector2> location;
-        [Tooltip("Sampled perlin value"), WriteOnly] public BlackboardEntrySelector<float> result;
+
+        [Tooltip("Sampled perlin value")] [WriteOnly]
+        public BlackboardEntrySelector<float> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             result.value = Mathf.PerlinNoise(location.value.x, location.value.y);

@@ -9,11 +9,21 @@ namespace Schema.Builtin.Nodes
     public class MoveTowardsAngle : Action
     {
         [Tooltip("Current angle")] public BlackboardEntrySelector<float> current;
-        [Tooltip("Whether the current angle is in radians")] public bool currentIsRadians;
+
+        [Tooltip("Whether the current angle is in radians")]
+        public bool currentIsRadians;
+
         [Tooltip("Target angle")] public BlackboardEntrySelector<float> target;
-        [Tooltip("Whether the target angle is in radians")] public bool targetIsRadians;
-        [Tooltip("Max delta to move towards the target")] public BlackboardEntrySelector<float> maxDelta;
-        [Tooltip("The lerped angle"), WriteOnly] public BlackboardEntrySelector<float> result;
+
+        [Tooltip("Whether the target angle is in radians")]
+        public bool targetIsRadians;
+
+        [Tooltip("Max delta to move towards the target")]
+        public BlackboardEntrySelector<float> maxDelta;
+
+        [Tooltip("The lerped angle")] [WriteOnly]
+        public BlackboardEntrySelector<float> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             float a1 = currentIsRadians ? current.value * Mathf.Rad2Deg : current.value;

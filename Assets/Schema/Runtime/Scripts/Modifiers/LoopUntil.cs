@@ -1,6 +1,3 @@
-using System;
-using UnityEngine;
-
 namespace Schema.Builtin.Modifiers
 {
     [AllowOne]
@@ -8,18 +5,20 @@ namespace Schema.Builtin.Modifiers
     [DarkIcon("Modifiers/LoopUntil")]
     public class LoopUntil : Modifier
     {
+        public enum ForcedStatus
+        {
+            Success,
+            Failure
+        }
+
         public BlackboardEntrySelector<bool> condition;
+
         public override Message Modify(object modifierMemory, SchemaAgent agent, NodeStatus status)
         {
             if (!condition.value)
                 return Message.Repeat;
 
             return Message.None;
-        }
-        public enum ForcedStatus
-        {
-            Success,
-            Failure
         }
     }
 }

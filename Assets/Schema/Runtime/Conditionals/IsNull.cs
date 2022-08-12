@@ -1,32 +1,32 @@
-using Schema;
 using System;
-using System.Reflection;
 using System.Text;
 using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
-    [DarkIcon("Conditionals/IsNull")]
+    [DarkIcon("Conditionals/d_IsNull")]
     [LightIcon("Conditionals/IsNull")]
     public class IsNull : Conditional
     {
-        [Tooltip("Entry to check for null")] public BlackboardEntrySelector entry = new BlackboardEntrySelector();
-        class IsNullMemory
-        {
-            public bool doReturn;
-        }
+        [Tooltip("Entry to check for null")] public BlackboardEntrySelector entry = new();
+
         protected override void OnObjectEnable()
         {
             entry.ApplyAllFilters();
         }
+
         public override void OnInitialize(object decoratorMemory, SchemaAgent agent)
         {
             IsNullMemory memory = (IsNullMemory)decoratorMemory;
 
-            memory.doReturn = entry.entry.type.IsValueType;
+            Type mapped = EntryType.GetMappedType(entry.entryType);
 
-            Debug.Log(entry.entry.type);
+            if (mapped != null)
+                memory.doReturn = mapped.IsValueType;
+            else
+                memory.doReturn = false;
         }
+
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
             IsNullMemory memory = (IsNullMemory)decoratorMemory;
@@ -34,8 +34,9 @@ namespace Schema.Builtin.Conditionals
             if (memory.doReturn)
                 return true;
 
-            return entry.value != null;
+            return entry.value == null;
         }
+
         public override GUIContent GetConditionalContent()
         {
             StringBuilder sb = new StringBuilder();
@@ -45,7 +46,7 @@ namespace Schema.Builtin.Conditionals
             else
                 sb.Append("If variable ");
 
-            sb.AppendFormat("<color=red>${0}</color> ", String.IsNullOrEmpty(entry.name) ? "null" : entry.name);
+            sb.AppendFormat("<color=red>${0}</color> ", string.IsNullOrEmpty(entry.name) ? "null" : entry.name);
 
             if (invert)
                 sb.Append("is not null");
@@ -53,6 +54,11 @@ namespace Schema.Builtin.Conditionals
                 sb.Append("is null");
 
             return new GUIContent(sb.ToString());
+        }
+
+        private class IsNullMemory
+        {
+            public bool doReturn;
         }
     }
 }

@@ -1,18 +1,20 @@
-using UnityEngine;
-using UnityEditor;
 using Schema.Builtin.Conditionals;
+using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Editors
 {
-    [CustomEditor(typeof(Raycast)), CanEditMultipleObjects]
+    [CustomEditor(typeof(Raycast))]
+    [CanEditMultipleObjects]
     public class RaycastEditor : Editor
     {
-        private SerializedProperty visualize;
-        private SerializedProperty offset;
         private SerializedProperty direction;
+        private SerializedProperty maxDistance;
+        private SerializedProperty offset;
         private SerializedProperty point;
         private SerializedProperty tagFilter;
-        private SerializedProperty maxDistance;
+        private SerializedProperty visualize;
+
         private void OnEnable()
         {
             offset = serializedObject.FindProperty("offset");
@@ -21,12 +23,13 @@ namespace SchemaEditor.Editors
             tagFilter = serializedObject.FindProperty("tagFilter");
             maxDistance = serializedObject.FindProperty("maxDistance");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
             Raycast raycast = (Raycast)target;
 
-            raycast.type = (Raycast.RaycastType)GUILayout.Toolbar((int)raycast.type, new string[] { "Absolute", "Dynamic" });
+            raycast.type = (Raycast.RaycastType)GUILayout.Toolbar((int)raycast.type, new[] { "Absolute", "Dynamic" });
 
             EditorGUILayout.PropertyField(tagFilter);
 

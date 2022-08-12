@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Schema;
-using UnityEngine;
 
 [DarkIcon("Dark/Sequence")]
 [LightIcon("Light/Sequence")]
@@ -12,7 +9,6 @@ public class Sequence : Flow
     {
         if (index + 1 > children.Length - 1 || status == NodeStatus.Failure)
             return -1;
-        else
-            return index + 1;
+        return index + 1;
     }
 }

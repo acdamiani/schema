@@ -1,6 +1,5 @@
-using UnityEngine;
-using UnityEngine.AI;
 using Schema;
+using UnityEngine;
 
 [DarkIcon("Dark/MoveToDirect")]
 [LightIcon("Light/MoveToDirect")]
@@ -9,6 +8,7 @@ internal class MoveToDirect : Action
     public float speed = 1;
     public bool rotateTowardsTarget;
     public BlackboardEntrySelector<Vector3> point;
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         if (rotateTowardsTarget)
@@ -18,10 +18,7 @@ internal class MoveToDirect : Action
             agent.transform.rotation = rotation;
         }
 
-        if (Vector3.SqrMagnitude(agent.transform.position - point.value) < 0.1f)
-        {
-            return NodeStatus.Success;
-        }
+        if (Vector3.SqrMagnitude(agent.transform.position - point.value) < 0.1f) return NodeStatus.Success;
         agent.transform.position = Vector3.MoveTowards(agent.transform.position, point.value, speed * Time.deltaTime);
         return NodeStatus.Running;
     }

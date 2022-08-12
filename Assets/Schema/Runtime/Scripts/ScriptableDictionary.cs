@@ -2,19 +2,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-///<summary>
-///A Unity SeralizableDictionary:
-///see https://answers.unity.com/questions/460727/how-to-serialize-dictionary-with-unity-serializati.html
-///</summary>
-
+/// <summary>
+///     A Unity SeralizableDictionary:
+///     see https://answers.unity.com/questions/460727/how-to-serialize-dictionary-with-unity-serializati.html
+/// </summary>
 [Serializable]
 public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
 {
-    [SerializeField]
-    private List<TKey> keys = new List<TKey>();
+    [SerializeField] private List<TKey> keys = new();
 
-    [SerializeField]
-    private List<TValue> values = new List<TValue>();
+    [SerializeField] private List<TValue> values = new();
 
     // save the dictionary to lists
     public void OnBeforeSerialize()
@@ -31,18 +28,19 @@ public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IS
     // load dictionary from lists
     public void OnAfterDeserialize()
     {
-        this.Clear();
+        Clear();
 
         if (keys.Count != values.Count)
-            throw new System.Exception(string.Format("there are {0} keys and {1} values after deserialization. Make sure that both key and value types are serializable."));
+            throw new Exception(string.Format(
+                "there are {0} keys and {1} values after deserialization. Make sure that both key and value types are serializable."));
 
         for (int i = keys.Count - 1; i >= 0; i--)
-        {
             try
             {
-                this.Add(keys[i], values[i]);
+                Add(keys[i], values[i]);
             }
-            catch { }
-        }
+            catch
+            {
+            }
     }
 }

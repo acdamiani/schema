@@ -1,32 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
     [DarkIcon("d_Transform Icon", true)]
     [LightIcon("Transform Icon", true)]
-    [Description("Calculate a position between the points specified by current and target, moving no farther than the distance specified by maxDistanceDelta.")]
+    [Description(
+        "Calculate a position between the points specified by current and target, moving no farther than the distance specified by maxDistanceDelta.")]
     [Category("Vector")]
     public class MoveTowardsVector : Action
     {
         [Tooltip("The position to move from.")]
-        public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
+        public BlackboardEntrySelector vectorOne = new();
+
         [Tooltip("The position to move towards.")]
-        public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
+        public BlackboardEntrySelector vectorTwo = new();
+
         [Tooltip("Distance to move current per call.")]
         public BlackboardEntrySelector<float> maxDistanceDelta;
-        [Tooltip("Blackboard variable to store the new position vector in"), WriteOnly]
-        public BlackboardEntrySelector newPosition = new BlackboardEntrySelector();
-        protected override void OnObjectEnable()
-        {
-            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
-            vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
 
-            ;
-        }
-        void OnValidate()
+        [Tooltip("Blackboard variable to store the new position vector in")] [WriteOnly]
+        public BlackboardEntrySelector newPosition = new();
+
+        private void OnValidate()
         {
             int l = 0;
 
@@ -69,9 +64,19 @@ namespace Schema.Builtin.Nodes
                     break;
             }
         }
+
+        protected override void OnObjectEnable()
+        {
+            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+            vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+
+            ;
+        }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
-            newPosition.value = Vector4.MoveTowards((Vector4)vectorOne.value, (Vector4)vectorTwo.value, maxDistanceDelta.value);
+            newPosition.value =
+                Vector4.MoveTowards((Vector4)vectorOne.value, (Vector4)vectorTwo.value, maxDistanceDelta.value);
 
             return NodeStatus.Success;
         }

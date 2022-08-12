@@ -1,5 +1,5 @@
-using UnityEngine;
 using Schema;
+using UnityEngine;
 
 [DarkIcon("Dark/SelectRandom")]
 [LightIcon("Light/SelectRandom")]

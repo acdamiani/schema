@@ -1,16 +1,23 @@
-using Schema;
-using SchemaEditor;
-using SchemaEditor.Utilities;
-using SchemaEditor.Internal;
-using UnityEngine;
-using UnityEditor;
 using System;
-using Schema.Utilities;
+using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
     public sealed class WindowComponent : GUIComponent, ICanvasMouseEventSink
     {
+        public Rect rect { get; private set; }
+
+        public int id { get; set; }
+        public GUIContent title { get; set; }
+        public GUIStyle style { get; set; }
+        private IWindowComponentProvider windowProvider { get; set; }
+
+        public Rect GetRect()
+        {
+            return rect;
+        }
+
         public override void Create(CreateArgs args)
         {
             WindowComponentCreateArgs createArgs = args as WindowComponentCreateArgs;
@@ -19,17 +26,12 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 throw new ArgumentException();
 
             id = createArgs.id;
-            _rect = createArgs.rect;
+            rect = createArgs.rect;
             windowProvider = createArgs.windowProvider;
             title = createArgs.title;
             style = createArgs.style;
         }
-        public Rect rect { get { return _rect; } }
-        private Rect _rect;
-        public int id { get; set; }
-        public GUIContent title { get; set; }
-        public GUIStyle style { get; set; }
-        private IWindowComponentProvider windowProvider { get; set; }
+
         public override void OnGUI()
         {
             GUI.FocusWindow(id);
@@ -51,13 +53,13 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (e != null)
                 e.BeginWindows();
 
-            windowProvider.HandleWinInfo(_rect, title, style);
-            _rect = GUI.Window(id, _rect, windowProvider.OnGUI, title, style);
+            windowProvider.HandleWinInfo(rect, title, style);
+            rect = GUI.Window(id, rect, windowProvider.OnGUI, title, style);
 
             if (e != null)
                 e.EndWindows();
         }
-        public Rect GetRect() { return rect; }
+
         public class WindowComponentCreateArgs : CreateArgs
         {
             public Rect rect { get; set; }

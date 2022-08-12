@@ -6,19 +6,24 @@ using UnityEngine;
 [LightIcon("c_Animator")]
 public class GetAnimatorVariable : Action
 {
+    public enum GetAnimatorVariableType
+    {
+        Float,
+        Int,
+        Bool
+    }
+
     public GetAnimatorVariableType type;
     public BlackboardEntrySelector<string> parameterName;
     [WriteOnly] public BlackboardEntrySelector<float> floatValue;
     [WriteOnly] public BlackboardEntrySelector<int> intValue;
     [WriteOnly] public BlackboardEntrySelector<bool> boolValue;
-    class SetAnimatorVariableMemory
-    {
-        public Animator animator;
-    }
+
     public override void OnInitialize(object nodeMemory, SchemaAgent agent)
     {
         ((SetAnimatorVariableMemory)nodeMemory).animator = agent.GetComponent<Animator>();
     }
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         SetAnimatorVariableMemory memory = (SetAnimatorVariableMemory)nodeMemory;
@@ -35,12 +40,12 @@ public class GetAnimatorVariable : Action
                 boolValue.value = memory.animator.GetBool(parameterName.value);
                 break;
         }
+
         return NodeStatus.Success;
     }
-    public enum GetAnimatorVariableType
+
+    private class SetAnimatorVariableMemory
     {
-        Float,
-        Int,
-        Bool
+        public Animator animator;
     }
 }

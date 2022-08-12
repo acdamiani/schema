@@ -8,8 +8,12 @@ namespace Schema.Builtin.Nodes
     [Description("Stop a named coroutine on a MonoBehavior")]
     public class StopCoroutine : Action
     {
-        [Tooltip("MonoBehaviour with the running coroutine that you would like to terminate")] public BlackboardEntrySelector<MonoBehaviour> monoBehaviour;
-        [Tooltip("Name of the coroutine to stop")] public BlackboardEntrySelector<string> methodName;
+        [Tooltip("MonoBehaviour with the running coroutine that you would like to terminate")]
+        public BlackboardEntrySelector<MonoBehaviour> monoBehaviour;
+
+        [Tooltip("Name of the coroutine to stop")]
+        public BlackboardEntrySelector<string> methodName;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             if (monoBehaviour.value == null)

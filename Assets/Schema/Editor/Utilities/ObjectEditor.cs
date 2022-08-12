@@ -1,11 +1,11 @@
-using UnityEngine;
-using UnityEditor;
 using System.Collections.Generic;
-using Object = UnityEngine.Object;
+using UnityEditor;
+using UnityEngine;
 
 public static class ObjectEditor
 {
-    private static Dictionary<Object, Editor> editors = new Dictionary<Object, Editor>();
+    private static readonly Dictionary<Object, Editor> editors = new();
+
     public static void DoEditor(Object obj)
     {
         editors.TryGetValue(obj, out Editor editor);

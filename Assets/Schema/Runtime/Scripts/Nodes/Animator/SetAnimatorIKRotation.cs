@@ -9,6 +9,7 @@ public class SetAnimatorIKRotation : Action
     public ComponentSelector<Animator> animator;
     public AvatarIKGoal goal;
     public BlackboardEntrySelector<Quaternion> goalRotation;
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Animator a = agent.GetComponent(animator);

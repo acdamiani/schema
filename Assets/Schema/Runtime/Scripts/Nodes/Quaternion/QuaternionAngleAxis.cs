@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
@@ -12,28 +9,30 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Angle (in degrees) to rotate around an axis")]
         public BlackboardEntrySelector<float> angle;
+
         [Tooltip("Use a custom axis for rotation")]
         public bool overrideAxis;
-        [Tooltip("Axis to rotate around")]
-        public VectorAngle.Dir direction;
+
+        [Tooltip("Axis to rotate around")] public VectorAngle.Dir direction;
+
         [Tooltip("Custom axis to rotate around")]
         public BlackboardEntrySelector<Vector3> axis;
-        [Tooltip("Blackboard variable to store the new rotation in"), WriteOnly]
+
+        [Tooltip("Blackboard variable to store the new rotation in")] [WriteOnly]
         public BlackboardEntrySelector<Quaternion> rotation;
-        void OnValidate()
+
+        private void OnValidate()
         {
             angle.inspectorValue = angle.inspectorValue % 360f;
         }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Vector3 axis = Vector3.zero;
 
             if (overrideAxis)
-            {
                 axis = this.axis.value;
-            }
             else
-            {
                 switch (direction)
                 {
                     case VectorAngle.Dir.Up:
@@ -55,7 +54,6 @@ namespace Schema.Builtin.Nodes
                         axis = Vector3.back;
                         break;
                 }
-            }
 
             rotation.value = Quaternion.AngleAxis(angle.value, axis);
 

@@ -1,20 +1,22 @@
-using UnityEngine;
 using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetBounds)), CanEditMultipleObjects]
+    [CustomEditor(typeof(GetBounds))]
+    [CanEditMultipleObjects]
     public class GetBoundsEditor : Editor
     {
-        SerializedProperty useSelf;
-        SerializedProperty gameObjectKey;
-        SerializedProperty boundsKey;
-        void OnEnable()
+        private SerializedProperty boundsKey;
+        private SerializedProperty gameObjectKey;
+        private SerializedProperty useSelf;
+
+        private void OnEnable()
         {
             useSelf = serializedObject.FindProperty("useSelf");
             gameObjectKey = serializedObject.FindProperty("gameObject");
             boundsKey = serializedObject.FindProperty("boundsKey");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

@@ -1,27 +1,26 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Schema.Builtin.Nodes;
-using UnityEngine;
 using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(QuaternionAngleAxis)), CanEditMultipleObjects]
+    [CustomEditor(typeof(QuaternionAngleAxis))]
+    [CanEditMultipleObjects]
     public class QuaternionAngleAxisEditor : Editor
     {
-        SerializedProperty a;
-        SerializedProperty axis;
-        SerializedProperty angle;
-        SerializedProperty overrideAxis;
-        SerializedProperty dir;
-        void OnEnable()
+        private SerializedProperty a;
+        private SerializedProperty angle;
+        private SerializedProperty axis;
+        private SerializedProperty dir;
+        private SerializedProperty overrideAxis;
+
+        private void OnEnable()
         {
             axis = serializedObject.FindProperty("axis");
             angle = serializedObject.FindProperty("angle");
             overrideAxis = serializedObject.FindProperty("overrideAxis");
             dir = serializedObject.FindProperty("direction");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

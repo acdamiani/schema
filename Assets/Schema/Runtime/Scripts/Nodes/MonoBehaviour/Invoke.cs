@@ -8,9 +8,14 @@ namespace Schema.Builtin.Nodes
     [Description("Invoke a method specified by a name, at a specified time from now")]
     public class Invoke : Action
     {
-        [Tooltip("MonoBehaviour to invoke the method on")] public BlackboardEntrySelector<MonoBehaviour> monoBehavior;
+        [Tooltip("MonoBehaviour to invoke the method on")]
+        public BlackboardEntrySelector<MonoBehaviour> monoBehavior;
+
         [Tooltip("Name of method to invoke")] public BlackboardEntrySelector<string> methodName;
-        [Tooltip("Time from now to invoke the method")] public BlackboardEntrySelector<float> time;
+
+        [Tooltip("Time from now to invoke the method")]
+        public BlackboardEntrySelector<float> time;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             if (monoBehavior.value == null)

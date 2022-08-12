@@ -10,7 +10,10 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
         [Tooltip("Name of the child to find")] public BlackboardEntrySelector<string> childName;
-        [Tooltip("Found transform"), WriteOnly] public BlackboardEntrySelector<Transform> found;
+
+        [Tooltip("Found transform")] [WriteOnly]
+        public BlackboardEntrySelector<Transform> found;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t = agent.GetComponent(transform);

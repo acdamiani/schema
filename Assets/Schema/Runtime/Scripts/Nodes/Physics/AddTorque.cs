@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Schema;
+﻿using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
@@ -14,6 +11,7 @@ namespace Schema.Builtin.Nodes
         public ComponentSelector<Rigidbody> rigidbody;
         public BlackboardEntrySelector<Vector3> torque;
         public ForceMode forceMode;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Rigidbody r = agent.GetComponent(rigidbody);
@@ -23,10 +21,8 @@ namespace Schema.Builtin.Nodes
                 r.AddTorque(torque.value, forceMode);
                 return NodeStatus.Success;
             }
-            else
-            {
-                return NodeStatus.Failure;
-            }
+
+            return NodeStatus.Failure;
         }
     }
 }

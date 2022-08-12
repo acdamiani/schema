@@ -1,17 +1,16 @@
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace Schema.Internal
 {
     public class ExecutableTree
     {
-        public static ExecutableTree current { get { return _current; } }
-        private static ExecutableTree _current;
-        public ExecutableNode[] nodes { get; }
-        public ExecutableBlackboard blackboard { get; }
-        private Dictionary<int, ExecutionContext> context { get; }
+        private readonly Dictionary<int, ExecutionContext> context;
+
         public ExecutableTree(Graph graph)
         {
+            tree = graph;
             nodes = graph.nodes
                 .Select(x => new ExecutableNode(x))
                 .OrderBy(x => x.index)
@@ -19,6 +18,13 @@ namespace Schema.Internal
             blackboard = new ExecutableBlackboard(graph.blackboard);
             context = new Dictionary<int, ExecutionContext>();
         }
+
+        public static ExecutableTree current { get; private set; }
+
+        public Graph tree { get; }
+        public ExecutableNode[] nodes { get; }
+        public ExecutableBlackboard blackboard { get; }
+
         public ExecutionContext GetExecutionContext(SchemaAgent agent)
         {
             int id = agent.GetInstanceID();
@@ -30,6 +36,7 @@ namespace Schema.Internal
 
             return execution;
         }
+
         public void Initialize(SchemaAgent agent)
         {
             ExecutionContext context = GetExecutionContext(agent);
@@ -44,15 +51,18 @@ namespace Schema.Internal
 
             context.node = nodes.FirstOrDefault(x => x.nodeType == ExecutableNode.ExecutableNodeType.Root);
         }
+
         public void Tick(SchemaAgent agent)
         {
-            _current = this;
+            current = this;
 
             ExecutionContext context = GetExecutionContext(agent);
             ExecutionContext.current = context;
 
             if (context.node == null)
                 return;
+
+            int t = 0;
 
             do
             {
@@ -61,6 +71,17 @@ namespace Schema.Internal
 
                 context.last = context.node;
                 context.node = nodes[i];
+
+                if (++t == agent.maxStepsPerTick)
+                {
+                    Debug.LogWarningFormat(
+                        "The behavior tree {0} has been stepped through over {1} times in one frame! Make sure that there are Action nodes in the tree that take time to execute.",
+                        tree.name,
+                        t
+                    );
+
+                    return;
+                }
             } while (context.last != context.node);
         }
     }

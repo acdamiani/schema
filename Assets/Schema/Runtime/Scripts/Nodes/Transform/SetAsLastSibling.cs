@@ -9,6 +9,7 @@ namespace Schema.Builtin.Nodes
     public class SetAsLastSibling : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t = agent.GetComponent(transform);

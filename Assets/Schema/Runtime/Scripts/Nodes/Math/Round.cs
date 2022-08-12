@@ -9,7 +9,10 @@ namespace Schema.Builtin.Nodes
     public class Round : Action
     {
         [Tooltip("Value to round")] public BlackboardEntrySelector<float> value;
-        [Tooltip("Sampled perlin value"), WriteOnly] public BlackboardEntrySelector<float> result;
+
+        [Tooltip("Sampled perlin value")] [WriteOnly]
+        public BlackboardEntrySelector<float> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             result.value = Mathf.Round(value.value);

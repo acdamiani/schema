@@ -12,7 +12,10 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Target float")] public BlackboardEntrySelector<float> target;
         [Tooltip("Parameter t to lerp by")] public BlackboardEntrySelector<float> t;
         [Tooltip("Do not limit t")] public bool unclamped;
-        [Tooltip("The lerped float"), WriteOnly] public BlackboardEntrySelector<float> result;
+
+        [Tooltip("The lerped float")] [WriteOnly]
+        public BlackboardEntrySelector<float> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             if (unclamped)

@@ -1,14 +1,15 @@
 using UnityEngine;
 
-public static class CurveUtility
+namespace Schema.Utilities
 {
     public class Bezier
     {
+        public Bezier next;
         public Vector2 p0;
         public Vector2 p1;
         public Vector2 p2;
         public Vector2 p3;
-        public Bezier next;
+
         public Bezier(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, Bezier next = null)
         {
             this.p0 = p0;
@@ -17,6 +18,7 @@ public static class CurveUtility
             this.p3 = p3;
             this.next = next;
         }
+
         public Vector2 Position(float t)
         {
             Vector2 a = Mathf.Pow(1 - t, 3) * p0;
@@ -26,6 +28,7 @@ public static class CurveUtility
 
             return a + b + c + d;
         }
+
         public Rect Bounds()
         {
             float x = Mathf.Min(p0.x, p1.x, p2.x, p3.x);
@@ -35,6 +38,7 @@ public static class CurveUtility
 
             return new Rect(x, y, xMax - x, yMax - y);
         }
+
         public bool Hit(Vector2 position, float maxDist, int subdivisions = 8)
         {
             float step = 1f / subdivisions;
@@ -67,6 +71,7 @@ public static class CurveUtility
 
             return Vector2.Distance(closest, position) < maxDist;
         }
+
         public void Split()
         {
             Vector2 e = (p0 + p1) / 2f;
@@ -78,12 +83,13 @@ public static class CurveUtility
 
             Bezier next = new Bezier(k, j, g, p3, this.next);
 
-            this.p1 = e;
-            this.p2 = h;
-            this.p3 = k;
+            p1 = e;
+            p2 = h;
+            p3 = k;
 
             this.next = next;
         }
+
         public bool Intersect(Rect rect)
         {
             Rect bounds = Bounds();

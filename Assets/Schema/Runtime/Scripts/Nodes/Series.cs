@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Schema;
-using UnityEngine;
 
 [DarkIcon("Dark/Sequence")]
 [LightIcon("Light/Sequence")]
@@ -11,6 +8,6 @@ public class Series : Flow
     public override int Tick(object nodeMemory, NodeStatus status, int index)
     {
         if (index + 1 > children.Length - 1) return -1;
-        else return index + 1;
+        return index + 1;
     }
 }

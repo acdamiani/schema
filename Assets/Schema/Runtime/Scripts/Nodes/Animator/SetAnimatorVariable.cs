@@ -12,6 +12,7 @@ public class SetAnimatorVariable : Action
     public BlackboardEntrySelector<float> floatValue;
     public BlackboardEntrySelector<int> intValue;
     public BlackboardEntrySelector<bool> boolValue;
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Animator anim = animator.GetValue(agent);

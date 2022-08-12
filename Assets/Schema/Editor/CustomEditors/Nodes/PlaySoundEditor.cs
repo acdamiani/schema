@@ -1,15 +1,16 @@
 using UnityEditor;
-using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(PlaySound)), CanEditMultipleObjects]
+    [CustomEditor(typeof(PlaySound))]
+    [CanEditMultipleObjects]
     public class PlaySoundEditor : Editor
     {
-        private SerializedProperty isOneShot;
         private SerializedProperty clip;
+        private SerializedProperty isOneShot;
         private SerializedProperty volume;
         private SerializedProperty waitForCompletion;
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

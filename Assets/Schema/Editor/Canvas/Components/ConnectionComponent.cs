@@ -1,20 +1,23 @@
-using Schema;
-using SchemaEditor;
-using SchemaEditor.Internal;
-using UnityEngine;
-using UnityEditor;
-using SchemaEditor.Internal.ComponentSystem;
 using System;
+using System.Text;
+using Schema.Utilities;
+using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
     public sealed class ConnectionComponent : GUIComponent, IViewElement, ISelectable, IDeletable
     {
-        public bool isSelected { get { return _isSelected; } }
-        private bool _isSelected;
+        private NodeComponent _connectionFrom;
+        private NodeComponent _connectionTo;
+        private NodeComponent _from;
+        private NodeComponent _to;
+        private Bezier curve;
+        public bool isSelected { get; private set; }
+
         public NodeComponent from
         {
-            get { return _from; }
+            get => _from;
             set
             {
                 _from = value;
@@ -25,9 +28,10 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     connectionFrom = _from;
             }
         }
+
         public NodeComponent to
         {
-            get { return _to; }
+            get => _to;
             set
             {
                 _to = value;
@@ -38,11 +42,10 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     connectionTo = _to;
             }
         }
-        private NodeComponent _from;
-        private NodeComponent _to;
+
         private NodeComponent connectionFrom
         {
-            get { return _connectionFrom; }
+            get => _connectionFrom;
             set
             {
                 if (value != _connectionFrom && _connectionTo != null)
@@ -56,10 +59,10 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 _connectionFrom = value;
             }
         }
-        private NodeComponent _connectionFrom;
+
         private NodeComponent connectionTo
         {
-            get { return _connectionTo; }
+            get => _connectionTo;
             set
             {
                 if (value != _connectionTo && _connectionFrom != null)
@@ -78,8 +81,50 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 _connectionTo = value;
             }
         }
-        private NodeComponent _connectionTo;
-        private CurveUtility.Bezier curve;
+
+        public bool IsDeletable()
+        {
+            return isSelected;
+        }
+
+        public void Delete()
+        {
+            if (connectionFrom == null || connectionTo == null)
+                return;
+
+            connectionFrom.node?.RemoveConnection(connectionTo.node);
+        }
+
+        public bool IsSelectable()
+        {
+            return true;
+        }
+
+        public bool IsSelected()
+        {
+            return isSelected;
+        }
+
+        public void Select(bool additive)
+        {
+            isSelected = true;
+        }
+
+        public void Deselect()
+        {
+            isSelected = false;
+        }
+
+        public bool Overlaps(Rect rect)
+        {
+            return curve.Intersect(rect);
+        }
+
+        public bool IsHit(Vector2 position)
+        {
+            return curve.Hit(position, 5f * canvas.zoomer.zoom);
+        }
+
         public override void Create(CreateArgs args)
         {
             ConnectionComponentCreateArgs createArgs = args as ConnectionComponentCreateArgs;
@@ -99,8 +144,9 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (createArgs.add)
                 _from.node.AddConnection(_to.node);
 
-            curve = new CurveUtility.Bezier(Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero);
+            curve = new Bezier(Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero);
         }
+
         public override void OnGUI()
         {
             if (
@@ -118,16 +164,18 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             NodeComponent hovered = canvas.hovered as NodeComponent;
 
             if (from == null)
-                p0 = hovered != null && hovered.GetHoverType(Event.current.mousePosition) == NodeComponent.HoverType.OutConnection
-                    ? new Vector2(hovered.layout.outConnection.center.x, hovered.layout.outConnection.yMax)
-                    : Event.current.mousePosition;
+                p0 = hovered != null && hovered.GetHoverType(Event.current.mousePosition) ==
+                    NodeComponent.HoverType.OutConnection
+                        ? new Vector2(hovered.layout.outConnection.center.x, hovered.layout.outConnection.yMax)
+                        : Event.current.mousePosition;
             else
                 p0 = new Vector2(from.layout.outConnection.center.x, from.layout.outConnection.yMax);
 
             if (to == null)
-                p3 = hovered != null && hovered.GetHoverType(Event.current.mousePosition) == NodeComponent.HoverType.InConnection
-                    ? new Vector2(hovered.layout.inConnection.center.x, hovered.layout.inConnection.y)
-                    : Event.current.mousePosition;
+                p3 = hovered != null && hovered.GetHoverType(Event.current.mousePosition) ==
+                    NodeComponent.HoverType.InConnection
+                        ? new Vector2(hovered.layout.inConnection.center.x, hovered.layout.inConnection.y)
+                        : Event.current.mousePosition;
             else
                 p3 = new Vector2(to.layout.inConnection.center.x, to.layout.inConnection.y);
 
@@ -141,22 +189,20 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             curve.p2 = p2;
             curve.p3 = p3;
 
-            Handles.DrawBezier(p0, p3, p1, p2, isSelected ? NodeEditor.Prefs.selectionColor : Color.gray, Styles.curve, NodeEditor.instance.windowInfo.zoom * 3f);
+            Handles.DrawBezier(p0, p3, p1, p2, isSelected ? NodeEditor.Prefs.selectionColor : Color.gray, Styles.curve,
+                NodeEditor.instance.windowInfo.zoom * 3f);
         }
-        public bool IsSelectable() { return true; }
-        public bool IsSelected() { return isSelected; }
-        public void Select(bool additive) { _isSelected = true; }
-        public void Deselect() { _isSelected = false; }
-        public bool Overlaps(Rect rect) { return curve.Intersect(rect); }
-        public bool IsHit(Vector2 position) { return curve.Hit(position, 5f * canvas.zoomer.zoom); }
-        public bool IsDeletable() { return isSelected; }
-        public void Delete()
-        {
-            if (connectionFrom == null || connectionTo == null)
-                return;
 
-            connectionFrom.node?.RemoveConnection(connectionTo.node);
+        public override string GetDebugInfo()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine(string.Format("<b>From:</b> {0}", from?.node.name));
+            sb.AppendLine(string.Format("<b>To:</b> {0}", to?.node.name));
+
+            return sb.ToString();
         }
+
         public class ConnectionComponentCreateArgs : CreateArgs
         {
             public NodeComponent from { get; set; }

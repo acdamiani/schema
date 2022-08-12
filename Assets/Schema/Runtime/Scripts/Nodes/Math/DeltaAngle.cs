@@ -1,8 +1,4 @@
-
 using UnityEngine;
-using Schema;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Schema.Builtin.Nodes
 {
@@ -14,10 +10,19 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Current angular position")] public BlackboardEntrySelector<float> current;
         [Tooltip("Target angular position")] public BlackboardEntrySelector<float> target;
-        [Tooltip("Whether current angular position is in radians")] public bool currentIsRadians;
-        [Tooltip("Whether target angular position is in radians")] public bool targetIsRadians;
-        [Tooltip("Shortest angular distance between the two values"), WriteOnly] public BlackboardEntrySelector<float> delta;
-        [Tooltip("Store the delta as radians instead of degrees")] public bool storeRadians;
+
+        [Tooltip("Whether current angular position is in radians")]
+        public bool currentIsRadians;
+
+        [Tooltip("Whether target angular position is in radians")]
+        public bool targetIsRadians;
+
+        [Tooltip("Shortest angular distance between the two values")] [WriteOnly]
+        public BlackboardEntrySelector<float> delta;
+
+        [Tooltip("Store the delta as radians instead of degrees")]
+        public bool storeRadians;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             float a1 = currentIsRadians ? current.value * Mathf.Rad2Deg : current.value;

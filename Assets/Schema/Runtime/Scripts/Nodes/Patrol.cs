@@ -1,21 +1,15 @@
-using System.Collections;
 using System.Collections.Generic;
+using Schema;
 using UnityEngine;
 using UnityEngine.AI;
-using Schema;
 
 [RequireAgentComponent(typeof(PatrolRoute))]
 [DarkIcon("Dark/Patrol")]
 [LightIcon("Light/Patrol")]
 public class Patrol : Action
 {
-    class PatrolMemory
-    {
-        public NavMeshAgent agent;
-        public PatrolRoute route;
-        public int currentIndex = 0;
-    }
     public List<BlackboardEntrySelector<Vector3>> points;
+
     public override void OnInitialize(object nodeMemory, SchemaAgent agent)
     {
         PatrolMemory memory = (PatrolMemory)nodeMemory;
@@ -23,18 +17,20 @@ public class Patrol : Action
         memory.route = agent.GetComponent<PatrolRoute>();
         memory.agent = agent.GetComponent<NavMeshAgent>();
     }
+
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
         PatrolMemory memory = (PatrolMemory)nodeMemory;
 
         memory.agent.SetDestination(points[memory.currentIndex].value);
     }
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         PatrolMemory memory = (PatrolMemory)nodeMemory;
 
         if (!memory.agent.pathPending &&
-            (memory.agent.remainingDistance <= memory.agent.stoppingDistance) &&
+            memory.agent.remainingDistance <= memory.agent.stoppingDistance &&
             (!memory.agent.hasPath || memory.agent.velocity.sqrMagnitude == 0f))
         {
             memory.currentIndex++;
@@ -44,5 +40,12 @@ public class Patrol : Action
         }
 
         return NodeStatus.Running;
+    }
+
+    private class PatrolMemory
+    {
+        public NavMeshAgent agent;
+        public int currentIndex;
+        public PatrolRoute route;
     }
 }

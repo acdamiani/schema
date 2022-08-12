@@ -1,22 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
 using Schema;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class MoveToRandom : Action
 {
-    class MoveToRandomMemory
-    {
-        public Vector3 position;
-    }
     public Vector2 x;
     public Vector2 y;
     public Vector2 z;
-    [Range(0, 100)]
-    public float speed;
+
+    [Range(0, 100)] public float speed;
+
     [Tooltip("Whether the random position is relative to the current agent's position")]
     public bool isRelative = true;
+
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
         MoveToRandomMemory memory = (MoveToRandomMemory)nodeMemory;
@@ -27,11 +23,9 @@ public class MoveToRandom : Action
 
         NavMeshAgent aiAgent = agent.GetComponent<NavMeshAgent>();
         //Disable agent
-        if (aiAgent)
-        {
-            aiAgent.enabled = false;
-        }
+        if (aiAgent) aiAgent.enabled = false;
     }
+
     public override void OnNodeExit(object nodeMemory, SchemaAgent agent)
     {
         MoveToRandomMemory memory = (MoveToRandomMemory)nodeMemory;
@@ -42,6 +36,7 @@ public class MoveToRandom : Action
         if (aiAgent)
             aiAgent.enabled = true;
     }
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         MoveToRandomMemory mem = (MoveToRandomMemory)nodeMemory;
@@ -53,13 +48,18 @@ public class MoveToRandom : Action
         }
 
         agent.transform.position = Vector3.MoveTowards(
-           agent.transform.position,
-           mem.position,
-           speed * Time.deltaTime
+            agent.transform.position,
+            mem.position,
+            speed * Time.deltaTime
         );
 
         Debug.Log("running");
 
         return NodeStatus.Running;
+    }
+
+    private class MoveToRandomMemory
+    {
+        public Vector3 position;
     }
 }

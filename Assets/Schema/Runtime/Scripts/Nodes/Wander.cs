@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Schema;
 using UnityEngine;
 using UnityEngine.AI;
-using Schema;
 
 [DarkIcon("Dark/Wander")]
 [LightIcon("Light/Wander")]
@@ -11,19 +9,17 @@ public class Wander : Action
 {
     [Tooltip("The distance an agent will travel in any direction")]
     public float distance = 1f;
+
     public NavMeshAreaMask navmeshAreaMask;
     public bool visualize;
-    class WanderMemory
-    {
-        public NavMeshAgent agent;
-        public Vector3 destination;
-    }
+
     public override void OnInitialize(object nodeMemory, SchemaAgent agent)
     {
         WanderMemory memory = (WanderMemory)nodeMemory;
 
         memory.agent = agent.GetComponent<NavMeshAgent>();
     }
+
     public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
     {
         WanderMemory memory = (WanderMemory)nodeMemory;
@@ -36,31 +32,31 @@ public class Wander : Action
 
         memory.destination = hit.position;
     }
+
     public override void OnNodeExit(object nodeMemory, SchemaAgent agent)
     {
         WanderMemory memory = (WanderMemory)nodeMemory;
         memory.agent.ResetPath();
     }
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         WanderMemory memory = (WanderMemory)nodeMemory;
 
-        if (memory.agent.SetDestination(memory.destination) && memory.agent.pathStatus == NavMeshPathStatus.PathComplete)
+        if (memory.agent.SetDestination(memory.destination) &&
+            memory.agent.pathStatus == NavMeshPathStatus.PathComplete)
         {
             if (!memory.agent.pathPending &&
-            (memory.agent.remainingDistance <= memory.agent.stoppingDistance) &&
-            (!memory.agent.hasPath || memory.agent.velocity.sqrMagnitude == 0f))
-            {
+                memory.agent.remainingDistance <= memory.agent.stoppingDistance &&
+                (!memory.agent.hasPath || memory.agent.velocity.sqrMagnitude == 0f))
                 return NodeStatus.Success;
-            }
 
             return NodeStatus.Running;
         }
-        else
-        {
-            return NodeStatus.Failure;
-        }
+
+        return NodeStatus.Failure;
     }
+
     public override void DrawGizmos(SchemaAgent agent)
     {
         if (!visualize) return;
@@ -70,5 +66,11 @@ public class Wander : Action
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(agent.transform.position, distance);
         Gizmos.color = gizmosColor;
+    }
+
+    private class WanderMemory
+    {
+        public NavMeshAgent agent;
+        public Vector3 destination;
     }
 }

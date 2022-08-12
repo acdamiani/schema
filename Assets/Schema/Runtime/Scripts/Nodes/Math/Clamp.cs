@@ -11,7 +11,10 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Float to clamp")] public BlackboardEntrySelector<float> value;
         [Tooltip("Lower bound for the float")] public BlackboardEntrySelector<float> lowerBound;
         [Tooltip("Upper bound for the float")] public BlackboardEntrySelector<float> upperBound;
-        [Tooltip("The clamped float"), WriteOnly] public BlackboardEntrySelector<float> result;
+
+        [Tooltip("The clamped float")] [WriteOnly]
+        public BlackboardEntrySelector<float> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             result.value = Mathf.Clamp(value.value, lowerBound.value, upperBound.value);

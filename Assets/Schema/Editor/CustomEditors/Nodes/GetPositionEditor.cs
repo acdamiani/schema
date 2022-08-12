@@ -1,22 +1,25 @@
-using UnityEngine;
+using Schema.Builtin.Nodes;
 using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(Schema.Builtin.Nodes.GetPosition)), CanEditMultipleObjects]
+    [CustomEditor(typeof(GetPosition))]
+    [CanEditMultipleObjects]
     public class GetPositionEditor : Editor
     {
-        SerializedProperty useSelf;
-        SerializedProperty local;
-        SerializedProperty gameObjectKey;
-        SerializedProperty positionKey;
-        void OnEnable()
+        private SerializedProperty gameObjectKey;
+        private SerializedProperty local;
+        private SerializedProperty positionKey;
+        private SerializedProperty useSelf;
+
+        private void OnEnable()
         {
             useSelf = serializedObject.FindProperty("useSelf");
             local = serializedObject.FindProperty("local");
             gameObjectKey = serializedObject.FindProperty("gameObject");
             positionKey = serializedObject.FindProperty("positionKey");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

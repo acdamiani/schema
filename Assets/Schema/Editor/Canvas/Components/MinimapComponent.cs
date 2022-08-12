@@ -1,15 +1,25 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using SchemaEditor;
-using SchemaEditor.Internal;
-using UnityEngine;
+using System.Linq;
 using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
     public sealed class MinimapComponent : GUIComponent, ICanvasMouseEventSink
     {
+        private Rect graphRect;
+        private Rect gridViewRect;
+        private bool listModified;
+        private Func<Vector2> offset;
+        private Rect rect;
+        private float viewWidth;
+
+        public Rect GetRect()
+        {
+            return NodeEditor.Prefs.minimapEnabled ? rect : Rect.zero;
+        }
+
         public override void Create(CreateArgs args)
         {
             MinimapComponentCreateArgs createArgs = args as MinimapComponentCreateArgs;
@@ -17,19 +27,17 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (createArgs == null)
                 throw new ArgumentException();
 
-            this.offset = createArgs.offset;
+            offset = createArgs.offset;
 
             listModified = true;
             canvas.onComponentListModified += () => listModified = true;
         }
-        private Rect rect;
-        private float viewWidth;
-        private Func<Vector2> offset;
-        private bool listModified;
-        private Rect graphRect;
-        private Rect gridViewRect;
+
         public override void OnGUI()
         {
+            if (!NodeEditor.Prefs.minimapEnabled)
+                return;
+
             rect = canvas.context.GetViewRect();
 
             graphRect = GetGraphRect(100f);
@@ -47,16 +55,19 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             switch (NodeEditor.Prefs.minimapPosition)
             {
                 case 0:
-                    rect = new Rect(10f, rect.yMax - height - 10f - toolbarHeight, NodeEditor.Prefs.minimapWidth, height);
+                    rect = new Rect(10f, rect.yMax - height - 10f - toolbarHeight, NodeEditor.Prefs.minimapWidth,
+                        height);
                     break;
                 case 1:
                     rect = new Rect(10f, 10f + toolbarHeight, NodeEditor.Prefs.minimapWidth, height);
                     break;
                 case 2:
-                    rect = new Rect(rect.xMax - 10f - NodeEditor.Prefs.minimapWidth, rect.yMax - height - 10f, NodeEditor.Prefs.minimapWidth, height);
+                    rect = new Rect(rect.xMax - 10f - NodeEditor.Prefs.minimapWidth, rect.yMax - height - 10f,
+                        NodeEditor.Prefs.minimapWidth, height);
                     break;
                 case 3:
-                    rect = new Rect(rect.xMax - 10f - NodeEditor.Prefs.minimapWidth, 0f, NodeEditor.Prefs.minimapWidth, height);
+                    rect = new Rect(rect.xMax - 10f - NodeEditor.Prefs.minimapWidth, 0f, NodeEditor.Prefs.minimapWidth,
+                        height);
                     break;
             }
 
@@ -64,10 +75,12 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             gridViewRect = canvas.zoomer.WindowToGridRect(canvas.context.GetViewRect());
             gridViewRect.position = GridToMinimapPosition(gridViewRect.position);
-            gridViewRect.position = new Vector2(gridViewRect.position.x + rect.width / 2f - viewWidth / 2f, gridViewRect.position.y);
+            gridViewRect.position = new Vector2(gridViewRect.position.x + rect.width / 2f - viewWidth / 2f,
+                gridViewRect.position.y);
             gridViewRect.size = gridViewRect.size / graphRect.width * viewWidth;
 
-            Handles.DrawSolidRectangleWithOutline(rect, new Color(0f, 0f, 0f, NodeEditor.Prefs.minimapOpacity), NodeEditor.Prefs.minimapOutlineColor);
+            Handles.DrawSolidRectangleWithOutline(rect, new Color(0f, 0f, 0f, NodeEditor.Prefs.minimapOpacity),
+                NodeEditor.Prefs.minimapOutlineColor);
 
             GUI.BeginGroup(rect);
 
@@ -85,7 +98,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                 Rect nodeRect = new Rect(position, size);
 
-                Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.windowBackground, node.IsSelected() ? NodeEditor.Prefs.selectionColor : Color.black);
+                Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.windowBackground,
+                    node.IsSelected() ? NodeEditor.Prefs.selectionColor : Color.black);
             }
 
 
@@ -93,6 +107,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             GUI.EndGroup();
         }
+
         private void DoEvents()
         {
             Event e = Event.current;
@@ -102,20 +117,13 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             switch (e.rawType)
             {
-                case EventType.MouseDown:
-                    Vector2 newPan = e.mousePosition - rect.position;
-                    newPan.x -= rect.width / 2f - viewWidth / 2f;
-                    newPan = MinimapToGridPosition(newPan);
-                    canvas.zoomer.pan = -newPan;
-
-                    canvas.cursor = MouseCursor.Pan;
-                    break;
                 case EventType.MouseDrag:
                     Vector2 ratio = canvas.context.GetViewRect().size / gridViewRect.size;
                     canvas.zoomer.pan -= e.delta * ratio * canvas.zoomer.zoom;
                     break;
             }
         }
+
         public Vector2 GridToMinimapPosition(Vector2 position)
         {
             position = (position - graphRect.position) / graphRect.size;
@@ -123,6 +131,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             return position * sizeFac;
         }
+
         public Vector2 MinimapToGridPosition(Vector2 position)
         {
             Vector2 sizeFac = new Vector2(viewWidth, graphRect.height / graphRect.width * viewWidth);
@@ -133,6 +142,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             return position;
         }
+
         private Rect GetGraphRect(float padding)
         {
             IEnumerable<NodeComponent> nodeComponents = canvas.components
@@ -150,7 +160,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             return graphRect;
         }
-        public Rect GetRect() { return rect; }
+
         public class MinimapComponentCreateArgs : CreateArgs
         {
             public Func<Vector2> offset { get; set; }

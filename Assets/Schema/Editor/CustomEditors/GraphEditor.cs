@@ -1,6 +1,6 @@
-using UnityEngine;
-using UnityEditor;
 using Schema;
+using UnityEditor;
+using UnityEngine;
 
 [CustomEditor(typeof(Graph))]
 public class GraphEditor : Editor

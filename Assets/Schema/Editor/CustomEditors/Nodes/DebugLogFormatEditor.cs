@@ -1,23 +1,25 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(DebugLogFormat)), CanEditMultipleObjects]
+    [CustomEditor(typeof(DebugLogFormat))]
+    [CanEditMultipleObjects]
     public class DebugLogFormatEditor : Editor
     {
-        SerializedProperty message;
-        SerializedProperty keys;
-        string m;
-        GUIStyle boxStyle;
-        void OnEnable()
+        private GUIStyle boxStyle;
+        private SerializedProperty keys;
+        private string m;
+        private SerializedProperty message;
+
+        private void OnEnable()
         {
             message = serializedObject.FindProperty("message");
             keys = serializedObject.FindProperty("keys");
         }
+
         public override void OnInspectorGUI()
         {
             DebugLogFormat debugLog = (DebugLogFormat)target;
@@ -42,12 +44,13 @@ namespace SchemaEditor.Editors.Nodes
 
             try
             {
-                m = String.Format(message.stringValue, names);
+                m = string.Format(message.stringValue, names);
             }
             catch (Exception e)
             {
                 EditorGUILayout.HelpBox(e.Message, MessageType.Warning);
             }
+
             EditorGUILayout.SelectableLabel(m, boxStyle);
 
             serializedObject.ApplyModifiedProperties();

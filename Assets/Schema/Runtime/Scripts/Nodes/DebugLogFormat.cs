@@ -1,7 +1,9 @@
-using Schema;
-using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Schema;
+using UnityEngine;
+using Action = Schema.Action;
 
 [DarkIcon("Dark/DebugLog")]
 [LightIcon("Light/DebugLog")]
@@ -10,22 +12,21 @@ public class DebugLogFormat : Action
 {
     [TextArea] public string message;
     public List<BlackboardEntrySelector> keys;
-    protected override void OnObjectEnable()
-    {
-        if (keys != null)
-        {
-            foreach (BlackboardEntrySelector key in keys)
-                key.ApplyAllFilters();
-        }
-    }
+
     private void OnValidate()
     {
         if (keys != null)
-        {
             foreach (BlackboardEntrySelector key in keys)
                 key.ApplyAllFilters();
-        }
     }
+
+    protected override void OnObjectEnable()
+    {
+        if (keys != null)
+            foreach (BlackboardEntrySelector key in keys)
+                key.ApplyAllFilters();
+    }
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         object[] values = keys.Select(key => key.value).ToArray();
@@ -35,7 +36,7 @@ public class DebugLogFormat : Action
             Debug.LogFormat(message, values);
             return NodeStatus.Success;
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Debug.LogException(e);
             return NodeStatus.Failure;

@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Schema;
 using UnityEngine;
-using Schema;
 
 [DarkIcon("c_Rigidbody")]
 [LightIcon("c_Rigidbody")]
@@ -12,6 +10,7 @@ public class AddForce : Action
     public ComponentSelector<Rigidbody> rigidbody;
     public BlackboardEntrySelector<Vector3> forceVector;
     public ForceMode forceMode;
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Rigidbody r = agent.GetComponent(rigidbody);
@@ -21,9 +20,7 @@ public class AddForce : Action
             r.AddForce(forceVector.value, forceMode);
             return NodeStatus.Success;
         }
-        else
-        {
-            return NodeStatus.Failure;
-        }
+
+        return NodeStatus.Failure;
     }
 }

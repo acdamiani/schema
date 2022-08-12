@@ -1,8 +1,6 @@
-using UnityEngine;
-using System.Runtime;
-using Schema;
-using System.Collections.Generic;
+using System;
 using System.Linq;
+using Random = UnityEngine.Random;
 
 namespace Schema.Builtin.Nodes
 {
@@ -11,13 +9,12 @@ namespace Schema.Builtin.Nodes
     public class SelectRandomWeighted : Flow
     {
         public SerializableDictionary<string, int> weights;
+
         public override void OnFlowEnter(object flowMemory, SchemaAgent agent)
         {
-            foreach (Node child in children.Where(child => !weights.ContainsKey(child.uID)))
-            {
-                weights.Add(child.uID, 1);
-            }
+            foreach (Node child in children.Where(child => !weights.ContainsKey(child.uID))) weights.Add(child.uID, 1);
         }
+
         public override int Tick(object nodeMemory, NodeStatus status, int index)
         {
             if (index > -1) return -1;
@@ -27,10 +24,11 @@ namespace Schema.Builtin.Nodes
             foreach (Node child in children)
             {
                 if (ranWeight <= weights[child.uID])
-                    return System.Array.IndexOf(children, child);
+                    return Array.IndexOf(children, child);
 
                 ranWeight -= weights[child.uID];
             }
+
             return 0;
         }
     }

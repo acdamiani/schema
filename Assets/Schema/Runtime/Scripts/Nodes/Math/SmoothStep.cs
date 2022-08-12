@@ -10,8 +10,13 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Current float")] public BlackboardEntrySelector<float> current;
         [Tooltip("Target float")] public BlackboardEntrySelector<float> target;
-        [Tooltip("Parameter t to interpolate by")] public BlackboardEntrySelector<float> t;
-        [Tooltip("The interpolated float"), WriteOnly] public BlackboardEntrySelector<float> result;
+
+        [Tooltip("Parameter t to interpolate by")]
+        public BlackboardEntrySelector<float> t;
+
+        [Tooltip("The interpolated float")] [WriteOnly]
+        public BlackboardEntrySelector<float> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             result.value = Mathf.SmoothStep(current.value, target.value, t.value);

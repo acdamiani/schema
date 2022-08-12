@@ -7,11 +7,12 @@ using UnityEngine;
 
 public static class DynamicProperty
 {
-    private static Dictionary<MemberInfo, Action<object, object>> setters = new Dictionary<MemberInfo, Action<object, object>>();
-    private static Dictionary<MemberInfo, Func<object, object>> getters = new Dictionary<MemberInfo, Func<object, object>>();
+    private static readonly Dictionary<MemberInfo, Action<object, object>> setters = new();
+    private static readonly Dictionary<MemberInfo, Func<object, object>> getters = new();
+
     public static void Set(object obj, string path, object value)
     {
-        if (obj == null || String.IsNullOrEmpty(path))
+        if (obj == null || string.IsNullOrEmpty(path))
             throw new ArgumentNullException();
 
         Type type = obj.GetType();
@@ -19,7 +20,7 @@ public static class DynamicProperty
         string assemblyName = type.AssemblyQualifiedName;
         string pathSuffix = '.' + path.Replace('/', '.').Trim('.');
 
-        Queue<string> pathParts = new Queue<string>(path.Split('/').Where(x => !String.IsNullOrWhiteSpace(x)));
+        Queue<string> pathParts = new Queue<string>(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
 
         object currentObject = ValueTypeHolder.Wrap(obj);
         Type currentType = type;
@@ -31,7 +32,7 @@ public static class DynamicProperty
         {
             part = pathParts.Dequeue();
 
-            member = ((MemberInfo)currentType.GetField(part) ?? (MemberInfo)currentType.GetProperty(part));
+            member = (MemberInfo)currentType.GetField(part) ?? currentType.GetProperty(part);
 
             if (member == null)
             {
@@ -39,39 +40,41 @@ public static class DynamicProperty
                 return;
             }
 
-            getters.TryGetValue(member, out var getter);
+            getters.TryGetValue(member, out Func<object, object> getter);
 
             if (getter == null)
                 getter = getters[member] = CreateGetMethod(member);
 
             currentObject = ValueTypeHolder.Wrap(getter(currentObject));
-            currentType = ((member as FieldInfo)?.FieldType ?? (member as PropertyInfo)?.PropertyType);
+            currentType = (member as FieldInfo)?.FieldType ?? (member as PropertyInfo)?.PropertyType;
         }
 
         part = pathParts.Dequeue();
-        member = ((MemberInfo)currentType.GetField(part) ?? (MemberInfo)currentType.GetProperty(part));
+        member = (MemberInfo)currentType.GetField(part) ?? currentType.GetProperty(part);
 
         if (member.MemberType == MemberTypes.Property && (member as PropertyInfo).SetMethod == null)
         {
             Debug.LogWarning($"{type.Name}{pathSuffix} is not writable; it is readonly");
             return;
         }
-        else if (member.MemberType == MemberTypes.Field && (member as FieldInfo).DeclaringType.IsValueType)
+
+        if (member.MemberType == MemberTypes.Field && (member as FieldInfo).DeclaringType.IsValueType)
         {
             Debug.LogWarning($"{type.Name}{pathSuffix} cannot be assigned to because it is not a variable");
             return;
         }
 
-        setters.TryGetValue(member, out var setter);
+        setters.TryGetValue(member, out Action<object, object> setter);
 
         if (setter == null)
             setter = setters[member] = CreateSetMethod(member);
 
         setter(currentObject, value);
     }
+
     public static object Get(object obj, string path)
     {
-        if (obj == null || String.IsNullOrEmpty(path))
+        if (obj == null || string.IsNullOrEmpty(path))
             throw new ArgumentNullException();
 
         Type type = obj.GetType();
@@ -79,7 +82,7 @@ public static class DynamicProperty
         string assemblyName = type.AssemblyQualifiedName;
         string pathSuffix = '.' + path.Replace('/', '.').Trim('.');
 
-        Queue<string> pathParts = new Queue<string>(path.Split('/').Where(x => !String.IsNullOrWhiteSpace(x)));
+        Queue<string> pathParts = new Queue<string>(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
 
         object currentObject = ValueTypeHolder.Wrap(obj);
         Type currentType = type;
@@ -91,7 +94,7 @@ public static class DynamicProperty
         {
             part = pathParts.Dequeue();
 
-            member = ((MemberInfo)currentType.GetField(part) ?? (MemberInfo)currentType.GetProperty(part));
+            member = (MemberInfo)currentType.GetField(part) ?? currentType.GetProperty(part);
 
             if (member == null)
             {
@@ -99,7 +102,7 @@ public static class DynamicProperty
                 return null;
             }
 
-            getters.TryGetValue(member, out var getter);
+            getters.TryGetValue(member, out Func<object, object> getter);
 
             if (getter == null)
                 getter = getters[member] = CreateGetMethod(member);
@@ -111,16 +114,18 @@ public static class DynamicProperty
 
             currentObject = ValueTypeHolder.Wrap(currentObject);
 
-            currentType = ((member as FieldInfo)?.FieldType ?? (member as PropertyInfo)?.PropertyType);
+            currentType = (member as FieldInfo)?.FieldType ?? (member as PropertyInfo)?.PropertyType;
         }
 
         return null;
     }
+
     private static Func<object, object> CreateGetMethod(MemberInfo memberInfo)
     {
 #if ENABLE_MONO
         string methodName = memberInfo.ReflectedType.FullName + ".get_" + memberInfo.Name;
-        DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(object), new Type[1] { typeof(object) }, true);
+        DynamicMethod getterMethod =
+            new DynamicMethod(methodName, typeof(object), new Type[1] { typeof(object) }, true);
         ILGenerator gen = getterMethod.GetILGenerator();
 
         Type targetType = memberInfo.DeclaringType;
@@ -191,15 +196,17 @@ public static class DynamicProperty
         }
 #endif
     }
+
     private static Action<object, object> CreateSetMethod(MemberInfo memberInfo)
     {
 #if ENABLE_MONO
         string methodName = memberInfo.ReflectedType.FullName + ".set_" + memberInfo.Name;
-        DynamicMethod setterMethod = new DynamicMethod(methodName, null, new Type[2] { typeof(object), typeof(object) }, true);
+        DynamicMethod setterMethod =
+            new DynamicMethod(methodName, null, new Type[2] { typeof(object), typeof(object) }, true);
         ILGenerator gen = setterMethod.GetILGenerator();
 
         Type targetType = memberInfo.DeclaringType;
-        Type memberType = ((memberInfo as FieldInfo)?.FieldType ?? (memberInfo as PropertyInfo)?.PropertyType);
+        Type memberType = (memberInfo as FieldInfo)?.FieldType ?? (memberInfo as PropertyInfo)?.PropertyType;
         bool shouldHandleInnerStruct = targetType.IsValueType;
 
         gen.Emit(OpCodes.Ldarg_0);
@@ -268,18 +275,25 @@ public static class DynamicProperty
         }
 #endif
     }
+
     public class ValueTypeHolder
     {
-        public static readonly MethodInfo GetMethod = typeof(ValueTypeHolder).GetMethod("get_Value", BindingFlags.Public | BindingFlags.Instance);
-        public static readonly MethodInfo SetMethod = typeof(ValueTypeHolder).GetMethod("set_Value", BindingFlags.Public | BindingFlags.Instance);
-        public static object Wrap(object obj)
-        {
-            return obj.GetType().IsValueType ? new ValueTypeHolder(obj) : obj;
-        }
+        public static readonly MethodInfo GetMethod =
+            typeof(ValueTypeHolder).GetMethod("get_Value", BindingFlags.Public | BindingFlags.Instance);
+
+        public static readonly MethodInfo SetMethod =
+            typeof(ValueTypeHolder).GetMethod("set_Value", BindingFlags.Public | BindingFlags.Instance);
+
         public ValueTypeHolder(object value)
         {
             Value = (ValueType)value;
         }
+
         public ValueType Value { get; set; }
+
+        public static object Wrap(object obj)
+        {
+            return obj.GetType().IsValueType ? new ValueTypeHolder(obj) : obj;
+        }
     }
 }

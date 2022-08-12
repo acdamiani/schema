@@ -1,5 +1,4 @@
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
@@ -9,7 +8,9 @@ namespace Schema.Builtin.Nodes
     [Description("Unparent all children of a Transform")]
     public class DetachChildren : Action
     {
-        [Tooltip("Transform to detach from children")] public ComponentSelector<Transform> transform;
+        [Tooltip("Transform to detach from children")]
+        public ComponentSelector<Transform> transform;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t = agent.GetComponent(transform);

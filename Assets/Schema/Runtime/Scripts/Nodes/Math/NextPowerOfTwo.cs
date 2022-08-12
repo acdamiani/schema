@@ -9,7 +9,10 @@ namespace Schema.Builtin.Nodes
     public class NextPowerOfTwo : Action
     {
         [Tooltip("Input integer")] public BlackboardEntrySelector<int> value;
-        [Tooltip("Next power of two"), WriteOnly] public BlackboardEntrySelector<int> result;
+
+        [Tooltip("Next power of two")] [WriteOnly]
+        public BlackboardEntrySelector<int> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             result.value = Mathf.NextPowerOfTwo(value.value);

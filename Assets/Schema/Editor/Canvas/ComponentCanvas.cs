@@ -1,31 +1,28 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Schema;
+using Schema.Internal;
+using Schema.Utilities;
 using SchemaEditor.Internal.ComponentSystem;
 using SchemaEditor.Internal.ComponentSystem.Components;
-using Schema.Utilities;
-using UnityEngine;
 using UnityEditor;
-using System.Linq;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SchemaEditor.Internal
 {
     public class ComponentCanvas
     {
-        public GUIComponent[] components { get { return _components; } }
-        private GUIComponent[] _components = Array.Empty<GUIComponent>();
-        public GUIComponent[] selected { get { return _selected; } }
-        private GUIComponent[] _selected = Array.Empty<GUIComponent>();
-        public SelectionBoxComponent selectionBoxComponent { get; }
-        public DebugViewComponent debugViewComponent { get; }
-        public MinimapComponent minimapComponent { get; }
-        public ICanvasContextProvider context { get; }
-        public PannerZoomer zoomer { get; }
-        public Vector2 mousePositionNoZoom { get { return _mousePositionNoZoom; } }
-        private Vector2 _mousePositionNoZoom;
-        private Action<Rect, float, Vector2> _doGrid;
-        public MouseCursor cursor { get; set; }
         public delegate void OnComponentListModifiedHandler();
-        public event OnComponentListModifiedHandler onComponentListModified;
+
+        private readonly Action<Rect, float, Vector2> _doGrid;
+
+        private GUIComponent[] _components = Array.Empty<GUIComponent>();
+        private GUIComponent _hovered;
+        private GUIComponent[] _selected = Array.Empty<GUIComponent>();
+        private Vector2 lastMouse;
+
         public ComponentCanvas(
             ICanvasContextProvider context,
             SelectionBoxComponent.SelectionBoxComponentCreateArgs selectionBoxComponentCreateArgs,
@@ -38,7 +35,7 @@ namespace SchemaEditor.Internal
             selectionBoxComponent = Create<SelectionBoxComponent>(selectionBoxComponentCreateArgs);
             selectionBoxComponent.hidden = true;
 
-            CreateArgs empty = new CreateArgs();
+            CreateArgs empty = new();
             empty.layer = 50;
 
             debugViewComponent = Create<DebugViewComponent>(empty);
@@ -46,35 +43,67 @@ namespace SchemaEditor.Internal
             minimapComponentCreateArgs.layer = 100;
             minimapComponent = Create<MinimapComponent>(minimapComponentCreateArgs);
 
-            BlockerComponent.BlockerComponentCreateArgs blockerComponentCreateArgs = new BlockerComponent.BlockerComponentCreateArgs();
-            blockerComponentCreateArgs.rect = () => new Rect(0f, 0f, context.GetViewRect().width, context.GetToolbarHeight());
+            BlockerComponent.BlockerComponentCreateArgs blockerComponentCreateArgs = new();
+            blockerComponentCreateArgs.rect =
+                () => new Rect(0f, 0f, context.GetViewRect().width, context.GetToolbarHeight());
             Create<BlockerComponent>(blockerComponentCreateArgs);
 
             this.zoomer = zoomer;
             this.context = context;
-            this._doGrid = doGrid;
+            _doGrid = doGrid;
         }
+
+        public GUIComponent[] components => _components;
+        public GUIComponent[] selected => _selected;
+        public SelectionBoxComponent selectionBoxComponent { get; }
+        public DebugViewComponent debugViewComponent { get; }
+        public MinimapComponent minimapComponent { get; }
+        public ICanvasContextProvider context { get; }
+        public PannerZoomer zoomer { get; }
+        public Vector2 mousePositionNoZoom { get; private set; }
+
+        public MouseCursor cursor { get; set; }
+
+        public GUIComponent hovered
+        {
+            get
+            {
+                if (mousePositionNoZoom != lastMouse)
+                {
+                    lastMouse = mousePositionNoZoom;
+                    _hovered = GetHovered(lastMouse);
+                }
+
+                return _hovered;
+            }
+        }
+
+        public event OnComponentListModifiedHandler onComponentListModified;
+
         public T Create<T>(CreateArgs args) where T : GUIComponent, new()
         {
-            T component = new T();
+            T component = new();
             ArrayUtility.Add(ref _components, component);
-            ((GUIComponent)component).canvas = this;
+            component.canvas = this;
             component.Create(args);
             component.layer = args.layer;
 
             return component;
         }
-        public GUIComponent FindComponent(Schema.Internal.GraphObject graphObject)
+
+        public GUIComponent FindComponent(GraphObject graphObject)
         {
             return (GUIComponent)_components
                 .Where(c => c is IGraphObjectProvider)
                 .Cast<IGraphObjectProvider>()
                 .FirstOrDefault(c => c.Equals(graphObject));
         }
+
         public void Remove(GUIComponent component)
         {
             ArrayUtility.Remove(ref _components, component);
         }
+
         public void MoveToFront(GUIComponent component)
         {
             int i = Array.IndexOf(components, component);
@@ -84,6 +113,7 @@ namespace SchemaEditor.Internal
 
             components.MoveItemAtIndexToFront(i);
         }
+
         private GUIComponent GetHovered(Vector2 mousePosition)
         {
             foreach (GUIComponent component in components.AsEnumerable().Reverse())
@@ -96,7 +126,8 @@ namespace SchemaEditor.Internal
 
             return null;
         }
-        public GUIComponent Resolve(UnityEngine.Object obj)
+
+        public GUIComponent Resolve(Object obj)
         {
             foreach (GUIComponent component in components)
             {
@@ -108,6 +139,7 @@ namespace SchemaEditor.Internal
 
             return null;
         }
+
         public void Reset()
         {
             ArrayUtility.Clear(ref _components);
@@ -115,6 +147,7 @@ namespace SchemaEditor.Internal
 
             selectionBoxComponent.hidden = true;
         }
+
         public void Draw()
         {
             if (
@@ -123,11 +156,11 @@ namespace SchemaEditor.Internal
             )
                 return;
 
-            // EditorGUIUtility.AddCursorRect(context.GetRect(), cursor);
+            EditorGUIUtility.AddCursorRect(context.GetRect(), cursor);
 
             _doGrid(context.GetViewRect(), zoomer.zoom, zoomer.pan);
 
-            _mousePositionNoZoom = Event.current.mousePosition;
+            mousePositionNoZoom = Event.current.mousePosition;
 
             GUIComponent[] c = (GUIComponent[])components.Clone();
 
@@ -148,34 +181,16 @@ namespace SchemaEditor.Internal
             zoomer.Begin();
 
             for (int i = viewComponents.Length - 1; i >= 0; i--)
-            {
                 if (!IsInSink(Event.current) || viewComponents[i] is ICanvasMouseEventSink)
                     viewComponents[i].OnGUI();
-            }
 
             zoomer.End();
 
             for (int i = c.Length - 1; i >= 0; i--)
-            {
                 if (!IsInSink(Event.current) || c[i] is ICanvasMouseEventSink)
                     c[i].OnGUI();
-            }
         }
-        private Vector2 lastMouse;
-        public GUIComponent hovered
-        {
-            get
-            {
-                if (_mousePositionNoZoom != lastMouse)
-                {
-                    lastMouse = _mousePositionNoZoom;
-                    _hovered = GetHovered(lastMouse);
-                }
 
-                return _hovered;
-            }
-        }
-        private GUIComponent _hovered;
         public void DeselectAll()
         {
             foreach (GUIComponent component in selected)
@@ -183,6 +198,7 @@ namespace SchemaEditor.Internal
 
             ArrayUtility.Clear(ref _selected);
         }
+
         private void DoEvents(IEnumerable<GUIComponent> layeredComponents)
         {
             if (IsInSink(Event.current))
@@ -204,6 +220,7 @@ namespace SchemaEditor.Internal
                     break;
             }
         }
+
         private void OnKeyDown(Event keyEvent)
         {
             switch (keyEvent.keyCode)
@@ -213,6 +230,7 @@ namespace SchemaEditor.Internal
                     break;
             }
         }
+
         private bool IsInSink(Event mouseEvent)
         {
             if (!mouseEvent.isMouse && !mouseEvent.isKey && !mouseEvent.isScrollWheel)
@@ -223,6 +241,7 @@ namespace SchemaEditor.Internal
                 .Cast<ICanvasMouseEventSink>()
                 .Any(c => c.GetRect().Contains(mouseEvent.mousePosition));
         }
+
         private void OnMouseDown(Event mouseEvent, IEnumerable<GUIComponent> layeredComponents)
         {
             switch (mouseEvent.button)
@@ -234,13 +253,15 @@ namespace SchemaEditor.Internal
                     {
                         ISelectable selectableComponent = component as ISelectable;
 
-                        Vector2 mouse = component is IViewElement ? mouseEvent.mousePosition * zoomer.zoom : mouseEvent.mousePosition;
+                        Vector2 mouse = component is IViewElement
+                            ? mouseEvent.mousePosition * zoomer.zoom
+                            : mouseEvent.mousePosition;
 
                         if (
                             selectableComponent == null
-                                || !selectableComponent.IsSelectable()
-                                || !selectableComponent.IsHit(mouse)
-                            )
+                            || !selectableComponent.IsSelectable()
+                            || !selectableComponent.IsHit(mouse)
+                        )
                             continue;
 
                         MoveToFront(component);
@@ -273,11 +294,13 @@ namespace SchemaEditor.Internal
                     break;
             }
         }
+
         private void OnMouseDrag(Event mouseEvent)
         {
             if (!selectionBoxComponent.hidden)
                 DoBoxOverlap(selectionBoxComponent.selectionRect, mouseEvent);
         }
+
         private void OnMouseScroll(Event mouseEvent)
         {
             zoomer.zoom += mouseEvent.delta.y * 0.035f;
@@ -285,6 +308,7 @@ namespace SchemaEditor.Internal
             if (!selectionBoxComponent.hidden)
                 return;
         }
+
         public void DoBoxOverlap(Rect boxRect, Event current)
         {
             for (int i = components.Length - 1; i >= 0; i--)
@@ -292,7 +316,9 @@ namespace SchemaEditor.Internal
                 GUIComponent component = components[i];
                 ISelectable selectableComponent = component as ISelectable;
 
-                Rect rect = component is IViewElement ? new Rect(boxRect.position * zoomer.zoom, boxRect.size * zoomer.zoom) : boxRect;
+                Rect rect = component is IViewElement
+                    ? new Rect(boxRect.position * zoomer.zoom, boxRect.size * zoomer.zoom)
+                    : boxRect;
 
                 rect = rect.Normalize();
 
@@ -300,9 +326,9 @@ namespace SchemaEditor.Internal
 
                 if (
                     selectableComponent == null
-                        || !selectableComponent.IsSelectable()
-                        || !selectableComponent.Overlaps(rect)
-                    )
+                    || !selectableComponent.IsSelectable()
+                    || !selectableComponent.Overlaps(rect)
+                )
                 {
                     if (componentIsSelected)
                     {
@@ -321,6 +347,7 @@ namespace SchemaEditor.Internal
                 }
             }
         }
+
         private void DeleteSelected()
         {
             foreach (GUIComponent component in components.Where(x => x is IDeletable))
@@ -338,6 +365,7 @@ namespace SchemaEditor.Internal
                 }
             }
         }
+
         private void DoCopy()
         {
             IEnumerable<NodeComponent> selectedNodes = selected
@@ -349,12 +377,40 @@ namespace SchemaEditor.Internal
 
             Copy.DoCopy(this, selectedNodes);
         }
+
         private GenericMenu BuildContextMenu()
         {
-            GenericMenu menu = new GenericMenu();
+            GenericMenu menu = new();
+
+            menu.AddItem("Copy", false, DoCopy, false);
+            menu.AddItem("Paste", false, () => { }, true);
+
+            menu.AddSeparator("");
 
             menu.AddItem("Delete", false, DeleteSelected, false);
-            menu.AddItem("Copy", false, DoCopy, false);
+            menu.AddItem("Duplicate", false, () => { }, false);
+
+            menu.AddSeparator("");
+
+            foreach (Type t in HelperMethods.GetEnumerableOfType(typeof(Node)))
+            {
+                string category = GraphObject.GetCategory(t);
+
+                if (string.IsNullOrEmpty(category))
+                    menu.AddItem($"Add Node/{t.GetFriendlyTypeName()}", false, () => { }, false);
+                else
+                    menu.AddItem($"Add Node/{category}/{t.GetFriendlyTypeName()}", false, () => { }, false);
+            }
+
+            foreach (Type t in HelperMethods.GetEnumerableOfType(typeof(Conditional)))
+            {
+                string category = GraphObject.GetCategory(t);
+
+                if (string.IsNullOrEmpty(category))
+                    menu.AddItem($"Add Conditional/{t.GetFriendlyTypeName()}", false, () => { }, false);
+                else
+                    menu.AddItem($"Add Conditional/{category}/{t.GetFriendlyTypeName()}", false, () => { }, false);
+            }
 
             return menu;
         }

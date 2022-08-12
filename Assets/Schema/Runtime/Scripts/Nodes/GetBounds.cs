@@ -1,5 +1,5 @@
-using UnityEngine;
 using Schema;
+using UnityEngine;
 
 [DarkIcon("c_MeshFilter")]
 [LightIcon("c_MeshFilter")]
@@ -7,10 +7,13 @@ public class GetBounds : Action
 {
     [Tooltip("When toggled, will get the bounds of the current SchemaAgent")]
     public bool useSelf;
+
     [Tooltip("The GameObject to get the bounds from")]
     public BlackboardEntrySelector<GameObject> gameObject;
+
     [Tooltip("Blackboard key to store the boudns of the object in")]
     public BlackboardEntrySelector<Vector3> boundsKey;
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         GameObject obj = useSelf ? agent.gameObject : gameObject.value;

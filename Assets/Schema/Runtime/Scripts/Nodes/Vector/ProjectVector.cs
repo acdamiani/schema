@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
@@ -11,20 +8,14 @@ namespace Schema.Builtin.Nodes
     [Description("Projects a vector onto another vector")]
     public class ProjectVector : Action
     {
-        [Tooltip("Vector A")]
-        public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
-        [Tooltip("Vector B")]
-        public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
-        [Tooltip("Blackboard variable to store the new projected vector in"), WriteOnly]
-        public BlackboardEntrySelector projected = new BlackboardEntrySelector();
-        protected override void OnObjectEnable()
-        {
-            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
-            vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new();
 
-            ;
-        }
-        void OnValidate()
+        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new();
+
+        [Tooltip("Blackboard variable to store the new projected vector in")] [WriteOnly]
+        public BlackboardEntrySelector projected = new();
+
+        private void OnValidate()
         {
             int l = 0;
 
@@ -67,6 +58,15 @@ namespace Schema.Builtin.Nodes
                     break;
             }
         }
+
+        protected override void OnObjectEnable()
+        {
+            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+            vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+
+            ;
+        }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             projected.value = Vector4.Project((Vector4)vectorOne.value, (Vector4)vectorTwo.value);

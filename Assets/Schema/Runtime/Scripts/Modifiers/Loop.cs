@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Schema.Builtin.Modifiers
@@ -8,15 +7,14 @@ namespace Schema.Builtin.Modifiers
     [DarkIcon("Modifiers/Loop")]
     public class Loop : Modifier
     {
-        class LoopMemory
+        public enum ForcedStatus
         {
-            public int count;
+            Success,
+            Failure
         }
-        public int loopCount;
-        void OnValidate()
-        {
-            loopCount = Mathf.Clamp(loopCount, 1, Int32.MaxValue);
-        }
+
+        [Min(1)] public int loopCount;
+
         public override Message Modify(object modifierMemory, SchemaAgent agent, NodeStatus status)
         {
             LoopMemory memory = (LoopMemory)modifierMemory;
@@ -30,10 +28,10 @@ namespace Schema.Builtin.Modifiers
             memory.count = 0;
             return Message.None;
         }
-        public enum ForcedStatus
+
+        private class LoopMemory
         {
-            Success,
-            Failure
+            public int count;
         }
     }
 }

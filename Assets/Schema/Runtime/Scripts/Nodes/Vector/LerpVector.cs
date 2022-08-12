@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
@@ -11,24 +8,19 @@ namespace Schema.Builtin.Nodes
     [Description("Linearly interpolate between two Vectors")]
     public class LerpVector : Action
     {
-        [Tooltip("Vector A")]
-        public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
-        [Tooltip("Vector B")]
-        public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
-        [Tooltip("Amount to interpolate by")]
-        public BlackboardEntrySelector<float> t = new BlackboardEntrySelector<float>();
+        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new();
+
+        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new();
+
+        [Tooltip("Amount to interpolate by")] public BlackboardEntrySelector<float> t = new();
+
         [Tooltip("Whether to clamp the t value")]
         public bool unclamped;
-        [Tooltip("Blackboard variable to store the lerped vector in."), WriteOnly]
-        public BlackboardEntrySelector lerped = new BlackboardEntrySelector();
-        protected override void OnObjectEnable()
-        {
-            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
-            vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
 
-            ;
-        }
-        void OnValidate()
+        [Tooltip("Blackboard variable to store the lerped vector in.")] [WriteOnly]
+        public BlackboardEntrySelector lerped = new();
+
+        private void OnValidate()
         {
             int l = 0;
 
@@ -74,6 +66,15 @@ namespace Schema.Builtin.Nodes
             if (!unclamped)
                 t.inspectorValue = Mathf.Clamp01(t.inspectorValue);
         }
+
+        protected override void OnObjectEnable()
+        {
+            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+            vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+
+            ;
+        }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             if (unclamped)

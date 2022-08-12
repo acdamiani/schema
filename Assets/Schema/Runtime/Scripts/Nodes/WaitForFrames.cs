@@ -6,15 +6,14 @@ using UnityEngine;
 [Description("Waits a given number of frames, then resumes execution of the Behavior Tree")]
 public class WaitForFrames : Action
 {
-    [Tooltip("The number of frames to wait for")] public BlackboardEntrySelector<int> count = new BlackboardEntrySelector<int>(1);
-    class WaitForFramesMemory
+    [Tooltip("The number of frames to wait for")]
+    public BlackboardEntrySelector<int> count = new(1);
+
+    private void OnValidate()
     {
-        public int count;
+        count.inspectorValue = Mathf.Clamp(count.inspectorValue, 1, int.MaxValue);
     }
-    void OnValidate()
-    {
-        count.inspectorValue = Mathf.Clamp(count.inspectorValue, 1, System.Int32.MaxValue);
-    }
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         WaitForFramesMemory memory = (WaitForFramesMemory)nodeMemory;
@@ -28,5 +27,10 @@ public class WaitForFrames : Action
         memory.count++;
 
         return NodeStatus.Running;
+    }
+
+    private class WaitForFramesMemory
+    {
+        public int count;
     }
 }

@@ -1,29 +1,26 @@
-using UnityEngine;
-using UnityEditor;
-using Schema.Utilities;
 using System;
-using System.Reflection;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using Schema;
 using Schema.Internal;
+using Schema.Utilities;
+using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor
 {
     [CustomPropertyDrawer(typeof(BlackboardEntrySelector), true)]
     public class BlackboardEntrySelectorDrawer : PropertyDrawer
     {
-        private static Dictionary<string, SelectorPropertyInfo> info = new Dictionary<string, SelectorPropertyInfo>();
-        private delegate void GUIDelayCall(SerializedProperty property);
+        private static readonly Dictionary<string, SelectorPropertyInfo> info = new();
+        private static readonly Type[] valid = { typeof(Node), typeof(Conditional) };
+        private static readonly Dictionary<Type, Type> typeMappings = new();
+        private static readonly Dictionary<Type, Tuple<string[], Type[]>> excluded = new();
+        private static int i;
         private static event GUIDelayCall guiDelayCall;
-        private static readonly Type[] valid = new Type[] { typeof(Schema.Node), typeof(Schema.Conditional) };
-        private static Dictionary<Type, Type> typeMappings = new Dictionary<Type, Type>();
-        private static Dictionary<Type, Tuple<string[], Type[]>> excluded = new Dictionary<Type, Tuple<string[], Type[]>>();
-        private class SelectorPropertyInfo
-        {
-            public bool writeOnly;
-            public float scroll;
-        }
+
         public static void DoSelectorMenu(Rect position, SerializedProperty property, FieldInfo fieldInfo)
         {
             if (GUI.Button(position, Styles.menu, EditorStyles.miniButtonRight))
@@ -33,18 +30,25 @@ namespace SchemaEditor
                 menu.DropDown(position);
             }
         }
-        public static string DoSelectorDrawer(Rect position, SerializedProperty property, GUIContent label, Type fieldType, FieldInfo fieldInfo)
+
+        public static string DoSelectorDrawer(Rect position, SerializedProperty property, GUIContent label,
+            Type fieldType, FieldInfo fieldInfo)
         {
             Type parentType = property.serializedObject.targetObject.GetType();
 
             if (!valid.Any(t => t.IsAssignableFrom(parentType)))
             {
-                GUI.Label(position, new GUIContent("Cannot use a BlackboardEntrySelector in a non tree type", Styles.warnIcon), EditorStyles.miniLabel);
+                GUI.Label(position,
+                    new GUIContent("Cannot use a BlackboardEntrySelector in a non tree type",
+                        Icons.GetEditor("console.warnicon")), EditorStyles.miniLabel);
                 return "";
             }
-            else if (Blackboard.instance == null)
+
+            if (Blackboard.instance == null)
             {
-                GUI.Label(position, new GUIContent("Cannot use a BlackboardEntrySelector outside a tree", Styles.warnIcon), EditorStyles.miniLabel);
+                GUI.Label(position,
+                    new GUIContent("Cannot use a BlackboardEntrySelector outside a tree",
+                        Icons.GetEditor("console.warnicon")), EditorStyles.miniLabel);
                 return "";
             }
 
@@ -66,9 +70,11 @@ namespace SchemaEditor
 
             Vector2 size = EditorStyles.miniButtonRight.CalcSize(new GUIContent(Styles.menu));
 
-            Rect enumRect = new Rect(position.x, position.y, position.width - size.x, Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
+            Rect enumRect = new Rect(position.x, position.y, position.width - size.x,
+                Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
             Rect textRect = new Rect(position.x, position.y + enumRect.height, position.width, enumRect.height);
-            Rect buttonRect = new Rect(position.xMax - size.x, position.y, size.x, Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
+            Rect buttonRect = new Rect(position.xMax - size.x, position.y, size.x,
+                Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
 
             Vector2 oldIconSize = EditorGUIUtility.GetIconSize();
             EditorGUIUtility.SetIconSize(new Vector2(12, 12));
@@ -108,7 +114,8 @@ namespace SchemaEditor
                     r = new Rect(r.x, textRect.y, r.width + size.x, r.height);
                     r.y += 3f;
 
-                    GUIContent content = new GUIContent($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
+                    GUIContent content =
+                        new GUIContent($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
                     size = EditorStyles.miniLabel.CalcSize(content);
 
                     GUI.BeginClip(r, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
@@ -119,9 +126,11 @@ namespace SchemaEditor
 
                     GUI.Box(r, GUIContent.none, EditorStyles.helpBox);
 
-                    if (size.x > r.width && r.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
+                    if (size.x > r.width && r.Contains(Event.current.mousePosition) &&
+                        Event.current.type == EventType.ScrollWheel)
                     {
-                        info[property.propertyPath].scroll = Mathf.Clamp(info[property.propertyPath].scroll - Event.current.delta.y * 10, -(size.x - r.width), 0f);
+                        info[property.propertyPath].scroll = Mathf.Clamp(
+                            info[property.propertyPath].scroll - Event.current.delta.y * 10, -(size.x - r.width), 0f);
                         // Prevent scroll
                         Event.current.delta = Vector2.zero;
                     }
@@ -140,7 +149,9 @@ namespace SchemaEditor
 
                 string path = valuePathProp.stringValue;
 
-                GUIContent buttonValue = new GUIContent(entryValue == null ? "None" : entryValue.name + valuePathProp.stringValue.Replace('/', '.').TrimEnd('.'));
+                GUIContent buttonValue = new GUIContent(entryValue == null
+                    ? "None"
+                    : entryValue.name + valuePathProp.stringValue.Replace('/', '.').TrimEnd('.'));
 
                 if (EditorGUI.DropdownButton(controlRect, buttonValue, FocusType.Passive))
                 {
@@ -158,22 +169,25 @@ namespace SchemaEditor
 
             EditorGUIUtility.wideMode = lastWideMode;
 
-            string entryName = entry.objectReferenceValue?.name + valuePathProp.stringValue.TrimEnd('/').Replace('/', '.');
+            string entryName = entry.objectReferenceValue?.name +
+                               valuePathProp.stringValue.TrimEnd('/').Replace('/', '.');
 
-            if (!String.IsNullOrEmpty(entryName))
+            if (!string.IsNullOrEmpty(entryName))
                 return entryName;
 
             if (isDynamicProperty.boolValue)
                 return "dynamic";
-            else if (value != null)
+            if (value != null)
                 return "asset";
 
             return "";
         }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             DoSelectorDrawer(position, property, label, null, fieldInfo);
         }
+
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             SerializedProperty valueProp = property.FindPropertyRelative("m_inspectorValue");
@@ -192,7 +206,8 @@ namespace SchemaEditor
             }
 
             if (valueProp != null && !info[property.propertyPath].writeOnly)
-                height = EditorGUI.GetPropertyHeight(valueProp, label, true) + (entry.objectReferenceValue != null ? EditorGUIUtility.singleLineHeight + 4 : 0);
+                height = EditorGUI.GetPropertyHeight(valueProp, label, true) +
+                         (entry.objectReferenceValue != null ? EditorGUIUtility.singleLineHeight + 4 : 0);
             else
                 height = base.GetPropertyHeight(property, label);
 
@@ -200,6 +215,7 @@ namespace SchemaEditor
 
             return height;
         }
+
         private static string GetID(string s)
         {
             byte[] bytes = Convert.FromBase64String(s);
@@ -208,7 +224,7 @@ namespace SchemaEditor
             for (int i = 0; i < 32; i++)
                 idBytes[i] = bytes[i];
 
-            return System.Text.Encoding.ASCII.GetString(idBytes);
+            return Encoding.ASCII.GetString(idBytes);
         }
 
         private static GenericMenu GenerateMenu(SerializedProperty property, FieldInfo fieldInfo)
@@ -230,12 +246,14 @@ namespace SchemaEditor
 
             int mask = Blackboard.instance.GetTypeMask(filtersList);
 
-            List<Type> filtered = HelperMethods.FilterArrayByMask(Blackboard.mappedBlackboardTypes.Reverse().ToArray(), mask)
+            List<Type> filtered = HelperMethods
+                .FilterArrayByMask(Blackboard.mappedBlackboardTypes.Reverse().ToArray(), mask)
                 .ToList();
 
             filtered.ForEach(Debug.Log);
 
-            menu.AddItem("<None>", entry.objectReferenceValue == null && !isDynamicPropertyValue, () => GenericMenuSelectOption(property, null), false);
+            menu.AddItem("<None>", entry.objectReferenceValue == null && !isDynamicPropertyValue,
+                () => GenericMenuSelectOption(property, null), false);
             menu.AddSeparator("");
             menu.AddItem("<Dynamic>", isDynamicPropertyValue, () => ToggleDynamic(property), false);
 
@@ -252,7 +270,6 @@ namespace SchemaEditor
 
                 if (disableDynamicBinding)
                 {
-
                     if (!filtered.Any(t => value.IsAssignableFrom(t)))
                         continue;
 
@@ -271,7 +288,7 @@ namespace SchemaEditor
                     menu.AddItem(
                         $"{bEntry.name}{(showType ? typeSuffix : "")}",
                         entry.objectReferenceValue == bEntry,
-                        () => GenericMenuSelectOption(property, bEntry, ""),
+                        () => GenericMenuSelectOption(property, bEntry),
                         false
                     );
                 }
@@ -280,37 +297,37 @@ namespace SchemaEditor
                     excluded.TryGetValue(bEntry.type, out Tuple<string[], Type[]> e);
 
                     if (e == null)
-                        e = excluded[bEntry.type] = new Tuple<string[], Type[]>(EntryType.GetExcludedPaths(bEntry.type), EntryType.GetExcludedTypes(bEntry.type));
+                        e = excluded[bEntry.type] = new Tuple<string[], Type[]>(EntryType.GetExcludedPaths(bEntry.type),
+                            EntryType.GetExcludedTypes(bEntry.type));
 
                     tmp.TryGetValue(bEntry.type, out IEnumerable<string> enumerated);
 
                     if (enumerated == null)
-                    {
                         enumerated = tmp[bEntry.type] = EnumerateProperties(
                             value,
                             filtered,
                             e.Item1,
                             e.Item2,
-                            needsSetter: info.ContainsKey(property.propertyPath) && info[property.propertyPath].writeOnly,
+                            needsSetter: info.ContainsKey(property.propertyPath) &&
+                                         info[property.propertyPath].writeOnly,
                             showType: filtered.Count > 1
                         );
-                    }
 
                     foreach (string ss in enumerated)
-                    {
                         menu.AddItem(
                             bEntry.name + ss,
                             valuePathProp.stringValue.Equals(ss) && entry.objectReferenceValue == bEntry,
                             () => GenericMenuSelectOption(property, bEntry, ss),
                             false
                         );
-                    }
                 }
             }
 
             return menu;
         }
-        private static void GenericMenuSelectOption(SerializedProperty property, BlackboardEntry entry, string path = "")
+
+        private static void GenericMenuSelectOption(SerializedProperty property, BlackboardEntry entry,
+            string path = "")
         {
             SerializedProperty entryProp = property.FindPropertyRelative("m_entry");
             SerializedProperty valuePathProperty = property.FindPropertyRelative("m_valuePath");
@@ -324,6 +341,7 @@ namespace SchemaEditor
 
             property.serializedObject.ApplyModifiedProperties();
         }
+
         private static void ToggleDynamic(SerializedProperty property)
         {
             SerializedProperty entryProp = property.FindPropertyRelative("m_entry");
@@ -338,6 +356,7 @@ namespace SchemaEditor
 
             property.serializedObject.ApplyModifiedProperties();
         }
+
         // Reorderable list resize fix
         private static void UpdateChanged(SerializedProperty property)
         {
@@ -345,7 +364,7 @@ namespace SchemaEditor
 
             guiDelayCall -= UpdateChanged;
         }
-        static int i;
+
         private static IEnumerable<string> EnumerateProperties(
             Type type,
             IEnumerable<Type> targets,
@@ -357,7 +376,8 @@ namespace SchemaEditor
             MemberInfo declaring = null
         )
         {
-            HashSet<Type> nonRecursiveTypes = new HashSet<Type> {
+            HashSet<Type> nonRecursiveTypes = new HashSet<Type>
+            {
                 typeof(sbyte),
                 typeof(byte),
                 typeof(short),
@@ -375,7 +395,8 @@ namespace SchemaEditor
                 typeof(Enum)
             };
 
-            IEnumerable<MemberInfo> members = type.GetFields(BindingFlags.Public | BindingFlags.Instance).Cast<MemberInfo>()
+            IEnumerable<MemberInfo> members = type.GetFields(BindingFlags.Public | BindingFlags.Instance)
+                .Cast<MemberInfo>()
                 .Concat(type.GetProperties(BindingFlags.Public | BindingFlags.Instance));
 
             foreach (MemberInfo member in members)
@@ -383,7 +404,7 @@ namespace SchemaEditor
                 ObsoleteAttribute obsoleteAttribute = member.GetCustomAttribute<ObsoleteAttribute>();
 
                 Type memberType = (member as FieldInfo)?.FieldType ?? (member as PropertyInfo)?.PropertyType;
-                bool hasSetMethod = (member is FieldInfo) ? true : (member as PropertyInfo)?.GetSetMethod(false) != null;
+                bool hasSetMethod = member is FieldInfo ? true : (member as PropertyInfo)?.GetSetMethod(false) != null;
 
                 if (
                     obsoleteAttribute != null ||
@@ -395,15 +416,20 @@ namespace SchemaEditor
                     continue;
 
                 if (targets.Any(t => t.IsAssignableFrom(memberType)) && (!needsSetter || hasSetMethod))
-                {
                     yield return $"{path}/{member.Name}{(showType ? $" ({memberType.Name})" : "")}";
-                }
                 else if (member.Name != declaring?.Name && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(memberType)))
-                {
-                    foreach (string s in EnumerateProperties(memberType, targets, excludePaths, excludeTypes, path + "/" + member.Name, needsSetter, showType, member))
+                    foreach (string s in EnumerateProperties(memberType, targets, excludePaths, excludeTypes,
+                                 path + "/" + member.Name, needsSetter, showType, member))
                         yield return s;
-                }
             }
+        }
+
+        private delegate void GUIDelayCall(SerializedProperty property);
+
+        private class SelectorPropertyInfo
+        {
+            public float scroll;
+            public bool writeOnly;
         }
     }
 }

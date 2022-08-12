@@ -1,17 +1,19 @@
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(MoveToRandom)), CanEditMultipleObjects]
+    [CustomEditor(typeof(MoveToRandom))]
+    [CanEditMultipleObjects]
     public class MoveToRandomEditor : Editor
     {
-        SerializedProperty x;
-        SerializedProperty y;
-        SerializedProperty z;
-        SerializedProperty speed;
-        SerializedProperty isRelative;
-        void OnEnable()
+        private SerializedProperty isRelative;
+        private SerializedProperty speed;
+        private SerializedProperty x;
+        private SerializedProperty y;
+        private SerializedProperty z;
+
+        private void OnEnable()
         {
             x = serializedObject.FindProperty("x");
             y = serializedObject.FindProperty("y");
@@ -19,6 +21,7 @@ namespace SchemaEditor.Editors.Nodes
             speed = serializedObject.FindProperty("speed");
             isRelative = serializedObject.FindProperty("isRelative");
         }
+
         public override void OnInspectorGUI()
         {
             Undo.RecordObjects(targets, "Inspector");
@@ -36,6 +39,7 @@ namespace SchemaEditor.Editors.Nodes
 
             serializedObject.ApplyModifiedProperties();
         }
+
         private void DrawMinMax(SerializedProperty property)
         {
             GUILayout.BeginHorizontal();
@@ -48,7 +52,6 @@ namespace SchemaEditor.Editors.Nodes
             property.vector2Value = new Vector2(xMin, xMax);
 
             GUILayout.EndHorizontal();
-
         }
     }
 }

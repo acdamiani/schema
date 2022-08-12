@@ -1,26 +1,29 @@
-using UnityEngine;
-using Schema.Utilities;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using Schema.Utilities;
+using UnityEngine;
 
 namespace Schema.Internal
 {
     public class ExecutableNode
     {
-        public int index { get; }
-        public int relativeIndex { get; }
-        public int parent { get; }
-        public int[] children { get; }
-        public int breadth { get; }
-        public ExecutableNodeType nodeType { get; }
-        private Node node;
-        private Dictionary<int, object> nodeMemory
-            = new Dictionary<int, object>();
-        private Dictionary<int, object[]> conditionalMemory
-            = new Dictionary<int, object[]>();
-        private Dictionary<int, object[]> modifierMemory
-            = new Dictionary<int, object[]>();
+        public enum ExecutableNodeType
+        {
+            Root,
+            Flow,
+            Action,
+            Invalid
+        }
+
+        private readonly Dictionary<int, object[]> conditionalMemory = new();
+
+        private readonly Dictionary<int, object[]> modifierMemory = new();
+
+        private readonly Node node;
+
+        private readonly Dictionary<int, object> nodeMemory = new();
+
         public ExecutableNode(Node node)
         {
             this.node = node;
@@ -44,6 +47,14 @@ namespace Schema.Internal
                 parent = -1;
             }
         }
+
+        public int index { get; }
+        public int relativeIndex { get; }
+        public int parent { get; }
+        public int[] children { get; }
+        public int breadth { get; }
+        public ExecutableNodeType nodeType { get; }
+
         public void Initialize(ExecutionContext context)
         {
             int id = context.agent.GetInstanceID();
@@ -91,6 +102,7 @@ namespace Schema.Internal
                     throw new Exception("Node is not of a valid type!");
             }
         }
+
         private void InitializeFlow(int id, SchemaAgent agent)
         {
             Flow flow = node as Flow;
@@ -106,6 +118,7 @@ namespace Schema.Internal
             for (int i = 0; i < flow.conditionals.Length; i++)
                 flow.conditionals[i].OnInitialize(conditionalMemory[id][i], agent);
         }
+
         private void InitializeAction(int id, SchemaAgent agent)
         {
             Action action = node as Action;
@@ -121,13 +134,16 @@ namespace Schema.Internal
             for (int i = 0; i < action.conditionals.Length; i++)
                 action.conditionals[i].OnInitialize(conditionalMemory[id][i], agent);
         }
+
         public int Execute(ExecutionContext context)
         {
             int id = context.agent.GetInstanceID();
 
             if (!nodeMemory.ContainsKey(id))
             {
-                Debug.LogFormat("Agent {0} does not have a memory instance. This means that the initialization method was not run for this agent.", context.agent.name);
+                Debug.LogFormat(
+                    "Agent {0} does not have a memory instance. This means that the initialization method was not run for this agent.",
+                    context.agent.name);
                 return index + 1;
             }
 
@@ -151,11 +167,13 @@ namespace Schema.Internal
 
             return i;
         }
+
         private int DoRoot(ExecutionContext context)
         {
             context.status = NodeStatus.Success;
             return index + 1;
         }
+
         private int DoFlow(int id, ExecutionContext context)
         {
             Flow flow = node as Flow;
@@ -181,10 +199,7 @@ namespace Schema.Internal
 
             int diff = context.last.index - index;
 
-            if (diff >= breadth || diff < 0)
-            {
-                flow.OnFlowEnter(nodeMemory[id], context.agent);
-            }
+            if (diff >= breadth || diff < 0) flow.OnFlowEnter(nodeMemory[id], context.agent);
 
             int caller = -1;
 
@@ -218,12 +233,30 @@ namespace Schema.Internal
 
             return child.Value;
         }
+
         private int DoAction(int id, ExecutionContext context)
         {
             Action action = node as Action;
 
             if (action == null)
                 throw new Exception("Node is not of type Action but the execution method was run anyways.");
+
+            bool run = true;
+
+            if (context.last.index != index)
+                for (int j = 0; j < action.conditionals.Length; j++)
+                {
+                    run = action.conditionals[j].Evaluate(conditionalMemory[id][j], context.agent);
+
+                    if (!run)
+                        break;
+                }
+
+            if (!run)
+            {
+                context.status = NodeStatus.Failure;
+                return parent;
+            }
 
             if (context.last.index != index)
                 action.OnNodeEnter(nodeMemory[id], context.agent);
@@ -247,9 +280,6 @@ namespace Schema.Internal
                     else if (message == Modifier.Message.ForceSuccess)
                         context.status = NodeStatus.Success;
 
-                    if (action.GetType() == typeof(Schema.Builtin.Nodes.Wait))
-                        Debug.Log(message.ToString());
-
                     bool repeat = message == Modifier.Message.Repeat;
 
                     if (repeat)
@@ -259,37 +289,27 @@ namespace Schema.Internal
                     return parent;
             }
         }
+
         private static ExecutableNodeType GetNodeType(Node node)
         {
             if (node is Root)
                 return ExecutableNodeType.Root;
-            else if (node is Flow)
+            if (node is Flow)
                 return ExecutableNodeType.Flow;
-            else if (node is Action)
+            if (node is Action)
                 return ExecutableNodeType.Action;
 
             return ExecutableNodeType.Invalid;
         }
+
         private static int GetBreadth(Node node)
         {
-            Node parent = node.parent;
+            int count = 1;
 
-            if (parent == null)
-                return node.graph.nodes.Length;
+            for (int i = 0; i < node.children.Length; i++)
+                count += GetBreadth(node.children[i]);
 
-            int i = Array.IndexOf(parent.children, node);
-
-            if (i + 1 > parent.children.Length - 1)
-                return 1;
-
-            return parent.children[i + 1].priority - node.priority;
-        }
-        public enum ExecutableNodeType
-        {
-            Root,
-            Flow,
-            Action,
-            Invalid
+            return count;
         }
     }
 }

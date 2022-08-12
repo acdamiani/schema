@@ -4,23 +4,28 @@ using UnityEngine;
 namespace Schema.Internal
 {
     /// <summary>
-    /// ScriptableObject representation for BlackboardEntry
+    ///     ScriptableObject representation for BlackboardEntry
     /// </summary>
     [Serializable]
     public class BlackboardEntry : ScriptableObject
     {
-        /// <summary>
-        /// Description of this entry
-        /// </summary>
-        public string description { get { return m_description; } }
         [SerializeField] private string m_description;
-        /// <summary>
-        /// Type string for this entry
-        /// </summary>
-        public string typeString { get { return m_typeString; } }
         [SerializeField] private string m_typeString;
+        [SerializeField] private Blackboard m_blackboard;
+        private Type _type;
+
         /// <summary>
-        /// Type of this entry
+        ///     Description of this entry
+        /// </summary>
+        public string description => m_description;
+
+        /// <summary>
+        ///     Type string for this entry
+        /// </summary>
+        public string typeString => m_typeString;
+
+        /// <summary>
+        ///     Type of this entry
         /// </summary>
         public Type type
         {
@@ -37,11 +42,14 @@ namespace Schema.Internal
                 _type = value;
             }
         }
-        private Type _type;
+
         /// <summary>
-        /// Blackboard that this entry is attached to
+        ///     Blackboard that this entry is attached to
         /// </summary>
-        public Blackboard blackboard { get { return m_blackboard; } internal set { m_blackboard = value; } }
-        [SerializeField] private Blackboard m_blackboard;
+        public Blackboard blackboard
+        {
+            get => m_blackboard;
+            internal set => m_blackboard = value;
+        }
     }
 }

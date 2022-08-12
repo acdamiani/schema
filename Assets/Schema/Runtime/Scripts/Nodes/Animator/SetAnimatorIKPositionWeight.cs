@@ -11,6 +11,7 @@ public class SetAnimatorIKPositionWeight : Action
     public AvatarIKHint hint;
     public bool isHint;
     public BlackboardEntrySelector<float> weight;
+
     public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
     {
         Animator a = agent.GetComponent(animator);

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Schema;
+﻿using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
@@ -11,17 +8,12 @@ namespace Schema.Builtin.Nodes
     [Category("Vector")]
     public class NormalizeVector : Action
     {
-        [Tooltip("Vector to normalize")]
-        public BlackboardEntrySelector vector = new BlackboardEntrySelector();
-        [Tooltip("Blackboard variable to store the normalized vector in"), WriteOnly]
-        public BlackboardEntrySelector normalized = new BlackboardEntrySelector();
-        protected override void OnObjectEnable()
-        {
-            vector.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+        [Tooltip("Vector to normalize")] public BlackboardEntrySelector vector = new();
 
-            ;
-        }
-        void OnValidate()
+        [Tooltip("Blackboard variable to store the normalized vector in")] [WriteOnly]
+        public BlackboardEntrySelector normalized = new();
+
+        private void OnValidate()
         {
             switch (vector.entryType?.Name)
             {
@@ -36,6 +28,14 @@ namespace Schema.Builtin.Nodes
                     break;
             }
         }
+
+        protected override void OnObjectEnable()
+        {
+            vector.ApplyFilters(typeof(Vector2), typeof(Vector3), typeof(Vector4));
+
+            ;
+        }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             normalized.value = Vector4.Normalize((Vector4)vector.value);

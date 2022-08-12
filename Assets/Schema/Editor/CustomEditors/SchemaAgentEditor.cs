@@ -1,6 +1,3 @@
-using UnityEngine;
-using UnityEditor;
-
 // [CustomEditor(typeof(SchemaAgent))]
 // public class SchemaAgentEditor : Editor
 // {
@@ -35,3 +32,4 @@ using UnityEditor;
 //         }
 //     }
 // }
+

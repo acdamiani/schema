@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
@@ -11,20 +8,14 @@ namespace Schema.Builtin.Nodes
     [Category("Vector")]
     public class ReflectVector : Action
     {
-        [Tooltip("Vector A")]
-        public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
-        [Tooltip("Vector B")]
-        public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
-        [Tooltip("Blackboard variable to store the new reflected vector in"), WriteOnly]
-        public BlackboardEntrySelector reflected = new BlackboardEntrySelector();
-        protected override void OnObjectEnable()
-        {
-            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3));
-            vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3));
+        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new();
 
-            ;
-        }
-        void OnValidate()
+        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new();
+
+        [Tooltip("Blackboard variable to store the new reflected vector in")] [WriteOnly]
+        public BlackboardEntrySelector reflected = new();
+
+        private void OnValidate()
         {
             int l = 0;
 
@@ -58,6 +49,15 @@ namespace Schema.Builtin.Nodes
                     break;
             }
         }
+
+        protected override void OnObjectEnable()
+        {
+            vectorOne.ApplyFilters(typeof(Vector2), typeof(Vector3));
+            vectorTwo.ApplyFilters(typeof(Vector2), typeof(Vector3));
+
+            ;
+        }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             reflected.value = Vector3.Reflect((Vector3)vectorOne.value, (Vector3)vectorTwo.value);

@@ -1,7 +1,4 @@
 using UnityEngine;
-using Schema;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Schema.Builtin.Nodes
 {
@@ -12,8 +9,13 @@ namespace Schema.Builtin.Nodes
     public class Pow : Action
     {
         [Tooltip("Float to exponentiate")] public BlackboardEntrySelector<float> value;
-        [Tooltip("Power to raise the float to")] public BlackboardEntrySelector<float> pow;
-        [Tooltip("Selector to store the exponentiated value in"), WriteOnly] public BlackboardEntrySelector<float> result;
+
+        [Tooltip("Power to raise the float to")]
+        public BlackboardEntrySelector<float> pow;
+
+        [Tooltip("Selector to store the exponentiated value in")] [WriteOnly]
+        public BlackboardEntrySelector<float> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             result.value = Mathf.Pow(value.value, pow.value);

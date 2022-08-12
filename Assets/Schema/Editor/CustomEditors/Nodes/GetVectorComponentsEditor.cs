@@ -1,20 +1,22 @@
-using UnityEngine;
-using Schema.Builtin.Nodes;
 using System.Collections.Generic;
+using Schema.Builtin.Nodes;
 using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetVectorComponents)), CanEditMultipleObjects]
+    [CustomEditor(typeof(GetVectorComponents))]
+    [CanEditMultipleObjects]
     public class GetVectorComponentsEditor : Editor
     {
-        SerializedProperty vector;
-        Dictionary<UnityEngine.Object, GetVectorComponents> vectors = new Dictionary<UnityEngine.Object, GetVectorComponents>();
-        SerializedProperty x;
-        SerializedProperty y;
-        SerializedProperty z;
-        SerializedProperty w;
-        void OnEnable()
+        private readonly Dictionary<Object, GetVectorComponents> vectors = new();
+        private SerializedProperty vector;
+        private SerializedProperty w;
+        private SerializedProperty x;
+        private SerializedProperty y;
+        private SerializedProperty z;
+
+        private void OnEnable()
         {
             x = serializedObject.FindProperty("x");
             y = serializedObject.FindProperty("y");
@@ -23,8 +25,9 @@ namespace SchemaEditor.Editors.Nodes
             vector = serializedObject.FindProperty("vector");
 
             for (int i = 0; i < targets.Length; i++)
-                vectors[targets[i]] = ((GetVectorComponents)targets[i]);
+                vectors[targets[i]] = (GetVectorComponents)targets[i];
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

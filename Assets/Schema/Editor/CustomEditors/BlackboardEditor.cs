@@ -1,28 +1,30 @@
-using UnityEngine;
-using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Schema.Utilities;
 using Schema;
 using Schema.Internal;
+using Schema.Utilities;
+using SchemaEditor.Utilities;
+using UnityEditor;
+using UnityEditor.IMGUI.Controls;
+using UnityEngine;
 
 namespace SchemaEditor.Editors
 {
     public class BlackboardEditor : Editor
     {
-        private Blackboard blackboard;
-        private Vector2 scroll;
+        private static readonly Dictionary<Type, Tuple<string, Color>> entryGUIData = new();
         public BlackboardEntry selectedEntry;
-        private bool clickedAny = false;
+        private Blackboard blackboard;
+        private bool clickedAny;
+        private BlackboardEntry editing;
+        private Editor entryEditor;
+        private bool isShowingGlobal;
         private string newEntryName = "";
+        private Vector2 scroll;
         private SearchField searchField;
         private string searchValue = "";
-        private Editor entryEditor;
-        private BlackboardEntry editing;
-        private static Dictionary<Type, Tuple<string, Color>> entryGUIData = new Dictionary<Type, Tuple<string, Color>>();
-        private bool isShowingGlobal;
+
         public void OnEnable()
         {
             if (target != null && target.GetType() == typeof(Blackboard))
@@ -30,22 +32,13 @@ namespace SchemaEditor.Editors
 
             searchField = new SearchField();
         }
-        public void DeselectAll()
-        {
-            GUI.FocusControl("");
-            editing = null;
-            selectedEntry = null;
-            DestroyImmediate(entryEditor);
-        }
+
         public override void OnInspectorGUI()
         {
-            bool newIsShowingGlobal = GUILayout.Toolbar(isShowingGlobal ? 1 : 0, new string[] { "Local", "Global" }) == 1;
+            bool newIsShowingGlobal = GUILayout.Toolbar(isShowingGlobal ? 1 : 0, new[] { "Local", "Global" }) == 1;
 
             if (isShowingGlobal != newIsShowingGlobal)
-            {
                 isShowingGlobal = newIsShowingGlobal;
-                DeselectAll();
-            }
 
             GUILayout.Space(8);
 
@@ -53,7 +46,8 @@ namespace SchemaEditor.Editors
 
             GUILayout.Space(4);
 
-            if (GUILayout.Button(Styles.plus, EditorStyles.iconButton, GUILayout.Width(16), GUILayout.ExpandHeight(true))) ShowContext();
+            if (GUILayout.Button(Icons.GetEditor("Toolbar Plus More"), EditorStyles.iconButton, GUILayout.Width(16),
+                    GUILayout.ExpandHeight(true))) ShowContext();
 
             GUILayout.Space(10);
 
@@ -62,7 +56,8 @@ namespace SchemaEditor.Editors
             GUILayout.Space(10);
 
             EditorGUI.BeginDisabledGroup(selectedEntry == null);
-            if (GUILayout.Button(Styles.minus, EditorStyles.iconButton, GUILayout.Width(16), GUILayout.Height(16))) RemoveSelected();
+            if (GUILayout.Button(Icons.GetEditor("Toolbar Minus"), EditorStyles.iconButton, GUILayout.Width(16),
+                    GUILayout.Height(16))) RemoveSelected();
             EditorGUI.EndDisabledGroup();
 
             GUILayout.Space(4);
@@ -76,11 +71,7 @@ namespace SchemaEditor.Editors
             BlackboardEntry[] globals = Blackboard.global.entries;
             BlackboardEntry[] locals = blackboard.entries;
 
-            GUILayout.BeginVertical(Styles.blackboardScroll);
-
-            GUILayout.Space(1);
-
-            scroll = GUILayout.BeginScrollView(scroll, Styles.padding8x);
+            scroll = GUILayout.BeginScrollView(scroll, Styles.blackboardEditorBackground);
 
             if ((isShowingGlobal ? globals : locals).Length > 0)
                 DrawEntryList(isShowingGlobal ? globals : locals);
@@ -99,10 +90,6 @@ namespace SchemaEditor.Editors
 
             GUILayout.EndScrollView();
 
-            GUILayout.Space(1);
-
-            GUILayout.EndVertical();
-
             GUILayout.Space(8);
 
             GUILayout.FlexibleSpace();
@@ -119,11 +106,12 @@ namespace SchemaEditor.Editors
 
             serializedObject.ApplyModifiedProperties();
         }
+
         private void DrawEntryList(IEnumerable<BlackboardEntry> entries)
         {
             IEnumerable<BlackboardEntry> searchExcept;
 
-            if (String.IsNullOrEmpty(searchValue))
+            if (string.IsNullOrEmpty(searchValue))
                 searchExcept = entries;
             else
                 searchExcept = GetResults(entries, searchValue);
@@ -136,7 +124,8 @@ namespace SchemaEditor.Editors
 
                 Rect r = GUILayoutUtility.GetLastRect();
 
-                if (r.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 0)
+                if (r.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown &&
+                    Event.current.button == 0)
                 {
                     if (selectedEntry != entry)
                     {
@@ -147,18 +136,20 @@ namespace SchemaEditor.Editors
                     selectedEntry = entry;
                     clickedAny = true;
 
-                    Editor.CreateCachedEditor(selectedEntry, null, ref entryEditor);
+                    DestroyImmediate(entryEditor);
+                    entryEditor = CreateEditor(selectedEntry, null);
                 }
             }
 
             if (searchExcept.Count() == 0)
                 GUILayout.Label(NodeEditor.Prefs.enableDebugViewPlus ? Styles.megamind : "No entries");
         }
+
         private void ShowContext()
         {
             GenericMenu menu = new GenericMenu();
 
-            var keys = Blackboard.blackboardTypes;
+            Type[] keys = Blackboard.blackboardTypes;
 
             foreach (Type key in keys)
                 menu.AddItem(
@@ -169,6 +160,7 @@ namespace SchemaEditor.Editors
 
             menu.ShowAsContext();
         }
+
         private void RemoveSelected()
         {
             Blackboard current = isShowingGlobal ? Blackboard.global : blackboard;
@@ -194,29 +186,19 @@ namespace SchemaEditor.Editors
         // }
         private void DrawEntry(BlackboardEntry entry)
         {
-            if (entry?.type == null)
-                blackboard.RemoveEntry(entry, undo: false);
+            // if (entry?.type == null)
+            //     blackboard.RemoveEntry(entry, undo: false);
 
             Event current = Event.current;
 
-            Vector2 nameSize = EditorStyles.whiteLabel.CalcSize(new GUIContent(entry.name));
+            GUIContent content = new GUIContent(entry.name);
 
-            GUILayout.BeginVertical(selectedEntry == entry ? Styles.searchResult : GUIStyle.none, GUILayout.Height(32f));
+            Rect rect = GUILayoutUtility.GetRect(content, Styles.blackboardEntry);
 
-            GUILayout.Space(8f);
+            bool isSelected = selectedEntry == entry;
+            bool isHovered = rect.Contains(current.mousePosition);
 
-            GUILayout.BeginHorizontal(GUILayout.Height(16f));
-
-            GUILayout.Space(8f);
-
-            GUILayout.Space(4f);
-
-            GUIContent textContent = new GUIContent(entry == editing ? newEntryName : entry.name);
-
-            Rect r = GUILayoutUtility.GetRect(textContent, entry == editing ? Styles.styles.nameField : Styles.styles.nodeText);
-            Rect name = new Rect(r.x, r.y, r.width, 16f);
-
-            if (current.clickCount == 2 && current.button == 0 && name.Contains(current.mousePosition))
+            if (current.clickCount == 2 && current.button == 0 && isHovered)
             {
                 editing = entry;
                 GUI.FocusControl(entry.name);
@@ -226,34 +208,36 @@ namespace SchemaEditor.Editors
             GUI.SetNextControlName(entry.name);
 
             if (entry == editing)
-                newEntryName = GUI.TextField(name, textContent.text, Styles.styles.nameField);
+            {
+                entry.name = EditorGUI.TextField(rect, entry.name, Styles.blackboardEntry);
+
+                if (GUI.GetNameOfFocusedControl() != entry.name)
+                    editing = null;
+            }
             else
-                GUI.Label(name, textContent, Styles.styles.nodeText);
+            {
+                Styles.blackboardEntry.DrawIfRepaint(rect, content, isHovered || isSelected, isSelected, false, false);
+            }
 
-            if (entry == editing && GUI.GetNameOfFocusedControl() != entry.name)
-                editing = null;
-
-            entryGUIData.TryGetValue(entry.type, out var entryData);
+            entryGUIData.TryGetValue(entry.type, out Tuple<string, Color> entryData);
 
             if (entryData == null)
-                entryData = entryGUIData[entry.type] = new Tuple<string, Color>(EntryType.GetName(entry.type), EntryType.GetColor(entry.type));
+                entryData = entryGUIData[entry.type] =
+                    new Tuple<string, Color>(EntryType.GetName(entry.type), EntryType.GetColor(entry.type));
 
-            GUILayout.FlexibleSpace();
-            GUILayout.Label(entryData.Item1, EditorStyles.miniLabel);
+            rect = new Rect(rect.xMax - 24f, rect.y + rect.height / 2f - 8f, 16f, 16f);
 
-            GUILayout.Space(4f);
-
+            Color c = GUI.color;
             GUI.color = entryData.Item2;
-            Rect imgRect = GUILayoutUtility.GetRect(new GUIContent(Styles.circle), GUIStyle.none, GUILayout.Width(16), GUILayout.Height(16));
-            GUI.DrawTexture(imgRect, Styles.circle);
-            GUI.color = Color.white;
+            GUI.DrawTexture(rect, Icons.GetResource("in_connection", false));
+            GUI.color = c;
 
-            GUILayout.Space(8f);
-
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
+            Vector2 size = EditorStyles.miniLabel.CalcSize(new GUIContent(entryData.Item1));
+            rect = new Rect(rect.x - size.x - 4f, rect.y + rect.height / 2f - size.y / 2f, size.x, size.y);
+            GUI.Label(rect, entryData.Item1, EditorStyles.miniLabel);
         }
-        IEnumerable<BlackboardEntry> GetResults(IEnumerable<BlackboardEntry> options, string query)
+
+        private IEnumerable<BlackboardEntry> GetResults(IEnumerable<BlackboardEntry> options, string query)
         {
             options = options
                 .Where(e => e != null)
@@ -261,7 +245,8 @@ namespace SchemaEditor.Editors
 
             return options.OrderBy(e => StringSimilarity(e.name, query));
         }
-        int StringSimilarity(string s, string t)
+
+        private int StringSimilarity(string s, string t)
         {
             if (string.IsNullOrEmpty(s))
             {
@@ -270,10 +255,7 @@ namespace SchemaEditor.Editors
                 return t.Length;
             }
 
-            if (string.IsNullOrEmpty(t))
-            {
-                return s.Length;
-            }
+            if (string.IsNullOrEmpty(t)) return s.Length;
 
             int n = s.Length;
             int m = t.Length;
@@ -284,16 +266,15 @@ namespace SchemaEditor.Editors
             for (int j = 1; j <= m; d[0, j] = j++) ;
 
             for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= m; j++)
             {
-                for (int j = 1; j <= m; j++)
-                {
-                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-                    int min1 = d[i - 1, j] + 1;
-                    int min2 = d[i, j - 1] + 1;
-                    int min3 = d[i - 1, j - 1] + cost;
-                    d[i, j] = Mathf.Min(Mathf.Min(min1, min2), min3);
-                }
+                int cost = t[j - 1] == s[i - 1] ? 0 : 1;
+                int min1 = d[i - 1, j] + 1;
+                int min2 = d[i, j - 1] + 1;
+                int min3 = d[i - 1, j - 1] + cost;
+                d[i, j] = Mathf.Min(Mathf.Min(min1, min2), min3);
             }
+
             return d[n, m];
         }
     }

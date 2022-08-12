@@ -1,39 +1,77 @@
-using UnityEngine;
-using System.Linq;
 using System;
-using System.Reflection;
 using System.Collections.Generic;
-using UnityEditor;
+using System.Linq;
 using Schema.Internal;
+using UnityEditor;
+using UnityEngine;
 
 namespace Schema
 {
     /// <summary>
-    /// Base class for all Schema nodes.
+    ///     Base class for all Schema nodes.
     /// </summary>
-
     [Serializable]
     public abstract class Node : GraphObject
     {
+        public enum ConnectionDescriptor
+        {
+            OnlyInConnection,
+            OnlyOutConnection,
+            Floating,
+            Both
+        }
+
+        [SerializeField] [HideInInspector] private Node m_parent;
+        [SerializeField] [HideInInspector] private Node[] m_children = Array.Empty<Node>();
+        [SerializeField] [HideInInspector] private Conditional[] m_conditionals = Array.Empty<Conditional>();
+        [SerializeField] [HideInInspector] private Modifier[] m_modifiers = Array.Empty<Modifier>();
+        [SerializeField] [HideInInspector] private Vector2 m_graphPosition;
+        [SerializeField] [HideInInspector] private int m_priority;
+        [SerializeField] [HideInInspector] private Graph m_graph;
+
+        [SerializeField] [HideInInspector] [TextArea]
+        private string m_comment;
+
+        [Tooltip("Toggle the status indicator for this node")] [HideInInspector] [SerializeField]
+        private bool m_enableStatusIndicator = true;
+
+        internal Stack<Modifier.Message> messageStack = new();
+
         /// <summary>
-        /// The parent of this node
+        ///     The parent of this node
         /// </summary>
-        public Node parent { get { return m_parent; } private set { m_parent = value; } }
-        [SerializeField, HideInInspector] private Node m_parent;
+        public Node parent
+        {
+            get => m_parent;
+            private set => m_parent = value;
+        }
+
         /// <summary>
-        /// An array containing the children of this node
+        ///     An array containing the children of this node
         /// </summary>
-        public Node[] children { get { return m_children; } internal set { m_children = value; } }
-        [SerializeField, HideInInspector] private Node[] m_children = Array.Empty<Node>();
+        public Node[] children
+        {
+            get => m_children;
+            internal set => m_children = value;
+        }
+
         /// <summary>
-        /// An array containing the conditionals for this node
+        ///     An array containing the conditionals for this node
         /// </summary>
-        public Conditional[] conditionals { get { return m_conditionals; } internal set { m_conditionals = value; } }
-        [SerializeField, HideInInspector] private Conditional[] m_conditionals = Array.Empty<Conditional>();
-        public Modifier[] modifiers { get { return m_modifiers; } internal set { m_modifiers = value; } }
-        [SerializeField, HideInInspector] private Modifier[] m_modifiers = Array.Empty<Modifier>();
+        public Conditional[] conditionals
+        {
+            get => m_conditionals;
+            internal set => m_conditionals = value;
+        }
+
+        public Modifier[] modifiers
+        {
+            get => m_modifiers;
+            internal set => m_modifiers = value;
+        }
+
         /// <summary>
-        /// Position of the Node in the graph
+        ///     Position of the Node in the graph
         /// </summary>
         public Vector2 graphPosition
         {
@@ -52,53 +90,82 @@ namespace Schema
 #endif
             }
         }
-        [SerializeField, HideInInspector] private Vector2 m_graphPosition;
+
         /// <summary>
-        /// Priority for the node
+        ///     Priority for the node
         /// </summary>
-        public int priority { get { return m_priority; } internal set { m_priority = value; } }
-        [SerializeField, HideInInspector] private int m_priority;
+        public int priority
+        {
+            get => m_priority;
+            internal set => m_priority = value;
+        }
+
         /// <summary>
-        /// Graph for this node
+        ///     Graph for this node
         /// </summary>
-        public Graph graph { get { return m_graph; } internal set { m_graph = value; } }
-        [SerializeField, HideInInspector] private Graph m_graph;
+        public Graph graph
+        {
+            get => m_graph;
+            internal set => m_graph = value;
+        }
+
         /// <summary>
-        /// Comment for this node
+        ///     Comment for this node
         /// </summary>
-        public string comment { get { return m_comment; } internal set { m_comment = value; } }
-        [SerializeField, HideInInspector, TextArea] private string m_comment;
+        public string comment
+        {
+            get => m_comment;
+            internal set => m_comment = value;
+        }
+
         /// <summary>
-        /// Whether to allow the status indicator for this node in the editor
+        ///     Whether to allow the status indicator for this node in the editor
         /// </summary>
-        public bool enableStatusIndicator { get { return m_enableStatusIndicator; } private set { m_enableStatusIndicator = value; } }
-        [Tooltip("Toggle the status indicator for this node"), HideInInspector, SerializeField] private bool m_enableStatusIndicator = true;
-        internal Stack<Modifier.Message> messageStack = new Stack<Modifier.Message>();
+        public bool enableStatusIndicator
+        {
+            get => m_enableStatusIndicator;
+            private set => m_enableStatusIndicator = value;
+        }
+
         /// <summary>
-        /// How this node can be connected to other nodes (do not override)
+        ///     How this node can be connected to other nodes (do not override)
         /// </summary>
         public virtual ConnectionDescriptor connectionDescriptor => ConnectionDescriptor.Both;
+
         /// <summary>
-        /// Whether a parent node is allowed for this node
+        ///     Whether a parent node is allowed for this node
         /// </summary>
-        public virtual bool CanHaveParent() { return parent == null; }
+        public virtual bool CanHaveParent()
+        {
+            return parent == null;
+        }
+
         /// <summary>
-        /// Whether children nodes are allowed for this node
+        ///     Whether children nodes are allowed for this node
         /// </summary>
-        public virtual bool CanHaveChildren() { return true; }
+        public virtual bool CanHaveChildren()
+        {
+            return true;
+        }
+
         /// <summary>
-        ///	Override to allow for Gizmo visualization in the scene view. This will be called only for the currently selected SchemaAgent. 
+        ///     Override to allow for Gizmo visualization in the scene view. This will be called only for the currently selected
+        ///     SchemaAgent.
         /// </summary>
-        public virtual void DrawGizmos(SchemaAgent agent) { }
+        public virtual void DrawGizmos(SchemaAgent agent)
+        {
+        }
+
         /// <summary>
-        /// Verifies the order of the child list by position
+        ///     Verifies the order of the child list by position
         /// </summary>
         public void VerifyOrder()
         {
             Array.Sort(m_children, (x, y) => x.graphPosition.x < y.graphPosition.x ? -1 : 1);
         }
+
         /// <summary>
-        /// Gets a list of all children attached directly or indirectly to this node (including self)
+        ///     Gets a list of all children attached directly or indirectly to this node (including self)
         /// </summary>
         /// <returns>List of all children in subtree</returns>
         public IEnumerable<Node> GetAllChildren()
@@ -112,17 +179,10 @@ namespace Schema
 
             return ret;
         }
-        public enum ConnectionDescriptor
-        {
-            OnlyInConnection,
-            OnlyOutConnection,
-            Floating,
-            Both
-        }
 #if UNITY_EDITOR
         public static Node Instantiate(Node node)
         {
-            Node copy = ScriptableObject.Instantiate<Node>(node);
+            Node copy = ScriptableObject.Instantiate(node);
 
             copy.name = node.name;
             copy.ResetGUID();
@@ -147,8 +207,9 @@ namespace Schema
 
             return copy;
         }
+
         /// <summary>
-        /// Order child list by their graph positions
+        ///     Order child list by their graph positions
         /// </summary>
         public void OrderChildren()
         {
@@ -160,8 +221,9 @@ namespace Schema
             if (!prev.SequenceEqual(m_children))
                 graph.Traverse();
         }
+
         /// <summary>
-        /// Add a connection to another node
+        ///     Add a connection to another node
         /// </summary>
         /// <param name="to">Node to connect to</param>
         /// <param name="actionName">Name of the undo action</param>
@@ -184,8 +246,9 @@ namespace Schema
 
             graph.Traverse();
         }
+
         /// <summary>
-        /// Whether this node is connected to another
+        ///     Whether this node is connected to another
         /// </summary>
         /// <param name="node">The node to check</param>
         public bool IsConnected(Node node)
@@ -195,6 +258,7 @@ namespace Schema
 
             return node == parent || ArrayUtility.Contains(m_children, node);
         }
+
         public void SplitConnection(Node to, Node child, string actionName = "Split Connection", bool undo = true)
         {
             if (undo)
@@ -211,11 +275,12 @@ namespace Schema
             m_children[i] = to;
 
             to.parent = this;
-            to.children = new Node[] { child };
+            to.children = new[] { child };
             child.parent = to;
         }
+
         /// <summary>
-        /// Disconnect from another child node
+        ///     Disconnect from another child node
         /// </summary>
         /// <param name="from">Node to disconnect from. Must be a child of this node</param>
         /// <param name="actionName">Name of the undo action</param>
@@ -239,8 +304,9 @@ namespace Schema
 
             graph.Traverse();
         }
+
         /// <summary>
-        /// Remove the connection between this node and its parent
+        ///     Remove the connection between this node and its parent
         /// </summary>
         /// <param name="actionName">Name of the undo action</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
@@ -257,8 +323,9 @@ namespace Schema
 
             parent.RemoveConnection(this, actionName, undo);
         }
+
         /// <summary>
-        /// Remove connections between this node and its children
+        ///     Remove connections between this node and its children
         /// </summary>
         /// <param name="actionName">Name of the undo action</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
@@ -275,8 +342,9 @@ namespace Schema
             foreach (Node child in children)
                 RemoveConnection(child, actionName, undo);
         }
+
         /// <summary>
-        /// Breaks connections between this node and its parent and children
+        ///     Breaks connections between this node and its parent and children
         /// </summary>
         /// <param name="actionName">Name of the undo action</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
@@ -290,10 +358,10 @@ namespace Schema
                 groupIndex = Undo.GetCurrentGroup();
             }
 
-            parent?.RemoveConnection(this, actionName: "", undo);
+            parent?.RemoveConnection(this, "", undo);
 
             foreach (Node child in children)
-                RemoveConnection(child, actionName: "", undo);
+                RemoveConnection(child, "", undo);
 
             if (undo)
             {
@@ -301,8 +369,9 @@ namespace Schema
                 Undo.CollapseUndoOperations(groupIndex);
             }
         }
+
         /// <summary>
-        /// Breaks connections with parent and children without affecting them
+        ///     Breaks connections with parent and children without affecting them
         /// </summary>
         /// <param name="actionName">Name of the undo action</param>
         /// <param name="undo">Whether to register this operation in the udno stack</param>
@@ -326,8 +395,9 @@ namespace Schema
                 Undo.CollapseUndoOperations(groupIndex);
             }
         }
+
         /// <summary>
-        /// Add a conditional to this node
+        ///     Add a conditional to this node
         /// </summary>
         /// <param name="conditionalType">Type of conditional to add. Must inherit from type Conditional</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
@@ -338,13 +408,13 @@ namespace Schema
             if (!typeof(Conditional).IsAssignableFrom(conditionalType))
                 throw new ArgumentException("conditionalType does not inherit from type conditional");
 
-            Conditional conditional = (Conditional)ScriptableObject.CreateInstance(conditionalType);
+            Conditional conditional = (Conditional)CreateInstance(conditionalType);
             conditional.hideFlags = HideFlags.HideInHierarchy;
             conditional.node = this;
 
             string path = AssetDatabase.GetAssetPath(this);
 
-            if (!String.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path))
                 AssetDatabase.AddObjectToAsset(conditional, path);
 
             if (undo)
@@ -357,21 +427,22 @@ namespace Schema
 
             return conditional;
         }
+
         /// <summary>
-        /// Duplicate a given conditional
+        ///     Duplicate a given conditional
         /// </summary>
         /// <param name="conditional">Conditional to duplicate</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
         /// <returns>Duplciated conditional</returns>
         public Conditional DuplicateConditional(Conditional conditional, bool undo = true)
         {
-            Conditional duplicate = ScriptableObject.Instantiate<Conditional>(conditional);
+            Conditional duplicate = Instantiate(conditional);
             duplicate.hideFlags = HideFlags.HideAndDontSave;
             conditional.node = this;
 
             string path = AssetDatabase.GetAssetPath(this);
 
-            if (!String.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path))
                 AssetDatabase.AddObjectToAsset(duplicate, path);
 
             if (undo)
@@ -384,8 +455,9 @@ namespace Schema
 
             return duplicate;
         }
+
         /// <summary>
-        /// Move a conditional to an index
+        ///     Move a conditional to an index
         /// </summary>
         /// <param name="conditional">The conditional to move</param>
         /// <param name="index">Index to move the conditional to</param>
@@ -401,13 +473,15 @@ namespace Schema
             ArrayUtility.Remove(ref m_conditionals, conditional);
             ArrayUtility.Insert(ref m_conditionals, index, conditional);
         }
+
         /// <summary>
-        /// Deletes a conditional from this node
+        ///     Deletes a conditional from this node
         /// </summary>
         /// <param name="conditional">Conditional to remove</param>
         /// <param name="actionName">Name of the undo action</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
-        public void RemoveConditional(Conditional conditional, string actionName = "Remove conditional", bool undo = true)
+        public void RemoveConditional(Conditional conditional, string actionName = "Remove conditional",
+            bool undo = true)
         {
             if (!ArrayUtility.Contains(m_conditionals, conditional))
             {
@@ -424,11 +498,12 @@ namespace Schema
             else
             {
                 ArrayUtility.Remove(ref m_conditionals, conditional);
-                ScriptableObject.DestroyImmediate(conditional, true);
+                DestroyImmediate(conditional, true);
             }
         }
+
         /// <summary>
-        /// Add a modifier to the node
+        ///     Add a modifier to the node
         /// </summary>
         /// <param name="modifierType">The type of the modifier to add</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
@@ -440,13 +515,13 @@ namespace Schema
             if (GetType() == typeof(Root))
                 return null;
 
-            Modifier modifier = (Modifier)ScriptableObject.CreateInstance(modifierType);
+            Modifier modifier = (Modifier)CreateInstance(modifierType);
             modifier.hideFlags = HideFlags.HideInHierarchy;
             modifier.node = this;
 
             string path = AssetDatabase.GetAssetPath(this);
 
-            if (!String.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path))
                 AssetDatabase.AddObjectToAsset(modifier, path);
 
             if (undo)
@@ -459,8 +534,9 @@ namespace Schema
 
             return modifier;
         }
+
         /// <summary>
-        /// Deletes a modifier from this node
+        ///     Deletes a modifier from this node
         /// </summary>
         /// <param name="modifier">Modifier to remove</param>
         /// <param name="undo">Whether to register this operation in the undo stack</param>
@@ -481,11 +557,12 @@ namespace Schema
             else
             {
                 ArrayUtility.Remove(ref m_modifiers, modifier);
-                ScriptableObject.DestroyImmediate(modifier, true);
+                DestroyImmediate(modifier, true);
             }
         }
+
         /// <summary>
-        /// Move a modifier to an index
+        ///     Move a modifier to an index
         /// </summary>
         /// <param name="conditional">The conditional to move</param>
         /// <param name="index">Index to move the conditional to</param>
@@ -501,21 +578,22 @@ namespace Schema
             ArrayUtility.Remove(ref m_modifiers, modifier);
             ArrayUtility.Insert(ref m_modifiers, index, modifier);
         }
+
         /// <summary>
-        /// Remove all null nodes attached to this one
+        ///     Remove all null nodes attached to this one
         /// </summary>
         public void PurgeNull()
         {
             Node[] n = m_children;
 
             foreach (Node node in n)
-            {
                 if (node == null)
                     ArrayUtility.Remove(ref m_children, node);
-            }
         }
-        private static List<Node> modifiedPositions = new List<Node>();
+
+        private static List<Node> modifiedPositions = new();
         private static bool posNoCheck;
+
         public static void BeginPosNoCheck()
         {
             if (posNoCheck)
@@ -523,6 +601,7 @@ namespace Schema
 
             posNoCheck = true;
         }
+
         public static void EndPosNoCheck()
         {
             if (!posNoCheck)

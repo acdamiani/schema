@@ -1,21 +1,23 @@
-using UnityEngine;
-using UnityEditor;
+using System.Collections.Generic;
+using System.Linq;
 using Schema;
 using Schema.Builtin.Nodes;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(SelectRandomWeighted)), CanEditMultipleObjects]
+    [CustomEditor(typeof(SelectRandomWeighted))]
+    [CanEditMultipleObjects]
     public class SelectRandomWeightedEditor : Editor
     {
-        SerializedProperty weights;
+        private SerializedProperty weights;
+
         private void OnEnable()
         {
             weights = serializedObject.FindProperty("weights");
         }
+
         public override void OnInspectorGUI()
         {
             SelectRandomWeighted node = (SelectRandomWeighted)target;
@@ -25,10 +27,8 @@ namespace SchemaEditor.Editors.Nodes
             Dictionary<string, int> d = new Dictionary<string, int>(node.weights);
 
             foreach (KeyValuePair<string, int> kvp in d)
-            {
                 if (!node.children.Any(x => x.uID.Equals(kvp.Key)))
                     node.weights.Remove(kvp.Key);
-            }
 
             for (int i = 0; i < node.children.Length; i++)
             {
@@ -36,7 +36,10 @@ namespace SchemaEditor.Editors.Nodes
 
                 EditorGUILayout.LabelField($"{i + 1} {child.name}");
 
-                node.weights[child.uID] = Mathf.Clamp(EditorGUILayout.IntField("Weight", node.weights.ContainsKey(child.uID) ? node.weights[child.uID] : 1), 0, System.Int32.MaxValue);
+                node.weights[child.uID] =
+                    Mathf.Clamp(
+                        EditorGUILayout.IntField("Weight",
+                            node.weights.ContainsKey(child.uID) ? node.weights[child.uID] : 1), 0, int.MaxValue);
 
                 EditorGUI.BeginChangeCheck();
 

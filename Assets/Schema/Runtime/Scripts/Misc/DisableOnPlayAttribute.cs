@@ -1,2 +1,5 @@
 using UnityEngine;
-public class DisableOnPlayAttribute : PropertyAttribute { }
+
+public class DisableOnPlayAttribute : PropertyAttribute
+{
+}

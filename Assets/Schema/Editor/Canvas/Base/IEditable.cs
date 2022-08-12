@@ -1,8 +1,10 @@
+using UnityEngine;
+
 namespace SchemaEditor.Internal.ComponentSystem
 {
     public interface IEditable
     {
-        UnityEngine.Object GetEditable();
+        Object GetEditable();
         bool IsEditable();
     }
 }

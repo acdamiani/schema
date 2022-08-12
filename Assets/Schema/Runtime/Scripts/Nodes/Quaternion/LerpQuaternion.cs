@@ -1,23 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
     [Description("Linearly interpolate between two rotations, and normalize the result afterwards")]
     public class LerpQuaternion : Action
     {
-        [Tooltip("Quaternion A")]
-        public BlackboardEntrySelector<Quaternion> quaternionOne;
-        [Tooltip("Quaternion B")]
-        public BlackboardEntrySelector<Quaternion> quaternionTwo;
-        [Tooltip("Amount to interpolate by")]
-        public BlackboardEntrySelector<float> t;
+        [Tooltip("Quaternion A")] public BlackboardEntrySelector<Quaternion> quaternionOne;
+
+        [Tooltip("Quaternion B")] public BlackboardEntrySelector<Quaternion> quaternionTwo;
+
+        [Tooltip("Amount to interpolate by")] public BlackboardEntrySelector<float> t;
+
         [Tooltip("Whether to clamp the t value")]
         public bool unclamped;
-        [Tooltip("Blackboard variable to store the lerped rotation in"), WriteOnly]
+
+        [Tooltip("Blackboard variable to store the lerped rotation in")] [WriteOnly]
         public BlackboardEntrySelector<Quaternion> lerped;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             if (unclamped)

@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
@@ -11,20 +11,33 @@ namespace Schema.Builtin.Nodes
     public class OverlapBox : Action
     {
         [Tooltip("Center of the box")] public BlackboardEntrySelector<Vector3> center;
-        [Tooltip("Half of the size of the box in each dimension")] public BlackboardEntrySelector<Vector3> halfExtents;
+
+        [Tooltip("Half of the size of the box in each dimension")]
+        public BlackboardEntrySelector<Vector3> halfExtents;
+
         [Tooltip("Rotation of the box")] public BlackboardEntrySelector<Quaternion> orientation;
-        [Tooltip("Layer mask to use when casting the box")] public LayerMask layerMask;
-        [Tooltip("Specifies whether this query should hit triggers")] public QueryTriggerInteraction queryTriggerInteraction;
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit GameObject"), WriteOnly] public BlackboardEntrySelector hit = new BlackboardEntrySelector();
+
+        [Tooltip("Layer mask to use when casting the box")]
+        public LayerMask layerMask;
+
+        [Tooltip("Specifies whether this query should hit triggers")]
+        public QueryTriggerInteraction queryTriggerInteraction;
+
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit GameObject")]
+        [WriteOnly]
+        public BlackboardEntrySelector hit = new();
+
         protected override void OnObjectEnable()
         {
             hit.ApplyFilters(typeof(GameObject), typeof(List<GameObject>), typeof(Transform), typeof(List<Transform>));
 
             ;
         }
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
-            Collider[] colliders = Physics.OverlapBox(center.value, halfExtents.value, orientation.value, layerMask, queryTriggerInteraction);
+            Collider[] colliders = Physics.OverlapBox(center.value, halfExtents.value, orientation.value, layerMask,
+                queryTriggerInteraction);
 
             if (colliders.Length == 0)
                 return NodeStatus.Failure;

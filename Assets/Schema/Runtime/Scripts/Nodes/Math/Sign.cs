@@ -9,7 +9,10 @@ namespace Schema.Builtin.Nodes
     public class Sign : Action
     {
         [Tooltip("Value to get the sign of")] public BlackboardEntrySelector<float> value;
-        [Tooltip("Sign of the value"), WriteOnly] public BlackboardEntrySelector<float> result;
+
+        [Tooltip("Sign of the value")] [WriteOnly]
+        public BlackboardEntrySelector<float> result;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             result.value = Mathf.Sign(value.value);

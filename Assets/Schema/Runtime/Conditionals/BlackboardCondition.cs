@@ -1,26 +1,26 @@
-using System.Linq;
 using System;
-using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Conditionals
 {
     [Serializable]
     public class BlackboardCondition : Conditional
     {
-        public BlackboardEntrySelector blackboardKey = new BlackboardEntrySelector();
-        public ConditionType conditionType;
         public enum ConditionType
         {
             IsSet,
             IsNotSet
         }
 
-        private string aborts => "Aborts " + abortsType.ToString();
+        public BlackboardEntrySelector blackboardKey = new();
+        public ConditionType conditionType;
+
+        private string aborts => "Aborts " + abortsType;
+
         private void OnEnable()
         {
             blackboardKey.ApplyAllFilters();
         }
+
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
             object val = blackboardKey.value;

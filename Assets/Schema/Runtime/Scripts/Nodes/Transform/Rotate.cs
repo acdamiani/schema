@@ -9,8 +9,14 @@ namespace Schema.Builtin.Nodes
     public class Rotate : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
-        [Tooltip("New rotation in euler angles")] public BlackboardEntrySelector<Vector3> eulerAngles;
-        [Tooltip("Determines whether to rotate the GameObject either locally to the GameObject or relative to the Scene in world space.")] public Space relativeTo;
+
+        [Tooltip("New rotation in euler angles")]
+        public BlackboardEntrySelector<Vector3> eulerAngles;
+
+        [Tooltip(
+            "Determines whether to rotate the GameObject either locally to the GameObject or relative to the Scene in world space.")]
+        public Space relativeTo;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t = agent.GetComponent(transform);

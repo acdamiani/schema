@@ -1,9 +1,9 @@
-using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Schema.Internal;
+using UnityEditor;
+using UnityEngine;
 
 namespace Schema
 {
@@ -11,43 +11,56 @@ namespace Schema
     [Serializable]
     public class Graph : ScriptableObject
     {
-        /// <summary>
-        /// Root of graph
-        /// </summary>
-        public Root root { get { return m_root; } }
         [SerializeField] private Root m_root;
-        /// <summary>
-        /// Blackboard for this entry
-        /// </summary>
-        public Blackboard blackboard { get { return m_blackboard; } }
         [SerializeField] private Blackboard m_blackboard;
-        /// <summary>
-        /// Array of nodes for the graph
-        /// </summary>
-        public Node[] nodes { get { return m_nodes; } }
         [SerializeField] private Node[] m_nodes = Array.Empty<Node>();
+        [SerializeField] private float m_zoom = 1f;
+        [SerializeField] private Vector2 m_pan;
+
+        /// <summary>
+        ///     Root of graph
+        /// </summary>
+        public Root root => m_root;
+
+        /// <summary>
+        ///     Blackboard for this entry
+        /// </summary>
+        public Blackboard blackboard => m_blackboard;
+
+        /// <summary>
+        ///     Array of nodes for the graph
+        /// </summary>
+        public Node[] nodes => m_nodes;
+
         // public List<Node> nodes = new List<Node>();
         /// <summary>
-        /// Zoom level of the graph view
+        ///     Zoom level of the graph view
         /// </summary>
-        public float zoom { get { return m_zoom; } set { m_zoom = value; } }
-        [SerializeField] private float m_zoom = 1f;
+        public float zoom
+        {
+            get => m_zoom;
+            set => m_zoom = value;
+        }
+
         /// <summary>
-        /// Pan vector of the graph view
+        ///     Pan vector of the graph view
         /// </summary>
-        public Vector2 pan { get { return m_pan; } set { m_pan = value; } }
-        [SerializeField] private Vector2 m_pan;
+        public Vector2 pan
+        {
+            get => m_pan;
+            set => m_pan = value;
+        }
 #if UNITY_EDITOR
         public void Initialize()
         {
             if (blackboard == null)
             {
-                m_blackboard = ScriptableObject.CreateInstance<Blackboard>();
+                m_blackboard = CreateInstance<Blackboard>();
                 blackboard.hideFlags = HideFlags.HideInHierarchy;
 
                 string path = AssetDatabase.GetAssetPath(this);
 
-                if (!String.IsNullOrEmpty(path))
+                if (!string.IsNullOrEmpty(path))
                     AssetDatabase.AddObjectToAsset(blackboard, path);
             }
 
@@ -57,8 +70,9 @@ namespace Schema
             PurgeNull();
             Traverse();
         }
+
         /// <summary>
-        /// Add a node to the tree
+        ///     Add a node to the tree
         /// </summary>
         /// <param name="nodeType">Type of node to add</param>
         /// <param name="position">Position of the node within the graph</param>
@@ -70,14 +84,14 @@ namespace Schema
             if (!typeof(Node).IsAssignableFrom(nodeType))
                 throw new ArgumentException("nodeType does not inherit from type Node");
 
-            Node node = (Node)ScriptableObject.CreateInstance(nodeType);
+            Node node = (Node)CreateInstance(nodeType);
             node.hideFlags = HideFlags.HideInHierarchy;
             node.graphPosition = position;
             node.graph = this;
 
             string path = AssetDatabase.GetAssetPath(this);
 
-            if (!String.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path))
                 AssetDatabase.AddObjectToAsset(node, path);
 
             if (undo)
@@ -90,8 +104,9 @@ namespace Schema
 
             return node;
         }
+
         /// <summary>
-        /// Add an existing node to the tree
+        ///     Add an existing node to the tree
         /// </summary>
         /// <param name="node">Node to add to the tree</param>
         /// <param name="position">Position of the node within the graph</param>
@@ -104,7 +119,7 @@ namespace Schema
             node.graphPosition = position;
             node.graph = this;
 
-            if (!String.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path))
                 AssetDatabase.AddObjectToAsset(node, path);
 
             if (undo)
@@ -112,8 +127,9 @@ namespace Schema
 
             ArrayUtility.Add(ref m_nodes, node);
         }
+
         /// <summary>
-        /// Duplicates a given node and adds it to the tree.
+        ///     Duplicates a given node and adds it to the tree.
         /// </summary>
         /// <param name="node">Node to use as the duplicate base</param>
         /// <param name="newPosition">New position of the node within the graph</param>
@@ -121,7 +137,7 @@ namespace Schema
         /// <returns>Duplicated node</returns>
         public Node Duplicate(Node node, Vector2 newPosition, bool undo = true)
         {
-            Node duplicate = ScriptableObject.Instantiate<Node>(node);
+            Node duplicate = Instantiate(node);
 
             duplicate.name = node.name;
             duplicate.BreakConnectionsIsolated(undo: false);
@@ -133,7 +149,7 @@ namespace Schema
 
             string path = AssetDatabase.GetAssetPath(this);
 
-            if (!String.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path))
                 AssetDatabase.AddObjectToAsset(duplicate, path);
 
             if (undo)
@@ -146,8 +162,9 @@ namespace Schema
 
             return duplicate;
         }
+
         /// <summary>
-        /// Duplicate a list of nodes, preserving their connections
+        ///     Duplicate a list of nodes, preserving their connections
         /// </summary>
         /// <param name="nodes">Array or list of nodes to duplicate</param>
         /// <param name="offset">Offset in position that duplicates will have</param>
@@ -194,6 +211,7 @@ namespace Schema
 
             return dupl;
         }
+
         private Node DuplicateRecursive(IEnumerable<Node> toDuplicate, Node node, Vector2 offset, bool undo = true)
         {
             Node duplicate = Duplicate(node, node.graphPosition + offset, undo);
@@ -201,7 +219,8 @@ namespace Schema
             List<Node> duplicateChildren = duplicate.children.ToList();
 
             duplicateChildren.RemoveAll(n => !toDuplicate.Contains(n));
-            duplicateChildren = duplicateChildren.Select(n => DuplicateRecursive(toDuplicate, n, offset, undo)).ToList();
+            duplicateChildren = duplicateChildren.Select(n => DuplicateRecursive(toDuplicate, n, offset, undo))
+                .ToList();
 
             duplicate.BreakConnectionsIsolated(undo: false);
 
@@ -212,8 +231,9 @@ namespace Schema
 
             return duplicate;
         }
+
         /// <summary>
-        /// Add a node to the tree
+        ///     Add a node to the tree
         /// </summary>
         /// <typeparam name="T">Type of node to add. Must inherit from Node</typeparam>
         /// <param name="position">Position of the node within the graph</param>
@@ -223,29 +243,31 @@ namespace Schema
         {
             return (T)AddNode(typeof(T), position);
         }
+
         /// <summary>
-        /// Remove multiple nodes from the tree
+        ///     Remove multiple nodes from the tree
         /// </summary>
         /// <param name="nodes">List to remove</param>
         public void DeleteNodes(IEnumerable<Node> nodes)
         {
-            IEnumerable<Node> nodesWithoutRoot = nodes.Where(node => node.GetType() != typeof(Root)).OrderByDescending(node => node.priority);
+            IEnumerable<Node> nodesWithoutRoot = nodes.Where(node => node.GetType() != typeof(Root))
+                .OrderByDescending(node => node.priority);
 
             Undo.IncrementCurrentGroup();
             int groupIndex = Undo.GetCurrentGroup();
 
             Undo.RegisterCompleteObjectUndo(this, "Delete Nodes");
-            this.m_nodes = this.nodes.Except(nodesWithoutRoot).ToArray();
+            m_nodes = this.nodes.Except(nodesWithoutRoot).ToArray();
 
             foreach (Node node in nodesWithoutRoot)
             {
-                node.parent?.RemoveConnection(node, actionName: "");
+                node.parent?.RemoveConnection(node, "");
 
                 foreach (Node child in node.children)
-                    node.RemoveConnection(child, actionName: "");
+                    node.RemoveConnection(child, "");
 
                 foreach (Conditional decorator in node.conditionals)
-                    node.RemoveConditional(decorator, actionName: "");
+                    node.RemoveConditional(decorator, "");
 
                 Undo.DestroyObjectImmediate(node);
             }
@@ -253,8 +275,9 @@ namespace Schema
             Undo.SetCurrentGroupName("Delete Nodes");
             Undo.CollapseUndoOperations(groupIndex);
         }
+
         /// <summary>
-        /// Remove all connections for multiple nodes
+        ///     Remove all connections for multiple nodes
         /// </summary>
         /// <param name="nodes">List to break</param>
         public void BreakConnections(IEnumerable<Node> nodes)
@@ -264,10 +287,10 @@ namespace Schema
 
             foreach (Node node in nodes)
             {
-                node.parent?.RemoveConnection(node, actionName: "");
+                node.parent?.RemoveConnection(node, "");
 
                 foreach (Node child in node.children)
-                    node.RemoveConnection(child, actionName: "");
+                    node.RemoveConnection(child, "");
             }
 
             Traverse();
@@ -275,8 +298,9 @@ namespace Schema
             Undo.SetCurrentGroupName("Break Connections");
             Undo.CollapseUndoOperations(groupIndex);
         }
+
         /// <summary>
-        /// Recalculate priorities for all nodes
+        ///     Recalculate priorities for all nodes
         /// </summary>
         public void Traverse()
         {
@@ -287,6 +311,7 @@ namespace Schema
 
             TraverseSubtree(root, 1);
         }
+
         private int TraverseSubtree(Node node, int i)
         {
             node.priority = i;
@@ -297,22 +322,22 @@ namespace Schema
                 children += j + 1;
                 i += j + 1;
             }
+
             return children;
         }
+
         /// <summary>
-        /// Removes all null nodes from the tree
+        ///     Removes all null nodes from the tree
         /// </summary>
         public void PurgeNull()
         {
             Node[] n = m_nodes;
 
             foreach (Node node in n)
-            {
                 if (node == null)
                     ArrayUtility.Remove(ref m_nodes, node);
                 else
                     node.PurgeNull();
-            }
         }
 #endif
     }

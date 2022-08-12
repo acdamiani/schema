@@ -1,30 +1,46 @@
-using UnityEngine;
 using Schema;
-using Schema.Utilities;
 using Schema.Internal;
-using System.Collections.Generic;
+using Schema.Utilities;
+using UnityEngine;
 
-public class SchemaAgent : UnityEngine.MonoBehaviour
+public class SchemaAgent : MonoBehaviour
 {
-    public Graph target { get { return m_target; } set { m_target = value; } }
+    private static readonly CacheDictionary<Graph, ExecutableTree> treeMap = new();
+
     [SerializeField] private Graph m_target;
-    public ExecutableTree tree { get { return m_tree; } }
-    private ExecutableTree m_tree;
-    private static CacheDictionary<Graph, ExecutableTree> treeMap
-        = new CacheDictionary<Graph, ExecutableTree>();
+    [SerializeField] [Min(1)] private int m_maxStepsPerTick = 1000;
+    private float t;
+
+    public Graph target
+    {
+        get => m_target;
+        set => m_target = value;
+    }
+
+    public int maxStepsPerTick
+    {
+        get => m_maxStepsPerTick;
+        set => m_maxStepsPerTick = value;
+    }
+
+    public ExecutableTree tree { get; private set; }
+
     public void Start()
     {
         if (m_target == null)
             return;
 
-        m_tree = treeMap.GetOrCreate(m_target, () => new ExecutableTree(m_target));
-        m_tree.Initialize(this);
+        tree = treeMap.GetOrCreate(m_target, () => new ExecutableTree(m_target));
+        tree.Initialize(this);
+
+        t = Time.time + m_maxStepsPerTick;
     }
+
     public void Update()
     {
         if (tree == null)
             return;
 
-        m_tree.Tick(this);
+        tree.Tick(this);
     }
 }

@@ -1,6 +1,3 @@
-using System;
-using UnityEngine;
-
 namespace Schema.Builtin.Modifiers
 {
     [AllowOne]
@@ -8,14 +5,15 @@ namespace Schema.Builtin.Modifiers
     [DarkIcon("Modifiers/LoopForever")]
     public class LoopForever : Modifier
     {
-        public override Message Modify(object modifierMemory, SchemaAgent agent, NodeStatus status)
-        {
-            return Message.Repeat;
-        }
         public enum ForcedStatus
         {
             Success,
             Failure
+        }
+
+        public override Message Modify(object modifierMemory, SchemaAgent agent, NodeStatus status)
+        {
+            return Message.Repeat;
         }
     }
 }

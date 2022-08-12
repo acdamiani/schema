@@ -1,17 +1,22 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using UnityEditor.Callbacks;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using Schema;
 using Schema.Internal;
 using Schema.Utilities;
-using SchemaEditor.Utilities;
 using SchemaEditor.Internal;
 using SchemaEditor.Internal.ComponentSystem.Components;
+using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEditor.ShortcutManagement;
+using UnityEngine;
+using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 namespace SchemaEditor
 {
@@ -21,17 +26,100 @@ namespace SchemaEditor
         public static NodeEditor instance;
         private static Dictionary<Type, List<Type>> nodeTypes;
         private static Type[] decoratorTypes;
-        private static List<UnityEngine.Object> copyBuffer = new List<UnityEngine.Object>();
+        private static readonly List<Object> copyBuffer = new();
         public Node requestingConnection;
-        private Node orphanNode;
         public Graph target;
         public Blackboard globalBlackboard;
-        public Window windowInfo = new Window();
-        public Event eventNoZoom;
+        public Window windowInfo = new();
         private int? _controlID;
+        public Event eventNoZoom;
         private int nodeCount;
+
+        private Node orphanNode;
+
+        //Validates connections between nodes also resets HideFlags
+        private void OnEnable()
+        {
+            wantsMouseMove = true;
+
+            Undo.undoRedoPerformed += UndoPerformed;
+
+            RebuildComponentTree();
+
+            instance = this;
+            if (target != null && target.blackboard != null)
+                Blackboard.instance = target.blackboard;
+
+            DestroyImmediate(editor);
+            editor = null;
+
+            target?.PurgeNull();
+        }
+
+        private void OnDestroy()
+        {
+            Undo.undoRedoPerformed -= UndoPerformed;
+            Undo.ClearAll();
+
+            foreach (SchemaAgent agent in FindObjectsOfType<SchemaAgent>())
+                // agent.editorTarget = null;
+                SceneView.RepaintAll();
+
+            instance = null;
+            Blackboard.instance = null;
+            DestroyImmediate(editor);
+            DestroyImmediate(blackboardEditor);
+        }
+
+        public int GetControlID()
+        {
+            if (_controlID == null)
+                _controlID = GUIUtility.GetControlID(FocusType.Passive);
+
+            return _controlID.Value;
+        }
+
+        public Rect GetRect()
+        {
+            return new Rect(0f, tabHeight, position.width, position.height);
+        }
+
+        public Rect GetViewRect()
+        {
+            return window;
+        }
+
+        public EditorWindow GetEditorWindow()
+        {
+            return this;
+        }
+
+        public float GetToolbarHeight()
+        {
+            try
+            {
+                return EditorStyles.toolbar.fixedHeight;
+            }
+            catch
+            {
+                return 0f;
+            }
+        }
+
+        public ComponentCanvas GetCanvas()
+        {
+            return canvas;
+        }
+
+        void IHasCustomMenu.AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem("Preferences", windowInfo.settingsShown, TogglePrefs, false);
+            menu.AddItem("Documentation", false,
+                () => OpenUrl("https://thinking-automation.vercel.app/docs/getting-started"), false);
+        }
+
         [DidReloadScripts]
-        static void Init()
+        private static void Init()
         {
             nodeTypes = new Dictionary<Type, List<Type>>();
             foreach (Type t in HelperMethods.GetNodeTypes())
@@ -40,19 +128,23 @@ namespace SchemaEditor
                 //Debug.Log(t + ": " + String.Join(",", test));
                 nodeTypes.Add(t, test.ToList());
             }
+
             decoratorTypes = HelperMethods.GetEnumerableOfType(typeof(Conditional)).ToArray();
         }
+
         [MenuItem("Window/AI/Behavior Editor")]
-        static void OpenWindow()
+        private static void OpenWindow()
         {
             NodeEditor window = GetWindow<NodeEditor>();
             window.Open(null);
         }
+
         public static void OpenGraph(Graph graphObj)
         {
             NodeEditor window = GetWindow<NodeEditor>();
             window.Open(graphObj);
         }
+
         public void Open(Graph graphObj)
         {
             windowInfo = new Window();
@@ -77,7 +169,7 @@ namespace SchemaEditor
 
             string id = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(target)).ToString();
             string last = EditorPrefs.GetString("Schema Recently Opened");
-            List<string> lastFiles = last.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            List<string> lastFiles = last.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
             if (lastFiles.Contains(id))
                 lastFiles.MoveItemAtIndexToFront(lastFiles.IndexOf(id));
@@ -90,7 +182,7 @@ namespace SchemaEditor
             {
                 string path = AssetDatabase.GUIDToAssetPath(s);
 
-                if (String.IsNullOrEmpty(path))
+                if (string.IsNullOrEmpty(path))
                 {
                     lastFiles.Remove(s);
                     continue;
@@ -98,11 +190,11 @@ namespace SchemaEditor
 
                 string absolutePath = Application.dataPath + path.Substring(6);
 
-                if (!System.IO.File.Exists(absolutePath))
+                if (!File.Exists(absolutePath))
                     lastFiles.Remove(s);
             }
 
-            EditorPrefs.SetString("Schema Recently Opened", String.Join(",", lastFiles));
+            EditorPrefs.SetString("Schema Recently Opened", string.Join(",", lastFiles));
 
             Selection.activeObject = target;
 
@@ -111,33 +203,14 @@ namespace SchemaEditor
             Blackboard.instance = target.blackboard;
             GetViewRect(100f, true);
         }
-        void IHasCustomMenu.AddItemsToMenu(GenericMenu menu)
-        {
-            menu.AddItem("Preferences", windowInfo.settingsShown, TogglePrefs, false);
-            menu.AddItem("Documentation", false, () => OpenUrl("https://thinking-automation.vercel.app/docs/getting-started"), false);
-        }
-        public int GetControlID()
-        {
-            if (_controlID == null)
-                _controlID = GUIUtility.GetControlID(FocusType.Passive);
 
-            return _controlID.Value;
-        }
-        public Rect GetRect() { return new Rect(0f, tabHeight, position.width, position.height); }
-        public Rect GetViewRect() { return window; }
-        public EditorWindow GetEditorWindow() { return this; }
-        public float GetToolbarHeight()
-        {
-            try { return EditorStyles.toolbar.fixedHeight; }
-            catch { return 0f; }
-        }
-        public ComponentCanvas GetCanvas() { return canvas; }
-        void TogglePrefs()
+        private void TogglePrefs()
         {
             windowInfo.settingsShown = !windowInfo.settingsShown;
             windowInfo.inspectorScroll = Vector2.zero;
             windowInfo.inspectorToggled = !windowInfo.inspectorToggled ? true : windowInfo.inspectorToggled;
         }
+
         private static GUIContent AggregateErrors(List<Error> errors)
         {
             GUIContent ret = new GUIContent();
@@ -148,13 +221,13 @@ namespace SchemaEditor
             switch (severity)
             {
                 case Error.Severity.Info:
-                    ret.image = Styles.infoIcon;
+                    ret.image = Icons.GetEditor("console.infoicon");
                     break;
                 case Error.Severity.Warning:
-                    ret.image = Styles.warnIcon;
+                    ret.image = Icons.GetEditor("console.warnicon");
                     break;
                 case Error.Severity.Error:
-                    ret.image = Styles.errorIcon;
+                    ret.image = Icons.GetEditor("console.erroricon");
                     break;
             }
 
@@ -169,8 +242,8 @@ namespace SchemaEditor
             ret.tooltip = total;
 
             return ret;
-
         }
+
         private static GUIContent GetErrors(Node node)
         {
             List<Error> errors = new List<Error>(node.GetErrors());
@@ -179,12 +252,13 @@ namespace SchemaEditor
             //     errors.AddRange(d.GetErrors().Select(error => new Error($"{error.message} ({d.name})", error.severity)));
 
             if (node.priority < 1) errors.Add(new Error("Node not connected to root!", Error.Severity.Warning));
-            else if (node.children.Length == 0 && node.CanHaveChildren()) errors.Add(new Error("No child node attatched", Error.Severity.Warning));
+            else if (node.children.Length == 0 && node.CanHaveChildren())
+                errors.Add(new Error("No child node attatched", Error.Severity.Warning));
 
             return AggregateErrors(errors);
         }
 
-        void UndoPerformed()
+        private void UndoPerformed()
         {
             canvas.Reset();
 
@@ -193,25 +267,8 @@ namespace SchemaEditor
             target.Traverse();
             GetViewRect(100f, true);
         }
-        //Validates connections between nodes also resets HideFlags
-        void OnEnable()
-        {
-            wantsMouseMove = true;
 
-            Undo.undoRedoPerformed += UndoPerformed;
-
-            RebuildComponentTree();
-
-            instance = this;
-            if (target != null && target.blackboard != null)
-                Blackboard.instance = target.blackboard;
-
-            DestroyImmediate(editor);
-            editor = null;
-
-            target?.PurgeNull();
-        }
-        void FocusSearch()
+        private void FocusSearch()
         {
             if (searchWantsFocus)
             {
@@ -220,43 +277,28 @@ namespace SchemaEditor
                 searchWantsFocus = false;
             }
         }
-        void OnDestroy()
-        {
-            Undo.undoRedoPerformed -= UndoPerformed;
-            Undo.ClearAll();
 
-            foreach (SchemaAgent agent in GameObject.FindObjectsOfType<SchemaAgent>())
-            {
-                // agent.editorTarget = null;
-                SceneView.RepaintAll();
-            }
-
-            instance = null;
-            Blackboard.instance = null;
-            DestroyImmediate(editor);
-            DestroyImmediate(blackboardEditor);
-        }
         private void OpenUrl(string url)
         {
             try
             {
-                System.Diagnostics.Process.Start(url);
+                Process.Start(url);
             }
             catch
             {
                 // hack because of this: https://github.com/dotnet/corefx/issues/10361
-                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     url = url.Replace("&", "^&");
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
                 }
-                else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    System.Diagnostics.Process.Start("xdg-open", url);
+                    Process.Start("xdg-open", url);
                 }
-                else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    System.Diagnostics.Process.Start("open", url);
+                    Process.Start("open", url);
                 }
                 else
                 {
@@ -264,20 +306,19 @@ namespace SchemaEditor
                 }
             }
         }
+
         private void Select(Node node, bool add)
         {
             if (!add)
                 windowInfo.selected.Clear();
 
-            if (!windowInfo.selected.Contains(node))
-            {
-                windowInfo.selected.Add(node);
-            }
+            if (!windowInfo.selected.Contains(node)) windowInfo.selected.Add(node);
 
             target.nodes.MoveItemAtIndexToFront(Array.IndexOf(target.nodes, node));
 
             EditorApplication.delayCall += () => SceneView.RepaintAll();
         }
+
         private Node[][] ConvertTo2DArray(List<Node> nodes)
         {
             Dictionary<string, int> parentCounts = nodes.ToDictionary(x => x.uID, x => GetParentCount(x));
@@ -295,6 +336,7 @@ namespace SchemaEditor
 
             return arr;
         }
+
         private int GetParentCount(Node node)
         {
             int count = 0;
@@ -308,6 +350,7 @@ namespace SchemaEditor
 
             return count;
         }
+
         private bool IsLowerPriority(Node node, Node child)
 
         {
@@ -320,6 +363,7 @@ namespace SchemaEditor
 
             return !IsSubTreeOf(node, child) && IsSubTreeOf(node.parent, child);
         }
+
         private bool IsSubTreeOf(Node node, Node child)
         {
             if (node == child)
@@ -341,29 +385,28 @@ namespace SchemaEditor
             return false;
         }
 
-        ///<summary>
-        ///Recalculates the list order of a node's children, based on position
-        ///</summary>
+        /// <summary>
+        ///     Recalculates the list order of a node's children, based on position
+        /// </summary>
         private void RecalculatePriorities(Node node)
         {
             IEnumerable<Node> prioritized = node.children.OrderBy(node =>
             {
                 Vector2 nodeArea = GetArea(node, false);
-                float x = (node.graphPosition.x + (nodeArea.x / 2f));
+                float x = node.graphPosition.x + nodeArea.x / 2f;
                 return x;
             });
 
             // node.children = prioritized.ToArray();
         }
+
         private void Deselect(Node node)
         {
-            if (windowInfo.selected.Contains(node))
-            {
-                windowInfo.selected.Remove(node);
-            }
+            if (windowInfo.selected.Contains(node)) windowInfo.selected.Remove(node);
 
             SceneView.RepaintAll();
         }
+
         private void DeleteSelected()
         {
             target.DeleteNodes(windowInfo.selected);
@@ -380,6 +423,7 @@ namespace SchemaEditor
 
             windowInfo.selected.Clear();
         }
+
         private void Copy(List<Node> copies, bool clearSelected = true)
         {
             //Making copy list seprate from passed instance (caused issues when passing windowInfo.selected, which is modified in the Duplicate method)
@@ -391,19 +435,17 @@ namespace SchemaEditor
 
             copyBuffer.ForEach(obj =>
             {
-                if ((typeof(Node).IsAssignableFrom(obj.GetType()) &&
-                !target.nodes.Contains(obj)))
-                {
+                if (typeof(Node).IsAssignableFrom(obj.GetType()) &&
+                    !target.nodes.Contains(obj))
                     DestroyImmediate(obj);
-                }
             });
             copyBuffer.Clear();
 
             copyBuffer.AddRange(temp);
         }
+
         private void Paste()
         {
-
             // if (copyBuffer.OfType<Node>().Count() > 0)
             // {
             //     Undo.RegisterCompleteObjectUndo(target, "Paste Nodes");
@@ -441,10 +483,12 @@ namespace SchemaEditor
             //     }
             // }
         }
+
         private void AddNode(Type nodeType)
         {
             AddNode(nodeType, WindowToGridPosition(windowInfo.mousePosition), false);
         }
+
         private void AddNode(Type nodeType, Vector2 position, bool asChild)
         {
             if (!typeof(Node).IsAssignableFrom(nodeType))
@@ -545,9 +589,10 @@ namespace SchemaEditor
 
             windowInfo.selected.Clear();
 
-            foreach (Node node in target.Duplicate(selected, Vector2.one * 50f, true))
+            foreach (Node node in target.Duplicate(selected, Vector2.one * 50f))
                 Select(node, true);
         }
+
         private Node GetSiblingNode(Node node, bool left)
         {
             if (node == null || node.parent == null)
@@ -558,11 +603,12 @@ namespace SchemaEditor
 
             if (left && thisIndex == 0)
                 return null;
-            else if (!left && thisIndex == parent.children.Length - 1)
+            if (!left && thisIndex == parent.children.Length - 1)
                 return null;
 
             return parent.children[left ? thisIndex - 1 : thisIndex + 1];
         }
+
         internal GenericMenu GenerateContextMenu()
         {
             GenericMenu g = new GenericMenu();
@@ -571,12 +617,16 @@ namespace SchemaEditor
             {
                 case Window.Hovering.Node:
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Cut"), false, () => { }, editingPaused);
-                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Copy"), false, () => Copy(windowInfo.selected), editingPaused);
-                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => Paste(), editingPaused || copyBuffer.Count == 0);
+                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Copy"), false, () => Copy(windowInfo.selected),
+                        editingPaused);
+                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => Paste(),
+                        editingPaused || copyBuffer.Count == 0);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Delete"), false, () => DeleteSelected(), editingPaused);
-                    g.AddItem("Break Connections %&b", false, () => target.BreakConnections(windowInfo.selected), editingPaused);
+                    g.AddItem("Break Connections %&b", false, () => target.BreakConnections(windowInfo.selected),
+                        editingPaused);
                     g.AddSeparator("");
-                    g.AddItem(GenerateMenuItem("Schema/Add Decorator"), false, () => AddDecoratorCommand(), editingPaused);
+                    g.AddItem(GenerateMenuItem("Schema/Add Decorator"), false, () => AddDecoratorCommand(),
+                        editingPaused);
                     break;
                 case Window.Hovering.InConnection:
                     g.AddItem("Break Connection", false, () => windowInfo.hoveredNode.RemoveParent(), editingPaused);
@@ -587,51 +637,54 @@ namespace SchemaEditor
                 case Window.Hovering.Decorator:
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Cut"), false, () => { }, editingPaused);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Copy"), false, () => { }, editingPaused);
-                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => { }, editingPaused || copyBuffer.Count == 0);
+                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => { },
+                        editingPaused || copyBuffer.Count == 0);
                     break;
                 case Window.Hovering.Window:
                     g.AddItem(GenerateMenuItem("Schema/Add Node"), false, () => AddNodeCommand(), editingPaused);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Select All"), false, () =>
-                            {
-                                List<Node> iteration = new List<Node>(target.nodes);
-
-                                foreach (Node node in iteration)
-                                {
-                                    Select(node, true);
-                                }
-                            }, editingPaused);
-                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Deselect All"), false, () => windowInfo.selected.Clear(), editingPaused);
-                    g.AddSeparator("");
-                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Frame Selected", windowInfo.selected.Count > 0 ? "" : "Focus Root"), false, () =>
                     {
-                        if (windowInfo.selected.Count > 0)
-                        {
-                            List<Vector2> positions = windowInfo.selected.Select(node => node.graphPosition).ToList();
+                        List<Node> iteration = new List<Node>(target.nodes);
 
-                            float x = 0f;
-                            float y = 0f;
-
-                            foreach (Vector2 pos in positions)
-                            {
-                                Vector2 area = GetArea(windowInfo.selected[positions.IndexOf(pos)], false);
-
-                                x += pos.x + area.x / 2f;
-                                y += pos.y + area.y / 2f;
-                            }
-
-                            Vector2 avg = new Vector2(x / windowInfo.selected.Count, y / windowInfo.selected.Count);
-
-                            PanView(-avg, 1f);
-                        }
-                        else
-                        {
-                            PanView(-(target.root.graphPosition + GetArea(target.root, false) / 2f), 1f);
-                        }
+                        foreach (Node node in iteration) Select(node, true);
                     }, editingPaused);
+                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Deselect All"), false, () => windowInfo.selected.Clear(),
+                        editingPaused);
+                    g.AddSeparator("");
+                    g.AddItem(
+                        GenerateMenuItem("Main Menu/Edit/Frame Selected",
+                            windowInfo.selected.Count > 0 ? "" : "Focus Root"), false, () =>
+                        {
+                            if (windowInfo.selected.Count > 0)
+                            {
+                                List<Vector2> positions =
+                                    windowInfo.selected.Select(node => node.graphPosition).ToList();
+
+                                float x = 0f;
+                                float y = 0f;
+
+                                foreach (Vector2 pos in positions)
+                                {
+                                    Vector2 area = GetArea(windowInfo.selected[positions.IndexOf(pos)], false);
+
+                                    x += pos.x + area.x / 2f;
+                                    y += pos.y + area.y / 2f;
+                                }
+
+                                Vector2 avg = new Vector2(x / windowInfo.selected.Count, y / windowInfo.selected.Count);
+
+                                PanView(-avg, 1f);
+                            }
+                            else
+                            {
+                                PanView(-(target.root.graphPosition + GetArea(target.root, false) / 2f), 1f);
+                            }
+                        }, editingPaused);
                     g.AddItem("Zoom In", false, () => windowInfo.zoom -= 3 * GUIData.zoomSpeed, false);
                     g.AddItem("Zoom Out", false, () => windowInfo.zoom += 3 * GUIData.zoomSpeed, false);
                     g.AddSeparator("");
-                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => Paste(), editingPaused || copyBuffer.Count == 0);
+                    g.AddItem(GenerateMenuItem("Main Menu/Edit/Paste"), false, () => Paste(),
+                        editingPaused || copyBuffer.Count == 0);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Undo"), false, () => Undo.PerformUndo(), editingPaused);
                     g.AddItem(GenerateMenuItem("Main Menu/Edit/Redo"), false, () => Undo.PerformRedo(), editingPaused);
                     break;
@@ -642,48 +695,45 @@ namespace SchemaEditor
 
             return g;
         }
-        string GenerateMenuItem(string commandName, string overrideName = "")
+
+        private string GenerateMenuItem(string commandName, string overrideName = "")
         {
             int pos = commandName.LastIndexOf("/") + 1;
-            string menuName = String.IsNullOrEmpty(overrideName) ? commandName.Substring(pos) : overrideName;
+            string menuName = string.IsNullOrEmpty(overrideName) ? commandName.Substring(pos) : overrideName;
 
             KeyCombination def = GetCommandKeyCombination(commandName);
             string keyCode = GetMenuKeyFromKeyCode(def.keyCode);
 
-            if (!String.IsNullOrEmpty(keyCode))
+            if (!string.IsNullOrEmpty(keyCode))
             {
                 if (def.action || def.alt || def.shift)
-                {
                     menuName += $" {(def.action ? "%" : "")}{(def.shift ? "#" : "")}{(def.alt ? "&" : "")}{keyCode}";
-                }
                 else
-                {
                     menuName += $" _{keyCode}";
-                }
             }
 
             return menuName;
         }
-        KeyCombination GetCommandKeyCombination(string commandName)
+
+        private KeyCombination GetCommandKeyCombination(string commandName)
         {
             IEnumerable<KeyCombination> sequence =
-                UnityEditor.ShortcutManagement.ShortcutManager.instance.GetShortcutBinding(commandName).keyCombinationSequence;
+                UnityEditor.ShortcutManagement.ShortcutManager.instance.GetShortcutBinding(commandName)
+                    .keyCombinationSequence;
 
             KeyCombination defaultKeyCombination = new KeyCombination(KeyCode.None);
 
             if (sequence.Count() > 0)
-                return UnityEditor.ShortcutManagement.ShortcutManager.instance.GetShortcutBinding(commandName).keyCombinationSequence.ElementAt(0);
-            else
-                return defaultKeyCombination;
+                return UnityEditor.ShortcutManagement.ShortcutManager.instance.GetShortcutBinding(commandName)
+                    .keyCombinationSequence.ElementAt(0);
+            return defaultKeyCombination;
         }
-        string GetMenuKeyFromKeyCode(KeyCode code)
+
+        private string GetMenuKeyFromKeyCode(KeyCode code)
         {
             //Return the raw keycode if keycode is a letter
             string codeStr = code.ToString();
-            if (System.Text.RegularExpressions.Regex.IsMatch(codeStr, @"^[a-zA-Z]$"))
-            {
-                return codeStr.ToLower();
-            }
+            if (Regex.IsMatch(codeStr, @"^[a-zA-Z]$")) return codeStr.ToLower();
 
             //Otherwise, manually return keycodes
             switch (code)
@@ -764,17 +814,21 @@ namespace SchemaEditor
             //Cases where nothing is rendered to the menu
             return "";
         }
-        ///<summary>
-        ///Sets the cursor of the window
-        ///</summary>
+
+        /// <summary>
+        ///     Sets the cursor of the window
+        /// </summary>
         public void SetCursor(MouseCursor cursor)
         {
             EditorGUIUtility.AddCursorRect(new Rect(0, 0, position.width, position.height), cursor);
         }
+
         internal static Vector2 WindowToGridPosition(Vector2 windowPosition)
         {
-            return (windowPosition - instance.window.center - (instance.windowInfo.pan / instance.windowInfo.zoom)) * instance.windowInfo.zoom;
+            return (windowPosition - instance.window.center - instance.windowInfo.pan / instance.windowInfo.zoom) *
+                   instance.windowInfo.zoom;
         }
+
         public Rect WindowToGridRect(Rect windowRect)
         {
             windowRect.position = WindowToGridPosition(windowRect.position);
@@ -784,7 +838,8 @@ namespace SchemaEditor
 
         internal static Vector2 GridToWindowPosition(Vector2 gridPosition)
         {
-            return (instance.window.size * 0.5f) + (instance.windowInfo.pan / instance.windowInfo.zoom) + (gridPosition / instance.windowInfo.zoom);
+            return instance.window.size * 0.5f + instance.windowInfo.pan / instance.windowInfo.zoom +
+                   gridPosition / instance.windowInfo.zoom;
         }
 
         public Rect GridToWindowRectNoClipped(Rect gridRect)
@@ -799,6 +854,7 @@ namespace SchemaEditor
             gridRect.size /= instance.windowInfo.zoom;
             return gridRect;
         }
+
         public Vector2 GridToMinimapPosition(Vector2 gridPosition, float width, float padding)
         {
             Rect r = GetViewRect(padding, false);
@@ -808,6 +864,7 @@ namespace SchemaEditor
 
             return position * sizeFac;
         }
+
         public Rect GetViewRect(float padding, bool recalculate)
         {
             if (recalculate)
@@ -819,11 +876,13 @@ namespace SchemaEditor
                 float yMax = target.nodes.Max(node => node.graphPosition.y + GetAreaWithPadding(node, false).y);
                 float yMin = target.nodes.Min(node => node.graphPosition.y);
 
-                windowInfo.viewRect = new Rect(xMin - padding, yMin - padding, xMax - xMin + padding * 2f, yMax - yMin + padding * 2f);
+                windowInfo.viewRect = new Rect(xMin - padding, yMin - padding, xMax - xMin + padding * 2f,
+                    yMax - yMin + padding * 2f);
             }
 
             return windowInfo.viewRect;
         }
+
         internal static Vector2 GridToWindowPositionNoClipped(Vector2 gridPosition)
         {
             Vector2 center = instance.window.size * 0.5f;
@@ -831,20 +890,20 @@ namespace SchemaEditor
             float yOffset = center.y * instance.windowInfo.zoom + (instance.windowInfo.pan.y + gridPosition.y);
             return new Vector2(xOffset, yOffset);
         }
+
         [OnOpenAsset(1)]
         public static bool Open(int instanceID, int line)
         {
-            UnityEngine.Object obj = EditorUtility.InstanceIDToObject(instanceID);
+            Object obj = EditorUtility.InstanceIDToObject(instanceID);
             if (obj as Graph != null)
             {
-                NodeEditor.OpenGraph((Graph)obj);
+                OpenGraph((Graph)obj);
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
+
         //--SCHEMA SHORTCUTS--//
         [Shortcut("Schema/Add Node", KeyCode.A, ShortcutModifiers.Shift)]
         private static void AddNodeCommand()
@@ -857,6 +916,7 @@ namespace SchemaEditor
             if (!instance.editingPaused)
                 instance.ToggleSearch();
         }
+
         [Shortcut("Schema/Add Child", KeyCode.N, ShortcutModifiers.Action | ShortcutModifiers.Alt)]
         private static void AddChildCommand()
         {
@@ -868,6 +928,7 @@ namespace SchemaEditor
             if (!instance.editingPaused)
                 instance.ToggleSearch();
         }
+
         [Shortcut("Schema/Add Decorator", KeyCode.D, ShortcutModifiers.Action | ShortcutModifiers.Alt)]
         private static void AddDecoratorCommand()
         {
@@ -878,6 +939,7 @@ namespace SchemaEditor
             if (!instance.editingPaused)
                 instance.ToggleSearch();
         }
+
         [Shortcut("Schema/Break Connections", KeyCode.B, ShortcutModifiers.Action | ShortcutModifiers.Alt)]
         private static void BreakConnectionsCommand()
         {
@@ -885,6 +947,7 @@ namespace SchemaEditor
 
             instance.target.BreakConnections(instance.windowInfo.selected);
         }
+
         internal static class Prefs
         {
             public static bool saveOnClose
@@ -892,91 +955,121 @@ namespace SchemaEditor
                 get => EditorPrefs.GetBool("SCHEMA_PREF__saveOnClose", false);
                 set => EditorPrefs.SetBool("SCHEMA_PREF__saveOnClose", value);
             }
+
             public static bool formatOnSave
             {
                 get => EditorPrefs.GetBool("SCHEMA_PREF__formatOnSave", true);
                 set => EditorPrefs.SetBool("SCHEMA_PREF__formatOnSave", value);
             }
+
             public static string screenshotPath
             {
                 get => EditorPrefs.GetString("SCHEMA_PREF__screenshotPath", "Screenshots");
                 set => EditorPrefs.SetString("SCHEMA_PREF__screenshotPath", value);
             }
+
             public static Color selectionColor
             {
                 get => GetColor("SCHEMA_PREF__selectionColor", Color.white);
                 set => SetColor("SCHEMA_PREF__selectionColor", value);
             }
+
             public static Color highlightColor
             {
                 get => GetColor("SCHEMA_PREF__highlightColor", new Color32(247, 181, 0, 255));
                 set => SetColor("SCHEMA_PREF__highlightColor", value);
             }
+
             public static bool enableStatusIndicators
             {
                 get => EditorPrefs.GetBool("SCHEMA_PREF__enableStatusIndicators", true);
                 set => EditorPrefs.SetBool("SCHEMA_PREF__enableStatusIndicators", value);
             }
+
             public static Color successColor
             {
                 get => GetColor("SCHEMA_PREF__successColor", new Color32(64, 255, 64, 255));
                 set => SetColor("SCHEMA_PREF__successColor", value);
             }
+
             public static Color failureColor
             {
                 get => GetColor("SCHEMA_PREF__failureColor", new Color32(255, 64, 64, 255));
                 set => SetColor("SCHEMA_PREF__failureColor", value);
             }
+
             public static float minimapWidth
             {
                 get => EditorPrefs.GetFloat("SCHEMA_PREF__minimapWidth", 250f);
                 set => EditorPrefs.SetFloat("SCHEMA_PREF__minimapWidth", Mathf.Clamp(value, 100f, float.MaxValue));
             }
+
             public static float maxMinimapHeight
             {
                 get => EditorPrefs.GetFloat("SCHEMA_PREF__maxMinimapHeight", 250f);
                 set => EditorPrefs.SetFloat("SCHEMA_PREF__maxMinimapHeight", Mathf.Clamp(value, 100f, float.MaxValue));
             }
+
             public static int minimapPosition
             {
                 get => EditorPrefs.GetInt("SCHEMA_PREF__minimapPosition", 2);
                 set => EditorPrefs.SetInt("SCHEMA_PREF__minimapPosition", Mathf.Clamp(value, 0, 4));
             }
+
             public static float minimapOpacity
             {
                 get => EditorPrefs.GetFloat("SCHEMA_PREF__minimapOpacity", 0.5f);
                 set => EditorPrefs.SetFloat("SCHEMA_PREF__minimapOpacity", Mathf.Clamp01(value));
             }
+
             public static Color minimapOutlineColor
             {
                 get => GetColor("SCHEMA_PREF__minimapOutlineColor", Color.gray);
                 set => SetColor("SCHEMA_PREF__minimapOutlineColor", value);
             }
+
             public static bool enableDebugView
             {
                 get => EditorPrefs.GetBool("SCHEMA_PREF__enableDebugView", false);
                 set => EditorPrefs.SetBool("SCHEMA_PREF__enableDebugView", value);
             }
+
             public static bool enableDebugViewPlus
             {
                 get => EditorPrefs.GetBool("SCHEMA_PREF__enableDebugViewPlus", false);
                 set => EditorPrefs.SetBool("SCHEMA_PREF__enableDebugViewPlus", value);
             }
+
             public static Color connectionColor
             {
                 get => GetColor("SCHEMA_PREF__connectionColor", Color.white);
                 set => SetColor("SCHEMA_PREF__connectionColor", value);
             }
+
             public static Color portColor
             {
                 get => GetColor("SCHEMA_PREF__portColor", new Color32(80, 80, 80, 255));
                 set => SetColor("SCHEMA_PREF__portColor", value);
             }
+
             public static bool gridSnap
             {
                 get => EditorPrefs.GetBool("SCHEMA_PREF__gridSnap", false);
                 set => EditorPrefs.SetBool("SCHEMA_PREF__gridSnap", value);
             }
+
+            public static bool liveLink
+            {
+                get => EditorPrefs.GetBool("SCHEMA_PREF__liveLink", false);
+                set => EditorPrefs.SetBool("SCHEMA_PREF__liveLink", value);
+            }
+
+            public static bool minimapEnabled
+            {
+                get => EditorPrefs.GetBool("SCHEMA_PREF__minimapEnabled", false);
+                set => EditorPrefs.SetBool("SCHEMA_PREF__minimapEnabled", value);
+            }
+
             public static Color GetColor(string key, Color defaultValue)
             {
                 float r = EditorPrefs.GetFloat(key + "_r", defaultValue.r);
@@ -986,6 +1079,7 @@ namespace SchemaEditor
 
                 return new Color(r, g, b, a);
             }
+
             public static void SetColor(string key, Color value)
             {
                 EditorPrefs.SetFloat(key + "_r", value.r);
@@ -993,37 +1087,39 @@ namespace SchemaEditor
                 EditorPrefs.SetFloat(key + "_b", value.b);
                 EditorPrefs.SetFloat(key + "_a", value.a);
             }
+
             public static IEnumerable<string> GetList(string key)
             {
                 string s = EditorPrefs.GetString(key, "");
 
                 return s.Split(',');
             }
+
             public static void SetList(string key, IEnumerable<string> values)
             {
-                EditorPrefs.SetString(key, String.Join(",", values));
+                EditorPrefs.SetString(key, string.Join(",", values));
             }
+
             public static void ResetToDefault()
             {
-                List<TypeCode> valid = new List<TypeCode> { TypeCode.String, TypeCode.Single, TypeCode.Boolean, TypeCode.Int32 };
+                List<TypeCode> valid = new List<TypeCode>
+                    { TypeCode.String, TypeCode.Single, TypeCode.Boolean, TypeCode.Int32 };
 
                 Type t = typeof(Prefs);
                 PropertyInfo[] fields = t.GetProperties(BindingFlags.Static | BindingFlags.Public);
 
                 foreach (PropertyInfo property in fields)
-                {
                     if (valid.Contains(Type.GetTypeCode(property.PropertyType)))
                     {
                         EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name);
                     }
-                    else if (typeof(UnityEngine.Color).IsAssignableFrom(property.PropertyType))
+                    else if (typeof(Color).IsAssignableFrom(property.PropertyType))
                     {
                         EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name + "_r");
                         EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name + "_g");
                         EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name + "_b");
                         EditorPrefs.DeleteKey("SCHEMA_PREF__" + property.Name + "_a");
                     }
-                }
             }
         }
     }

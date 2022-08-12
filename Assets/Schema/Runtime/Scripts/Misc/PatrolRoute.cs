@@ -1,13 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class PatrolRoute : MonoBehaviour
 {
-    public List<Vector3> points = new List<Vector3>();
+    public List<Vector3> points = new();
     [HideInInspector] public int selected;
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
@@ -36,10 +35,9 @@ public class PatrolRoute : MonoBehaviour
                 points[lastIndex] = corners[0];
 
                 for (int j = 0; j < corners.Length; j++)
-                {
                     if (j - 1 >= 0)
-                        Handles.DrawBezier(corners[j - 1], corners[j], corners[j - 1], corners[j], Color.white, null, 5f);
-                }
+                        Handles.DrawBezier(corners[j - 1], corners[j], corners[j - 1], corners[j], Color.white, null,
+                            5f);
             }
 
             if (selected == i)

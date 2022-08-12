@@ -1,19 +1,13 @@
-using UnityEngine;
-using UnityEditor;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System;
+using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor
 {
     public static class SchemaGUI
     {
-        private struct LabelInfo
-        {
-            public Rect position;
-            public string text;
-            public Texture image;
-        }
         public static void DoIconText(Rect position, string text, GUIStyle style, params Texture[] images)
         {
             GUIContent[] contents = MakeContents(text, style, images);
@@ -22,7 +16,7 @@ namespace SchemaEditor
 
             foreach (GUIContent content in contents)
             {
-                if (String.IsNullOrWhiteSpace(content.text) && content.image == null)
+                if (string.IsNullOrWhiteSpace(content.text) && content.image == null)
                     continue;
 
                 content.text = content.text.Trim();
@@ -32,6 +26,7 @@ namespace SchemaEditor
                 x += size.x;
             }
         }
+
         private static GUIContent[] MakeContents(string text, GUIStyle style, params Texture[] images)
         {
             MatchCollection matchCollection = Regex.Matches(text, @"{(\d+)}");
@@ -39,7 +34,7 @@ namespace SchemaEditor
 
             foreach (Match match in matchCollection)
             {
-                if (!Int32.TryParse(match.Groups[1].Value, out int index))
+                if (!int.TryParse(match.Groups[1].Value, out int index))
                     throw new ArgumentException("Text was not a valid format string");
 
                 i.Add(index);
@@ -63,6 +58,7 @@ namespace SchemaEditor
 
             return info;
         }
+
         public static Vector2 GetSize(string text, GUIStyle style, params Texture[] images)
         {
             GUIContent[] contents = MakeContents(text, style, images);
@@ -71,7 +67,7 @@ namespace SchemaEditor
 
             foreach (GUIContent content in contents)
             {
-                if (String.IsNullOrWhiteSpace(content.text) && content.image == null)
+                if (string.IsNullOrWhiteSpace(content.text) && content.image == null)
                     continue;
 
                 content.text = content.text.Trim();
@@ -82,6 +78,7 @@ namespace SchemaEditor
 
             return ret;
         }
+
         public static void DrawRotatedTexture(Rect position, Texture image, float angle)
         {
             if (angle == 0f)
@@ -95,6 +92,13 @@ namespace SchemaEditor
                 GUI.DrawTexture(position, image);
                 GUI.matrix = last;
             }
+        }
+
+        private struct LabelInfo
+        {
+            public Rect position;
+            public string text;
+            public Texture image;
         }
     }
 }

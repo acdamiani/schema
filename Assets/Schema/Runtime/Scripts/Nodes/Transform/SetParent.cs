@@ -9,7 +9,10 @@ namespace Schema.Builtin.Nodes
     public class SetParent : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
-        [Tooltip("Transform to use as parent")] public ComponentSelector<Transform> parentTransform;
+
+        [Tooltip("Transform to use as parent")]
+        public ComponentSelector<Transform> parentTransform;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t1 = agent.GetComponent(transform);

@@ -1,5 +1,4 @@
 using UnityEngine;
-using Schema;
 
 namespace Schema.Builtin.Nodes
 {
@@ -12,7 +11,10 @@ namespace Schema.Builtin.Nodes
         public BlackboardEntrySelector<float> x;
         public BlackboardEntrySelector<float> y;
         public BlackboardEntrySelector<float> z;
-        [Tooltip("Entry to store composed vector in"), WriteOnly] public BlackboardEntrySelector<Vector3> target;
+
+        [Tooltip("Entry to store composed vector in")] [WriteOnly]
+        public BlackboardEntrySelector<Vector3> target;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             target.value = new Vector3(x.value, y.value, z.value);

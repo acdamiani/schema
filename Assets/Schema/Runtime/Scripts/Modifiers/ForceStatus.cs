@@ -4,7 +4,14 @@ namespace Schema.Builtin.Modifiers
     [DarkIcon("console.infoicon", true)]
     public class ForceStatus : Modifier
     {
+        public enum ForcedStatus
+        {
+            Success,
+            Failure
+        }
+
         public ForcedStatus forcedStatus;
+
         public override Message Modify(object modifierMemory, SchemaAgent agent, NodeStatus status)
         {
             switch (forcedStatus)
@@ -16,11 +23,6 @@ namespace Schema.Builtin.Modifiers
                 default:
                     return Message.None;
             }
-        }
-        public enum ForcedStatus
-        {
-            Success,
-            Failure
         }
     }
 }

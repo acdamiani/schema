@@ -10,7 +10,10 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
         [Tooltip("Translation vector")] public BlackboardEntrySelector<Vector3> translation;
-        [Tooltip("Transform to translate relative to")] public ComponentSelector<Transform> relativeTo;
+
+        [Tooltip("Transform to translate relative to")]
+        public ComponentSelector<Transform> relativeTo;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Transform t1 = agent.GetComponent(transform);

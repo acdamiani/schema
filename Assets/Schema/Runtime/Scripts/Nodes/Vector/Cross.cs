@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Schema;
+﻿using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
@@ -11,12 +8,13 @@ namespace Schema.Builtin.Nodes
     [Category("Vector")]
     public class Cross : Action
     {
-        [Tooltip("LHS of the cross product")]
-        public BlackboardEntrySelector<Vector3> vectorOne;
-        [Tooltip("RHS of the cross product")]
-        public BlackboardEntrySelector<Vector3> vectorTwo;
-        [Tooltip("Blackboard variable to store the cross product in"), WriteOnly]
+        [Tooltip("LHS of the cross product")] public BlackboardEntrySelector<Vector3> vectorOne;
+
+        [Tooltip("RHS of the cross product")] public BlackboardEntrySelector<Vector3> vectorTwo;
+
+        [Tooltip("Blackboard variable to store the cross product in")] [WriteOnly]
         public BlackboardEntrySelector<Vector3> cross;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Vector3 product = Vector3.Cross(vectorOne.value, vectorTwo.value);

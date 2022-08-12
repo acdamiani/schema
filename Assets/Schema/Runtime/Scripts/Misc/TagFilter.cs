@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
-[System.Serializable]
+
+[Serializable]
 public class TagFilter
 {
-	public List<string> tags = new List<string>();
+    public List<string> tags = new();
 }

@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Schema;
-using UnityEngine;
 
 [DarkIcon("Dark/Selector")]
 [LightIcon("Light/Selector")]

@@ -1,20 +1,23 @@
-using UnityEngine;
+using Schema.Builtin.Nodes;
 using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(Schema.Builtin.Nodes.CancelInvoke)), CanEditMultipleObjects]
+    [CustomEditor(typeof(CancelInvoke))]
+    [CanEditMultipleObjects]
     public class CancelInvokeEditor : Editor
     {
-        SerializedProperty monoBehavior;
-        SerializedProperty cancelAll;
-        SerializedProperty methodName;
-        void OnEnable()
+        private SerializedProperty cancelAll;
+        private SerializedProperty methodName;
+        private SerializedProperty monoBehavior;
+
+        private void OnEnable()
         {
             monoBehavior = serializedObject.FindProperty("monoBehaviour");
             cancelAll = serializedObject.FindProperty("cancelAll");
             methodName = serializedObject.FindProperty("methodName");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
