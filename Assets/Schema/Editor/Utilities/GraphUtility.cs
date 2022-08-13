@@ -14,9 +14,6 @@ public static class GraphUtility
     {
         Node.BeginPosNoCheck();
 
-        foreach (Node n in nodes)
-            Debug.Log(n.name);
-
         Node root = nodes.Where(node => node.GetType() == typeof(Root)).FirstOrDefault();
 
         Calc(root);

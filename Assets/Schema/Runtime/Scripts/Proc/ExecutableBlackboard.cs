@@ -6,6 +6,7 @@ namespace Schema.Internal
 {
     public class ExecutableBlackboard
     {
+        private static Dictionary<BlackboardEntry, EntryData> globalValues;
         private readonly Dictionary<string, EntryData> dynamicValues = new();
         private readonly Dictionary<BlackboardEntry, EntryData> values = new();
 
@@ -17,6 +18,20 @@ namespace Schema.Internal
 
                 if (!values.ContainsKey(entry))
                     values.Add(entry, new EntryData(entry));
+            }
+
+            if (globalValues == null)
+            {
+                globalValues = new Dictionary<BlackboardEntry, EntryData>();
+
+                for (int i = 0; i < Blackboard.global.entries.Length; i++)
+                {
+                    BlackboardEntry entry = Blackboard.global.entries[i];
+
+                    if (!globalValues.ContainsKey(entry))
+                        globalValues.Add(entry, new EntryData(entry));
+                }
+
             }
         }
 
@@ -55,12 +70,18 @@ namespace Schema.Internal
         {
             values.TryGetValue(entry, out EntryData data);
 
+            if (data == null)
+                globalValues.TryGetValue(entry, out data);
+
             return data?.GetValue(ExecutionContext.current.agent.GetInstanceID());
         }
 
         public void Set(BlackboardEntry entry, object value)
         {
             values.TryGetValue(entry, out EntryData data);
+
+            if (data == null)
+                globalValues.TryGetValue(entry, out data);
 
             data?.SetValue(ExecutionContext.current.agent.GetInstanceID(), value);
         }

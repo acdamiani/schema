@@ -136,42 +136,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             {
                 node = createArgs.fromExisting;
                 uID = node.uID;
-
-                if (node.parent != null)
-                {
-                    ConnectionComponent.ConnectionComponentCreateArgs connectionComponentCreateArgs =
-                        new ConnectionComponent.ConnectionComponentCreateArgs();
-
-                    GUIComponent parentComponent = canvas.FindComponent(node.parent);
-
-                    if (parentComponent == null)
-                    {
-                        Debug.LogWarning(
-                            $"Component for node {node} has no active parent component! When creating NodeCompnents from existing nodes, do so in PreOrder.");
-                    }
-                    else
-                    {
-                        connectionComponentCreateArgs.from = (NodeComponent)parentComponent;
-                        connectionComponentCreateArgs.to = this;
-
-                        parentConnection = canvas.Create<ConnectionComponent>(connectionComponentCreateArgs);
-                    }
-                }
             }
             else
             {
                 node = createArgs.graph.AddNode(createArgs.nodeType, createArgs.position);
                 uID = node.uID;
-            }
-
-            foreach (Conditional conditional in node.conditionals)
-            {
-                ConditionalComponent.ConditionalComponentCreateArgs conditionalComponentCreateArgs =
-                    new ConditionalComponent.ConditionalComponentCreateArgs();
-
-                conditionalComponentCreateArgs.fromExisting = conditional;
-
-                canvas.Create<ConditionalComponent>(conditionalComponentCreateArgs);
             }
 
             layout = new NodeComponentLayout(this);

@@ -190,7 +190,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             curve.p3 = p3;
 
             Handles.DrawBezier(p0, p3, p1, p2, isSelected ? NodeEditor.Prefs.selectionColor : Color.gray, Styles.curve,
-                NodeEditor.instance.windowInfo.zoom * 3f);
+                canvas.zoomer.zoom * 3f);
         }
 
         public override string GetDebugInfo()

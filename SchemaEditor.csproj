@@ -38,15 +38,12 @@
   <ItemGroup>
      <Compile Include="Assets/Schema/Editor/EditorReflection.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetScaleEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/NodeEditorEvents.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/NavMeshAreaMaskDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetRotationEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/MoveToRandomEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/BlockerComponent.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SoundHeardEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/NodeEditorUtilities.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IDeletable.cs" />
-     <Compile Include="Assets/Schema/Editor/NodeEditorFileHandler.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/RandomRangeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetVectorComponentsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/DefaultNodeEditor.cs" />
@@ -54,10 +51,12 @@
      <Compile Include="Assets/Schema/Editor/Canvas/Components/ConditionalComponent.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/WindowComponent.cs" />
      <Compile Include="Assets/Schema/Editor/SchemaGUI.cs" />
+     <Compile Include="Assets/Schema/Editor/Window/NodeEditorGUI.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/SelectionBoxComponent.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/EditorHelperMethods.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/GraphEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Window/ICanvasContextProvider.cs" />
+     <Compile Include="Assets/Schema/Editor/ContextBuilder.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogFormatEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Resources/a.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetBoundsEditor.cs" />
@@ -69,7 +68,6 @@
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IEditable.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/QuaternionAngleAxisEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/ObjectEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/NodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntryDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/ICopyable.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/CurveUtility.cs" />
@@ -84,15 +82,16 @@
      <Compile Include="Assets/Schema/Editor/ShortcutManager.cs" />
      <Compile Include="Assets/Schema/Editor/QuickSearch.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/GUIComponent.cs" />
+     <Compile Include="Assets/Schema/Editor/Window/NodeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IDuplicatable.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/PannerZoomer.cs" />
      <Compile Include="Assets/Schema/Editor/Styles.cs" />
+     <Compile Include="Assets/Schema/Editor/MenuItems.cs" />
      <Compile Include="Assets/Schema/Editor/EditorInspector.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Window/IWindowComponentProvider.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomWeightedEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/NodeEditorGUI.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetPositionEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetMatrixValueEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CoverVolumeEditor.cs" />
@@ -113,6 +112,7 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/VectorAngleEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Components/NodeComponent.cs" />
      <Compile Include="Assets/Schema/Editor/Utilities/GraphUtility.cs" />
+     <Compile Include="Assets/Schema/Editor/Window/CommandHandler.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagListDrawer.cs" />
      <None Include="Assets/Schema/Editor/SchemaEditor.asmdef" />
      <None Include="Assets/Schema/Editor/Resources/ScriptTemplates/Schema_NodeTemplate.cs.txt" />

@@ -107,7 +107,34 @@ namespace SchemaEditor.Internal
 
         public void Remove(GUIComponent component)
         {
-            ArrayUtility.Remove(ref _components, component);
+            if (ArrayUtility.Contains(_components, component))
+                ArrayUtility.Remove(ref _components, component);
+        }
+
+        public void Select(GUIComponent component)
+        {
+            ISelectable selectable = component as ISelectable;
+
+            if (selectable == null || !selectable.IsSelectable())
+                return;
+
+            selectable.Select(true);
+
+            if (!ArrayUtility.Contains(_selected, component))
+                ArrayUtility.Add(ref _selected, component);
+        }
+
+        public void Deselect(GUIComponent component)
+        {
+            ISelectable selectable = component as ISelectable;
+
+            if (selectable == null)
+                return;
+
+            selectable.Deselect();
+
+            if (ArrayUtility.Contains(_selected, component))
+                ArrayUtility.Remove(ref _selected, component);
         }
 
         public void MoveToFront(GUIComponent component)
@@ -214,6 +241,14 @@ namespace SchemaEditor.Internal
             ArrayUtility.Clear(ref _selected);
         }
 
+        public bool CanSelectChildren()
+        {
+            IEnumerable<GUIComponent> nodeComponents = selected
+                .Where(x => x is NodeComponent);
+
+            return nodeComponents.Count() > 0;
+        }
+
         private void DoEvents(IEnumerable<GUIComponent> layeredComponents)
         {
             if (IsInSink(Event.current))
@@ -221,6 +256,13 @@ namespace SchemaEditor.Internal
 
             switch (Event.current.rawType)
             {
+                case EventType.ValidateCommand:
+                    if (CommandHandler.Valdiate(Event.current.commandName))
+                        Event.current.Use();
+                    break;
+                case EventType.ExecuteCommand:
+                    CommandHandler.Execute(this, Event.current.commandName);
+                    break;
                 case EventType.MouseDown:
                     OnMouseDown(Event.current, layeredComponents);
                     break;
@@ -229,19 +271,6 @@ namespace SchemaEditor.Internal
                     break;
                 case EventType.ScrollWheel:
                     OnMouseScroll(Event.current);
-                    break;
-                case EventType.KeyDown:
-                    OnKeyDown(Event.current);
-                    break;
-            }
-        }
-
-        private void OnKeyDown(Event keyEvent)
-        {
-            switch (keyEvent.keyCode)
-            {
-                case KeyCode.Delete:
-                    DeleteSelected();
                     break;
             }
         }
@@ -363,24 +392,6 @@ namespace SchemaEditor.Internal
             }
         }
 
-        private void DeleteSelected()
-        {
-            foreach (GUIComponent component in components.Where(x => x is IDeletable))
-            {
-                IDeletable deletable = (IDeletable)component;
-
-                if (deletable.IsDeletable())
-                {
-                    deletable.Delete();
-
-                    ArrayUtility.Remove(ref _components, component);
-
-                    if (_selected.Contains(component))
-                        ArrayUtility.Remove(ref _selected, component);
-                }
-            }
-        }
-
         private void DoCopy()
         {
             IEnumerable<NodeComponent> selectedNodes = selected
@@ -395,39 +406,34 @@ namespace SchemaEditor.Internal
 
         private GenericMenu BuildContextMenu()
         {
-            GenericMenu menu = new();
+            ContextBuilder menu = new();
 
-            menu.AddItem("Copy", false, DoCopy, false);
-            menu.AddItem("Paste", false, () => { }, true);
+            menu.AddShortcut("Main Menu/Edit/Cut", () => { });
+            menu.AddShortcut("Main Menu/Edit/Copy", () => { });
+            menu.AddShortcut("Main Menu/Edit/Paste", () => { });
 
-            menu.AddSeparator("");
+            menu.AddSeparator();
 
-            menu.AddItem("Delete", false, DeleteSelected, false);
-            menu.AddItem("Duplicate", false, () => { }, false);
+            menu.AddShortcut("Main Menu/Edit/Duplicate", () => { });
+            menu.AddShortcut("Main Menu/Edit/Delete", () => CommandHandler.DeleteCommand(this));
 
-            menu.AddSeparator("");
+            menu.AddSeparator();
 
-            foreach (Type t in HelperMethods.GetEnumerableOfType(typeof(Node)))
-            {
-                string category = GraphObject.GetCategory(t);
+            menu.AddShortcut("Main Menu/Edit/Undo", Undo.PerformUndo);
+            menu.AddShortcut("Main Menu/Edit/Redo", Undo.PerformRedo);
 
-                if (string.IsNullOrEmpty(category))
-                    menu.AddItem($"Add Node/{t.GetFriendlyTypeName()}", false, () => { }, false);
-                else
-                    menu.AddItem($"Add Node/{category}/{t.GetFriendlyTypeName()}", false, () => { }, false);
-            }
+            menu.AddSeparator();
 
-            foreach (Type t in HelperMethods.GetEnumerableOfType(typeof(Conditional)))
-            {
-                string category = GraphObject.GetCategory(t);
+            menu.AddShortcut("Main Menu/Edit/Select All", () => CommandHandler.SelectAllCommand(this));
+            menu.AddShortcut("Main Menu/Edit/Deselect All", () => CommandHandler.DeselectAllCommand(this));
+            menu.AddShortcut("Main Menu/Edit/Select Children", () => CommandHandler.SelectChildrenCommand(this), !CanSelectChildren());
 
-                if (string.IsNullOrEmpty(category))
-                    menu.AddItem($"Add Conditional/{t.GetFriendlyTypeName()}", false, () => { }, false);
-                else
-                    menu.AddItem($"Add Conditional/{category}/{t.GetFriendlyTypeName()}", false, () => { }, false);
-            }
+            menu.AddSeparator();
 
-            return menu;
+            menu.AddShortcut("Schema/Add Node", NodeEditor.AddNodeCommand);
+            menu.AddShortcut("Schema/Add Conditional", NodeEditor.AddConditionalCommand, NodeEditor.CanAddConditional(this));
+
+            return menu.menu;
         }
     }
 }
