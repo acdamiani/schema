@@ -62,7 +62,6 @@
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetBoundsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorIKPositionWeightEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEntryEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/DownloadIconEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/ConeCheckEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Icons.cs" />
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IEditable.cs" />

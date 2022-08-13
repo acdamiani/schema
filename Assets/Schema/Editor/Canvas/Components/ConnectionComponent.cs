@@ -3,6 +3,8 @@ using System.Text;
 using Schema.Utilities;
 using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
@@ -84,7 +86,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public bool IsDeletable()
         {
-            return isSelected;
+            IEnumerable<NodeComponent> nodeComponents = canvas.selected
+                .Where(x => x is NodeComponent)
+                .Cast<NodeComponent>();
+
+            return isSelected && !nodeComponents.Contains(connectionTo) && !nodeComponents.Contains(connectionFrom);
         }
 
         public void Delete()

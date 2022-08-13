@@ -4,6 +4,8 @@ using Schema.Internal;
 using Schema.Utilities;
 using SchemaEditor.Utilities;
 using UnityEngine;
+using System.Linq;
+using System.Collections.Generic;
 using Object = UnityEngine.Object;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
@@ -26,7 +28,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public bool IsDeletable()
         {
-            return isSelected;
+            IEnumerable<NodeComponent> nodeComponents = canvas.selected
+                .Where(x => x is NodeComponent)
+                .Cast<NodeComponent>();
+
+            return isSelected && !nodeComponents.Contains(parent);
         }
 
         public void Delete()
