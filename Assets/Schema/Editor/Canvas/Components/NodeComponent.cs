@@ -169,8 +169,18 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 node.connectionDescriptor == Node.ConnectionDescriptor.OnlyInConnection
                 || node.connectionDescriptor == Node.ConnectionDescriptor.Both
             )
+            {
                 GUI.DrawTextureWithTexCoords(layout.inConnection, Icons.GetResource("in_connection", false),
                     new Rect(0f, 0.5f, 1f, 0.5f));
+
+                GUI.color = NodeEditor.Prefs.selectionColor;
+
+                if (layout.inConnection.Contains(Event.current.mousePosition))
+                    GUI.DrawTextureWithTexCoords(layout.inConnection, Icons.GetResource("in_connection_outline", false),
+                        new Rect(0f, 0.5f, 1f, 0.5f));
+            }
+
+            GUI.color = Styles.windowBackground;
 
             if (
                 node.connectionDescriptor == Node.ConnectionDescriptor.OnlyOutConnection
@@ -178,7 +188,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             )
                 Styles.roundedBox.DrawIfRepaint(layout.outConnection, false, false, false, false);
 
-            GUI.color = Styles.windowBackground;
             Styles.element.DrawIfRepaint(layout.shadow, false, false, false, false);
 
             Color c = isSelected ? NodeEditor.Prefs.selectionColor : Styles.outlineColor;
@@ -329,7 +338,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     e.Use();
                     break;
                 case EventType.MouseDrag when e.button == 0 && isSelected && canvas.selectionBoxComponent.hidden:
-                    float snap = Styles.gridTexture.width / 4f;
+                    float snap = Icons.gridTexture.width / 4f;
 
                     if (beginDragPosition == null)
                     {
@@ -460,7 +469,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             sb.AppendLine(string.Format("<b>Shadow:</b> {0}", layout.shadow));
             sb.AppendLine(string.Format("<b>InConnection:</b> {0}", layout.inConnection));
             sb.AppendLine(string.Format("<b>OutConnection:</b> {0}", layout.outConnection));
-            sb.AppendLine(string.Format("<b>OutConnectionSliced:</b> {0}", layout.outConnectionSliced));
             sb.AppendLine(string.Format("<b>ErrorBox:</b> {0}", layout.errorBox));
             sb.Append(string.Format("<b>PriorityIndicator:</b> {0}", layout.priorityIndicator));
 
@@ -521,7 +529,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             public Rect shadow { get; set; }
             public Rect inConnection { get; set; }
             public Rect outConnection { get; set; }
-            public Rect outConnectionSliced { get; set; }
             public Rect errorBox { get; set; }
             public Rect priorityIndicator { get; set; }
             public Rect modifierBox { get; set; }
@@ -547,8 +554,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 errorBox = new Rect(body.xMax, body.yMax, 28f, 28f).UseCenter();
                 inConnection = new Rect(body.center.x, body.y - component.node.conditionals.Length * 50f - 6f, 24f, 12f)
                     .UseCenter();
-                outConnection = new Rect(body.center.x, body.yMax, body.width - 48f, 24f).UseCenter();
-                outConnectionSliced = outConnection.Slice(0.5f, false, false);
+                outConnection = new Rect(body.center.x, body.yMax, body.width - 48f, 12f).UseCenter();
                 priorityIndicator = new Rect(body.x, body.center.y, v.x, v.y).UseCenter();
                 modifierBox = new Rect(body.xMax, body.y, 28f, 28f).UseCenter();
             }

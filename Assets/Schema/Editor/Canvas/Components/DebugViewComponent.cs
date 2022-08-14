@@ -22,6 +22,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public override void OnGUI()
         {
+            return;
             rect = canvas.context.GetRect();
 
             GUIStyle label = new GUIStyle(EditorStyles.label);

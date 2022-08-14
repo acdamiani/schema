@@ -35,10 +35,11 @@ namespace SchemaEditor
         {
             CalculateWindow();
 
-            if (target != null && canvas != null)
-            {
+            if (canvas != null)
                 canvas.Draw();
 
+            if (target != null && canvas != null)
+            {
                 CreateEditors();
 
                 DrawInspector();
@@ -209,7 +210,7 @@ namespace SchemaEditor
                 string[] values = Enum.GetNames(typeof(Window.InspectorView));
 
                 GUIContent[] content = new GUIContent[2]
-                    { new(values[0], Styles.inspectorIcon), new(values[1], Styles.hiearchyIcon) };
+                    { new(values[0], Icons.GetEditor("UnityEditor.InspectorWindow")), new(values[1], Icons.GetEditor("UnityEditor.HierarchyWindow")) };
 
                 GUILayout.FlexibleSpace();
 
@@ -281,10 +282,6 @@ namespace SchemaEditor
 
         private void DrawPreferencesWindow()
         {
-            GUILayout.Space(Window.padding);
-            GUILayout.Label("Preferences", EditorStyles.largeLabel);
-            GUILayout.Space(Window.padding);
-
             EditorGUILayout.LabelField("General", EditorStyles.boldLabel);
             Prefs.saveOnClose = EditorGUILayout.Toggle("Save on Close", Prefs.saveOnClose);
             Prefs.formatOnSave = EditorGUILayout.Toggle("Format on Save", Prefs.formatOnSave);
@@ -351,10 +348,6 @@ namespace SchemaEditor
         /// </summary>
         private void DrawInspectorWindow()
         {
-            GUILayout.Space(Window.padding);
-            GUILayout.Label("Inspector", EditorStyles.largeLabel);
-            GUILayout.Space(Window.padding);
-
             if (distinctTypes.Count > 1)
             {
                 EditorGUILayout.LabelField("Different Node Types Selected");
@@ -363,6 +356,8 @@ namespace SchemaEditor
                 foreach (Type t in distinctTypes) EditorGUILayout.LabelField(t.Name);
                 return;
             }
+
+            GUILayout.Space(8);
 
             if (editor != null)
             {
@@ -389,10 +384,6 @@ namespace SchemaEditor
 
         private void DrawBlackboard(Blackboard blackboard)
         {
-            GUILayout.Space(Window.padding);
-            GUILayout.Label("Blackboard", EditorStyles.largeLabel);
-            GUILayout.Space(Window.padding);
-
             blackboardEditor.OnInspectorGUI();
         }
 
@@ -616,7 +607,7 @@ namespace SchemaEditor
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size * .5f;
-            Texture2D gridTex = zoom > 2f ? Styles.gridTexture2x : Styles.gridTexture;
+            Texture2D gridTex = zoom > 2f ? Icons.gridTexture2x : Icons.gridTexture;
 
             float fac = 1f - Mathf.Clamp(zoom - (transitionPoint - transitionWindow), 0f, transitionWindow * 2f) /
                 (transitionWindow * 2f);
@@ -633,9 +624,9 @@ namespace SchemaEditor
 
             Vector2 tileAmount = new Vector2(tileAmountX, tileAmountY);
 
-            GUI.DrawTextureWithTexCoords(rect, Styles.gridTexture2x, new Rect(tileOffset, tileAmount));
+            GUI.DrawTextureWithTexCoords(rect, Icons.gridTexture2x, new Rect(tileOffset, tileAmount));
             GUI.color = new Color(1f, 1f, 1f, fac);
-            GUI.DrawTextureWithTexCoords(rect, Styles.gridTexture, new Rect(tileOffset, tileAmount));
+            GUI.DrawTextureWithTexCoords(rect, Icons.gridTexture, new Rect(tileOffset, tileAmount));
             GUI.color = Color.white;
         }
 

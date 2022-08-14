@@ -149,6 +149,9 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 .Where(x => x is NodeComponent)
                 .Cast<NodeComponent>();
 
+            if (nodeComponents.Count() == 0)
+                return Rect.zero;
+
             float xMin = nodeComponents.Min(x => x.layout.gridRect.x) - padding;
             float xMax = nodeComponents.Max(x => x.layout.gridRect.x + x.layout.gridRect.width) + padding;
             float yMin = nodeComponents.Min(x => x.layout.gridRect.y) - padding;

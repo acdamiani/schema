@@ -151,6 +151,7 @@ namespace SchemaEditor
         public void Open(Graph graphObj)
         {
             target = graphObj;
+            target?.Initialize();
 
             canvas = null;
             RebuildComponentTree();
@@ -164,8 +165,6 @@ namespace SchemaEditor
                 titleContent = new GUIContent("Behavior Editor");
                 return;
             }
-
-            target.Initialize();
 
             titleContent = new GUIContent(target.name);
 
@@ -197,8 +196,6 @@ namespace SchemaEditor
             }
 
             EditorPrefs.SetString("Schema Recently Opened", string.Join(",", lastFiles));
-
-            Selection.activeObject = target;
 
             Undo.ClearAll();
 

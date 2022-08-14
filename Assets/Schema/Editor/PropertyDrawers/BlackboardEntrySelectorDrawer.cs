@@ -23,7 +23,7 @@ namespace SchemaEditor
 
         public static void DoSelectorMenu(Rect position, SerializedProperty property, FieldInfo fieldInfo)
         {
-            if (GUI.Button(position, Styles.menu, EditorStyles.miniButtonRight))
+            if (GUI.Button(position, Icons.GetEditor("_Menu"), EditorStyles.miniButtonRight))
             {
                 GenericMenu menu = GenerateMenu(property, fieldInfo);
 
@@ -68,7 +68,7 @@ namespace SchemaEditor
             bool lastWideMode = EditorGUIUtility.wideMode;
             EditorGUIUtility.wideMode = true;
 
-            Vector2 size = EditorStyles.miniButtonRight.CalcSize(new GUIContent(Styles.menu));
+            Vector2 size = EditorStyles.miniButtonRight.CalcSize(new GUIContent(Icons.GetEditor("_Menu")));
 
             Rect enumRect = new Rect(position.x, position.y, position.width - size.x,
                 Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
@@ -92,7 +92,7 @@ namespace SchemaEditor
             {
                 EditorGUI.PropertyField(enumRect, dynamicPropertyName, label, true);
 
-                if (GUI.Button(buttonRect, Styles.menu, EditorStyles.miniButtonRight))
+                if (GUI.Button(buttonRect, Icons.GetEditor("_Menu"), EditorStyles.miniButtonRight))
                 {
                     GenericMenu menu = GenerateMenu(property, fieldInfo);
 
@@ -136,7 +136,7 @@ namespace SchemaEditor
                     }
                 }
 
-                if (GUI.Button(buttonRect, Styles.menu, EditorStyles.miniButtonRight))
+                if (GUI.Button(buttonRect, Icons.GetEditor("_Menu"), EditorStyles.miniButtonRight))
                 {
                     GenericMenu menu = GenerateMenu(property, fieldInfo);
 

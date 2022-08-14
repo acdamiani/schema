@@ -96,7 +96,7 @@ namespace SchemaEditor.Editors
                 r.y += 6f;
 
                 GUI.color = new Color(0.75f, 0.75f, 0.75f, 1f);
-                SchemaGUI.DrawRotatedTexture(r, Styles.foldout, m.expanded ? 90f : 0f);
+                SchemaGUI.DrawRotatedTexture(r, Icons.GetResource("foldout", false), m.expanded ? 90f : 0f);
                 GUI.color = Color.white;
 
                 if (GUI.Button(r, "", GUIStyle.none))
@@ -121,14 +121,14 @@ namespace SchemaEditor.Editors
                 GUILayout.Space(-3);
 
                 if (
-                    GUILayout.Button(new GUIContent(Styles.moveUp, "Move Modifier Up"), EditorStyles.miniButtonMid,
+                    GUILayout.Button(new GUIContent(Icons.GetResource("move_up", false), "Move Modifier Up"), EditorStyles.miniButtonMid,
                         GUILayout.ExpandWidth(false))
                     && i > 0
                 )
                     node.MoveModifier(m, i - 1);
 
                 if (
-                    GUILayout.Button(new GUIContent(Styles.moveDown, "Move Modifier Down"),
+                    GUILayout.Button(new GUIContent(Icons.GetResource("move_down", false), "Move Modifier Down"),
                         EditorStyles.miniButtonRight, GUILayout.ExpandWidth(false))
                     && i < modifiers.Count() - 1
                 )
@@ -141,7 +141,7 @@ namespace SchemaEditor.Editors
 
                 GUI.color = new Color(0.75f, 0.75f, 0.75f, 1f);
 
-                if (GUI.Button(r, new GUIContent(Styles.close, "Remove Modifier"), GUIStyle.none))
+                if (GUI.Button(r, new GUIContent(Icons.GetResource("close", false), "Remove Modifier"), GUIStyle.none))
                 {
                     node.RemoveModifier(m);
                     removed = true;

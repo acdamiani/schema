@@ -368,10 +368,8 @@ namespace SchemaEditor.Internal
 
         private void OnMouseScroll(Event mouseEvent)
         {
-            zoomer.zoom += mouseEvent.delta.y * 0.035f;
-
-            if (!selectionBoxComponent.hidden)
-                return;
+            if (zoomer != null)
+                zoomer.zoom += mouseEvent.delta.y * 0.035f;
         }
 
         public void DoBoxOverlap(Rect boxRect, Event current)
@@ -453,6 +451,7 @@ namespace SchemaEditor.Internal
 
             menu.AddShortcut("Schema/Add Node", NodeEditor.AddNodeCommand);
             menu.AddShortcut("Schema/Add Conditional", NodeEditor.AddConditionalCommand, NodeEditor.CanAddConditional(this));
+            menu.AddShortcut("Schema/Break Connections", NodeEditor.BreakConnectionsCommand);
 
             return menu.menu;
         }

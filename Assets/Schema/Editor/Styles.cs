@@ -15,37 +15,7 @@ namespace SchemaEditor
         private static readonly Color LightBackgroundColor = new Color32(200, 200, 200, 255);
         private static readonly Color DarkBorder = new Color32(40, 40, 40, 255);
         private static readonly Color LightBorder = new Color32(147, 147, 147, 255);
-        private static Texture2D _gridTexture;
 
-        private static Texture2D _gridTexture2x;
-
-        private static Texture2D _favoriteDisabled;
-
-        private static Texture2D _favoriteEnabled;
-
-        private static Texture2D _folder;
-
-        private static Texture2D _folderOpen;
-
-        private static Texture2D _next;
-        private static Texture2D _prev;
-        private static Texture2D _menu;
-        private static Texture2D _inspectorIcon;
-
-        private static Texture2D _hiearchyIcon;
-
-        private static Texture2D _searchBackground;
-
-        private static Texture2D _solid;
-        private static Texture2D _curve;
-        private static Texture2D _inConnectionOutline;
-
-        private static Texture2D _foldout;
-
-        private static Texture2D _moveUp;
-        private static Texture2D _moveDown;
-
-        private static Texture2D _close;
         private static GUIStyle _title;
 
         private static GUIStyle _window;
@@ -90,72 +60,15 @@ namespace SchemaEditor
         public static Color outlineColor =>
             EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : new Color32(176, 176, 176, 255);
 
-        public static Texture2D gridTexture => _gridTexture == null
-            ? _gridTexture = GenerateGridTexture(Color.Lerp(Color.white, windowAccent, 0.8f), windowAccent, false)
-            : _gridTexture;
-
-        public static Texture2D gridTexture2x => _gridTexture2x == null
-            ? _gridTexture2x = GenerateGridTexture(Color.Lerp(Color.white, windowAccent, 0.8f), windowAccent, true)
-            : _gridTexture2x;
-
-        public static Texture2D favoriteDisabled => _favoriteDisabled == null
-            ? _favoriteDisabled = FindTexture("QuickSearch/favorite_disabled")
-            : _favoriteDisabled;
-
-        public static Texture2D favoriteEnabled => _favoriteEnabled == null
-            ? _favoriteEnabled = FindTexture("QuickSearch/favorite_enabled")
-            : _favoriteEnabled;
-
-        public static Texture2D folder => _folder == null
-            ? _folder = (Texture2D)EditorGUIUtility.IconContent("Folder Icon").image
-            : _folder;
-
-        public static Texture2D folderOpen =>
-            _folderOpen == null ? _folderOpen = FindTexture("FolderOpened Icon") : _folderOpen;
-
-        public static Texture2D next => _next == null ? _next = FindTexture("tab_next") : _next;
-        public static Texture2D prev => _prev == null ? _prev = FindTexture("tab_prev") : _prev;
-        public static Texture2D menu => _menu == null ? _menu = FindTexture("_Menu") : _menu;
-
-        public static Texture2D inspectorIcon => _inspectorIcon == null
-            ? _inspectorIcon = FindTexture("UnityEditor.InspectorWindow")
-            : _inspectorIcon;
-
-        public static Texture2D hiearchyIcon => _hiearchyIcon == null
-            ? _hiearchyIcon = FindTexture("UnityEditor.HierarchyWindow")
-            : _hiearchyIcon;
-
-        public static Texture2D searchBackground => _searchBackground == null
-            ? _searchBackground = Resources.Load<Texture2D>("search_bg")
-            : _searchBackground;
-
-        public static Texture2D solid => _solid == null ? _solid = Resources.Load<Texture2D>("Misc/px") : _solid;
-        public static Texture2D curve => _curve == null ? _curve = Resources.Load<Texture2D>("curve") : _curve;
-
-        public static Texture2D inConnectionOutline => _inConnectionOutline == null
-            ? _inConnectionOutline = Resources.Load<Texture2D>("in_connection_outline")
-            : _inConnectionOutline;
-
-        public static Texture2D foldout =>
-            _foldout == null ? _foldout = Resources.Load<Texture2D>("foldout") : _foldout;
-
-        public static Texture2D moveUp => _moveUp == null ? _moveUp = Resources.Load<Texture2D>("move_up") : _moveUp;
-
-        public static Texture2D moveDown =>
-            _moveDown == null ? _moveDown = Resources.Load<Texture2D>("move_down") : _moveDown;
-
-        public static Texture2D close => _close == null ? _close = Resources.Load<Texture2D>("close") : _close;
-
         public static GUIStyle title
         {
             get
             {
                 if (_title == null)
                 {
-                    _title = new GUIStyle();
-                    _title.alignment = TextAnchor.UpperCenter;
-                    _title.fontSize = 24;
-                    _title.normal.textColor = Color.white;
+                    _title = new GUIStyle(EditorStyles.label);
+                    _title.alignment = TextAnchor.MiddleCenter;
+                    _title.fontSize = 16;
                 }
 
                 return _title;
@@ -204,8 +117,8 @@ namespace SchemaEditor
                     _favoriteToggle.stretchWidth = false;
                     _favoriteToggle.fixedHeight = 16;
                     _favoriteToggle.fixedWidth = 16;
-                    _favoriteToggle.normal.background = favoriteDisabled;
-                    _favoriteToggle.onNormal.background = favoriteEnabled;
+                    _favoriteToggle.normal.background = Icons.GetResource("QuickSearch/favorite_disabled");
+                    _favoriteToggle.onNormal.background = Icons.GetResource("QuickSearch/favorite_enabled");
                 }
 
                 return _favoriteToggle;
@@ -462,51 +375,6 @@ namespace SchemaEditor
             }
         }
 
-        private static Texture2D FindTexture(string path)
-        {
-            bool darkMode = EditorGUIUtility.isProSkin;
-
-            string name = (darkMode ? "d_" : "") + Path.GetFileName(path);
-
-            Texture2D tex = Resources.Load<Texture2D>(Path.Join(Path.GetDirectoryName(path), name));
-
-            if (tex != null)
-                return tex;
-
-            tex = (Texture2D)EditorGUIUtility.IconContent(name).image;
-
-            if (tex != null)
-                return tex;
-
-            return EditorGUIUtility.FindTexture(name);
-        }
-
-        private static Texture2D GenerateGridTexture(Color dots, Color bg, bool large)
-        {
-            Texture2D tex = new Texture2D(64, 64);
-            Color[] cols = new Color[64 * 64];
-            for (int y = 0; y < 64; y++)
-                for (int x = 0; x < 64; x++)
-                {
-                    Color col = bg;
-
-                    if (!large && (y % 16 == 0 || x % 16 == 0))
-                        col = Color.Lerp(dots, bg, 0.65f);
-
-                    if (y == 0 || x == 0) col = Color.Lerp(dots, bg, 0.65f);
-                    if (y == 63 || x == 63) col = Color.Lerp(dots, bg, 0.35f);
-
-                    cols[y * 64 + x] = col;
-                }
-
-            tex.SetPixels(cols);
-            tex.wrapMode = TextureWrapMode.Repeat;
-            tex.filterMode = FilterMode.Bilinear;
-            tex.name = "Grid";
-            tex.Apply();
-            return tex;
-        }
-
         private static Texture2D GenerateSolid(Color color, Vector2Int size)
         {
             Texture2D tex = new Texture2D(size.y, size.x);
@@ -519,26 +387,6 @@ namespace SchemaEditor
 
             tex.Apply();
 
-            return tex;
-        }
-
-        private static Texture2D GenerateCrossTexture(Color line)
-        {
-            Texture2D tex = new Texture2D(64, 64);
-            Color[] cols = new Color[64 * 64];
-            for (int y = 0; y < 64; y++)
-                for (int x = 0; x < 64; x++)
-                {
-                    Color col = line;
-                    if (y != 31 && x != 31) col.a = 0;
-                    cols[y * 64 + x] = col;
-                }
-
-            tex.SetPixels(cols);
-            tex.wrapMode = TextureWrapMode.Clamp;
-            tex.filterMode = FilterMode.Bilinear;
-            tex.name = "Grid";
-            tex.Apply();
             return tex;
         }
     }
