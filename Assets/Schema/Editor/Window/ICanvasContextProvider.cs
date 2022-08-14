@@ -11,5 +11,6 @@ namespace SchemaEditor.Internal
         Rect GetViewRect();
         float GetToolbarHeight();
         EditorWindow GetEditorWindow();
+        void Rebuild();
     }
 }

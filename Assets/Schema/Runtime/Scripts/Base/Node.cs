@@ -433,6 +433,35 @@ namespace Schema
         }
 
         /// <summary>
+        ///     Add a conditional to this node
+        /// </summary>
+        /// <param name="conditionalType">Type of conditional to add. Must inherit from type Conditional</param>
+        /// <param name="undo">Whether to register this operation in the undo stack</param>
+        /// <returns>Created Conditional</returns>
+        /// <exception cref="ArgumentException">conditionalType does not inherit from Conditional</exception>
+        public void AddConditional(Conditional conditional, bool undo = true)
+        {
+            Debug.Log("going1");
+            if (ArrayUtility.Contains(m_conditionals, conditional))
+                return;
+
+            Debug.Log("going");
+
+            conditional.hideFlags = HideFlags.HideInHierarchy;
+            conditional.node = this;
+
+            string path = AssetDatabase.GetAssetPath(this);
+
+            if (!string.IsNullOrEmpty(path))
+                AssetDatabase.AddObjectToAsset(conditional, path);
+
+            if (undo)
+                Undo.RegisterCompleteObjectUndo(this, "Conditional Added");
+
+            ArrayUtility.Add(ref m_conditionals, conditional);
+        }
+
+        /// <summary>
         ///     Duplicate a given conditional
         /// </summary>
         /// <param name="conditional">Conditional to duplicate</param>

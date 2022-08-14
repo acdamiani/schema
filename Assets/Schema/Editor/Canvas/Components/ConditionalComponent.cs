@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
     public sealed class ConditionalComponent : GUIComponent, IViewElement, ISelectable, IEditable, IGraphObjectProvider,
-        IDeletable
+        IDeletable, ICopyable
     {
         private static ConditionalComponent moving;
         private static Vector2 dxdyMouseDown;
@@ -89,6 +89,16 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public void Deselect()
         {
             isSelected = false;
+        }
+
+        public bool IsCopyable()
+        {
+            return isSelected;
+        }
+
+        public Object GetCopyable()
+        {
+            return conditional;
         }
 
         public Rect GetRect()

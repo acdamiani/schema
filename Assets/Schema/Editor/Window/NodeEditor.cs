@@ -97,6 +97,11 @@ namespace SchemaEditor
             return this;
         }
 
+        public void Rebuild()
+        {
+            RebuildComponentTree();
+        }
+
         public float GetToolbarHeight()
         {
             try

@@ -3,9 +3,9 @@ using Object = UnityEngine.Object;
 
 namespace SchemaEditor.Internal.ComponentSystem
 {
-    public interface ICopyable
+    public interface IPasteRecievier
     {
-        bool IsCopyable();
-        Object GetCopyable();
+        bool IsPastable();
+        Object GetReciever();
     }
 }

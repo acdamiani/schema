@@ -13,7 +13,7 @@ using Object = UnityEngine.Object;
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
     public sealed class NodeComponent
-        : GUIComponent, ISelectable, IEditable, IFramable, IDeletable, IGraphObjectProvider, IViewElement
+        : GUIComponent, ISelectable, IEditable, IFramable, IDeletable, IGraphObjectProvider, IViewElement, ICopyable, IPasteRecievier
     {
         public enum HoverType
         {
@@ -54,12 +54,9 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 .Where(x => x.conditional.node == node);
 
             foreach (ConditionalComponent conditional in conditionalComponents)
-            {
-                node.RemoveConditional(conditional.conditional);
                 Destroy(conditional);
-            }
 
-            node.graph.DeleteNodes(new List<Node> { node });
+            node.graph.DeleteNode(node);
 
             if (parentConnection != null)
                 Destroy(parentConnection);
@@ -124,6 +121,26 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             isSelected = false;
         }
 
+        public bool IsCopyable()
+        {
+            return isSelected;
+        }
+
+        public bool IsPastable()
+        {
+            return isSelected;
+        }
+
+        public Object GetCopyable()
+        {
+            return node;
+        }
+
+        public Object GetReciever()
+        {
+            return node;
+        }
+
         public override void Create(CreateArgs args)
         {
             NodeComponentCreateArgs createArgs = args as NodeComponentCreateArgs;
@@ -169,16 +186,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 node.connectionDescriptor == Node.ConnectionDescriptor.OnlyInConnection
                 || node.connectionDescriptor == Node.ConnectionDescriptor.Both
             )
-            {
                 GUI.DrawTextureWithTexCoords(layout.inConnection, Icons.GetResource("in_connection", false),
                     new Rect(0f, 0.5f, 1f, 0.5f));
-
-                GUI.color = NodeEditor.Prefs.selectionColor;
-
-                if (layout.inConnection.Contains(Event.current.mousePosition))
-                    GUI.DrawTextureWithTexCoords(layout.inConnection, Icons.GetResource("in_connection_outline", false),
-                        new Rect(0f, 0.5f, 1f, 0.5f));
-            }
 
             GUI.color = Styles.windowBackground;
 
@@ -186,7 +195,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 node.connectionDescriptor == Node.ConnectionDescriptor.OnlyOutConnection
                 || node.connectionDescriptor == Node.ConnectionDescriptor.Both
             )
-                Styles.roundedBox.DrawIfRepaint(layout.outConnection, false, false, false, false);
+                Styles.roundedBox.DrawIfRepaint(layout.outConnectionDraw, false, false, false, false);
 
             Styles.element.DrawIfRepaint(layout.shadow, false, false, false, false);
 
@@ -529,6 +538,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             public Rect shadow { get; set; }
             public Rect inConnection { get; set; }
             public Rect outConnection { get; set; }
+            public Rect outConnectionDraw { get; set; }
             public Rect errorBox { get; set; }
             public Rect priorityIndicator { get; set; }
             public Rect modifierBox { get; set; }
@@ -554,7 +564,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 errorBox = new Rect(body.xMax, body.yMax, 28f, 28f).UseCenter();
                 inConnection = new Rect(body.center.x, body.y - component.node.conditionals.Length * 50f - 6f, 24f, 12f)
                     .UseCenter();
-                outConnection = new Rect(body.center.x, body.yMax, body.width - 48f, 12f).UseCenter();
+                outConnection = new Rect(body.center.x, body.yMax + 6f, body.width - 48f, 12f).UseCenter();
+                outConnectionDraw = new Rect(outConnection.x, outConnection.y - 12f, outConnection.width, 24f);
                 priorityIndicator = new Rect(body.x, body.center.y, v.x, v.y).UseCenter();
                 modifierBox = new Rect(body.xMax, body.y, 28f, 28f).UseCenter();
             }

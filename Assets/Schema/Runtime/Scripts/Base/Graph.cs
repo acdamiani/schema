@@ -244,6 +244,28 @@ namespace Schema
             return (T)AddNode(typeof(T), position);
         }
 
+        public void DeleteNode(Node node)
+        {
+            if (node.GetType() == typeof(Root) || !ArrayUtility.Contains(m_nodes, node))
+                return;
+
+            Undo.RegisterCompleteObjectUndo(this, "Delete Node");
+            ArrayUtility.Remove(ref m_nodes, node);
+
+            node.parent?.RemoveConnection(node, "");
+
+            foreach (Node child in node.children)
+                node.RemoveConnection(child, "");
+
+            foreach (Conditional conditional in node.conditionals)
+                node.RemoveConditional(conditional, "");
+
+            foreach (Modifier modifier in node.modifiers)
+                node.RemoveModifier(modifier);
+
+            Undo.DestroyObjectImmediate(node);
+        }
+
         /// <summary>
         ///     Remove multiple nodes from the tree
         /// </summary>
@@ -252,9 +274,6 @@ namespace Schema
         {
             IEnumerable<Node> nodesWithoutRoot = nodes.Where(node => node.GetType() != typeof(Root))
                 .OrderByDescending(node => node.priority);
-
-            Undo.IncrementCurrentGroup();
-            int groupIndex = Undo.GetCurrentGroup();
 
             Undo.RegisterCompleteObjectUndo(this, "Delete Nodes");
             m_nodes = this.nodes.Except(nodesWithoutRoot).ToArray();
@@ -271,9 +290,6 @@ namespace Schema
 
                 Undo.DestroyObjectImmediate(node);
             }
-
-            Undo.SetCurrentGroupName("Delete Nodes");
-            Undo.CollapseUndoOperations(groupIndex);
         }
 
         /// <summary>

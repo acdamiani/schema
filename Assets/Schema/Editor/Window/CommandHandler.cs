@@ -8,6 +8,11 @@ namespace SchemaEditor.Internal
 {
     public static class CommandHandler
     {
+        public static CopyBuffer copyBuffer { get; }
+        static CommandHandler()
+        {
+            copyBuffer = new CopyBuffer();
+        }
         public static bool Valdiate(string commandName)
         {
             switch (commandName)
@@ -40,6 +45,12 @@ namespace SchemaEditor.Internal
                     break;
                 case "SelectChildren":
                     SelectChildrenCommand(canvas);
+                    break;
+                case "Copy":
+                    CopyCommand(canvas);
+                    break;
+                case "Paste":
+                    PasteCommand(canvas);
                     break;
             }
         }
@@ -86,8 +97,30 @@ namespace SchemaEditor.Internal
 
             canvas.Select(nodeComponent);
         }
-        public static void CopyCommand() { }
-        public static void SoftDeleteCommand() { }
+        public static void CopyCommand(ComponentCanvas canvas)
+        {
+            copyBuffer.Copy(
+                canvas.components
+                    .Where(x => x is ICopyable)
+                    .Cast<ICopyable>()
+                    .Where(x => x.IsCopyable())
+                    .Select(x => x.GetCopyable())
+            );
+
+            canvas.context.Rebuild();
+        }
+        public static void PasteCommand(ComponentCanvas canvas)
+        {
+            copyBuffer.Paste(
+                canvas.components
+                    .Where(x => x is IPasteRecievier)
+                    .Cast<IPasteRecievier>()
+                    .Where(x => x.IsPastable())
+                    .Select(x => x.GetReciever())
+            );
+
+            canvas.context.Rebuild();
+        }
         private enum CopyBufferDescriptor
         {
             NodesWithConditionals,
