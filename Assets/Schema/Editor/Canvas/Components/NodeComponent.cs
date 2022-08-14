@@ -26,6 +26,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         private static readonly RectOffset ContentPadding = new(20, 20, 14, 14);
         private Vector2 beginDragNodePosition;
         private Vector2? beginDragPosition;
+        private static bool beginConnectionOrigin;
         private float cLerp;
         private bool isActive;
         private bool isSelected;
@@ -244,6 +245,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             switch (e.rawType)
             {
                 case EventType.MouseDown when e.button == 0:
+                    beginConnectionOrigin = false;
+
                     if (layout.inConnection.Contains(e.mousePosition))
                     {
                         if (node.CanHaveParent())
@@ -259,14 +262,20 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                             parentConnection.to = null;
                             floatingConnection = parentConnection;
                         }
+
+                        e.Use();
                     }
-                    else if (layout.outConnectionSliced.Contains(e.mousePosition) && node.CanHaveChildren())
+                    else if (layout.outConnection.Contains(e.mousePosition) && node.CanHaveChildren())
                     {
                         ConnectionComponent.ConnectionComponentCreateArgs createArgs =
                             new ConnectionComponent.ConnectionComponentCreateArgs();
                         createArgs.from = this;
 
                         floatingConnection = canvas.Create<ConnectionComponent>(createArgs);
+
+                        beginConnectionOrigin = true;
+
+                        e.Use();
                     }
 
                     break;
@@ -298,7 +307,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                             Destroy(floatingConnection);
 
                             if (floatingConnection.to == null)
-                                DoConnectionDrop(floatingConnection.from, mousePositionGrid, true);
+                                DoConnectionDrop(floatingConnection.from, mousePositionGrid);
                         }
 
                         floatingConnection = null;
@@ -309,7 +318,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                         Destroy(floatingConnection);
 
                         if (floatingConnection.to == null)
-                            DoConnectionDrop(floatingConnection.from, mousePositionGrid, true);
+                            DoConnectionDrop(floatingConnection.from, mousePositionGrid);
 
                         floatingConnection = null;
                     }
@@ -349,9 +358,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             }
         }
 
-        private void DoConnectionDrop(NodeComponent old, Vector2 position, bool inConnection)
+        private void DoConnectionDrop(NodeComponent old, Vector2 position)
         {
-            return;
+            if (!beginConnectionOrigin)
+                return;
+
             QuickSearch search = new QuickSearch(
                 HelperMethods.GetEnumerableOfType(typeof(Node)),
                 t =>
@@ -389,6 +400,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             createArgs.style = Styles.window;
             createArgs.title = GUIContent.none;
             createArgs.windowProvider = search;
+            createArgs.canClose = true;
 
             canvas.Create<WindowComponent>(createArgs);
         }

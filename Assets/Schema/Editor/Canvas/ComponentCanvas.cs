@@ -189,7 +189,8 @@ namespace SchemaEditor.Internal
             )
                 return;
 
-            EditorGUIUtility.AddCursorRect(context.GetRect(), cursor);
+            if (!IsInSink(Event.current))
+                EditorGUIUtility.AddCursorRect(context.GetRect(), cursor);
 
             if (_doGrid != null)
             {
@@ -217,19 +218,21 @@ namespace SchemaEditor.Internal
             GUIComponent[] viewComponents = c.Where(c => c is IViewElement).ToArray();
             c = c.Except(viewComponents).ToArray();
 
+            bool isSinkEvent = IsSinkEvent(Event.current);
+
             if (zoomer != null)
             {
                 zoomer.Begin();
 
                 for (int i = viewComponents.Length - 1; i >= 0; i--)
-                    if (!IsInSink(Event.current) || viewComponents[i] is ICanvasMouseEventSink)
+                    if (!isSinkEvent || viewComponents[i] is ICanvasMouseEventSink)
                         viewComponents[i].OnGUI();
 
                 zoomer.End();
             }
 
             for (int i = c.Length - 1; i >= 0; i--)
-                if (!IsInSink(Event.current) || c[i] is ICanvasMouseEventSink)
+                if (!isSinkEvent || c[i] is ICanvasMouseEventSink)
                     c[i].OnGUI();
         }
 
@@ -251,7 +254,7 @@ namespace SchemaEditor.Internal
 
         private void DoEvents(IEnumerable<GUIComponent> layeredComponents)
         {
-            if (IsInSink(Event.current))
+            if (IsSinkEvent(Event.current))
                 return;
 
             switch (Event.current.rawType)
@@ -266,6 +269,9 @@ namespace SchemaEditor.Internal
                 case EventType.MouseDown:
                     OnMouseDown(Event.current, layeredComponents);
                     break;
+                case EventType.MouseUp:
+                    OnMouseUp(Event.current);
+                    break;
                 case EventType.MouseDrag:
                     OnMouseDrag(Event.current);
                     break;
@@ -275,11 +281,16 @@ namespace SchemaEditor.Internal
             }
         }
 
-        private bool IsInSink(Event mouseEvent)
+        private bool IsSinkEvent(Event sinkEvent)
         {
-            if (!mouseEvent.isMouse && !mouseEvent.isKey && !mouseEvent.isScrollWheel)
+            if (!sinkEvent.isKey && !sinkEvent.isMouse && !sinkEvent.isScrollWheel)
                 return false;
 
+            return IsInSink(sinkEvent);
+        }
+
+        private bool IsInSink(Event mouseEvent)
+        {
             return components
                 .Where(c => c is ICanvasMouseEventSink)
                 .Cast<ICanvasMouseEventSink>()
@@ -335,6 +346,16 @@ namespace SchemaEditor.Internal
 
                     menu.ShowAsContext();
 
+                    break;
+            }
+        }
+
+        private void OnMouseUp(Event mouseEvent)
+        {
+            switch (mouseEvent.button)
+            {
+                case 0:
+                    GUIUtility.hotControl = 0;
                     break;
             }
         }

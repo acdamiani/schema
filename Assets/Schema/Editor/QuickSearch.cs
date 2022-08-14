@@ -37,6 +37,9 @@ public class QuickSearch : IWindowComponentProvider
     {
         this.types = types.Where(t => typeof(GraphObject).IsAssignableFrom(t));
         createNodeAction = onSelectAction;
+
+        searchField = new SearchField();
+        searchField.downOrUpArrowKeyPressed += UpOrDownArrowPressed;
     }
 
     public void HandleWinInfo(Rect rect, GUIContent title, GUIStyle style)
@@ -51,12 +54,6 @@ public class QuickSearch : IWindowComponentProvider
 
     public void OnGUI(int id)
     {
-        if (searchField == null)
-        {
-            searchField = new SearchField();
-            searchField.downOrUpArrowKeyPressed += MoveSelectionByEvent;
-        }
-
         searchField.SetFocus();
 
         GUILayout.BeginHorizontal(Styles.searchTopBar);
@@ -241,19 +238,33 @@ public class QuickSearch : IWindowComponentProvider
     {
         Event current = Event.current;
 
+        if (current.type == EventType.KeyDown)
+            UpOrDownArrowPressed();
+        else if (current.type == EventType.ScrollWheel)
+            Scrolled();
+    }
+
+    private void UpOrDownArrowPressed()
+    {
+        Event current = Event.current;
+
         int resultsLength = search.GetOrCreate(searchText, () => SearchThroughResults(types, searchText)).Count();
 
-        if (current.type == EventType.KeyDown)
-        {
-            if (current.keyCode == KeyCode.UpArrow)
-                MoveSelection(true, resultsLength);
-            else if (current.keyCode == KeyCode.DownArrow)
-                MoveSelection(false, resultsLength);
-        }
-        else if (current.type == EventType.ScrollWheel && current.delta.y != 0)
+        if (current.keyCode == KeyCode.UpArrow)
+            MoveSelection(true, resultsLength);
+        else if (current.keyCode == KeyCode.DownArrow)
+            MoveSelection(false, resultsLength);
+    }
+
+    private void Scrolled()
+    {
+        Event current = Event.current;
+
+        int resultsLength = search.GetOrCreate(searchText, () => SearchThroughResults(types, searchText)).Count();
+
+        if (current.delta.y != 0)
         {
             MoveSelection(current.delta.y < 0, resultsLength);
-
             current.Use();
         }
     }
