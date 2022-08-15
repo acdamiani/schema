@@ -14,9 +14,7 @@ namespace Schema.Builtin.Conditionals
         public BlackboardEntrySelector blackboardKey = new();
         public ConditionType conditionType;
 
-        private string aborts => "Aborts " + abortsType;
-
-        private void OnEnable()
+        protected override void OnObjectEnable()
         {
             blackboardKey.ApplyAllFilters();
         }

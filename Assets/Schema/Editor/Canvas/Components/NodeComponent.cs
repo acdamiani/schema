@@ -88,6 +88,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             if (node != null)
                 return node.uID == uID;
+
             return false;
         }
 

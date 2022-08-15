@@ -105,7 +105,6 @@
      <Compile Include="Assets/Schema/Editor/Canvas/Base/IFramable.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetAnimatorVariableEditor.cs" />
      <Compile Include="Assets/Schema/Editor/Window/CopyBuffer.cs" />
-     <Compile Include="Assets/Schema/Editor/Canvas/Components/DebugViewComponent.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/BlackboardEntrySelectorDrawer.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Decorators/RaycastEditor.cs" />
      <Compile Include="Assets/Schema/Editor/PropertyDrawers/TagFilterDrawer.cs" />

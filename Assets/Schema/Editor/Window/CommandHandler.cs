@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Schema;
 using SchemaEditor.Internal.ComponentSystem.Components;
 using System.Linq;
+using Object = UnityEngine.Object;
 
 namespace SchemaEditor.Internal
 {
@@ -51,6 +52,9 @@ namespace SchemaEditor.Internal
                     break;
                 case "Cut":
                     CutCommand(canvas);
+                    break;
+                case "Duplicate":
+                    DuplicateCommand(canvas);
                     break;
             }
         }
@@ -150,6 +154,34 @@ namespace SchemaEditor.Internal
 
             canvas.context.Rebuild();
             canvas.DeselectAll();
+        }
+        public static void DuplicateCommand(ComponentCanvas canvas)
+        {
+            IEnumerable<Object> copyables =
+                canvas.components
+                    .Where(x => x is ICopyable)
+                    .Cast<ICopyable>()
+                    .Where(x => x.IsCopyable())
+                    .Select(x => x.GetCopyable());
+
+            IEnumerable<Object> toPaste = copyables
+                .Where(x => x is Conditional)
+                .Select(x => ((Conditional)x).node);
+
+            _copyBuffer = new CopyBuffer(
+                canvas,
+                copyables,
+                NodeEditor.instance.target
+            );
+
+            copyBuffer.Flush(
+                toPaste
+            );
+
+            _copyBuffer = null;
+
+            canvas.DeselectAll();
+            canvas.context.Rebuild();
         }
         private enum CopyBufferDescriptor
         {

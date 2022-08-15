@@ -22,6 +22,7 @@ namespace SchemaEditor.Internal
         private GUIComponent _hovered;
         private GUIComponent[] _selected = Array.Empty<GUIComponent>();
         private Vector2 lastMouse;
+        private List<Func<GUIComponent, bool>> selectors = new List<Func<GUIComponent, bool>>();
 
         public ComponentCanvas(
             ICanvasContextProvider context,
@@ -40,8 +41,6 @@ namespace SchemaEditor.Internal
 
             CreateArgs empty = new();
             empty.layer = 50;
-
-            debugViewComponent = Create<DebugViewComponent>(empty);
 
             if (minimapComponentCreateArgs != null)
             {
@@ -62,7 +61,6 @@ namespace SchemaEditor.Internal
         public GUIComponent[] components => _components;
         public GUIComponent[] selected => _selected;
         public SelectionBoxComponent selectionBoxComponent { get; }
-        public DebugViewComponent debugViewComponent { get; }
         public MinimapComponent minimapComponent { get; }
         public ICanvasContextProvider context { get; }
         public PannerZoomer zoomer { get; }
@@ -97,6 +95,14 @@ namespace SchemaEditor.Internal
             onComponentListModified?.Invoke();
 
             MoveToFront(component);
+
+            int i = selectors.FindIndex(x => x(component));
+
+            if (i >= 0)
+            {
+                selectors.RemoveAt(i);
+                Select(component);
+            }
 
             return component;
         }
@@ -246,6 +252,11 @@ namespace SchemaEditor.Internal
                 ((ISelectable)component).Deselect();
 
             ArrayUtility.Clear(ref _selected);
+        }
+
+        public void SelectWhenCreated(Func<GUIComponent, bool> selector)
+        {
+            selectors.Add(selector);
         }
 
         public bool CanSelectChildren()
@@ -431,9 +442,9 @@ namespace SchemaEditor.Internal
         {
             ContextBuilder menu = new();
 
-            menu.AddShortcut("Main Menu/Edit/Cut", () => { });
-            menu.AddShortcut("Main Menu/Edit/Copy", () => { });
-            menu.AddShortcut("Main Menu/Edit/Paste", () => { });
+            menu.AddShortcut("Main Menu/Edit/Cut", () => CommandHandler.CutCommand(this));
+            menu.AddShortcut("Main Menu/Edit/Copy", () => CommandHandler.CopyCommand(this));
+            menu.AddShortcut("Main Menu/Edit/Paste", () => CommandHandler.PasteCommand(this));
 
             menu.AddSeparator();
 

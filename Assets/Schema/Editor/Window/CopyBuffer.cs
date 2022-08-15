@@ -89,6 +89,18 @@ namespace SchemaEditor.Internal
         {
             Descriptor descriptor = GetDescriptor(buffer);
 
+            foreach (Object o in _buffer)
+            {
+                Schema.Internal.GraphObject g = o as Schema.Internal.GraphObject;
+
+                if (g == null)
+                    continue;
+
+                canvas.SelectWhenCreated(
+                    x => x is IGraphObjectProvider && ((IGraphObjectProvider)x).Equals(g)
+                    );
+            }
+
             switch (descriptor)
             {
                 case Descriptor.Conditionals:
