@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Schema;
 using SchemaEditor;
+using SchemaEditor.Internal;
 using SchemaEditor.Internal.ComponentSystem.Components;
 using UnityEngine;
 
@@ -136,7 +137,7 @@ public static class GraphUtility
                 node.SetPosition(new Vector2(
                     node.parent.children[nodeIndex - 1].GetPosition().x
                     + node.parent.children[nodeIndex - 1].GetSize().x
-                    + NodeEditor.Prefs.arrangeHorizontalSpacing,
+                    + Prefs.arrangeHorizontalSpacing,
                     node.GetPosition().y
                 ));
         }
@@ -155,7 +156,7 @@ public static class GraphUtility
                 node.SetPosition(new Vector2(
                     node.parent.children[nodeIndex - 1].GetPosition().x
                     + node.parent.children[nodeIndex - 1].GetSize().x
-                    + NodeEditor.Prefs.arrangeHorizontalSpacing,
+                    + Prefs.arrangeHorizontalSpacing,
                     node.GetPosition().y
                 ));
                 mod[node.uID] = node.GetPosition().x - node.children[0].GetPosition().x;
@@ -180,7 +181,7 @@ public static class GraphUtility
                 node.SetPosition(new Vector2(
                     node.parent.children[nodeIndex - 1].GetPosition().x
                     + node.parent.children[nodeIndex - 1].GetSize().x
-                    + NodeEditor.Prefs.arrangeHorizontalSpacing,
+                    + Prefs.arrangeHorizontalSpacing,
                     node.GetPosition().y
                 ));
                 mod[node.uID] = node.GetPosition().x - midpoint;
@@ -192,7 +193,7 @@ public static class GraphUtility
 
         node.SetPosition(new Vector2(
             node.GetPosition().x,
-            node.GetParentSize() + node.GetParentCount() * NodeEditor.Prefs.arrangeVerticalSpacing
+            node.GetParentSize() + node.GetParentCount() * Prefs.arrangeVerticalSpacing
         ));
     }
 
@@ -220,7 +221,7 @@ public static class GraphUtility
             {
                 float distance = nodeContour[level] - childContour[level];
 
-                shift = -distance + NodeEditor.Prefs.arrangeHorizontalSpacing;
+                shift = -distance + Prefs.arrangeHorizontalSpacing;
             }
 
             if (shift > 0f)

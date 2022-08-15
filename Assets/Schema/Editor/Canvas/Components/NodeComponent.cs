@@ -181,7 +181,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             Color guiColor = GUI.color;
 
-            Color tint = NodeEditor.Prefs.dimUnconnectedNodes && node.priority < 1 ? new Color(0.8f, 0.8f, 0.8f, 1f) : Color.white;
+            Color tint = Prefs.dimUnconnectedNodes && node.priority < 1 ? new Color(0.8f, 0.8f, 0.8f, 1f) : Color.white;
 
             GUI.color = Styles.windowBackground * tint;
 
@@ -202,7 +202,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             Styles.element.DrawIfRepaint(layout.shadow, false, false, false, false);
 
-            Color c = isSelected ? NodeEditor.Prefs.selectionColor : Styles.outlineColor;
+            Color c = isSelected ? Prefs.selectionColor : Styles.outlineColor;
             cLerp -= Time.realtimeSinceStartup - t;
             cLerp = Mathf.Clamp01(cLerp);
 
@@ -356,7 +356,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     {
                         beginDragPosition = mousePositionGrid;
 
-                        if (NodeEditor.Prefs.gridSnap)
+                        if (Prefs.gridSnap)
                             node.graphPosition = new Vector2(
                                 Mathf.Round(node.graphPosition.x / snap) * snap,
                                 Mathf.Round(node.graphPosition.y / snap) * snap
@@ -367,7 +367,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                     Vector2 dxdy = mousePositionGrid - beginDragPosition.Value;
 
-                    if (NodeEditor.Prefs.gridSnap)
+                    if (Prefs.gridSnap)
                         dxdy = new Vector2(
                             Mathf.Round(dxdy.x / snap) * snap,
                             Mathf.Round(dxdy.y / snap) * snap
@@ -489,7 +489,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public void HandleSelection(IEnumerable<GameObject> selection)
         {
-            if (!Application.isPlaying || NodeEditor.Prefs.liveLink || selection.Count() != 1)
+            if (!Application.isPlaying || Prefs.liveLink || selection.Count() != 1)
                 return;
 
             SchemaAgent agent = selection
@@ -504,15 +504,15 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             switch (executionContext.GetLastStatus(node.priority - 1))
             {
                 case NodeStatus.Success:
-                    statusColor = NodeEditor.Prefs.successColor;
+                    statusColor = Prefs.successColor;
                     cLerp = 1.0f;
                     break;
                 case NodeStatus.Failure:
-                    statusColor = NodeEditor.Prefs.failureColor;
+                    statusColor = Prefs.failureColor;
                     cLerp = 1.0f;
                     break;
                 case NodeStatus.Running:
-                    statusColor = NodeEditor.Prefs.highlightColor;
+                    statusColor = Prefs.highlightColor;
                     cLerp = 1.0f;
                     break;
             }

@@ -195,7 +195,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             curve.p2 = p2;
             curve.p3 = p3;
 
-            Handles.DrawBezier(p0, p3, p1, p2, isSelected ? NodeEditor.Prefs.selectionColor : Color.gray, Icons.GetResource("curve", false),
+            Handles.DrawBezier(p0, p3, p1, p2, isSelected ? Prefs.selectionColor : Color.gray, Icons.GetResource("curve", false),
                 canvas.zoomer.zoom * 3f);
         }
 

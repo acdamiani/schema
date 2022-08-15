@@ -215,7 +215,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             GUI.backgroundColor = Styles.windowBackground;
             Styles.element.DrawIfRepaint(r.Pad(-10), false, false, false, false);
             Styles.conditional.DrawIfRepaint(r, content, false, false, false, false);
-            GUI.backgroundColor = isSelected ? NodeEditor.Prefs.selectionColor : Styles.outlineColor;
+            GUI.backgroundColor = isSelected ? Prefs.selectionColor : Styles.outlineColor;
             Styles.outline.DrawIfRepaint(r, false, false, false, false);
 
             if (icon != null)

@@ -16,7 +16,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public Rect GetRect()
         {
-            return NodeEditor.Prefs.minimapEnabled ? rect : Rect.zero;
+            return Prefs.minimapEnabled ? rect : Rect.zero;
         }
 
         public override void Create(CreateArgs args)
@@ -31,38 +31,38 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public override void OnGUI()
         {
-            if (!NodeEditor.Prefs.minimapEnabled)
+            if (!Prefs.minimapEnabled)
                 return;
 
             rect = canvas.context.GetViewRect();
 
             graphRect = GetGraphRect(100f);
 
-            float height = graphRect.height / graphRect.width * NodeEditor.Prefs.minimapWidth;
+            float height = graphRect.height / graphRect.width * Prefs.minimapWidth;
 
-            viewWidth = height > NodeEditor.Prefs.maxMinimapHeight
-                ? NodeEditor.Prefs.minimapWidth / height * NodeEditor.Prefs.maxMinimapHeight
-                : NodeEditor.Prefs.minimapWidth;
+            viewWidth = height > Prefs.maxMinimapHeight
+                ? Prefs.minimapWidth / height * Prefs.maxMinimapHeight
+                : Prefs.minimapWidth;
 
-            height = Mathf.Clamp(height, 0f, NodeEditor.Prefs.maxMinimapHeight);
+            height = Mathf.Clamp(height, 0f, Prefs.maxMinimapHeight);
 
             float toolbarHeight = canvas.context.GetToolbarHeight();
 
-            switch (NodeEditor.Prefs.minimapPosition)
+            switch (Prefs.minimapPosition)
             {
                 case 0:
-                    rect = new Rect(10f, rect.yMax - height - 10f - toolbarHeight, NodeEditor.Prefs.minimapWidth,
+                    rect = new Rect(10f, rect.yMax - height - 10f - toolbarHeight, Prefs.minimapWidth,
                         height);
                     break;
                 case 1:
-                    rect = new Rect(10f, 10f + toolbarHeight, NodeEditor.Prefs.minimapWidth, height);
+                    rect = new Rect(10f, 10f + toolbarHeight, Prefs.minimapWidth, height);
                     break;
                 case 2:
-                    rect = new Rect(rect.xMax - 10f - NodeEditor.Prefs.minimapWidth, rect.yMax - height - 10f,
-                        NodeEditor.Prefs.minimapWidth, height);
+                    rect = new Rect(rect.xMax - 10f - Prefs.minimapWidth, rect.yMax - height - 10f,
+                        Prefs.minimapWidth, height);
                     break;
                 case 3:
-                    rect = new Rect(rect.xMax - 10f - NodeEditor.Prefs.minimapWidth, 0f, NodeEditor.Prefs.minimapWidth,
+                    rect = new Rect(rect.xMax - 10f - Prefs.minimapWidth, 0f, Prefs.minimapWidth,
                         height);
                     break;
             }
@@ -75,8 +75,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 gridViewRect.position.y);
             gridViewRect.size = gridViewRect.size / graphRect.width * viewWidth;
 
-            Handles.DrawSolidRectangleWithOutline(rect, new Color(0f, 0f, 0f, NodeEditor.Prefs.minimapOpacity),
-                NodeEditor.Prefs.minimapOutlineColor);
+            Handles.DrawSolidRectangleWithOutline(rect, new Color(0f, 0f, 0f, Prefs.minimapOpacity),
+                Prefs.minimapOutlineColor);
 
             GUI.BeginGroup(rect);
 
@@ -95,7 +95,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 Rect nodeRect = new Rect(position, size);
 
                 Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.windowBackground,
-                    node.IsSelected() ? NodeEditor.Prefs.selectionColor : Color.black);
+                    node.IsSelected() ? Prefs.selectionColor : Color.black);
             }
 
 

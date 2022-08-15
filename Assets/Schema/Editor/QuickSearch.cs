@@ -4,6 +4,7 @@ using System.Linq;
 using Schema.Internal;
 using Schema.Utilities;
 using SchemaEditor;
+using SchemaEditor.Internal;
 using SchemaEditor.Internal.ComponentSystem;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -13,7 +14,7 @@ public class QuickSearch : IWindowComponentProvider
 {
     private readonly CacheDictionary<Type, string> categories = new();
     private readonly Action<Type> createNodeAction;
-    private readonly List<string> favorites = NodeEditor.Prefs.GetList("SCHEMA_PREF__favorites").ToList();
+    private readonly List<string> favorites = Prefs.GetList("SCHEMA_PREF__favorites").ToList();
     private readonly CacheDictionary<Type, Texture2D> icons = new();
     private readonly CacheDictionary<string, IEnumerable<Type>> search = new();
     private readonly IEnumerable<Type> types;
@@ -126,7 +127,7 @@ public class QuickSearch : IWindowComponentProvider
             if (!isInFavorites)
             {
                 favorites.Add(favoriteName);
-                NodeEditor.Prefs.SetList("SCHEMA_PREF__favorites", favorites);
+                Prefs.SetList("SCHEMA_PREF__favorites", favorites);
             }
         }
         else
@@ -134,7 +135,7 @@ public class QuickSearch : IWindowComponentProvider
             if (isInFavorites)
             {
                 favorites.Remove(favoriteName);
-                NodeEditor.Prefs.SetList("SCHEMA_PREF__favorites", favorites);
+                Prefs.SetList("SCHEMA_PREF__favorites", favorites);
             }
         }
 
