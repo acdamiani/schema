@@ -10,7 +10,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
     {
         private Rect graphRect;
         private Rect gridViewRect;
-        private bool listModified;
         private Func<Vector2> offset;
         private Rect rect;
         private float viewWidth;
@@ -28,9 +27,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 throw new ArgumentException();
 
             offset = createArgs.offset;
-
-            listModified = true;
-            canvas.onComponentListModified += () => listModified = true;
         }
 
         public override void OnGUI()

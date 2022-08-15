@@ -56,6 +56,13 @@ namespace SchemaEditor
             if (blackboardEditor == null)
                 blackboardEditor = Editor.CreateEditor(target.blackboard, typeof(BlackboardEditor));
 
+            if (editor != null && editor.targets.Any(x => !x))
+                DestroyImmediate(editor);
+            else if (defaultNodeEditor != null && defaultNodeEditor.targets.Any(x => !x))
+                DestroyImmediate(defaultNodeEditor);
+            else if (defaultConditionalEditor != null && defaultConditionalEditor.targets.Any(x => !x))
+                DestroyImmediate(defaultConditionalEditor);
+
             List<Object> targets = new List<Object>();
 
             IEnumerable<Object> editableComponents;
@@ -98,7 +105,7 @@ namespace SchemaEditor
                     if (targets.Count > 0)
                         defaultNodeEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultNodeEditor));
                 }
-                else if (defaultNodeEditor.targets.Any(x => x == null) || !defaultNodeEditor.targets.SequenceEqual(targets))
+                else if (!defaultNodeEditor.targets.SequenceEqual(targets))
                 {
                     DestroyImmediate(defaultNodeEditor);
 
@@ -113,7 +120,7 @@ namespace SchemaEditor
                     if (targets.Count > 0)
                         defaultConditionalEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultConditionalEditor));
                 }
-                else if (defaultConditionalEditor.targets.Any(x => x == null) || !defaultConditionalEditor.targets.SequenceEqual(targets))
+                else if (!defaultConditionalEditor.targets.SequenceEqual(targets))
                 {
                     DestroyImmediate(defaultConditionalEditor);
 

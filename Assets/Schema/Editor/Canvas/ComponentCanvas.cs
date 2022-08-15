@@ -448,7 +448,7 @@ namespace SchemaEditor.Internal
 
             menu.AddSeparator();
 
-            menu.AddShortcut("Main Menu/Edit/Duplicate", () => { });
+            menu.AddShortcut("Main Menu/Edit/Duplicate", () => CommandHandler.DuplicateCommand(this));
             menu.AddShortcut("Main Menu/Edit/Delete", () => CommandHandler.DeleteCommand(this));
 
             menu.AddSeparator();

@@ -20,8 +20,6 @@ public class QuickSearch : IWindowComponentProvider
     private readonly KeyCode[] validMovementCodes = { KeyCode.UpArrow, KeyCode.DownArrow };
     private bool close;
     private CacheDictionary<Type, string> descriptions = new();
-    private bool didAddNode;
-    private float keydownTime;
     private Vector2 mouseOverPosition;
     private Rect rect;
     private int refinementLength;
@@ -221,11 +219,7 @@ public class QuickSearch : IWindowComponentProvider
                 nodeType,
                 nodeType.Name,
                 i,
-                () =>
-                {
-                    createNodeAction(nodeType);
-                    didAddNode = true;
-                }
+                () => createNodeAction(nodeType)
             );
 
             i++;
