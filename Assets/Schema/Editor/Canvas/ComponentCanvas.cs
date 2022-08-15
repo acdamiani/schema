@@ -202,7 +202,7 @@ namespace SchemaEditor.Internal
                 return;
 
             if (!IsInSink(Event.current))
-                EditorGUIUtility.AddCursorRect(context.GetRect(), cursor);
+                EditorGUIUtility.AddCursorRect(context.GetViewRect(), cursor);
 
             if (_doGrid != null)
             {

@@ -343,24 +343,6 @@ namespace SchemaEditor
 
         internal static class Prefs
         {
-            public static bool saveOnClose
-            {
-                get => EditorPrefs.GetBool("SCHEMA_PREF__saveOnClose", false);
-                set => EditorPrefs.SetBool("SCHEMA_PREF__saveOnClose", value);
-            }
-
-            public static bool formatOnSave
-            {
-                get => EditorPrefs.GetBool("SCHEMA_PREF__formatOnSave", true);
-                set => EditorPrefs.SetBool("SCHEMA_PREF__formatOnSave", value);
-            }
-
-            public static string screenshotPath
-            {
-                get => EditorPrefs.GetString("SCHEMA_PREF__screenshotPath", "Screenshots");
-                set => EditorPrefs.SetString("SCHEMA_PREF__screenshotPath", value);
-            }
-
             public static Color selectionColor
             {
                 get => GetColor("SCHEMA_PREF__selectionColor", Color.white);

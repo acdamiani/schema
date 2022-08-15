@@ -167,7 +167,7 @@ namespace SchemaEditor
             Prefs.minimapEnabled = GUILayout.Toggle(Prefs.minimapEnabled, "Minimap", EditorStyles.toolbarButton);
             Prefs.gridSnap = GUILayout.Toggle(Prefs.gridSnap, "Grid Snap", EditorStyles.toolbarButton);
 
-            if (!windowInfo.inspectorToggled && GUILayout.Button(Icons.GetEditor("animationvisibilitytoggleon"),
+            if (!windowInfo.inspectorToggled && GUILayout.Button(Icons.GetEditor("animationvisibilitytoggleoff"),
                     EditorStyles.toolbarButton))
                 windowInfo.inspectorToggled = true;
 
@@ -304,13 +304,6 @@ namespace SchemaEditor
 
         private void DrawPreferencesWindow()
         {
-            EditorGUILayout.LabelField("General", EditorStyles.boldLabel);
-            Prefs.saveOnClose = EditorGUILayout.Toggle("Save on Close", Prefs.saveOnClose);
-            Prefs.formatOnSave = EditorGUILayout.Toggle("Format on Save", Prefs.formatOnSave);
-            Prefs.screenshotPath = EditorGUILayout.TextField("Screenshot Path", Prefs.screenshotPath);
-
-            EditorGUILayout.LabelField("");
-
             EditorGUILayout.LabelField("Editor", EditorStyles.boldLabel);
             Prefs.selectionColor = EditorGUILayout.ColorField(
                 new GUIContent("Selection Color", "The selection color to use for nodes"),
@@ -351,13 +344,6 @@ namespace SchemaEditor
             Prefs.maxMinimapHeight = EditorGUILayout.FloatField("Max Minimap Height", Prefs.maxMinimapHeight);
             Prefs.minimapOpacity = EditorGUILayout.Slider("Minimap Opacity", Prefs.minimapOpacity, 0f, 1f);
             Prefs.minimapOutlineColor = EditorGUILayout.ColorField("Minimap Outline Color", Prefs.minimapOutlineColor);
-
-            EditorGUILayout.LabelField("");
-            EditorGUILayout.LabelField("Debug", EditorStyles.boldLabel);
-            Prefs.enableDebugView = EditorGUILayout.Toggle("Enable Debug View", Prefs.enableDebugView);
-
-            if (Prefs.enableDebugView)
-                Prefs.enableDebugViewPlus = EditorGUILayout.Toggle("Enable Debug View+", Prefs.enableDebugViewPlus);
 
             EditorGUILayout.LabelField("");
 
