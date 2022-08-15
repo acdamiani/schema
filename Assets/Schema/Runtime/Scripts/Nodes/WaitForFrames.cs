@@ -1,36 +1,39 @@
 using Schema;
 using UnityEngine;
 
-[DarkIcon("Dark/Wait")]
-[LightIcon("Light/Wait")]
-[Description("Waits a given number of frames, then resumes execution of the Behavior Tree")]
-public class WaitForFrames : Action
+namespace Schema.Builtin.Nodes
 {
-    [Tooltip("The number of frames to wait for")]
-    public BlackboardEntrySelector<int> count = new(1);
-
-    private void OnValidate()
+    [DarkIcon("Nodes/d_Wait")]
+    [LightIcon("Nodes/Wait")]
+    [Description("Waits a given number of frames, then resumes execution of the Behavior Tree")]
+    public class WaitForFrames : Action
     {
-        count.inspectorValue = Mathf.Clamp(count.inspectorValue, 1, int.MaxValue);
-    }
+        [Tooltip("The number of frames to wait for")]
+        public BlackboardEntrySelector<int> count = new(1);
 
-    public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
-    {
-        WaitForFramesMemory memory = (WaitForFramesMemory)nodeMemory;
-
-        if (memory.count == count.value)
+        private void OnValidate()
         {
-            memory.count = 0;
-            return NodeStatus.Success;
+            count.inspectorValue = Mathf.Clamp(count.inspectorValue, 1, int.MaxValue);
         }
 
-        memory.count++;
+        public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
+        {
+            WaitForFramesMemory memory = (WaitForFramesMemory)nodeMemory;
 
-        return NodeStatus.Running;
-    }
+            if (memory.count == count.value)
+            {
+                memory.count = 0;
+                return NodeStatus.Success;
+            }
 
-    private class WaitForFramesMemory
-    {
-        public int count;
+            memory.count++;
+
+            return NodeStatus.Running;
+        }
+
+        private class WaitForFramesMemory
+        {
+            public int count;
+        }
     }
 }

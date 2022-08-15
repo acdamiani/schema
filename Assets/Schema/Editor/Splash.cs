@@ -54,7 +54,7 @@ public class Splash : IWindowComponentProvider
 
         GUILayout.Label(splash, GUIStyle.none);
 
-        GUILayout.Label("Recent Files", EditorStyles.whiteLargeLabel);
+        GUILayout.Label("Recent Files", EditorStyles.largeLabel);
 
         scroll = GUILayout.BeginScrollView(scroll);
 

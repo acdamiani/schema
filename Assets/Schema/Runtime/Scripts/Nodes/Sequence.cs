@@ -1,14 +1,15 @@
-using Schema;
-
-[DarkIcon("Dark/Sequence")]
-[LightIcon("Light/Sequence")]
-[Description("Executes a series of nodes one after another")]
-public class Sequence : Flow
+namespace Schema.Builtin.Nodes
 {
-    public override int Tick(object nodeMemory, NodeStatus status, int index)
+    [DarkIcon("Nodes/d_Sequence")]
+    [LightIcon("Light/Sequence")]
+    [Description("Executes a series of nodes one after another")]
+    public class Sequence : Flow
     {
-        if (index + 1 > children.Length - 1 || status == NodeStatus.Failure)
-            return -1;
-        return index + 1;
+        public override int Tick(object nodeMemory, NodeStatus status, int index)
+        {
+            if (index + 1 > children.Length - 1 || status == NodeStatus.Failure)
+                return -1;
+            return index + 1;
+        }
     }
 }

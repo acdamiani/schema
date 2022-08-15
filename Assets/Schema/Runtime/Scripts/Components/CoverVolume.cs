@@ -23,41 +23,41 @@ public class CoverVolume : MonoBehaviour
         float halfY = size.y * transform.lossyScale.y / 2f;
         float halfZ = size.z * transform.lossyScale.z / 2f;
 
-        //Through the perils of float math, a small epsilon is required ot ensure that the correct number of points are generated for spacing that should evenly go into size
+        //Through the perils of float Nodes/Math, a small epsilon is required ot ensure that the correct number of points are generated for spacing that should evenly go into size
         int numX = Mathf.FloorToInt(size.x * transform.lossyScale.x / spacing + 0.01f) + 1;
         int numY = Mathf.FloorToInt(size.y * transform.lossyScale.y / spacing + 0.01f) + 1;
         int numZ = Mathf.FloorToInt(size.z * transform.lossyScale.z / spacing + 0.01f) + 1;
 
         for (int x = 0; x < numX; x++)
-        for (int y = 0; y < numY; y++)
-        for (int z = 0; z < numZ; z++)
-        {
-            Vector3 point = new Vector3(x * spacing - halfX, y * spacing - halfY, z * spacing - halfZ);
+            for (int y = 0; y < numY; y++)
+                for (int z = 0; z < numZ; z++)
+                {
+                    Vector3 point = new Vector3(x * spacing - halfX, y * spacing - halfY, z * spacing - halfZ);
 
-            //Apply transform to Vector to get world position (current point is relative to the center)
-            Matrix4x4 m = Matrix4x4.TRS(
-                transform.position + transform.rotation * MultiplyComponents(transform.lossyScale, center),
-                transform.rotation, Vector3.one);
-            point = m.MultiplyPoint(point);
+                    //Apply transform to Vector to get world position (current point is relative to the center)
+                    Matrix4x4 m = Matrix4x4.TRS(
+                        transform.position + transform.rotation * MultiplyComponents(transform.lossyScale, center),
+                        transform.rotation, Vector3.one);
+                    point = m.MultiplyPoint(point);
 
-            NavMeshHit hit;
+                    NavMeshHit hit;
 
-            if (NavMesh.SamplePosition(point, out hit, spacing / 2f, filter.mask))
-            {
-                //Double check that the point is inside the cube
-                Vector3 pos = hit.position;
+                    if (NavMesh.SamplePosition(point, out hit, spacing / 2f, filter.mask))
+                    {
+                        //Double check that the point is inside the cube
+                        Vector3 pos = hit.position;
 
-                //Multiply position by the inverse of the transform matrix to translate it back into local space
-                pos = m.inverse.MultiplyPoint(pos);
+                        //Multiply position by the inverse of the transform matrix to translate it back into local space
+                        pos = m.inverse.MultiplyPoint(pos);
 
-                //Check to see if point is inside the bounds of the cube
-                if (!PositionInsideCube(pos, Vector3.zero, MultiplyComponents(transform.lossyScale, size), 0.01f))
-                    continue;
+                        //Check to see if point is inside the bounds of the cube
+                        if (!PositionInsideCube(pos, Vector3.zero, MultiplyComponents(transform.lossyScale, size), 0.01f))
+                            continue;
 
-                //Then add the unrotated point if it has
-                p.Add(hit.position);
-            }
-        }
+                        //Then add the unrotated point if it has
+                        p.Add(hit.position);
+                    }
+                }
 
         return p.ToArray();
     }
@@ -84,14 +84,14 @@ public class CoverVolume : MonoBehaviour
 
     //         //Vector3.Distance(a,b) is the same as (a-b).magnitude
     //         float targetDist = (target.transform.position - point).sqrMagnitude / diagonal;
-    //         targetDist = Mathf.Clamp01(targetDist);
+    //         targetDist = Nodes/Mathf.Clamp01(targetDist);
 
     //         float agentDist = (agent.transform.position - point).sqrMagnitude / diagonal;
-    //         agentDist = 1f - Mathf.Clamp01(agentDist);
+    //         agentDist = 1f - Nodes/Mathf.Clamp01(agentDist);
 
     //         //Get closest collider
     //         float colliderDist = DistToCollider(point) / preferredDist;
-    //         colliderDist = 1f - Mathf.Clamp01(colliderDist);
+    //         colliderDist = 1f - Nodes/Mathf.Clamp01(colliderDist);
 
     //         d.Add(points[i], agentDist * 0.25f + targetDist * 0.20f + colliderDist * 0.55f);
     //     }

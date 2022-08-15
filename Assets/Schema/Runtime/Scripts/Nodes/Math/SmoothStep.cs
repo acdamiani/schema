@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_math")]
-    [LightIcon("math")]
+    [DarkIcon("Nodes/d_Math")]
+    [LightIcon("Nodes/Math")]
     [Category("Math")]
     [Description("Interpolate between two floats by a time parameter, with smoothing at the limits")]
     public class SmoothStep : Action
@@ -14,7 +14,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Parameter t to interpolate by")]
         public BlackboardEntrySelector<float> t;
 
-        [Tooltip("The interpolated float")] [WriteOnly]
+        [Tooltip("The interpolated float")]
+        [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

@@ -1,19 +1,26 @@
 using Schema;
 using UnityEngine;
 
-public class CoinFlip : Action
+namespace Schema.Builtin.Nodes
 {
-    [WriteOnly] public BlackboardEntrySelector<bool> entry;
-
-    [Tooltip("Chance that the entry will be true")] [Range(0, 1)]
-    public float chance;
-
-    public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
+    [DarkIcon("Nodes/d_CoinFlip")]
+    [LightIcon("Nodes/CoinFlip")]
+    [Category("Random")]
+    public class CoinFlip : Action
     {
-        bool v = Random.Range(0f, 1f) <= chance;
-        Debug.Log(v);
-        entry.value = v;
+        [WriteOnly] public BlackboardEntrySelector<bool> entry;
 
-        return NodeStatus.Success;
+        [Tooltip("Chance that the entry will be true")]
+        [Range(0, 1)]
+        public float chance;
+
+        public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
+        {
+            bool v = Random.Range(0f, 1f) <= chance;
+            Debug.Log(v);
+            entry.value = v;
+
+            return NodeStatus.Success;
+        }
     }
 }

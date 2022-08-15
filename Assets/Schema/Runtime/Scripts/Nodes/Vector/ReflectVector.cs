@@ -12,7 +12,8 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new();
 
-        [Tooltip("Blackboard variable to store the new reflected vector in")] [WriteOnly]
+        [Tooltip("Blackboard variable to store the new reflected vector in")]
+        [WriteOnly]
         public BlackboardEntrySelector reflected = new();
 
         private void OnValidate()

@@ -20,7 +20,7 @@
 //         {
 //             agent.restartOnComplete = EditorGUILayout.Toggle(new GUIContent("Restart On Complete", "Restart tree when execution has finished (when the engine has reached the root)"), true);
 //             agent.maxIterationsPerTick = EditorGUILayout.IntField(new GUIContent("Max Iterations Per Tick", "Maximum number of steps taken through the tree in a single tick."), agent.maxIterationsPerTick);
-//             agent.maxIterationsPerTick = Mathf.Clamp(agent.maxIterationsPerTick, 0, System.Int32.MaxValue);
+//             agent.maxIterationsPerTick = Nodes/Mathf.Clamp(agent.maxIterationsPerTick, 0, System.Int32.MaxValue);
 //         }
 
 //         advancedFoldout = EditorGUILayout.Foldout(advancedFoldout, "Advanced Settings", true, EditorStyles.foldoutHeader);

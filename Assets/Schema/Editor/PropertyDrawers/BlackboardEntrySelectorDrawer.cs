@@ -71,10 +71,10 @@ namespace SchemaEditor
             Vector2 size = EditorStyles.miniButtonRight.CalcSize(new GUIContent(Icons.GetEditor("_Menu")));
 
             Rect enumRect = new Rect(position.x, position.y, position.width - size.x,
-                Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
+                 Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
             Rect textRect = new Rect(position.x, position.y + enumRect.height, position.width, enumRect.height);
             Rect buttonRect = new Rect(position.xMax - size.x, position.y, size.x,
-                Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
+                 Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
 
             Vector2 oldIconSize = EditorGUIUtility.GetIconSize();
             EditorGUIUtility.SetIconSize(new Vector2(12, 12));

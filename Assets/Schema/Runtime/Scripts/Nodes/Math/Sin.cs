@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_math")]
-    [LightIcon("math")]
+    [DarkIcon("Nodes/d_Math")]
+    [LightIcon("Nodes/Math")]
     [Category("Math")]
     [Description("Get the sine of an angle")]
     public class Sin : Action
@@ -11,7 +11,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Input for the sine function")]
         public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Selector to store the sine in")] [WriteOnly]
+        [Tooltip("Selector to store the sine in")]
+        [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         [Tooltip("Input is degrees instead of radians")]

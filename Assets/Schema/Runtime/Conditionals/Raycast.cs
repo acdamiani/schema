@@ -1,9 +1,12 @@
 using System.Linq;
 using UnityEngine;
+using System.Text;
 
 namespace Schema.Builtin.Conditionals
 {
     [Description("Cast a ray absolutely or dynamically towards an object or point")]
+    [DarkIcon("Conditionals/d_Raycast")]
+    [LightIcon("Conditionals/Raycast")]
     public class Raycast : Conditional
     {
         public enum RaycastType
@@ -63,6 +66,14 @@ namespace Schema.Builtin.Conditionals
             }
 
             return hits.Any(hit => tagFilter.tags.Contains(hit.transform.tag));
+        }
+        public override GUIContent GetConditionalContent()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("If raycast hits object");
+
+            return new GUIContent(sb.ToString());
         }
     }
 }

@@ -133,7 +133,7 @@ namespace SchemaEditor
         private void CalculateWindow()
         {
             if (windowInfo.inspectorToggled)
-                window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - Window.padding * 2,
+                window = new Rect(0f, 0f, position.width - Window.inspectorWidth - Window.padding * 2,
                     position.height);
             else
                 window = new Rect(0f, 0f, position.width, position.height);
@@ -183,39 +183,9 @@ namespace SchemaEditor
             if (!windowInfo.inspectorToggled)
                 return;
 
-            float inspectorWidth = windowInfo.inspectorWidth;
+            float inspectorWidth = Window.inspectorWidth;
             Rect inspectorArea = new Rect(position.width - (inspectorWidth + Window.padding * 2), 0f,
                 inspectorWidth + Window.padding * 2, position.height);
-
-            Rect divider = new Rect(inspectorArea.x - 1f, EditorStyles.toolbar.fixedHeight, 1f,
-                position.height - EditorStyles.toolbar.fixedHeight);
-            Rect dividerRegion = new Rect(divider.x - 4.5f, divider.y, 10f, position.height);
-
-            EditorGUI.DrawRect(inspectorArea, Styles.windowBackground);
-
-            if (dividerRegion.Contains(Event.current.mousePosition))
-            {
-                windowInfo.hoverDivider = true;
-
-                if (Event.current.type == EventType.MouseDown)
-                {
-                    windowInfo.resizingInspector = true;
-                    windowInfo.resizeClickOffset = Event.current.mousePosition.x - divider.x;
-                }
-            }
-            else
-            {
-                windowInfo.hoverDivider = false;
-            }
-
-            if (windowInfo.resizingInspector)
-            {
-                float desired = Screen.width - Event.current.mousePosition.x - Window.padding * 2 +
-                                windowInfo.resizeClickOffset;
-                windowInfo.inspectorWidth = desired;
-            }
-
-            EditorGUI.DrawRect(divider, Styles.windowAccent);
 
             Rect inspectorContainer = new Rect(
                 position.width - inspectorWidth - Window.padding * 2,
@@ -414,14 +384,10 @@ namespace SchemaEditor
 
         private void DoSplashCanvas()
         {
-            if (canvas != null)
-                return;
-
-            windowInfo.inspectorToggled = false;
+            if (canvas == null)
+                canvas = new ComponentCanvas(this, null, null, null, DrawGrid);
 
             CalculateWindow();
-
-            canvas = new ComponentCanvas(this, null, null, null, DrawGrid);
 
             WindowComponent.WindowComponentCreateArgs windowCreateArgs
                 = new WindowComponent.WindowComponentCreateArgs();
@@ -570,16 +536,8 @@ namespace SchemaEditor
             public Vector2 inspectorScroll;
             public InspectorView inspectorView;
             public bool inspectorToggled = true;
-            public bool resizingInspector;
-            public bool hoverDivider;
-            public float resizeClickOffset;
-            private float _inspectorWidth = 350f;
 
-            public float inspectorWidth
-            {
-                get => _inspectorWidth;
-                set => _inspectorWidth = Mathf.Clamp(value, 350f, editor.position.width - 100f);
-            }
+            public static readonly float inspectorWidth = 350f;
 
             public static readonly float padding = 8f;
         }

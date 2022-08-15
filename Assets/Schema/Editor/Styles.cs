@@ -34,6 +34,8 @@ namespace SchemaEditor
 
         private static GUIStyle _nodeLabel;
 
+        private static GUIStyle _nodeIcon;
+
         private static GUIStyle _conditional;
 
         private static GUIStyle _element;
@@ -151,8 +153,8 @@ namespace SchemaEditor
                     _searchResult.alignment = TextAnchor.MiddleLeft;
                     _searchResult.hover.background =
                         roundedBox.normal.background.Tint(GUI.skin.settings.selectionColor);
-                    _searchResult.hover.textColor = Color.white;
-                    _searchResult.normal.textColor = Color.white;
+                    _searchResult.hover.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                    _searchResult.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
                 }
 
                 return _searchResult;
@@ -199,12 +201,29 @@ namespace SchemaEditor
                 {
                     _nodeLabel = new GUIStyle();
                     _nodeLabel.alignment = TextAnchor.MiddleCenter;
-                    _nodeLabel.imagePosition = ImagePosition.ImageAbove;
+                    _nodeLabel.imagePosition = ImagePosition.TextOnly;
                     _nodeLabel.fontSize = 15;
                     _nodeLabel.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
                 }
 
                 return _nodeLabel;
+            }
+        }
+
+        public static GUIStyle nodeIcon
+        {
+            get
+            {
+                if (_nodeIcon == null)
+                {
+                    _nodeIcon = new GUIStyle();
+                    _nodeIcon.alignment = TextAnchor.MiddleCenter;
+                    _nodeIcon.imagePosition = ImagePosition.ImageOnly;
+                    _nodeIcon.fixedHeight = 64f;
+                    _nodeIcon.fixedWidth = 64f;
+                }
+
+                return _nodeIcon;
             }
         }
 
@@ -347,11 +366,11 @@ namespace SchemaEditor
                     _blackboardEntry.stretchWidth = true;
                     _blackboardEntry.alignment = TextAnchor.MiddleLeft;
                     _blackboardEntry.padding = new RectOffset(8, 0, 0, 0);
-                    _blackboardEntry.normal.textColor = Color.white;
-                    _blackboardEntry.hover.textColor = Color.white;
+                    _blackboardEntry.normal.textColor = textColor;
+                    _blackboardEntry.hover.textColor = textColor;
                     _blackboardEntry.hover.background =
                         GenerateSolid(new Color(0.5f, 0.5f, 0.5f, 0.5f), Vector2Int.one);
-                    _blackboardEntry.onNormal.textColor = Color.white;
+                    _blackboardEntry.onNormal.textColor = textColor;
                     _blackboardEntry.onNormal.background =
                         GenerateSolid(GUI.skin.settings.selectionColor, Vector2Int.one);
                 }

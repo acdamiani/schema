@@ -216,8 +216,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             Vector2 mousePos = Event.current.mousePosition;
 
-            GUI.Label(layout.content.Pad(new RectOffset(0, 0, ContentPadding.top, ContentPadding.bottom)),
-                new GUIContent(node.name, node.icon), Styles.nodeLabel);
+            GUI.Label(layout.textContent,
+                new GUIContent(node.name), Styles.nodeLabel);
+
+            GUI.Label(layout.iconContent,
+                new GUIContent(node.icon), Styles.nodeIcon);
 
             // IEnumerable<Error> errors = new List<Error>() { new Error("Hello World", Error.Severity.Warning) };
 
@@ -358,8 +361,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                         if (Prefs.gridSnap)
                             node.graphPosition = new Vector2(
-                                Mathf.Round(node.graphPosition.x / snap) * snap,
-                                Mathf.Round(node.graphPosition.y / snap) * snap
+                                 Mathf.Round(node.graphPosition.x / snap) * snap,
+                                 Mathf.Round(node.graphPosition.y / snap) * snap
                             );
 
                         beginDragNodePosition = node.graphPosition;
@@ -369,8 +372,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                     if (Prefs.gridSnap)
                         dxdy = new Vector2(
-                            Mathf.Round(dxdy.x / snap) * snap,
-                            Mathf.Round(dxdy.y / snap) * snap
+                             Mathf.Round(dxdy.x / snap) * snap,
+                             Mathf.Round(dxdy.y / snap) * snap
                         );
 
                     node.graphPosition = beginDragNodePosition + dxdy;
@@ -477,7 +480,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             sb.AppendLine();
 
             sb.AppendLine(string.Format("<b>Body:</b> {0}", layout.body));
-            sb.AppendLine(string.Format("<b>Content:</b> {0}", layout.content));
+            sb.AppendLine(string.Format("<b>Content:</b> {0}", layout.textContent));
             sb.AppendLine(string.Format("<b>Shadow:</b> {0}", layout.shadow));
             sb.AppendLine(string.Format("<b>InConnection:</b> {0}", layout.inConnection));
             sb.AppendLine(string.Format("<b>OutConnection:</b> {0}", layout.outConnection));
@@ -538,6 +541,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             public Rect gridRect { get; set; }
             public Rect body { get; set; }
             public Rect content { get; set; }
+            public Rect textContent { get; set; }
+            public Rect iconContent { get; set; }
             public Rect shadow { get; set; }
             public Rect inConnection { get; set; }
             public Rect outConnection { get; set; }
@@ -545,6 +550,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             public Rect errorBox { get; set; }
             public Rect priorityIndicator { get; set; }
             public Rect modifierBox { get; set; }
+            public Vector2 textSize { get; private set; }
+            public Vector2 iconSize { get; private set; }
 
             public void Update()
             {
@@ -564,6 +571,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 body = r;
                 shadow = body.Pad(-10);
                 content = body.Pad(14);
+                iconContent = new Rect(content.x + content.width / 2f - iconSize.x / 2f, content.y + ContentPadding.top, iconSize.x, iconSize.y);
+                textContent = new Rect(content.x, content.yMax - textSize.y - ContentPadding.bottom, content.width, textSize.y);
                 errorBox = new Rect(body.xMax, body.yMax, 28f, 28f).UseCenter();
                 inConnection = new Rect(body.center.x, body.y - component.node.conditionals.Length * 50f - 6f, 24f, 12f)
                     .UseCenter();
@@ -575,10 +584,18 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             private void DoRect()
             {
-                Vector2 labelSize = Styles.nodeLabel.CalcSize(new GUIContent(component.node.name, component.node.icon));
+                textSize = Styles.nodeLabel.CalcSize(new GUIContent(component.node.name));
 
-                float width = labelSize.x + ContentPadding.left + ContentPadding.right + 28;
-                float height = labelSize.y + ContentPadding.top + ContentPadding.bottom + 28;
+                float width = textSize.x + ContentPadding.left + ContentPadding.right + 28;
+                float height = textSize.y + ContentPadding.top + ContentPadding.bottom + 28;
+
+                if (component.node.icon != null)
+                {
+                    iconSize = Styles.nodeIcon.CalcSize(new GUIContent(component.node.icon));
+
+                    width = Mathf.Max(width, iconSize.x + ContentPadding.left + ContentPadding.right + 28);
+                    height += iconSize.y + ContentPadding.bottom;
+                }
 
                 gridRect = new Rect(component.node.graphPosition, new Vector2(width, height));
             }

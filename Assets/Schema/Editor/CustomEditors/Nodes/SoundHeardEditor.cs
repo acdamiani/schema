@@ -41,7 +41,7 @@
 //         List<Keyframe> keys = new List<Keyframe>();
 
 //         float step = 2;
-//         timeStart = Mathf.Max(timeStart, 0.0001f);
+//         timeStart = Nodes/Mathf.Max(timeStart, 0.0001f);
 //         for (float d = timeStart; d < timeEnd; d *= step)
 //         {
 //             value = LogarithmicValue(d, timeStart, logBase);

@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_math")]
-    [LightIcon("math")]
+    [DarkIcon("Nodes/d_Math")]
+    [LightIcon("Nodes/Math")]
     [Category("Math")]
     [Description("Clamp a float to be between two other float values")]
     public class Clamp : Action
@@ -12,7 +12,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Lower bound for the float")] public BlackboardEntrySelector<float> lowerBound;
         [Tooltip("Upper bound for the float")] public BlackboardEntrySelector<float> upperBound;
 
-        [Tooltip("The clamped float")] [WriteOnly]
+        [Tooltip("The clamped float")]
+        [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

@@ -29,7 +29,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Specifies whether this query should hit triggers")]
         public QueryTriggerInteraction queryTriggerInteraction;
 
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects")] [WriteOnly]
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects")]
+        [WriteOnly]
         public BlackboardEntrySelector hit = new();
 
         protected override void OnObjectEnable()

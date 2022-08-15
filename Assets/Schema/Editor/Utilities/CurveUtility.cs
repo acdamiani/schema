@@ -111,12 +111,12 @@ namespace Schema.Utilities
     }
     // public static float Slope(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
     // {
-    //     Vector2 a = -3 * Mathf.Pow(1 - t, 2) * p0;
-    //     Vector2 b = 3 * Mathf.Pow((1 - t), 2) * p1;
+    //     Vector2 a = -3 * Nodes/Mathf.Pow(1 - t, 2) * p0;
+    //     Vector2 b = 3 * Nodes/Mathf.Pow((1 - t), 2) * p1;
     //     Vector2 c = -6 * t * (1 - t) * p1;
-    //     Vector2 d = -3 * Mathf.Pow(t, 2) * p2;
+    //     Vector2 d = -3 * Nodes/Mathf.Pow(t, 2) * p2;
     //     Vector2 e = 6 * t * (1 - t) * p2;
-    //     Vector2 f = 3 * Mathf.Pow(t, 2) * p3;
+    //     Vector2 f = 3 * Nodes/Mathf.Pow(t, 2) * p3;
 
     //     Vector2 g = a + b + c + d + e + f;
 
@@ -126,6 +126,6 @@ namespace Schema.Utilities
     // {
     //     float s = Slope(t, p0, p1, p2, p3);
 
-    //     return Mathf.Atan(Mathf.Pow(s, -1));
+    //     return Nodes/Mathf.Atan(Nodes/Mathf.Pow(s, -1));
     // }
 }

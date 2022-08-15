@@ -24,14 +24,13 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Specifies whether this query should hit triggers")]
         public QueryTriggerInteraction queryTriggerInteraction;
 
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object")] [WriteOnly]
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object")]
+        [WriteOnly]
         public BlackboardEntrySelector hit = new();
 
         protected override void OnObjectEnable()
         {
             hit.ApplyFilters(typeof(GameObject), typeof(List<GameObject>), typeof(Transform), typeof(List<Transform>));
-
-            ;
         }
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

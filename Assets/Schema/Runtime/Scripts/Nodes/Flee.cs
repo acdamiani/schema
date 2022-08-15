@@ -13,10 +13,12 @@ public class Flee : Action
     [Tooltip("The NavMesh surfaces the agent is allowed to choose points on")]
     public NavMeshAreaMask areaMask;
 
-    [Range(10f, 180f)] [Tooltip("The maximum angle to choose a point in front of the agent")]
+    [Range(10f, 180f)]
+    [Tooltip("The maximum angle to choose a point in front of the agent")]
     public float angle = 45f;
 
-    [Min(1f)] [Tooltip("The maximum distance to choose a point")]
+    [Min(1f)]
+    [Tooltip("The maximum distance to choose a point")]
     public float maxDistance = 10f;
 
     [Tooltip("The minimum distance to choose a point")]

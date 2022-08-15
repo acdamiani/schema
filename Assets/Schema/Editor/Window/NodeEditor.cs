@@ -40,13 +40,12 @@ namespace SchemaEditor
         private void OnEnable()
         {
             if (windowInfo.inspectorToggled)
-                window = new Rect(0f, 0f, position.width - windowInfo.inspectorWidth - Window.padding * 2,
+                window = new Rect(0f, 0f, position.width - Window.inspectorWidth - Window.padding * 2,
                     position.height);
             else
                 window = new Rect(0f, 0f, position.width, position.height);
 
-            if (target != null)
-                RebuildComponentTree();
+            RebuildComponentTree();
 
             wantsMouseMove = true;
 

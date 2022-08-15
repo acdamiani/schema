@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_math")]
-    [LightIcon("math")]
+    [DarkIcon("Nodes/d_Math")]
+    [LightIcon("Nodes/Math")]
     [Category("Math")]
     [Description("Get a number raised to a specified power")]
     public class Pow : Action
@@ -13,7 +13,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Power to raise the float to")]
         public BlackboardEntrySelector<float> pow;
 
-        [Tooltip("Selector to store the exponentiated value in")] [WriteOnly]
+        [Tooltip("Selector to store the exponentiated value in")]
+        [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

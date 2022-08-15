@@ -76,13 +76,13 @@ namespace Schema
         private string GetName()
         {
             if (isDynamic)
-                return dynamicName;
-            if (entry != null)
-                return entry.name;
-            if (inspectorValue != null)
+                return $"${dynamicName}";
+            else if (entry != null)
+                return $"${entry.name}";
+            else if (inspectorValue != null)
                 return inspectorValue.ToString();
 
-            return "null";
+            return "$null";
         }
     }
 

@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_math")]
-    [LightIcon("math")]
+    [DarkIcon("Nodes/d_Math")]
+    [LightIcon("Nodes/Math")]
     [Category("Math")]
     [Description("Move an angle towards another angle by a specified step size, wrapping around 360 degrees")]
     public class MoveTowardsAngle : Action
@@ -21,7 +21,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Max delta to move towards the target")]
         public BlackboardEntrySelector<float> maxDelta;
 
-        [Tooltip("The lerped angle")] [WriteOnly]
+        [Tooltip("The lerped angle")]
+        [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

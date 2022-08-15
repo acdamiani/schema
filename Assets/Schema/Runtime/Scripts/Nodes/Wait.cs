@@ -2,8 +2,8 @@
 
 namespace Schema.Builtin.Nodes
 {
-    [LightIcon("Light/Wait")]
-    [DarkIcon("Dark/Wait")]
+    [DarkIcon("Nodes/d_Wait")]
+    [LightIcon("Nodes/Wait")]
     [Description("Waits a given number of seconds, then resumes execution of the Behavior Tree")]
     public class Wait : Action
     {

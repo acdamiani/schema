@@ -5,6 +5,7 @@ namespace Schema.Builtin.Conditionals
 {
     [Description(
         "Checks for playing AudioSources within a sphere. Note that these objects require a collider to be detected")]
+    [DarkIcon("Conditionals/d_SoundHeard")]
     public class SoundHeard : Conditional
     {
         [Tooltip("Radius of the sphere that is registered as \"hearing\" a noise")]

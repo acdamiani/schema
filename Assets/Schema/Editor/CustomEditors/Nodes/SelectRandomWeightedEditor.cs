@@ -37,7 +37,7 @@ namespace SchemaEditor.Editors.Nodes
                 EditorGUILayout.LabelField($"{i + 1} {child.name}");
 
                 node.weights[child.uID] =
-                    Mathf.Clamp(
+                     Mathf.Clamp(
                         EditorGUILayout.IntField("Weight",
                             node.weights.ContainsKey(child.uID) ? node.weights[child.uID] : 1), 0, int.MaxValue);
 

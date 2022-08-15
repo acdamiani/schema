@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_math")]
-    [LightIcon("math")]
+    [DarkIcon("Nodes/d_Math")]
+    [LightIcon("Nodes/Math")]
     [Category("Math")]
     [Description("Get the absolute value of a float")]
     public class Abs : Action
@@ -11,7 +11,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Value to get the absolute value of")]
         public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Selector to store the absolute value in")] [WriteOnly]
+        [Tooltip("Selector to store the absolute value in")]
+        [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

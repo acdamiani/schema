@@ -59,7 +59,6 @@
      <Compile Include="Assets/Schema/Editor/Window/ICanvasContextProvider.cs" />
      <Compile Include="Assets/Schema/Editor/ContextBuilder.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogFormatEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/Resources/a.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetBoundsEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetAnimatorIKPositionWeightEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/BlackboardEntryEditor.cs" />

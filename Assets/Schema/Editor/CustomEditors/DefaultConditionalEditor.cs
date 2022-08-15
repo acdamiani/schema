@@ -12,10 +12,12 @@ namespace SchemaEditor.Editors
     public class DefaultConditionalEditor : Editor
     {
         private SerializedProperty conditionalName;
+        private SerializedProperty invert;
 
         private void OnEnable()
         {
             conditionalName = serializedObject.FindProperty("m_Name");
+            invert = serializedObject.FindProperty("m_invert");
         }
 
         public override void OnInspectorGUI()
@@ -23,6 +25,7 @@ namespace SchemaEditor.Editors
             serializedObject.Update();
 
             EditorGUILayout.PropertyField(conditionalName);
+            EditorGUILayout.PropertyField(invert);
 
             serializedObject.ApplyModifiedProperties();
         }

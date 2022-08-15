@@ -190,8 +190,8 @@ namespace Schema.Builtin.Conditionals
             else
                 sb.Append("If ");
 
-            sb.AppendFormat("<color=red>${0}</color> ",
-                string.IsNullOrEmpty(gameObjectKey.name) ? "null" : gameObjectKey.name);
+            sb.AppendFormat("<color=red>{0}</color> ",
+                gameObjectKey.name);
 
             if (invert)
                 sb.Append("is not inside cone");

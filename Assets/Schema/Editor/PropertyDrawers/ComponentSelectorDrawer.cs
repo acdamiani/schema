@@ -67,7 +67,7 @@ namespace SchemaEditor
                 Event.current.type == EventType.ScrollWheel)
             {
                 scrolls[property.propertyPath] =
-                    Mathf.Clamp(scrolls[property.propertyPath] - Event.current.delta.y * 10, -(size.x - textRect.width),
+                     Mathf.Clamp(scrolls[property.propertyPath] - Event.current.delta.y * 10, -(size.x - textRect.width),
                         0f);
                 // Prevent scroll
                 Event.current.delta = Vector2.zero;

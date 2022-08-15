@@ -46,7 +46,7 @@ namespace Schema.Builtin.Conditionals
             else
                 sb.Append("If variable ");
 
-            sb.AppendFormat("<color=red>${0}</color> ", string.IsNullOrEmpty(entry.name) ? "null" : entry.name);
+            sb.AppendFormat("<color=red>{0}</color> ", entry.name);
 
             if (invert)
                 sb.Append("is not null");

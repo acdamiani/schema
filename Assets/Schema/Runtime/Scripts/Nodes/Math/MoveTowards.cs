@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_math")]
-    [LightIcon("math")]
+    [DarkIcon("Nodes/d_Math")]
+    [LightIcon("Nodes/Math")]
     [Category("Math")]
     [Description("Move a float towards another float by a specified step size")]
     public class MoveTowards : Action
@@ -14,7 +14,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Max delta to move towards the target")]
         public BlackboardEntrySelector<float> maxDelta;
 
-        [Tooltip("The lerped float")] [WriteOnly]
+        [Tooltip("The lerped float")]
+        [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

@@ -238,7 +238,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 case EventType.MouseUp when e.button == 0:
                     if (moving != null)
                         moving.conditional.node.MoveConditional(moving.conditional,
-                            Mathf.Clamp(desiredIndex, 0, moving.conditional.node.conditionals.Length - 1));
+                             Mathf.Clamp(desiredIndex, 0, moving.conditional.node.conditionals.Length - 1));
 
                     moving = null;
                     break;
