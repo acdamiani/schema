@@ -136,7 +136,7 @@ public static class GraphUtility
                 node.SetPosition(new Vector2(
                     node.parent.children[nodeIndex - 1].GetPosition().x
                     + node.parent.children[nodeIndex - 1].GetSize().x
-                    + 25f,
+                    + NodeEditor.Prefs.arrangeHorizontalSpacing,
                     node.GetPosition().y
                 ));
         }
@@ -155,7 +155,7 @@ public static class GraphUtility
                 node.SetPosition(new Vector2(
                     node.parent.children[nodeIndex - 1].GetPosition().x
                     + node.parent.children[nodeIndex - 1].GetSize().x
-                    + 25f,
+                    + NodeEditor.Prefs.arrangeHorizontalSpacing,
                     node.GetPosition().y
                 ));
                 mod[node.uID] = node.GetPosition().x - node.children[0].GetPosition().x;
@@ -180,7 +180,7 @@ public static class GraphUtility
                 node.SetPosition(new Vector2(
                     node.parent.children[nodeIndex - 1].GetPosition().x
                     + node.parent.children[nodeIndex - 1].GetSize().x
-                    + 25f,
+                    + NodeEditor.Prefs.arrangeHorizontalSpacing,
                     node.GetPosition().y
                 ));
                 mod[node.uID] = node.GetPosition().x - midpoint;
@@ -192,7 +192,7 @@ public static class GraphUtility
 
         node.SetPosition(new Vector2(
             node.GetPosition().x,
-            node.GetParentSize() + node.GetParentCount() * 100f
+            node.GetParentSize() + node.GetParentCount() * NodeEditor.Prefs.arrangeVerticalSpacing
         ));
     }
 
@@ -220,7 +220,7 @@ public static class GraphUtility
             {
                 float distance = nodeContour[level] - childContour[level];
 
-                shift = -distance + 25f;
+                shift = -distance + NodeEditor.Prefs.arrangeHorizontalSpacing;
             }
 
             if (shift > 0f)

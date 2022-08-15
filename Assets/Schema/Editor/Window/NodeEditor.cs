@@ -343,6 +343,36 @@ namespace SchemaEditor
 
         internal static class Prefs
         {
+            public static bool dimUnconnectedNodes
+            {
+                get => EditorPrefs.GetBool("SCHEMA_PREF__dimUnconnectedNodes", true);
+                set => EditorPrefs.SetBool("SCHEMA_PREF__dimUnconnectedNodes", value);
+            }
+
+            public static bool showGrid
+            {
+                get => EditorPrefs.GetBool("SCHEMA_PREF__showGrid", true);
+                set => EditorPrefs.SetBool("SCHEMA_PREF__showGrid", value);
+            }
+
+            public static float zoomSpeed
+            {
+                get => EditorPrefs.GetFloat("SCHEMA_PREF__zoomSpeed", 0.035f);
+                set => EditorPrefs.SetFloat("SCHEMA_PREF__zoomSpeed", value);
+            }
+
+            public static float arrangeHorizontalSpacing
+            {
+                get => EditorPrefs.GetFloat("SCHEMA_PREF__arrangeHorizontalSpacing", 25f);
+                set => EditorPrefs.SetFloat("SCHEMA_PREF__arrangeHorizontalSpacing", value);
+            }
+
+            public static float arrangeVerticalSpacing
+            {
+                get => EditorPrefs.GetFloat("SCHEMA_PREF__arrangeVerticalSpacing", 100f);
+                set => EditorPrefs.SetFloat("SCHEMA_PREF__arrangeVerticalSpacing", value);
+            }
+
             public static Color selectionColor
             {
                 get => GetColor("SCHEMA_PREF__selectionColor", Color.white);

@@ -305,6 +305,17 @@ namespace SchemaEditor
         private void DrawPreferencesWindow()
         {
             EditorGUILayout.LabelField("Editor", EditorStyles.boldLabel);
+            Prefs.dimUnconnectedNodes = EditorGUILayout.Toggle(new GUIContent("Dim Unconnected Nodes", "Dim nodes not connected to the root node"), Prefs.dimUnconnectedNodes);
+            Prefs.showGrid = EditorGUILayout.Toggle(new GUIContent("Show Grid", "Show the background grid in the editor"), Prefs.showGrid);
+            Prefs.minimapEnabled = EditorGUILayout.Toggle(new GUIContent("Show Minimap", "Show the minimap in the editor"), Prefs.minimapEnabled);
+            Prefs.gridSnap = EditorGUILayout.Toggle(new GUIContent("Grid Snap", "Snap nodes to a grid"), Prefs.gridSnap);
+            Prefs.zoomSpeed = EditorGUILayout.Slider(new GUIContent("Zoom Speed", "The zoom speed in the editor"), Prefs.zoomSpeed, 0.01f, 0.1f);
+            Prefs.arrangeHorizontalSpacing = EditorGUILayout.Slider(new GUIContent("Arrange Horizontal Spacing", "Horizontal spacing between nodes when arranged"), Prefs.arrangeHorizontalSpacing, 0f, 500f);
+            Prefs.arrangeVerticalSpacing = EditorGUILayout.Slider(new GUIContent("Arrange Vertical Spacing", "Vertical spacing between ndoes when arranged"), Prefs.arrangeVerticalSpacing, 0f, 500f);
+
+            EditorGUILayout.LabelField("");
+
+            EditorGUILayout.LabelField("Colors", EditorStyles.boldLabel);
             Prefs.selectionColor = EditorGUILayout.ColorField(
                 new GUIContent("Selection Color", "The selection color to use for nodes"),
                 Prefs.selectionColor
@@ -603,6 +614,12 @@ namespace SchemaEditor
         /// </summary>
         public void DrawGrid(Rect rect, float zoom, Vector2 panOffset)
         {
+            if (!NodeEditor.Prefs.showGrid)
+            {
+                EditorGUI.DrawRect(rect, Styles.windowAccent);
+                return;
+            }
+
             float transitionPoint = 2f;
             float transitionWindow = 0.25f;
 

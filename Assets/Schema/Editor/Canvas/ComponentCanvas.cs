@@ -384,7 +384,7 @@ namespace SchemaEditor.Internal
         private void OnMouseScroll(Event mouseEvent)
         {
             if (zoomer != null)
-                zoomer.zoom += mouseEvent.delta.y * 0.035f;
+                zoomer.zoom += mouseEvent.delta.y * NodeEditor.Prefs.zoomSpeed;
         }
 
         public void DoBoxOverlap(Rect boxRect, Event current)

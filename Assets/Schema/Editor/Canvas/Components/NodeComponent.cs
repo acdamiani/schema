@@ -181,7 +181,9 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             Color guiColor = GUI.color;
 
-            GUI.color = Styles.windowBackground;
+            Color tint = NodeEditor.Prefs.dimUnconnectedNodes && node.priority < 1 ? new Color(0.8f, 0.8f, 0.8f, 1f) : Color.white;
+
+            GUI.color = Styles.windowBackground * tint;
 
             if (
                 node.connectionDescriptor == Node.ConnectionDescriptor.OnlyInConnection
@@ -190,7 +192,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 GUI.DrawTextureWithTexCoords(layout.inConnection, Icons.GetResource("in_connection", false),
                     new Rect(0f, 0.5f, 1f, 0.5f));
 
-            GUI.color = Styles.windowBackground;
+            GUI.color = Styles.windowBackground * tint;
 
             if (
                 node.connectionDescriptor == Node.ConnectionDescriptor.OnlyOutConnection
@@ -204,13 +206,13 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             cLerp -= Time.realtimeSinceStartup - t;
             cLerp = Mathf.Clamp01(cLerp);
 
-            GUI.color = Color.Lerp(c, statusColor, cLerp);
+            GUI.color = Color.Lerp(c, statusColor, cLerp) * tint;
             Styles.outline.DrawIfRepaint(layout.body, false, false, false, false);
 
-            GUI.color = Styles.windowAccent;
+            GUI.color = Styles.windowAccent * tint;
             Styles.roundedBox.DrawIfRepaint(layout.content, false, false, false, false);
 
-            GUI.color = Color.white;
+            GUI.color = Color.white * tint;
 
             Vector2 mousePos = Event.current.mousePosition;
 
@@ -235,17 +237,17 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             if (node.modifiers.Length > 0)
             {
-                GUI.color = Styles.outlineColor;
+                GUI.color = Styles.outlineColor * tint;
                 GUIContent content = new GUIContent("", "Node has active modifiers");
                 Styles.roundedBox.DrawIfRepaint(layout.modifierBox, content, false, false, false, false);
 
-                GUI.color = Color.white;
+                GUI.color = Color.white * tint;
                 GUI.DrawTexture(layout.modifierBox.Pad(4), Icons.GetResource("Modifier", false));
             }
 
             if (node.priority > 0)
             {
-                GUI.backgroundColor = Styles.outlineColor;
+                GUI.backgroundColor = Styles.outlineColor * tint;
                 Styles.roundedBox.DrawIfRepaint(layout.priorityIndicator, new GUIContent(node.priority.ToString()),
                     false, false, false, false);
                 GUI.backgroundColor = Color.white;
