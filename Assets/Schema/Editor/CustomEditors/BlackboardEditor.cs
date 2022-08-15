@@ -216,7 +216,7 @@ namespace SchemaEditor.Editors
             }
             else
             {
-                Styles.blackboardEntry.DrawIfRepaint(rect, content, isHovered || isSelected, isSelected, false, false);
+                Styles.blackboardEntry.DrawIfRepaint(rect, content, isHovered, false, isSelected, false);
             }
 
             entryGUIData.TryGetValue(entry.type, out Tuple<string, Color> entryData);

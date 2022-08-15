@@ -129,6 +129,16 @@ namespace Schema
         }
 
         /// <summary>
+        ///     Add an existing node to the tree
+        /// </summary>
+        /// <param name="node">Node to add to the tree</param>
+        /// <param name="undo">Wehether to register this operation to undo</param>
+        public void AddNode(Node node, bool undo = true)
+        {
+            AddNode(node, node.graphPosition, undo);
+        }
+
+        /// <summary>
         ///     Duplicates a given node and adds it to the tree.
         /// </summary>
         /// <param name="node">Node to use as the duplicate base</param>

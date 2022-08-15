@@ -159,8 +159,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             graphRect = Rect.MinMaxRect(xMin, yMin, xMax, yMax);
 
-            listModified = false;
-
             return graphRect;
         }
 

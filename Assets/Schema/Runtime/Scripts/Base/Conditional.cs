@@ -19,9 +19,9 @@ namespace Schema
             Both
         }
 
-        [SerializeField] [HideInInspector] private Node m_node;
-        [SerializeField] [HideInInspector] private AbortsType m_abortsType;
-        [SerializeField] [HideInInspector] private bool m_invert;
+        [SerializeField][HideInInspector] private Node m_node;
+        [SerializeField][HideInInspector] private AbortsType m_abortsType;
+        [SerializeField][HideInInspector] private bool m_invert;
 
         /// <summary>
         ///     Node that this conditional is attached to
@@ -69,7 +69,7 @@ namespace Schema
         /// </summary>
         public virtual GUIContent GetConditionalContent()
         {
-            return new GUIContent(GetType().Name);
+            return new GUIContent(name);
         }
 #if UNITY_EDITOR
         public static Conditional Instantiate(Conditional conditional)

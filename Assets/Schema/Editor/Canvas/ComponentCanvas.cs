@@ -94,6 +94,10 @@ namespace SchemaEditor.Internal
             component.Create(args);
             component.layer = args.layer;
 
+            onComponentListModified?.Invoke();
+
+            MoveToFront(component);
+
             return component;
         }
 
@@ -109,6 +113,8 @@ namespace SchemaEditor.Internal
         {
             if (ArrayUtility.Contains(_components, component))
                 ArrayUtility.Remove(ref _components, component);
+
+            onComponentListModified?.Invoke();
         }
 
         public void Select(GUIComponent component)
@@ -206,9 +212,7 @@ namespace SchemaEditor.Internal
 
             Array.Sort(
                 c,
-                (a, b) => Event.current.type == EventType.Repaint
-                    ? b.layer - a.layer
-                    : a.layer - b.layer
+                (a, b) => b.layer - a.layer
             );
 
             DoEvents(c);

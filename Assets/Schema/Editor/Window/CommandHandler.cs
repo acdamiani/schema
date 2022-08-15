@@ -8,11 +8,8 @@ namespace SchemaEditor.Internal
 {
     public static class CommandHandler
     {
-        public static CopyBuffer copyBuffer { get; }
-        static CommandHandler()
-        {
-            copyBuffer = new CopyBuffer();
-        }
+        public static CopyBuffer copyBuffer { get { return _copyBuffer; } }
+        private static CopyBuffer _copyBuffer;
         public static bool Valdiate(string commandName)
         {
             switch (commandName)
@@ -51,6 +48,9 @@ namespace SchemaEditor.Internal
                     break;
                 case "Paste":
                     PasteCommand(canvas);
+                    break;
+                case "Cut":
+                    CutCommand(canvas);
                     break;
             }
         }
@@ -99,19 +99,22 @@ namespace SchemaEditor.Internal
         }
         public static void CopyCommand(ComponentCanvas canvas)
         {
-            copyBuffer.Copy(
+            _copyBuffer = new CopyBuffer(
+                canvas,
                 canvas.components
                     .Where(x => x is ICopyable)
                     .Cast<ICopyable>()
                     .Where(x => x.IsCopyable())
-                    .Select(x => x.GetCopyable())
+                    .Select(x => x.GetCopyable()),
+                NodeEditor.instance.target
             );
 
             canvas.context.Rebuild();
+            canvas.DeselectAll();
         }
         public static void PasteCommand(ComponentCanvas canvas)
         {
-            copyBuffer.Paste(
+            copyBuffer.Flush(
                 canvas.components
                     .Where(x => x is IPasteRecievier)
                     .Cast<IPasteRecievier>()
@@ -119,7 +122,34 @@ namespace SchemaEditor.Internal
                     .Select(x => x.GetReciever())
             );
 
+            _copyBuffer = null;
+
             canvas.context.Rebuild();
+        }
+        public static void CutCommand(ComponentCanvas canvas)
+        {
+            IEnumerable<ICopyable> copyables = canvas.components
+                .Where(x => x is ICopyable)
+                .Cast<ICopyable>()
+                .Where(x => x.IsCopyable());
+
+            _copyBuffer = new CopyBuffer(
+                canvas,
+                copyables
+                    .Select(x => x.GetCopyable()),
+                NodeEditor.instance.target
+            );
+
+            foreach (IDeletable deletable in copyables
+                .Where(x => x is IDeletable)
+                .Cast<IDeletable>())
+            {
+                if (deletable.IsDeletable())
+                    deletable.Delete();
+            }
+
+            canvas.context.Rebuild();
+            canvas.DeselectAll();
         }
         private enum CopyBufferDescriptor
         {

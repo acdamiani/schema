@@ -98,12 +98,27 @@ namespace SchemaEditor
                     if (targets.Count > 0)
                         defaultNodeEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultNodeEditor));
                 }
-                else if (!defaultNodeEditor.targets.SequenceEqual(targets))
+                else if (defaultNodeEditor.targets.Any(x => x == null) || !defaultNodeEditor.targets.SequenceEqual(targets))
                 {
                     DestroyImmediate(defaultNodeEditor);
 
                     if (targets.Count > 0)
                         defaultNodeEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultNodeEditor));
+                }
+            }
+            else if (targets.All(x => x is Conditional))
+            {
+                if (defaultConditionalEditor == null)
+                {
+                    if (targets.Count > 0)
+                        defaultConditionalEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultConditionalEditor));
+                }
+                else if (defaultConditionalEditor.targets.Any(x => x == null) || !defaultConditionalEditor.targets.SequenceEqual(targets))
+                {
+                    DestroyImmediate(defaultConditionalEditor);
+
+                    if (targets.Count > 0)
+                        defaultConditionalEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultConditionalEditor));
                 }
             }
         }
@@ -361,22 +376,16 @@ namespace SchemaEditor
 
             if (editor != null)
             {
-                bool isInspectingDecorator = false;
-
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.BeginDisabledGroup(Application.isPlaying);
-                if (isInspectingDecorator)
-                {
-                    defaultConditionalEditor.OnInspectorGUI();
-                    EditorGUILayout.LabelField("");
-                }
-                else if (editor.targets.OfType<Node>().Count() > 0)
-                {
-                    defaultNodeEditor.OnInspectorGUI();
-                    EditorGUILayout.LabelField("");
-                }
 
                 EditorGUILayout.LabelField(editor.targets[0].name, EditorStyles.boldLabel);
+
+                if (defaultNodeEditor != null)
+                    defaultNodeEditor.OnInspectorGUI();
+                else if (defaultConditionalEditor != null)
+                    defaultConditionalEditor.OnInspectorGUI();
+
                 editor.OnInspectorGUI();
                 EditorGUI.EndDisabledGroup();
             }

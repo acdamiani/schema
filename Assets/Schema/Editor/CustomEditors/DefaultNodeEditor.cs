@@ -37,10 +37,9 @@ namespace SchemaEditor.Editors
 
             EditorGUILayout.PropertyField(nodeName);
             EditorGUILayout.PropertyField(comment);
-            EditorGUILayout.PropertyField(enableStatusIndicator);
-
-            if (target.GetType() != typeof(Root))
+            if (targets.Length == 0 && target.GetType() != typeof(Root))
                 DoModifers(node.modifiers);
+            EditorGUILayout.PropertyField(enableStatusIndicator);
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -76,7 +75,7 @@ namespace SchemaEditor.Editors
         {
             Rect r;
 
-            GUILayout.Label("Modifiers", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Modifiers");
 
             Vector2 iconSize = EditorGUIUtility.GetIconSize();
             EditorGUIUtility.SetIconSize(Vector2.one * 16f);

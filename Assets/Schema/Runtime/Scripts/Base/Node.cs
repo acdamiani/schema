@@ -189,6 +189,7 @@ namespace Schema
             Node copy = ScriptableObject.Instantiate(node);
 
             copy.name = node.name;
+            copy.graphPosition += Vector2.one * 32f;
             copy.ResetGUID();
             copy.BreakConnections();
             copy.priority = 0;
@@ -208,6 +209,40 @@ namespace Schema
                 copiedModifier.node = copy;
                 copy.modifiers[i] = copiedModifier;
             }
+
+            return copy;
+        }
+
+        public static Node Instantiate(Node node, IEnumerable<Conditional> conditionalsToDuplicate)
+        {
+            Node copy = ScriptableObject.Instantiate(node);
+
+            copy.name = node.name;
+            copy.graphPosition += Vector2.one * 32f;
+            copy.ResetGUID();
+            copy.BreakConnections();
+            copy.priority = 0;
+
+            copy.conditionals = conditionalsToDuplicate
+                .Intersect(node.conditionals)
+                .Select(x =>
+                {
+                    Conditional duplicatedConditional = Conditional.Instantiate(x);
+                    duplicatedConditional.node = copy;
+
+                    return duplicatedConditional;
+                })
+                .ToArray();
+
+            copy.modifiers = node.modifiers
+                .Select(x =>
+                {
+                    Modifier duplicatedModifier = Modifier.Instantiate(x);
+                    duplicatedModifier.node = copy;
+
+                    return duplicatedModifier;
+                })
+                .ToArray();
 
             return copy;
         }
@@ -441,11 +476,8 @@ namespace Schema
         /// <exception cref="ArgumentException">conditionalType does not inherit from Conditional</exception>
         public void AddConditional(Conditional conditional, bool undo = true)
         {
-            Debug.Log("going1");
             if (ArrayUtility.Contains(m_conditionals, conditional))
                 return;
-
-            Debug.Log("going");
 
             conditional.hideFlags = HideFlags.HideInHierarchy;
             conditional.node = this;
