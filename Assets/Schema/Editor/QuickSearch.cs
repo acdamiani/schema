@@ -54,6 +54,7 @@ public class QuickSearch : IWindowComponentProvider
     public void OnGUI(int id)
     {
         searchField.SetFocus();
+        Focus();
 
         GUILayout.BeginHorizontal(Styles.searchTopBar);
 
@@ -267,6 +268,10 @@ public class QuickSearch : IWindowComponentProvider
     private void MoveSelection(bool isUp, int resultsCount)
     {
         selected = isUp ? selected - 1 : selected + 1;
+    }
+
+    private void Focus()
+    {
         selected = CorrectSelection(selected);
 
         float positionInView = selected * 24f + Styles.padding8x.padding.top;

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(MoveToRandom))]
+    [CustomEditor(typeof(Schema.Builtin.Nodes.MoveToRandom))]
     [CanEditMultipleObjects]
     public class MoveToRandomEditor : Editor
     {

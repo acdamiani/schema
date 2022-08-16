@@ -4,8 +4,9 @@ using UnityEngine.AI;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Wander")]
-    [LightIcon("Light/Wander")]
+    [DarkIcon("Nodes/d_Movement")]
+    [LightIcon("Light/Movement")]
+    [Category("Movement")]
     public class Wander : Action
     {
         [Tooltip("The distance an agent will travel in any direction")]

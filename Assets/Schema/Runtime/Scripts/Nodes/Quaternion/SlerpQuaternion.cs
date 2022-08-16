@@ -2,8 +2,9 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
+    [DarkIcon("Nodes/d_Quaternion")]
+    [LightIcon("Nodes/Quaternion")]
+    [Category("Quaternion")]
     [Description("Spherically interpolate between two rotations, and normalize the result afterwards")]
     public class SlerpQuaternion : Action
     {
@@ -16,7 +17,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Whether to clamp the t value")]
         public bool unclamped;
 
-        [Tooltip("Blackboard variable to store the slerped rotation in")] [WriteOnly]
+        [Tooltip("Blackboard variable to store the slerped rotation in")]
+        [WriteOnly]
         public BlackboardEntrySelector<Quaternion> slerped;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
