@@ -1,4 +1,3 @@
-using Schema;
 using UnityEngine;
 
 namespace Schema.Builtin.Nodes

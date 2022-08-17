@@ -11,8 +11,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Numerator of the ratio")] public BlackboardEntrySelector<float> y;
         [Tooltip("Denominator of the ratio")] public BlackboardEntrySelector<float> x;
 
-        [Tooltip("Selector to store the arctangent in")]
-        [WriteOnly]
+        [Tooltip("Selector to store the arctangent in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         [Tooltip("Return degrees instead of radians")]

@@ -1,5 +1,5 @@
-using UnityEditor;
 using Schema.Builtin.Nodes;
+using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {

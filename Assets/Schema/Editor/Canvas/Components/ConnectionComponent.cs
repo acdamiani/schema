@@ -1,10 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Schema.Utilities;
 using UnityEditor;
 using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
@@ -195,13 +195,14 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             curve.p2 = p2;
             curve.p3 = p3;
 
-            Handles.DrawBezier(p0, p3, p1, p2, isSelected ? Prefs.selectionColor : Color.gray, Icons.GetResource("curve", false),
+            Handles.DrawBezier(p0, p3, p1, p2, isSelected ? Prefs.selectionColor : Color.gray,
+                Icons.GetResource("curve", false),
                 canvas.zoomer.zoom * 3f);
         }
 
         public override string GetDebugInfo()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             sb.AppendLine(string.Format("<b>From:</b> {0}", from?.node.name));
             sb.AppendLine(string.Format("<b>To:</b> {0}", to?.node.name));

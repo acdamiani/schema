@@ -16,9 +16,9 @@ namespace Schema.Internal
             Invalid
         }
 
-        private readonly Dictionary<int, bool> lastConditionalStatus = new();
-
         private readonly Dictionary<int, object[]> conditionalMemory = new();
+
+        private readonly Dictionary<int, bool> lastConditionalStatus = new();
 
         private readonly Dictionary<int, object[]> modifierMemory = new();
 

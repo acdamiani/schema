@@ -11,8 +11,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Input for the arcsine function")]
         public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Selector to store the arcsine in")]
-        [WriteOnly]
+        [Tooltip("Selector to store the arcsine in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         [Tooltip("Return degrees instead of radians")]

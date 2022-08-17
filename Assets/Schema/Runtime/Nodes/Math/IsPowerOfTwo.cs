@@ -10,8 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Integer to evaluate")] public BlackboardEntrySelector<int> value;
 
-        [Tooltip("Whether the integer is a power of two")]
-        [WriteOnly]
+        [Tooltip("Whether the integer is a power of two")] [WriteOnly]
         public BlackboardEntrySelector<bool> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

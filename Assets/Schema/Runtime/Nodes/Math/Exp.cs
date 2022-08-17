@@ -10,8 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Power to raise e to")] public BlackboardEntrySelector<float> pow;
 
-        [Tooltip("Selector to store the cosine in")]
-        [WriteOnly]
+        [Tooltip("Selector to store the cosine in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using Schema;
 using Schema.Internal;
 using Schema.Utilities;
@@ -180,7 +178,7 @@ namespace SchemaEditor
             else
                 lastFiles.Insert(0, id);
 
-            List<string> f = new List<string>(lastFiles);
+            List<string> f = new(lastFiles);
 
             foreach (string s in f)
             {
@@ -207,7 +205,7 @@ namespace SchemaEditor
 
         private static GUIContent AggregateErrors(List<Error> errors)
         {
-            GUIContent ret = new GUIContent();
+            GUIContent ret = new();
 
             if (errors.Count == 0) return GUIContent.none;
 
@@ -240,7 +238,7 @@ namespace SchemaEditor
 
         private static GUIContent GetErrors(Node node)
         {
-            List<Error> errors = new List<Error>(node.GetErrors());
+            List<Error> errors = new(node.GetErrors());
 
             // foreach (Decorator d in node.decorators)
             //     errors.AddRange(d.GetErrors().Select(error => new Error($"{error.message} ({d.name})", error.severity)));
@@ -331,6 +329,5 @@ namespace SchemaEditor
                     .Select(x => x.node)
             );
         }
-
     }
 }

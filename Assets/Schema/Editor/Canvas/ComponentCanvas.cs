@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Schema;
 using Schema.Internal;
 using Schema.Utilities;
 using SchemaEditor.Internal.ComponentSystem;
@@ -22,7 +21,7 @@ namespace SchemaEditor.Internal
         private GUIComponent _hovered;
         private GUIComponent[] _selected = Array.Empty<GUIComponent>();
         private Vector2 lastMouse;
-        private List<Func<GUIComponent, bool>> selectors = new List<Func<GUIComponent, bool>>();
+        private readonly List<Func<GUIComponent, bool>> selectors = new();
 
         public ComponentCanvas(
             ICanvasContextProvider context,
@@ -460,12 +459,14 @@ namespace SchemaEditor.Internal
 
             menu.AddShortcut("Main Menu/Edit/Select All", () => CommandHandler.SelectAllCommand(this));
             menu.AddShortcut("Main Menu/Edit/Deselect All", () => CommandHandler.DeselectAllCommand(this));
-            menu.AddShortcut("Main Menu/Edit/Select Children", () => CommandHandler.SelectChildrenCommand(this), !CanSelectChildren());
+            menu.AddShortcut("Main Menu/Edit/Select Children", () => CommandHandler.SelectChildrenCommand(this),
+                !CanSelectChildren());
 
             menu.AddSeparator();
 
             menu.AddShortcut("Schema/Add Node", NodeEditor.AddNodeCommand);
-            menu.AddShortcut("Schema/Add Conditional", NodeEditor.AddConditionalCommand, NodeEditor.CanAddConditional(this));
+            menu.AddShortcut("Schema/Add Conditional", NodeEditor.AddConditionalCommand,
+                NodeEditor.CanAddConditional(this));
             menu.AddShortcut("Schema/Break Connections", NodeEditor.BreakConnectionsCommand);
 
             return menu.menu;

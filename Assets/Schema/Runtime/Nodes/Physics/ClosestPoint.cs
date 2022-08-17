@@ -17,8 +17,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Position of the collider")] public BlackboardEntrySelector<Vector3> position;
         [Tooltip("Rotation of the collider")] public BlackboardEntrySelector<Quaternion> rotation;
 
-        [Tooltip("Where to store the closest point")]
-        [WriteOnly]
+        [Tooltip("Where to store the closest point")] [WriteOnly]
         public BlackboardEntrySelector<Vector3> target;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

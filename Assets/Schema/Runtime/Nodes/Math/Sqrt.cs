@@ -11,8 +11,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Number to get the square root for")]
         public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Selector to store the square root in")]
-        [WriteOnly]
+        [Tooltip("Selector to store the square root in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

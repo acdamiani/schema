@@ -20,7 +20,7 @@ public static class DynamicProperty
         string assemblyName = type.AssemblyQualifiedName;
         string pathSuffix = '.' + path.Replace('/', '.').Trim('.');
 
-        Queue<string> pathParts = new Queue<string>(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
+        Queue<string> pathParts = new(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
 
         object currentObject = ValueTypeHolder.Wrap(obj);
         Type currentType = type;
@@ -82,7 +82,7 @@ public static class DynamicProperty
         string assemblyName = type.AssemblyQualifiedName;
         string pathSuffix = '.' + path.Replace('/', '.').Trim('.');
 
-        Queue<string> pathParts = new Queue<string>(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
+        Queue<string> pathParts = new(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
 
         object currentObject = ValueTypeHolder.Wrap(obj);
         Type currentType = type;
@@ -124,8 +124,7 @@ public static class DynamicProperty
     {
 #if ENABLE_MONO
         string methodName = memberInfo.ReflectedType.FullName + ".get_" + memberInfo.Name;
-        DynamicMethod getterMethod =
-            new DynamicMethod(methodName, typeof(object), new Type[1] { typeof(object) }, true);
+        DynamicMethod getterMethod = new(methodName, typeof(object), new Type[1] { typeof(object) }, true);
         ILGenerator gen = getterMethod.GetILGenerator();
 
         Type targetType = memberInfo.DeclaringType;
@@ -201,8 +200,7 @@ public static class DynamicProperty
     {
 #if ENABLE_MONO
         string methodName = memberInfo.ReflectedType.FullName + ".set_" + memberInfo.Name;
-        DynamicMethod setterMethod =
-            new DynamicMethod(methodName, null, new Type[2] { typeof(object), typeof(object) }, true);
+        DynamicMethod setterMethod = new(methodName, null, new Type[2] { typeof(object), typeof(object) }, true);
         ILGenerator gen = setterMethod.GetILGenerator();
 
         Type targetType = memberInfo.DeclaringType;

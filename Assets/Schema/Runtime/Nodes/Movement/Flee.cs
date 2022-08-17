@@ -1,5 +1,4 @@
-﻿using Schema;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -16,12 +15,10 @@ namespace Schema.Builtin.Nodes
         [Tooltip("The NavMesh surfaces the agent is allowed to choose points on")]
         public NavMeshAreaMask areaMask;
 
-        [Range(10f, 180f)]
-        [Tooltip("The maximum angle to choose a point in front of the agent")]
+        [Range(10f, 180f)] [Tooltip("The maximum angle to choose a point in front of the agent")]
         public float angle = 45f;
 
-        [Min(1f)]
-        [Tooltip("The maximum distance to choose a point")]
+        [Min(1f)] [Tooltip("The maximum distance to choose a point")]
         public float maxDistance = 10f;
 
         [Tooltip("The minimum distance to choose a point")]
@@ -93,7 +90,8 @@ namespace Schema.Builtin.Nodes
 
         private Vector3 GetRandomPoint(SchemaAgent agent, Vector3 enemyPos)
         {
-            Vector3 dir = (new Vector3(agent.transform.position.x, 0f, agent.transform.position.z) - enemyPos).normalized;
+            Vector3 dir = (new Vector3(agent.transform.position.x, 0f, agent.transform.position.z) - enemyPos)
+                .normalized;
             Quaternion rot = Quaternion.LookRotation(dir, Vector3.up);
 
             float halfAngle = angle / 2f;

@@ -10,8 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Value to round")] public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Sampled perlin value")]
-        [WriteOnly]
+        [Tooltip("Sampled perlin value")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

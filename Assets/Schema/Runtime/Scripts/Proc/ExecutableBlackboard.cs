@@ -31,7 +31,6 @@ namespace Schema.Internal
                     if (!globalValues.ContainsKey(entry))
                         globalValues.Add(entry, new EntryData(entry));
                 }
-
             }
         }
 

@@ -10,8 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Quaternion to normalize")] public BlackboardEntrySelector<Quaternion> quaternion;
 
-        [Tooltip("Blackboard variable to store the normalized vector in")]
-        [WriteOnly]
+        [Tooltip("Blackboard variable to store the normalized vector in")] [WriteOnly]
         public BlackboardEntrySelector<Quaternion> normalized;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

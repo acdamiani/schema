@@ -113,7 +113,7 @@ public static class GraphUtility
         {
             if (node.children.Length > 0)
             {
-                Vector2 v = new Vector2(
+                Vector2 v = new(
                     node.children[0].GetPosition().x + node.children[0].GetSize().x / 2f - nodeSize.x / 2f,
                     0f
                 );
@@ -204,7 +204,7 @@ public static class GraphUtility
 
         int nodeIndex = Array.IndexOf(node.parent.children, node);
 
-        Dictionary<int, float> nodeContour = new Dictionary<int, float>();
+        Dictionary<int, float> nodeContour = new();
 
         float shift = 0f;
 
@@ -212,7 +212,7 @@ public static class GraphUtility
 
         for (int i = 0; i < nodeIndex; i++)
         {
-            Dictionary<int, float> childContour = new Dictionary<int, float>();
+            Dictionary<int, float> childContour = new();
             GetRightContour(node.parent.children[i], 0f, ref childContour);
 
             for (int level = node.GetParentCount() + 1;
@@ -239,7 +239,7 @@ public static class GraphUtility
 
     private static IEnumerable<Node> PreOrder(Node root)
     {
-        List<Node> ret = new List<Node>();
+        List<Node> ret = new();
 
         if (root.children.Length == 0)
         {

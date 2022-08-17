@@ -13,8 +13,7 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("Base of the logarithm")] public BlackboardEntrySelector<float> baseValue = new(2f);
 
-        [Tooltip("Selector to store maximum in")]
-        [WriteOnly]
+        [Tooltip("Selector to store maximum in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

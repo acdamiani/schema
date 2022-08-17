@@ -10,8 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Value to get the sign of")] public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Sign of the value")]
-        [WriteOnly]
+        [Tooltip("Sign of the value")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

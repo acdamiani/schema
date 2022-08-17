@@ -1,21 +1,20 @@
-using UnityEngine;
 using System.Collections.Generic;
-using UnityEditor;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEditor;
 using UnityEditor.ShortcutManagement;
+using UnityEngine;
 
 namespace SchemaEditor.Internal
 {
     public class ContextBuilder
     {
-        public GenericMenu menu { get { return _menu; } }
-        private GenericMenu _menu;
-
         public ContextBuilder()
         {
-            _menu = new GenericMenu();
+            menu = new GenericMenu();
         }
+
+        public GenericMenu menu { get; }
 
         public void AddItem(string content, GenericMenu.MenuFunction menuFunction)
         {
@@ -34,33 +33,34 @@ namespace SchemaEditor.Internal
 
         public void AddSeparator(string path)
         {
-            _menu.AddSeparator(path);
+            menu.AddSeparator(path);
         }
 
         public void AddItem(GUIContent content, bool on, GenericMenu.MenuFunction menuFunction)
         {
-            _menu.AddItem(content, on, menuFunction);
+            menu.AddItem(content, on, menuFunction);
         }
 
         public void AddItem(GUIContent content, bool on, GenericMenu.MenuFunction menuFunction, bool disabled)
         {
             if (disabled)
-                _menu.AddDisabledItem(content, on);
+                menu.AddDisabledItem(content, on);
             else
-                _menu.AddItem(content, on, menuFunction);
+                menu.AddItem(content, on, menuFunction);
         }
 
         public void AddItem(GUIContent content, bool on, GenericMenu.MenuFunction2 menuFunction, object userData)
         {
-            _menu.AddItem(content, on, menuFunction, userData);
+            menu.AddItem(content, on, menuFunction, userData);
         }
 
-        public void AddItem(GUIContent content, bool on, GenericMenu.MenuFunction2 menuFunction, object userData, bool disabled)
+        public void AddItem(GUIContent content, bool on, GenericMenu.MenuFunction2 menuFunction, object userData,
+            bool disabled)
         {
             if (disabled)
-                _menu.AddDisabledItem(content, on);
+                menu.AddDisabledItem(content, on);
             else
-                _menu.AddItem(content, on, menuFunction, userData);
+                menu.AddItem(content, on, menuFunction, userData);
         }
 
         public void AddShortcut(string shortcut, GenericMenu.MenuFunction menuFunction, string nameInMenu = "")
@@ -68,7 +68,8 @@ namespace SchemaEditor.Internal
             AddShortcut(shortcut, menuFunction, false, nameInMenu);
         }
 
-        public void AddShortcut(string shortcut, GenericMenu.MenuFunction menuFunction, bool disabled, string nameInMenu = "")
+        public void AddShortcut(string shortcut, GenericMenu.MenuFunction menuFunction, bool disabled,
+            string nameInMenu = "")
         {
             int pos = shortcut.LastIndexOf("/") + 1;
             string text = string.IsNullOrEmpty(nameInMenu) ? shortcut.Substring(pos) : nameInMenu;
@@ -93,7 +94,7 @@ namespace SchemaEditor.Internal
                 UnityEditor.ShortcutManagement.ShortcutManager.instance.GetShortcutBinding(commandName)
                     .keyCombinationSequence;
 
-            KeyCombination defaultKeyCombination = new KeyCombination(KeyCode.None);
+            KeyCombination defaultKeyCombination = new(KeyCode.None);
 
             if (sequence.Count() > 0)
                 return UnityEditor.ShortcutManagement.ShortcutManager.instance.GetShortcutBinding(commandName)

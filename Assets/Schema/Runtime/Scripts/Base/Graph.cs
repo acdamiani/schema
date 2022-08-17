@@ -190,7 +190,7 @@ namespace Schema
                 groupIndex = Undo.GetCurrentGroup();
             }
 
-            List<Node> original = new List<Node>(nodes);
+            List<Node> original = new(nodes);
             List<Node> roots = original.FindAll(node =>
                 {
                     if (node.GetType() == typeof(Root))
@@ -206,7 +206,7 @@ namespace Schema
                 }
             );
 
-            List<Node> dupl = new List<Node>();
+            List<Node> dupl = new();
 
             foreach (Node root in roots)
                 dupl.AddRange(DuplicateRecursive(nodes, root, offset, undo).GetAllChildren());

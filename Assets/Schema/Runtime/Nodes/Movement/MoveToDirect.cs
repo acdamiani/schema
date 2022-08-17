@@ -1,4 +1,3 @@
-using Schema;
 using UnityEngine;
 
 namespace Schema.Builtin.Nodes
@@ -22,7 +21,8 @@ namespace Schema.Builtin.Nodes
             }
 
             if (Vector3.SqrMagnitude(agent.transform.position - point.value) < 0.1f) return NodeStatus.Success;
-            agent.transform.position = Vector3.MoveTowards(agent.transform.position, point.value, speed * Time.deltaTime);
+            agent.transform.position =
+                Vector3.MoveTowards(agent.transform.position, point.value, speed * Time.deltaTime);
             return NodeStatus.Running;
         }
     }

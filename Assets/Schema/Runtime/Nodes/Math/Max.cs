@@ -13,8 +13,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("List of values to get the maximum of")]
         public List<BlackboardEntrySelector<float>> values;
 
-        [Tooltip("Selector to store maximum in")]
-        [WriteOnly]
+        [Tooltip("Selector to store maximum in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

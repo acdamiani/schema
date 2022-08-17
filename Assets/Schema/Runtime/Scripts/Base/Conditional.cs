@@ -19,9 +19,9 @@ namespace Schema
             Both
         }
 
-        [SerializeField][HideInInspector] private Node m_node;
-        [SerializeField][HideInInspector] private AbortsType m_abortsType;
-        [SerializeField][HideInInspector] private bool m_invert;
+        [SerializeField] [HideInInspector] private Node m_node;
+        [SerializeField] [HideInInspector] private AbortsType m_abortsType;
+        [SerializeField] [HideInInspector] private bool m_invert;
 
         /// <summary>
         ///     Node that this conditional is attached to

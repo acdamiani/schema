@@ -1,4 +1,3 @@
-using Schema;
 using UnityEngine;
 
 namespace Schema.Builtin.Nodes
@@ -9,8 +8,7 @@ namespace Schema.Builtin.Nodes
     [Category("Animation")]
     public class RemoveCurveKey : Action
     {
-        [Tooltip("Animation curve to use for this operation")]
-        [WriteOnly]
+        [Tooltip("Animation curve to use for this operation")] [WriteOnly]
         public BlackboardEntrySelector<AnimationCurve> curve;
 
         [Tooltip("Index of key to remove")] public BlackboardEntrySelector<int> index;

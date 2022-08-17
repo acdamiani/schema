@@ -18,8 +18,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Distance to move current per call.")]
         public BlackboardEntrySelector<float> maxDistanceDelta;
 
-        [Tooltip("Blackboard variable to store the new position vector in")]
-        [WriteOnly]
+        [Tooltip("Blackboard variable to store the new position vector in")] [WriteOnly]
         public BlackboardEntrySelector newPosition = new();
 
         private void OnValidate()

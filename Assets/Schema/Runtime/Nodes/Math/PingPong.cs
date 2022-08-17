@@ -13,8 +13,7 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("Length of the PingPong")] public BlackboardEntrySelector<float> length;
 
-        [Tooltip("Sampled perlin value")]
-        [WriteOnly]
+        [Tooltip("Sampled perlin value")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

@@ -1,40 +1,50 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Schema;
+using Schema.Internal;
 using SchemaEditor.Internal.ComponentSystem;
-using SchemaEditor.Internal.ComponentSystem.Components;
-using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace SchemaEditor.Internal
 {
     public class CopyBuffer
     {
-        public Object[] buffer { get { return _buffer; } }
-        private Object[] _buffer;
-        public Graph graph { get; }
-        public ComponentCanvas canvas { get; }
+        public enum Descriptor
+        {
+            None,
+            NodesWithConditionals,
+            Conditionals
+        }
+
         public CopyBuffer(ComponentCanvas canvas, IEnumerable<Object> objectsToCopy, Graph graph)
         {
-            _buffer = Array.Empty<Object>();
+            buffer = Array.Empty<Object>();
 
             this.canvas = canvas;
             this.graph = graph;
 
             Copy(objectsToCopy);
         }
+
+        public Object[] buffer { get; private set; }
+
+        public Graph graph { get; }
+        public ComponentCanvas canvas { get; }
+
         ~CopyBuffer()
         {
             ClearBuffer();
         }
+
         private void ClearBuffer()
         {
-            for (int i = 0; i < _buffer.Length; i++)
-                Object.DestroyImmediate(_buffer[i]);
+            for (int i = 0; i < buffer.Length; i++)
+                Object.DestroyImmediate(buffer[i]);
 
-            _buffer = Array.Empty<Object>();
+            buffer = Array.Empty<Object>();
         }
+
         private void Copy(IEnumerable<Object> objectsToCopy)
         {
             Descriptor descriptor = GetDescriptor(objectsToCopy);
@@ -47,16 +57,17 @@ namespace SchemaEditor.Internal
             switch (descriptor)
             {
                 case Descriptor.Conditionals:
-                    _buffer = objectsToCopy
+                    buffer = objectsToCopy
                         .Where(x => x is Conditional)
                         .Select(x => Conditional.Instantiate((Conditional)x))
                         .ToArray();
                     break;
                 case Descriptor.NodesWithConditionals:
-                    _buffer = DoNodeCopy(objectsToCopy).ToArray();
+                    buffer = DoNodeCopy(objectsToCopy).ToArray();
                     break;
             }
         }
+
         private IEnumerable<Object> DoNodeCopy(IEnumerable<Object> objectsToCopy)
         {
             IEnumerable<Node> nodes = objectsToCopy
@@ -85,20 +96,21 @@ namespace SchemaEditor.Internal
 
             return copiesForwards.Values;
         }
+
         public void Flush(IEnumerable<Object> selected)
         {
             Descriptor descriptor = GetDescriptor(buffer);
 
-            foreach (Object o in _buffer)
+            foreach (Object o in buffer)
             {
-                Schema.Internal.GraphObject g = o as Schema.Internal.GraphObject;
+                GraphObject g = o as GraphObject;
 
                 if (g == null)
                     continue;
 
                 canvas.SelectWhenCreated(
                     x => x is IGraphObjectProvider && ((IGraphObjectProvider)x).Equals(g)
-                    );
+                );
             }
 
             switch (descriptor)
@@ -109,18 +121,17 @@ namespace SchemaEditor.Internal
                         .Cast<Node>();
 
                     foreach (Node node in selectedNodes)
-                    {
-                        for (int i = 0; i < _buffer.Length; i++)
+                        for (int i = 0; i < buffer.Length; i++)
                             node.AddConditional((Conditional)buffer[i]);
-                    }
 
                     break;
                 case Descriptor.NodesWithConditionals:
-                    for (int i = 0; i < _buffer.Length; i++)
-                        graph.AddNode((Node)_buffer[i]);
+                    for (int i = 0; i < buffer.Length; i++)
+                        graph.AddNode((Node)buffer[i]);
                     break;
             }
         }
+
         public Descriptor GetDescriptor(IEnumerable<Object> objectsToCopy)
         {
             Descriptor ret = Descriptor.None;
@@ -139,12 +150,6 @@ namespace SchemaEditor.Internal
                 ret = Descriptor.Conditionals;
 
             return ret;
-        }
-        public enum Descriptor
-        {
-            None,
-            NodesWithConditionals,
-            Conditionals
         }
     }
 }

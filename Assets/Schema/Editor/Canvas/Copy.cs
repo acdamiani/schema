@@ -29,7 +29,7 @@ namespace SchemaEditor.Internal
 
             foreach (Node copy in copiesForwards.Values)
             {
-                NodeComponent.NodeComponentCreateArgs createArgs = new NodeComponent.NodeComponentCreateArgs();
+                NodeComponent.NodeComponentCreateArgs createArgs = new();
                 createArgs.fromExisting = copy;
 
                 canvas.Create<NodeComponent>(createArgs);

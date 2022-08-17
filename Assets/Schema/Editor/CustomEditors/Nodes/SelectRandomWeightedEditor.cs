@@ -24,7 +24,7 @@ namespace SchemaEditor.Editors.Nodes
 
             node.weights ??= new SerializableDictionary<string, int>();
 
-            Dictionary<string, int> d = new Dictionary<string, int>(node.weights);
+            Dictionary<string, int> d = new(node.weights);
 
             foreach (KeyValuePair<string, int> kvp in d)
                 if (!node.children.Any(x => x.uID.Equals(kvp.Key)))
@@ -37,7 +37,7 @@ namespace SchemaEditor.Editors.Nodes
                 EditorGUILayout.LabelField($"{i + 1} {child.name}");
 
                 node.weights[child.uID] =
-                     Mathf.Clamp(
+                    Mathf.Clamp(
                         EditorGUILayout.IntField("Weight",
                             node.weights.ContainsKey(child.uID) ? node.weights[child.uID] : 1), 0, int.MaxValue);
 

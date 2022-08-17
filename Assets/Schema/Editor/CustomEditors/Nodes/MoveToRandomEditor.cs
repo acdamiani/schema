@@ -1,9 +1,10 @@
+using Schema.Builtin.Nodes;
 using UnityEditor;
 using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(Schema.Builtin.Nodes.MoveToRandom))]
+    [CustomEditor(typeof(MoveToRandom))]
     [CanEditMultipleObjects]
     public class MoveToRandomEditor : Editor
     {

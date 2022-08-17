@@ -33,11 +33,11 @@ namespace SchemaEditor
 
             Rect r = EditorGUI.PrefixLabel(position, label);
 
-            Rect buttonRect = new Rect(r.x, r.y + EditorGUIUtility.singleLineHeight, r.width,
+            Rect buttonRect = new(r.x, r.y + EditorGUIUtility.singleLineHeight, r.width,
                 EditorGUIUtility.singleLineHeight);
-            Rect useSelfLabel = new Rect(r.x, r.y, 49f, EditorGUIUtility.singleLineHeight);
-            Rect useSelfRect = new Rect(r.x + 54f, r.y, 72f, EditorGUIUtility.singleLineHeight);
-            Rect textRect = new Rect(r.x + 70f, r.y + 3f, r.width - 70f, EditorGUIUtility.singleLineHeight);
+            Rect useSelfLabel = new(r.x, r.y, 49f, EditorGUIUtility.singleLineHeight);
+            Rect useSelfRect = new(r.x + 54f, r.y, 72f, EditorGUIUtility.singleLineHeight);
+            Rect textRect = new(r.x + 70f, r.y + 3f, r.width - 70f, EditorGUIUtility.singleLineHeight);
 
             GUIContent c = EditorGUIUtility.ObjectContent(null, fieldTypes[property.propertyPath]);
 
@@ -67,7 +67,7 @@ namespace SchemaEditor
                 Event.current.type == EventType.ScrollWheel)
             {
                 scrolls[property.propertyPath] =
-                     Mathf.Clamp(scrolls[property.propertyPath] - Event.current.delta.y * 10, -(size.x - textRect.width),
+                    Mathf.Clamp(scrolls[property.propertyPath] - Event.current.delta.y * 10, -(size.x - textRect.width),
                         0f);
                 // Prevent scroll
                 Event.current.delta = Vector2.zero;

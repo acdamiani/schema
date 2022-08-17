@@ -14,8 +14,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Parameter t to interpolate by")]
         public BlackboardEntrySelector<float> t;
 
-        [Tooltip("The interpolated float")]
-        [WriteOnly]
+        [Tooltip("The interpolated float")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

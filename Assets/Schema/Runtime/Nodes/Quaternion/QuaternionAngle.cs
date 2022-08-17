@@ -12,8 +12,7 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("Quaternion B")] public BlackboardEntrySelector<Quaternion> quaternionTwo;
 
-        [Tooltip("Blackboard variable to store the angle in")]
-        [WriteOnly]
+        [Tooltip("Blackboard variable to store the angle in")] [WriteOnly]
         public BlackboardEntrySelector<float> angle;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

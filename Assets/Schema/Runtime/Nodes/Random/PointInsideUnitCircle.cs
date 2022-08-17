@@ -8,8 +8,7 @@ namespace Schema.Builtin.Nodes
     [Description("Get a random point inside a unit circle with radius 1.0")]
     public class PointInsideUnitCircle : Action
     {
-        [Tooltip("Where to store the random point")]
-        [WriteOnly]
+        [Tooltip("Where to store the random point")] [WriteOnly]
         public BlackboardEntrySelector<Vector2> target;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

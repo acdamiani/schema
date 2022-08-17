@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using UnityEngine;
 
@@ -8,7 +7,8 @@ namespace Schema.Builtin.Conditionals
     [LightIcon("Conditionals/Cooldown")]
     public class Cooldown : Conditional
     {
-        [Tooltip("Time until the node can be run after already being run")] public BlackboardEntrySelector<float> cooldownTime;
+        [Tooltip("Time until the node can be run after already being run")]
+        public BlackboardEntrySelector<float> cooldownTime;
 
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
@@ -25,7 +25,7 @@ namespace Schema.Builtin.Conditionals
 
         public override GUIContent GetConditionalContent()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             sb.Append("Cooldown for ");
 

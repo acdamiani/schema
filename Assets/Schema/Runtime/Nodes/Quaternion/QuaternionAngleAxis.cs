@@ -19,8 +19,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Custom axis to rotate around")]
         public BlackboardEntrySelector<Vector3> axis;
 
-        [Tooltip("Blackboard variable to store the new rotation in")]
-        [WriteOnly]
+        [Tooltip("Blackboard variable to store the new rotation in")] [WriteOnly]
         public BlackboardEntrySelector<Quaternion> rotation;
 
         private void OnValidate()

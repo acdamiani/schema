@@ -17,8 +17,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Whether to clamp the t value")]
         public bool unclamped;
 
-        [Tooltip("Blackboard variable to store the lerped vector in.")]
-        [WriteOnly]
+        [Tooltip("Blackboard variable to store the lerped vector in.")] [WriteOnly]
         public BlackboardEntrySelector lerped = new();
 
         private void OnValidate()

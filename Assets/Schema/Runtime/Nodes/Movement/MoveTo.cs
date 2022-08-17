@@ -1,8 +1,6 @@
 using System;
-using Schema;
 using UnityEngine;
 using UnityEngine.AI;
-using Action = Schema.Action;
 
 namespace Schema.Builtin.Nodes
 {

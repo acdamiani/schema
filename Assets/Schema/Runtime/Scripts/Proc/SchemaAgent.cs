@@ -8,7 +8,7 @@ public class SchemaAgent : MonoBehaviour
     private static readonly CacheDictionary<Graph, ExecutableTree> treeMap = new();
 
     [SerializeField] private Graph m_target;
-    [SerializeField][Min(1)] private int m_maxStepsPerTick = 1000;
+    [SerializeField] [Min(1)] private int m_maxStepsPerTick = 1000;
     private float t;
 
     public Graph target

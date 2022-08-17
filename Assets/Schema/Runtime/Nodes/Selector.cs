@@ -1,5 +1,3 @@
-using Schema;
-
 namespace Schema.Builtin.Nodes
 {
     [DarkIcon("Nodes/d_Selector")]

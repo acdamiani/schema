@@ -1,5 +1,4 @@
-﻿using Schema;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
@@ -14,8 +13,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("t value to sample at (horizontal axis)")]
         public BlackboardEntrySelector<float> tValue;
 
-        [Tooltip("Where to store result of this operation")]
-        [WriteOnly]
+        [Tooltip("Where to store result of this operation")] [WriteOnly]
         public BlackboardEntrySelector<float> target;
 
         private void OnValidate()

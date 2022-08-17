@@ -1,16 +1,16 @@
-using SchemaEditor.Internal.ComponentSystem;
 using System.Collections.Generic;
-using Schema;
-using SchemaEditor.Internal.ComponentSystem.Components;
 using System.Linq;
-using Object = UnityEngine.Object;
+using Schema;
+using SchemaEditor.Internal.ComponentSystem;
+using SchemaEditor.Internal.ComponentSystem.Components;
+using UnityEngine;
 
 namespace SchemaEditor.Internal
 {
     public static class CommandHandler
     {
-        public static CopyBuffer copyBuffer { get { return _copyBuffer; } }
-        private static CopyBuffer _copyBuffer;
+        public static CopyBuffer copyBuffer { get; private set; }
+
         public static bool Valdiate(string commandName)
         {
             switch (commandName)
@@ -28,6 +28,7 @@ namespace SchemaEditor.Internal
 
             return false;
         }
+
         public static void Execute(ComponentCanvas canvas, string commandName)
         {
             switch (commandName)
@@ -58,6 +59,7 @@ namespace SchemaEditor.Internal
                     break;
             }
         }
+
         public static void DeleteCommand(ComponentCanvas canvas)
         {
             foreach (GUIComponent component in canvas.components.Where(x => x is IDeletable))
@@ -73,15 +75,18 @@ namespace SchemaEditor.Internal
                 }
             }
         }
+
         public static void SelectAllCommand(ComponentCanvas canvas)
         {
             foreach (GUIComponent component in canvas.components)
                 canvas.Select(component);
         }
+
         public static void DeselectAllCommand(ComponentCanvas canvas)
         {
             canvas.DeselectAll();
         }
+
         public static void SelectChildrenCommand(ComponentCanvas canvas)
         {
             if (!canvas.CanSelectChildren())
@@ -94,6 +99,7 @@ namespace SchemaEditor.Internal
             foreach (NodeComponent node in nodeComponents)
                 SelectRecursive(node, canvas);
         }
+
         private static void SelectRecursive(NodeComponent nodeComponent, ComponentCanvas canvas)
         {
             foreach (NodeComponent child in nodeComponent.node.children.Select(x => canvas.FindComponent(x)))
@@ -101,9 +107,10 @@ namespace SchemaEditor.Internal
 
             canvas.Select(nodeComponent);
         }
+
         public static void CopyCommand(ComponentCanvas canvas)
         {
-            _copyBuffer = new CopyBuffer(
+            copyBuffer = new CopyBuffer(
                 canvas,
                 canvas.components
                     .Where(x => x is ICopyable)
@@ -116,6 +123,7 @@ namespace SchemaEditor.Internal
             canvas.context.Rebuild();
             canvas.DeselectAll();
         }
+
         public static void PasteCommand(ComponentCanvas canvas)
         {
             copyBuffer.Flush(
@@ -126,10 +134,11 @@ namespace SchemaEditor.Internal
                     .Select(x => x.GetReciever())
             );
 
-            _copyBuffer = null;
+            copyBuffer = null;
 
             canvas.context.Rebuild();
         }
+
         public static void CutCommand(ComponentCanvas canvas)
         {
             IEnumerable<ICopyable> copyables = canvas.components
@@ -137,7 +146,7 @@ namespace SchemaEditor.Internal
                 .Cast<ICopyable>()
                 .Where(x => x.IsCopyable());
 
-            _copyBuffer = new CopyBuffer(
+            copyBuffer = new CopyBuffer(
                 canvas,
                 copyables
                     .Select(x => x.GetCopyable()),
@@ -145,16 +154,15 @@ namespace SchemaEditor.Internal
             );
 
             foreach (IDeletable deletable in copyables
-                .Where(x => x is IDeletable)
-                .Cast<IDeletable>())
-            {
+                         .Where(x => x is IDeletable)
+                         .Cast<IDeletable>())
                 if (deletable.IsDeletable())
                     deletable.Delete();
-            }
 
             canvas.context.Rebuild();
             canvas.DeselectAll();
         }
+
         public static void DuplicateCommand(ComponentCanvas canvas)
         {
             IEnumerable<Object> copyables =
@@ -168,7 +176,7 @@ namespace SchemaEditor.Internal
                 .Where(x => x is Conditional)
                 .Select(x => ((Conditional)x).node);
 
-            _copyBuffer = new CopyBuffer(
+            copyBuffer = new CopyBuffer(
                 canvas,
                 copyables,
                 NodeEditor.instance.target
@@ -178,15 +186,16 @@ namespace SchemaEditor.Internal
                 toPaste
             );
 
-            _copyBuffer = null;
+            copyBuffer = null;
 
             canvas.DeselectAll();
             canvas.context.Rebuild();
         }
+
         private enum CopyBufferDescriptor
         {
             NodesWithConditionals,
-            Conditionals,
+            Conditionals
         }
     }
 }

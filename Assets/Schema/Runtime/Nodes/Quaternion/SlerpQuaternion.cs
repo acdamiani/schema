@@ -17,8 +17,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Whether to clamp the t value")]
         public bool unclamped;
 
-        [Tooltip("Blackboard variable to store the slerped rotation in")]
-        [WriteOnly]
+        [Tooltip("Blackboard variable to store the slerped rotation in")] [WriteOnly]
         public BlackboardEntrySelector<Quaternion> slerped;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

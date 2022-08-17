@@ -1,22 +1,20 @@
-using UnityEngine;
-using UnityEditor;
 using System;
-using System.Linq;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.IO;
 using Schema;
 using SchemaEditor;
-using SchemaEditor.Utilities;
 using SchemaEditor.Internal.ComponentSystem;
+using SchemaEditor.Utilities;
+using UnityEditor;
+using UnityEngine;
 
 public class Splash : IWindowComponentProvider
 {
+    private readonly Dictionary<string, string> recentFiles;
     private Rect rect;
     private Vector2 scroll;
-    private string selected = String.Empty;
-    private Dictionary<string, string> recentFiles;
+    private string selected = string.Empty;
+
     public Splash()
     {
         recentFiles = new Dictionary<string, string>();
@@ -35,16 +33,19 @@ public class Splash : IWindowComponentProvider
             recentFiles[recent[j]] = n;
         }
 
-        EditorPrefs.SetString("Schema Recently Opened", String.Join(",", recentFiles.Keys));
+        EditorPrefs.SetString("Schema Recently Opened", string.Join(",", recentFiles.Keys));
     }
+
     public void HandleWinInfo(Rect rect, GUIContent title, GUIStyle style)
     {
         this.rect = rect;
     }
+
     public bool ShouldClose()
     {
         return false;
     }
+
     public void OnGUI(int id)
     {
         Event current = Event.current;
@@ -105,6 +106,7 @@ public class Splash : IWindowComponentProvider
 
         GUILayout.EndVertical();
     }
+
     private void CreateNew()
     {
         Graph graph = ScriptableObject.CreateInstance<Graph>();

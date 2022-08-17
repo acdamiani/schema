@@ -10,8 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Float to floor")] public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Selector to store the ceiled value in")]
-        [WriteOnly]
+        [Tooltip("Selector to store the ceiled value in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         [Tooltip("Convert the ceiled value to an integer")]

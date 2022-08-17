@@ -11,8 +11,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Input for the sine function")]
         public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Selector to store the sine in")]
-        [WriteOnly]
+        [Tooltip("Selector to store the sine in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         [Tooltip("Input is degrees instead of radians")]

@@ -25,7 +25,7 @@ namespace Schema.Builtin.Conditionals
             Collider[] colliders =
                 Physics.OverlapSphere(agent.transform.position, radius, -1, QueryTriggerInteraction.UseGlobal);
 
-            Tuple<AudioSource, float> closest = new Tuple<AudioSource, float>(null, float.MaxValue);
+            Tuple<AudioSource, float> closest = new(null, float.MaxValue);
 
             foreach (Collider c in colliders)
             {

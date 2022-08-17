@@ -10,6 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         public ComponentSelector<Animator> animator;
         [Tooltip("The position to look at")] public Vector3 lookAtPosition;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             Animator a = agent.GetComponent(animator);

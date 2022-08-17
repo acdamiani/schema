@@ -6,13 +6,12 @@ namespace Schema.Internal
     {
         private readonly Dictionary<int, NodeStatus> lastStatus;
         private ExecutableNode _node;
-        private NodeStatus _status;
 
         public ExecutionContext(SchemaAgent agent)
         {
             this.agent = agent;
 
-            _status = NodeStatus.Success;
+            status = NodeStatus.Success;
             lastStatus = new Dictionary<int, NodeStatus>();
         }
 
@@ -30,19 +29,14 @@ namespace Schema.Internal
                 if (status == NodeStatus.Running || (_node != null && value.index - node.index < 0))
                     lastStatus[_node.index] = status;
 
-                _last = _node;
+                last = _node;
                 _node = value;
             }
         }
 
-        public ExecutableNode last { get => _last; }
-        private ExecutableNode _last;
+        public ExecutableNode last { get; private set; }
 
-        public NodeStatus status
-        {
-            get => _status;
-            set => _status = value;
-        }
+        public NodeStatus status { get; set; }
 
         public NodeStatus? GetLastStatus(int index)
         {

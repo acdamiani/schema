@@ -1,4 +1,3 @@
-using Schema;
 using UnityEngine;
 
 namespace Schema.Builtin.Nodes
@@ -10,8 +9,7 @@ namespace Schema.Builtin.Nodes
     {
         [WriteOnly] public BlackboardEntrySelector<bool> entry;
 
-        [Tooltip("Chance that the entry will be true")]
-        [Range(0, 1)]
+        [Tooltip("Chance that the entry will be true")] [Range(0, 1)]
         public float chance;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

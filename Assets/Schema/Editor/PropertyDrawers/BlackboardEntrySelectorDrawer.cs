@@ -60,7 +60,7 @@ namespace SchemaEditor
 
             if (!info.ContainsKey(property.propertyPath))
             {
-                SelectorPropertyInfo pi = new SelectorPropertyInfo();
+                SelectorPropertyInfo pi = new();
                 pi.writeOnly = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
                 info[property.propertyPath] = pi;
             }
@@ -70,11 +70,11 @@ namespace SchemaEditor
 
             Vector2 size = EditorStyles.miniButtonRight.CalcSize(new GUIContent(Icons.GetEditor("_Menu")));
 
-            Rect enumRect = new Rect(position.x, position.y, position.width - size.x,
-                 Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
-            Rect textRect = new Rect(position.x, position.y + enumRect.height, position.width, enumRect.height);
-            Rect buttonRect = new Rect(position.xMax - size.x, position.y, size.x,
-                 Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
+            Rect enumRect = new(position.x, position.y, position.width - size.x,
+                Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
+            Rect textRect = new(position.x, position.y + enumRect.height, position.width, enumRect.height);
+            Rect buttonRect = new(position.xMax - size.x, position.y, size.x,
+                Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
 
             Vector2 oldIconSize = EditorGUIUtility.GetIconSize();
             EditorGUIUtility.SetIconSize(new Vector2(12, 12));
@@ -114,8 +114,7 @@ namespace SchemaEditor
                     r = new Rect(r.x, textRect.y, r.width + size.x, r.height);
                     r.y += 3f;
 
-                    GUIContent content =
-                        new GUIContent($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
+                    GUIContent content = new($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
                     size = EditorStyles.miniLabel.CalcSize(content);
 
                     GUI.BeginClip(r, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
@@ -149,7 +148,7 @@ namespace SchemaEditor
 
                 string path = valuePathProp.stringValue;
 
-                GUIContent buttonValue = new GUIContent(entryValue == null
+                GUIContent buttonValue = new(entryValue == null
                     ? "None"
                     : entryValue.name + valuePathProp.stringValue.Replace('/', '.').TrimEnd('.'));
 
@@ -200,7 +199,7 @@ namespace SchemaEditor
 
             if (!info.ContainsKey(property.propertyPath))
             {
-                SelectorPropertyInfo pi = new SelectorPropertyInfo();
+                SelectorPropertyInfo pi = new();
                 pi.writeOnly = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
                 info[property.propertyPath] = pi;
             }
@@ -235,9 +234,9 @@ namespace SchemaEditor
 
             bool isDynamicPropertyValue = isDynamicProperty.boolValue;
 
-            GenericMenu menu = new GenericMenu();
+            GenericMenu menu = new();
 
-            List<string> filtersList = new List<string>();
+            List<string> filtersList = new();
 
             SerializedProperty filters = property.FindPropertyRelative("m_filters");
 
@@ -259,7 +258,7 @@ namespace SchemaEditor
 
             bool disableDynamicBinding = fieldInfo.GetCustomAttribute<DisableDynamicBindingAttribute>() != null;
 
-            Dictionary<Type, IEnumerable<string>> tmp = new Dictionary<Type, IEnumerable<string>>();
+            Dictionary<Type, IEnumerable<string>> tmp = new();
 
             foreach (BlackboardEntry bEntry in Blackboard.instance.entries.Concat(Blackboard.global.entries))
             {
@@ -376,7 +375,7 @@ namespace SchemaEditor
             MemberInfo declaring = null
         )
         {
-            HashSet<Type> nonRecursiveTypes = new HashSet<Type>
+            HashSet<Type> nonRecursiveTypes = new()
             {
                 typeof(sbyte),
                 typeof(byte),

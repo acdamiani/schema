@@ -7,7 +7,8 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Value to use when setting")] public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Entry value to set")][WriteOnly] public BlackboardEntrySelector<float> selector;
+        [Tooltip("Entry value to set")] [WriteOnly]
+        public BlackboardEntrySelector<float> selector;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

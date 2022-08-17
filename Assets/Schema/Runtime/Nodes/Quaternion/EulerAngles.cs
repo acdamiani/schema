@@ -15,8 +15,7 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("Z Rotation")] public BlackboardEntrySelector<float> z;
 
-        [Tooltip("Blackboard variable to store the new rotation in")]
-        [WriteOnly]
+        [Tooltip("Blackboard variable to store the new rotation in")] [WriteOnly]
         public BlackboardEntrySelector<Quaternion> rotation;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

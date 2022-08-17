@@ -10,8 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Input integer")] public BlackboardEntrySelector<int> value;
 
-        [Tooltip("Closest power of two")]
-        [WriteOnly]
+        [Tooltip("Closest power of two")] [WriteOnly]
         public BlackboardEntrySelector<int> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

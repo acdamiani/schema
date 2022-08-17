@@ -27,7 +27,7 @@ public class QuickSearch : IWindowComponentProvider
     private Vector2 scroll;
     private CacheDictionary<string, IEnumerable<Type>> searchedFavorites = new();
     private bool searchFavorites;
-    private SearchField searchField;
+    private readonly SearchField searchField;
     private string searchText = "";
     private int selected;
     private float toolbarHeight;
@@ -181,7 +181,7 @@ public class QuickSearch : IWindowComponentProvider
             category += " \u25B8";
         }
 
-        GUIContent content = new GUIContent(category);
+        GUIContent content = new(category);
 
         rect.width = EditorStyles.label.CalcSize(content).x;
 
@@ -215,7 +215,7 @@ public class QuickSearch : IWindowComponentProvider
         foreach (Type nodeType in results)
         {
             Texture2D icon = icons.GetOrCreate(nodeType, () => GraphObject.GetIcon(nodeType));
-            GUIContent content = new GUIContent(nodeType.Name, icon);
+            GUIContent content = new(nodeType.Name, icon);
 
             DoSingleResult(
                 nodeType,
@@ -300,21 +300,21 @@ public class QuickSearch : IWindowComponentProvider
         query = query.ToLower();
         string[] queries = query.Split(' ').Where(s => s != "").ToArray();
 
-        List<Type> ret = new List<Type>();
+        List<Type> ret = new();
 
         foreach (Type ty in types)
-            foreach (string q in queries)
-            {
-                string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
-                string search = category.ToLower() + ty.Name.ToLower();
+        foreach (string q in queries)
+        {
+            string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
+            string search = category.ToLower() + ty.Name.ToLower();
 
-                int s = Search(q, search);
-                if (s != -1)
-                {
-                    ret.Add(ty);
-                    break;
-                }
+            int s = Search(q, search);
+            if (s != -1)
+            {
+                ret.Add(ty);
+                break;
             }
+        }
 
         return ret;
     }

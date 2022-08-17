@@ -18,8 +18,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("The maximum allowed change in vector magnitude for this rotation")]
         public BlackboardEntrySelector<float> maxMagnitudeDelta;
 
-        [Tooltip("Blackboard variable to store the new rotated vector in")]
-        [WriteOnly]
+        [Tooltip("Blackboard variable to store the new rotated vector in")] [WriteOnly]
         public BlackboardEntrySelector rotated = new();
 
         private void OnValidate()

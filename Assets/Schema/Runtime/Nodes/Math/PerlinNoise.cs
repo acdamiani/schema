@@ -10,8 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Location of sample point")] public BlackboardEntrySelector<Vector2> location;
 
-        [Tooltip("Sampled perlin value")]
-        [WriteOnly]
+        [Tooltip("Sampled perlin value")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

@@ -11,8 +11,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Input for the tangent function")]
         public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Selector to store the tangent in")]
-        [WriteOnly]
+        [Tooltip("Selector to store the tangent in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         [Tooltip("Input is degrees instead of radians")]

@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Schema;
 using Schema.Internal;
 using Schema.Utilities;
 using SchemaEditor.Utilities;
+using UnityEditor;
 using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
 using Object = UnityEngine.Object;
 
 namespace SchemaEditor.Internal.ComponentSystem.Components
@@ -18,17 +19,27 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         private static int desiredIndex;
         private static int originalIndex;
         private Rect _rect;
-        private NodeComponent parent;
-        public Rect rect => _rect;
-        public Conditional conditional { get; private set; }
 
         private float cLerp;
+        private NodeComponent parent;
         private Color statusColor;
         private float t;
+        public Rect rect => _rect;
+        public Conditional conditional { get; private set; }
 
         public string uID { get; private set; }
 
         public bool isSelected { get; private set; }
+
+        public bool IsCopyable()
+        {
+            return isSelected;
+        }
+
+        public Object GetCopyable()
+        {
+            return conditional;
+        }
 
         public bool IsDeletable()
         {
@@ -95,16 +106,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             isSelected = false;
         }
 
-        public bool IsCopyable()
-        {
-            return isSelected;
-        }
-
-        public Object GetCopyable()
-        {
-            return conditional;
-        }
-
         public Rect GetRect()
         {
             int index = Array.IndexOf(conditional.node.conditionals, conditional);
@@ -120,7 +121,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             Vector2 contentSize = Styles.conditional.CalcSize(content);
             contentSize.x += icon != null ? 20f : 0f;
 
-            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f,
+            Vector2 pos = new(parent.layout.body.center.x - contentSize.x / 2f,
                 parent.layout.body.y - (height + 18f) * upCount);
 
             return new Rect(pos.x, pos.y, contentSize.x, height);
@@ -205,7 +206,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             DoEvents();
 
-            HandleSelection(UnityEditor.Selection.gameObjects);
+            HandleSelection(Selection.gameObjects);
 
             float height = 32f;
 
@@ -217,14 +218,14 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             Vector2 contentSize = Styles.conditional.CalcSize(content);
             contentSize.x += icon != null ? 20f : 0f;
 
-            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f,
+            Vector2 pos = new(parent.layout.body.center.x - contentSize.x / 2f,
                 parent.layout.body.y - (height + 18f) * upCount);
 
             _rect = new Rect(pos.x, pos.y, contentSize.x, height);
 
             GUI.color = Styles.windowBackground;
 
-            Rect decorator_out = new Rect(_rect.center.x - 24f, _rect.yMax, 48f, 18f);
+            Rect decorator_out = new(_rect.center.x - 24f, _rect.yMax, 48f, 18f);
 
             GUI.DrawTexture(decorator_out, Icons.GetResource("decorator_out", false));
             GUI.DrawTextureWithTexCoords(
@@ -283,7 +284,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 case EventType.MouseUp when e.button == 0:
                     if (moving != null)
                         moving.conditional.node.MoveConditional(moving.conditional,
-                             Mathf.Clamp(desiredIndex, 0, moving.conditional.node.conditionals.Length - 1));
+                            Mathf.Clamp(desiredIndex, 0, moving.conditional.node.conditionals.Length - 1));
 
                     moving = null;
                     break;

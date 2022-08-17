@@ -1,4 +1,3 @@
-using Schema;
 using UnityEngine;
 
 namespace Schema.Builtin.Nodes
@@ -17,8 +16,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("t value for this graph (horizontal axis)")]
         public BlackboardEntrySelector<float> t;
 
-        [Tooltip("Entry to store the result of this operation")]
-        [WriteOnly]
+        [Tooltip("Entry to store the result of this operation")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

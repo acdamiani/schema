@@ -21,8 +21,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Max delta to move towards the target")]
         public BlackboardEntrySelector<float> maxDelta;
 
-        [Tooltip("The lerped angle")]
-        [WriteOnly]
+        [Tooltip("The lerped angle")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

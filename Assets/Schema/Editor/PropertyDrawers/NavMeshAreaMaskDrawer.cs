@@ -17,7 +17,7 @@ public class NavMeshAreaMaskDrawer : PropertyDrawer
         if (!initializedMask && mask.intValue != -1)
         {
             //Initialize mask from serialized string array
-            List<string> values = new List<string>();
+            List<string> values = new();
 
             for (int k = 0; k < selectedTags.arraySize; k++)
                 values.Add(selectedTags.GetArrayElementAtIndex(k).stringValue);

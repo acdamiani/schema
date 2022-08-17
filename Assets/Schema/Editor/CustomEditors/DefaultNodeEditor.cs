@@ -48,7 +48,7 @@ namespace SchemaEditor.Editors
         {
             IEnumerable<Type> types = HelperMethods.GetEnumerableOfType(typeof(Modifier));
 
-            GenericMenu menu = new GenericMenu();
+            GenericMenu menu = new();
 
             foreach (Type t in types)
             {
@@ -120,7 +120,8 @@ namespace SchemaEditor.Editors
                 GUILayout.Space(-3);
 
                 if (
-                    GUILayout.Button(new GUIContent(Icons.GetResource("move_up", false), "Move Modifier Up"), EditorStyles.miniButtonMid,
+                    GUILayout.Button(new GUIContent(Icons.GetResource("move_up", false), "Move Modifier Up"),
+                        EditorStyles.miniButtonMid,
                         GUILayout.ExpandWidth(false))
                     && i > 0
                 )

@@ -17,7 +17,7 @@ public class CoverVolume : MonoBehaviour
         Vector3 root = transform.position + MultiplyComponents(transform.lossyScale, center) -
                        MultiplyComponents(transform.lossyScale, size) / 2f;
 
-        List<Vector3> p = new List<Vector3>();
+        List<Vector3> p = new();
 
         float halfX = size.x * transform.lossyScale.x / 2f;
         float halfY = size.y * transform.lossyScale.y / 2f;
@@ -29,35 +29,35 @@ public class CoverVolume : MonoBehaviour
         int numZ = Mathf.FloorToInt(size.z * transform.lossyScale.z / spacing + 0.01f) + 1;
 
         for (int x = 0; x < numX; x++)
-            for (int y = 0; y < numY; y++)
-                for (int z = 0; z < numZ; z++)
-                {
-                    Vector3 point = new Vector3(x * spacing - halfX, y * spacing - halfY, z * spacing - halfZ);
+        for (int y = 0; y < numY; y++)
+        for (int z = 0; z < numZ; z++)
+        {
+            Vector3 point = new(x * spacing - halfX, y * spacing - halfY, z * spacing - halfZ);
 
-                    //Apply transform to Vector to get world position (current point is relative to the center)
-                    Matrix4x4 m = Matrix4x4.TRS(
-                        transform.position + transform.rotation * MultiplyComponents(transform.lossyScale, center),
-                        transform.rotation, Vector3.one);
-                    point = m.MultiplyPoint(point);
+            //Apply transform to Vector to get world position (current point is relative to the center)
+            Matrix4x4 m = Matrix4x4.TRS(
+                transform.position + transform.rotation * MultiplyComponents(transform.lossyScale, center),
+                transform.rotation, Vector3.one);
+            point = m.MultiplyPoint(point);
 
-                    NavMeshHit hit;
+            NavMeshHit hit;
 
-                    if (NavMesh.SamplePosition(point, out hit, spacing / 2f, filter.mask))
-                    {
-                        //Double check that the point is inside the cube
-                        Vector3 pos = hit.position;
+            if (NavMesh.SamplePosition(point, out hit, spacing / 2f, filter.mask))
+            {
+                //Double check that the point is inside the cube
+                Vector3 pos = hit.position;
 
-                        //Multiply position by the inverse of the transform matrix to translate it back into local space
-                        pos = m.inverse.MultiplyPoint(pos);
+                //Multiply position by the inverse of the transform matrix to translate it back into local space
+                pos = m.inverse.MultiplyPoint(pos);
 
-                        //Check to see if point is inside the bounds of the cube
-                        if (!PositionInsideCube(pos, Vector3.zero, MultiplyComponents(transform.lossyScale, size), 0.01f))
-                            continue;
+                //Check to see if point is inside the bounds of the cube
+                if (!PositionInsideCube(pos, Vector3.zero, MultiplyComponents(transform.lossyScale, size), 0.01f))
+                    continue;
 
-                        //Then add the unrotated point if it has
-                        p.Add(hit.position);
-                    }
-                }
+                //Then add the unrotated point if it has
+                p.Add(hit.position);
+            }
+        }
 
         return p.ToArray();
     }

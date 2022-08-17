@@ -17,8 +17,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Whether target angular position is in radians")]
         public bool targetIsRadians;
 
-        [Tooltip("Shortest angular distance between the two values")]
-        [WriteOnly]
+        [Tooltip("Shortest angular distance between the two values")] [WriteOnly]
         public BlackboardEntrySelector<float> delta;
 
         [Tooltip("Store the delta as radians instead of degrees")]

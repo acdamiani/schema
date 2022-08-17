@@ -39,7 +39,7 @@ namespace Schema.Builtin.Conditionals
 
         public override GUIContent GetConditionalContent()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             if (entry.isDynamic)
                 sb.Append("If dynamic variable ");

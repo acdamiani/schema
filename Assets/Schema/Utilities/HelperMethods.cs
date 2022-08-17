@@ -107,8 +107,8 @@ namespace Schema.Utilities
         public static void SetHideFlags(HideFlags hideFlags, params List<ScriptableObject>[] objects)
         {
             foreach (List<ScriptableObject> sl in objects)
-                foreach (ScriptableObject s in sl)
-                    s.hideFlags = hideFlags;
+            foreach (ScriptableObject s in sl)
+                s.hideFlags = hideFlags;
         }
 
         public static Color ToColor(this string s)
@@ -129,7 +129,7 @@ namespace Schema.Utilities
         {
             if (node.parent != null)
             {
-                List<Node> ret = new List<Node>();
+                List<Node> ret = new();
 
                 Node current = node;
 
@@ -156,7 +156,7 @@ namespace Schema.Utilities
 
         public static IEnumerable<Type> GetEnumerableOfType(Type type)
         {
-            List<Type> objects = new List<Type>();
+            List<Type> objects = new();
             foreach (Type t in
                      Assembly.GetAssembly(type).GetTypes()
                          .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(type)))
@@ -298,7 +298,7 @@ namespace Schema.Utilities
             if (!type.IsGenericType)
                 return type.Name;
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             string name = type.Name;
             int index = name.IndexOf("`");
             builder.Append(name.Substring(0, index));
@@ -320,7 +320,7 @@ namespace Schema.Utilities
             byte[] text = Encoding.UTF8.GetBytes(str);
             byte[] hash = md5.ComputeHash(text);
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
 
             for (int i = 0; i < hash.Length; i++)
                 builder.Append(hash[i].ToString("X2"));
@@ -345,12 +345,12 @@ namespace Schema.Utilities
 
         public static Texture2D Tint(this Texture2D texture, Color color)
         {
-            Texture2D ret = new Texture2D(texture.width, texture.height);
+            Texture2D ret = new(texture.width, texture.height);
             Color[] cols = new Color[texture.width * texture.height];
 
             for (int y = 0; y < texture.height; y++)
-                for (int x = 0; x < texture.width; x++)
-                    cols[y * texture.width + x] = texture.GetPixel(x, y) * color;
+            for (int x = 0; x < texture.width; x++)
+                cols[y * texture.width + x] = texture.GetPixel(x, y) * color;
 
             ret.SetPixels(cols);
             ret.name = "Tinted";

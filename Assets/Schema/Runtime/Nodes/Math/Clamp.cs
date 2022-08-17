@@ -12,8 +12,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Lower bound for the float")] public BlackboardEntrySelector<float> lowerBound;
         [Tooltip("Upper bound for the float")] public BlackboardEntrySelector<float> upperBound;
 
-        [Tooltip("The clamped float")]
-        [WriteOnly]
+        [Tooltip("The clamped float")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

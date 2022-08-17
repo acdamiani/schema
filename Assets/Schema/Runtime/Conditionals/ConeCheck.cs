@@ -18,6 +18,7 @@ namespace Schema.Builtin.Conditionals
             "How many rays to send to check for colliding Game Objects. Increasing this value will reduce performance but will result in more accurate results for smaller objects.")]
         [Range(10, 100)]
         public int resolution = 10;
+
         public bool precisionMode;
         public Vector3 offset;
         public BlackboardEntrySelector<GameObject> parentObject;
@@ -50,7 +51,7 @@ namespace Schema.Builtin.Conditionals
 
                 for (int i = 0; i < rayRepresentations.Length; i++) rays[i] = (Ray)rayRepresentations[i];
 
-                Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
+                Dictionary<Ray, RaycastHit> hits = new();
                 hits = GetHitInfo(rays);
 
                 foreach (RaycastHit hit in hits.Values)
@@ -65,13 +66,13 @@ namespace Schema.Builtin.Conditionals
             float radius = Mathf.Tan(Mathf.Deg2Rad * halfAngle) * rayRange.value;
             Vector3 rotatedOffset = agent.transform.rotation * offset;
 
-            Vector3 position = new Vector3(agent.transform.position.x + rotatedOffset.x,
+            Vector3 position = new(agent.transform.position.x + rotatedOffset.x,
                 agent.transform.position.y + rotatedOffset.y,
                 agent.transform.position.z + rotatedOffset.z);
 
             position += rotation * (Vector3.forward * (rayRange.value / 2f));
 
-            Vector3 size = new Vector3(radius * 2, radius * 2, rayRange.value);
+            Vector3 size = new(radius * 2, radius * 2, rayRange.value);
 
             Collider[] colliders = Physics.OverlapBox(
                 position,
@@ -116,7 +117,7 @@ namespace Schema.Builtin.Conditionals
 
         private Dictionary<Ray, RaycastHit> GetHitInfo(Ray[] rays)
         {
-            Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
+            Dictionary<Ray, RaycastHit> hits = new();
             for (int i = 0; i < rays.Length; i++)
             {
                 RaycastHit hitInfo;
@@ -178,7 +179,7 @@ namespace Schema.Builtin.Conditionals
 
         public override GUIContent GetConditionalContent()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             if (gameObjectKey.isDynamic)
                 sb.Append("If dynamic variable ");

@@ -1,8 +1,8 @@
-using UnityEngine;
-using UnityEditor;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System;
+using UnityEditor;
+using UnityEngine;
 
 namespace SchemaEditor.Internal
 {
@@ -166,8 +166,7 @@ namespace SchemaEditor.Internal
 
         public static void ResetToDefault()
         {
-            List<TypeCode> valid = new List<TypeCode>
-                    { TypeCode.String, TypeCode.Single, TypeCode.Boolean, TypeCode.Int32 };
+            List<TypeCode> valid = new() { TypeCode.String, TypeCode.Single, TypeCode.Boolean, TypeCode.Int32 };
 
             Type t = typeof(Prefs);
             PropertyInfo[] fields = t.GetProperties(BindingFlags.Static | BindingFlags.Public);
@@ -186,10 +185,13 @@ namespace SchemaEditor.Internal
                 }
         }
     }
+
     public class PrefsProvider : SettingsProvider
     {
         public PrefsProvider(string path, SettingsScope scope = SettingsScope.User)
-            : base(path, scope) { }
+            : base(path, scope)
+        {
+        }
 
         public override void OnGUI(string searchContext)
         {
@@ -200,13 +202,25 @@ namespace SchemaEditor.Internal
             EditorGUIUtility.labelWidth = 200f;
 
             EditorGUILayout.LabelField("Editor", EditorStyles.boldLabel);
-            Prefs.dimUnconnectedNodes = EditorGUILayout.Toggle(new GUIContent("Dim Unconnected Nodes", "Dim nodes not connected to the root node"), Prefs.dimUnconnectedNodes);
-            Prefs.showGrid = EditorGUILayout.Toggle(new GUIContent("Show Grid", "Show the background grid in the editor"), Prefs.showGrid);
-            Prefs.minimapEnabled = EditorGUILayout.Toggle(new GUIContent("Show Minimap", "Show the minimap in the editor"), Prefs.minimapEnabled);
-            Prefs.gridSnap = EditorGUILayout.Toggle(new GUIContent("Grid Snap", "Snap nodes to a grid"), Prefs.gridSnap);
-            Prefs.zoomSpeed = EditorGUILayout.Slider(new GUIContent("Zoom Speed", "The zoom speed in the editor"), Prefs.zoomSpeed, 0.01f, 0.1f);
-            Prefs.arrangeHorizontalSpacing = EditorGUILayout.Slider(new GUIContent("Arrange Horizontal Spacing", "Horizontal spacing between nodes when arranged"), Prefs.arrangeHorizontalSpacing, 0f, 500f);
-            Prefs.arrangeVerticalSpacing = EditorGUILayout.Slider(new GUIContent("Arrange Vertical Spacing", "Vertical spacing between ndoes when arranged"), Prefs.arrangeVerticalSpacing, 0f, 500f);
+            Prefs.dimUnconnectedNodes = EditorGUILayout.Toggle(
+                new GUIContent("Dim Unconnected Nodes", "Dim nodes not connected to the root node"),
+                Prefs.dimUnconnectedNodes);
+            Prefs.showGrid =
+                EditorGUILayout.Toggle(new GUIContent("Show Grid", "Show the background grid in the editor"),
+                    Prefs.showGrid);
+            Prefs.minimapEnabled =
+                EditorGUILayout.Toggle(new GUIContent("Show Minimap", "Show the minimap in the editor"),
+                    Prefs.minimapEnabled);
+            Prefs.gridSnap =
+                EditorGUILayout.Toggle(new GUIContent("Grid Snap", "Snap nodes to a grid"), Prefs.gridSnap);
+            Prefs.zoomSpeed = EditorGUILayout.Slider(new GUIContent("Zoom Speed", "The zoom speed in the editor"),
+                Prefs.zoomSpeed, 0.01f, 0.1f);
+            Prefs.arrangeHorizontalSpacing = EditorGUILayout.Slider(
+                new GUIContent("Arrange Horizontal Spacing", "Horizontal spacing between nodes when arranged"),
+                Prefs.arrangeHorizontalSpacing, 0f, 500f);
+            Prefs.arrangeVerticalSpacing = EditorGUILayout.Slider(
+                new GUIContent("Arrange Vertical Spacing", "Vertical spacing between ndoes when arranged"),
+                Prefs.arrangeVerticalSpacing, 0f, 500f);
             Prefs.enableStatusIndicators = EditorGUILayout.Toggle(
                 new GUIContent("Enable Status Indicators", "Toggle status indicators for all nodes"),
                 Prefs.enableStatusIndicators
@@ -264,7 +278,7 @@ namespace SchemaEditor.Internal
         [SettingsProvider]
         public static SettingsProvider CreateMyCustomSettingsProvider()
         {
-            return new PrefsProvider("Preferences/Schema", SettingsScope.User);
+            return new PrefsProvider("Preferences/Schema");
         }
     }
 }

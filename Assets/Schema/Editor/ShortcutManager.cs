@@ -19,7 +19,7 @@ public static class ShortcutManager
 
     public static void AddShortcut(KeyCode keyCode, EventModifiers modifiers, UnityAction action)
     {
-        Shortcut shortcut = new Shortcut();
+        Shortcut shortcut = new();
 
         shortcut.keyCode = keyCode;
         shortcut.modifiers = modifiers;

@@ -11,8 +11,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Value to get the logarithm of")]
         public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Selector to store maximum in")]
-        [WriteOnly]
+        [Tooltip("Selector to store maximum in")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

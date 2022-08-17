@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Schema;
 using UnityEngine;
-using Action = Schema.Action;
 
 namespace Schema.Builtin.Nodes
 {

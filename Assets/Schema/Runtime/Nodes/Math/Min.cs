@@ -13,8 +13,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("List of values to get the minimum of")]
         public List<BlackboardEntrySelector<float>> values;
 
-        [Tooltip("Selector to store minimum in")]
-        [WriteOnly]
+        [Tooltip("Selector to store minimum in")] [WriteOnly]
         public BlackboardEntrySelector<float> result = new();
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

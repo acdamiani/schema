@@ -9,7 +9,7 @@ namespace Schema.Builtin.Nodes
     public class RoundToInt : Action
     {
         [Tooltip("Value to round")] public BlackboardEntrySelector<float> value;
-        [Tooltip("Rounded value")][WriteOnly] public BlackboardEntrySelector<int> result;
+        [Tooltip("Rounded value")] [WriteOnly] public BlackboardEntrySelector<int> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

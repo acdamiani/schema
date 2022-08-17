@@ -10,8 +10,7 @@ namespace Schema.Builtin.Nodes
     {
         [Tooltip("Rotation to invert")] public BlackboardEntrySelector<Quaternion> quaternion;
 
-        [Tooltip("Blackboard variable to store the inverted rotation in")]
-        [WriteOnly]
+        [Tooltip("Blackboard variable to store the inverted rotation in")] [WriteOnly]
         public BlackboardEntrySelector<Quaternion> inverted;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

@@ -13,5 +13,4 @@ namespace Scheam.Builtin.Nodes
             return index + 1;
         }
     }
-
 }

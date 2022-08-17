@@ -33,7 +33,7 @@ public sealed class SelectionBoxComponent : GUIComponent
 
         Vector2 curPos = canvas.zoomer.WindowToGridPosition(e.mousePosition);
         Vector2 size = curPos - mouseDownPosition;
-        Rect r = new Rect(mouseDownPosition, size);
+        Rect r = new(mouseDownPosition, size);
         r.position = canvas.zoomer.GridToWindowPosition(r.position);
         r.size /= canvas.zoomer.zoom;
 

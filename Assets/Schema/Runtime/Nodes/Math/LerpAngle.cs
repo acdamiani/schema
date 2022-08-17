@@ -20,8 +20,7 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("Parameter t to lerp by")] public BlackboardEntrySelector<float> t;
 
-        [Tooltip("The lerped angle")]
-        [WriteOnly]
+        [Tooltip("The lerped angle")] [WriteOnly]
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

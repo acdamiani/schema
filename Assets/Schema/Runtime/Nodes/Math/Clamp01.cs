@@ -9,7 +9,7 @@ namespace Schema.Builtin.Nodes
     public class Clamp01 : Action
     {
         [Tooltip("Float to clamp")] public BlackboardEntrySelector<float> value;
-        [Tooltip("Clamped float")][WriteOnly] public BlackboardEntrySelector<float> result;
+        [Tooltip("Clamped float")] [WriteOnly] public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {

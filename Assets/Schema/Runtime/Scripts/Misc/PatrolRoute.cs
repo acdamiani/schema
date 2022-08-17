@@ -22,7 +22,7 @@ public class PatrolRoute : MonoBehaviour
                 int lastIndex = i - 1 < 0 ? points.Count - 1 : i - 1;
 
                 Vector3 last = points[lastIndex];
-                NavMeshPath path = new NavMeshPath();
+                NavMeshPath path = new();
 
                 NavMesh.CalculatePath(last, point, NavMesh.AllAreas, path);
 

@@ -8,8 +8,7 @@ namespace Schema.Builtin.Nodes
     [Description("Get a random rotation")]
     public class RandomRotation : Action
     {
-        [Tooltip("Where to store the random rotation")]
-        [WriteOnly]
+        [Tooltip("Where to store the random rotation")] [WriteOnly]
         public BlackboardEntrySelector<Quaternion> target;
 
         [Tooltip("Whether to generate a uniformly random rotation")]

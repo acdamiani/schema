@@ -1,6 +1,6 @@
 using System.Linq;
-using UnityEngine;
 using System.Text;
+using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
@@ -67,9 +67,10 @@ namespace Schema.Builtin.Conditionals
 
             return hits.Any(hit => tagFilter.tags.Contains(hit.transform.tag));
         }
+
         public override GUIContent GetConditionalContent()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             sb.Append("If raycast hits object");
 

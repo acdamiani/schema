@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Schema;
 using Schema.Internal;
@@ -10,7 +9,6 @@ using SchemaEditor.Internal;
 using SchemaEditor.Internal.ComponentSystem;
 using SchemaEditor.Internal.ComponentSystem.Components;
 using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -21,8 +19,8 @@ namespace SchemaEditor
         public Rect window;
         private Editor blackboardEditor;
         public ComponentCanvas canvas;
-        private Editor defaultNodeEditor;
         private Editor defaultConditionalEditor;
+        private Editor defaultNodeEditor;
         private List<Type> distinctTypes;
         private bool editingPaused;
         private Editor editor;
@@ -63,22 +61,18 @@ namespace SchemaEditor
             else if (defaultConditionalEditor != null && defaultConditionalEditor.targets.Any(x => !x))
                 DestroyImmediate(defaultConditionalEditor);
 
-            List<Object> targets = new List<Object>();
+            List<Object> targets = new();
 
             IEnumerable<Object> editableComponents;
 
             if (canvas == null)
-            {
                 editableComponents = Enumerable.Empty<Object>();
-            }
             else
-            {
                 editableComponents = canvas.selected
                     .Where(x => x is IEditable)
                     .Cast<IEditable>()
                     .Where(x => x.IsEditable())
                     .Select(x => x.GetEditable());
-            }
 
             targets = editableComponents.Where(x => x != null).ToList();
             distinctTypes = targets.Select(x => x.GetType()).Distinct().ToList();
@@ -118,14 +112,16 @@ namespace SchemaEditor
                 if (defaultConditionalEditor == null)
                 {
                     if (targets.Count > 0)
-                        defaultConditionalEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultConditionalEditor));
+                        defaultConditionalEditor =
+                            Editor.CreateEditor(targets.ToArray(), typeof(DefaultConditionalEditor));
                 }
                 else if (!defaultConditionalEditor.targets.SequenceEqual(targets))
                 {
                     DestroyImmediate(defaultConditionalEditor);
 
                     if (targets.Count > 0)
-                        defaultConditionalEditor = Editor.CreateEditor(targets.ToArray(), typeof(DefaultConditionalEditor));
+                        defaultConditionalEditor =
+                            Editor.CreateEditor(targets.ToArray(), typeof(DefaultConditionalEditor));
                 }
             }
         }
@@ -141,7 +137,7 @@ namespace SchemaEditor
 
         private void DrawToolbar()
         {
-            Rect toolbar = new Rect(0f, 0f, window.width, EditorStyles.toolbar.fixedHeight);
+            Rect toolbar = new(0f, 0f, window.width, EditorStyles.toolbar.fixedHeight);
             GUI.Box(toolbar, "", EditorStyles.toolbar);
 
             GUI.color = Color.white;
@@ -163,7 +159,8 @@ namespace SchemaEditor
 
             GUILayout.FlexibleSpace();
 
-            Prefs.enableStatusIndicators = GUILayout.Toggle(Prefs.enableStatusIndicators, "Live Link", EditorStyles.toolbarButton);
+            Prefs.enableStatusIndicators =
+                GUILayout.Toggle(Prefs.enableStatusIndicators, "Live Link", EditorStyles.toolbarButton);
             Prefs.minimapEnabled = GUILayout.Toggle(Prefs.minimapEnabled, "Minimap", EditorStyles.toolbarButton);
             Prefs.gridSnap = GUILayout.Toggle(Prefs.gridSnap, "Grid Snap", EditorStyles.toolbarButton);
 
@@ -184,10 +181,10 @@ namespace SchemaEditor
                 return;
 
             float inspectorWidth = Window.inspectorWidth;
-            Rect inspectorArea = new Rect(position.width - (inspectorWidth + Window.padding * 2), 0f,
+            Rect inspectorArea = new(position.width - (inspectorWidth + Window.padding * 2), 0f,
                 inspectorWidth + Window.padding * 2, position.height);
 
-            Rect inspectorContainer = new Rect(
+            Rect inspectorContainer = new(
                 position.width - inspectorWidth - Window.padding * 2,
                 0f,
                 inspectorWidth + Window.padding * 2,
@@ -200,7 +197,10 @@ namespace SchemaEditor
             string[] values = Enum.GetNames(typeof(Window.InspectorView));
 
             GUIContent[] content = new GUIContent[2]
-                { new(values[0], Icons.GetEditor("UnityEditor.InspectorWindow")), new(values[1], Icons.GetEditor("UnityEditor.HierarchyWindow")) };
+            {
+                new(values[0], Icons.GetEditor("UnityEditor.InspectorWindow")),
+                new(values[1], Icons.GetEditor("UnityEditor.HierarchyWindow"))
+            };
 
             GUILayout.FlexibleSpace();
 
@@ -288,15 +288,13 @@ namespace SchemaEditor
 
             if (canvas == null)
             {
-                SelectionBoxComponent.SelectionBoxComponentCreateArgs sBoxCreateArgs =
-                   new SelectionBoxComponent.SelectionBoxComponentCreateArgs();
+                SelectionBoxComponent.SelectionBoxComponentCreateArgs sBoxCreateArgs = new();
                 sBoxCreateArgs.hideOnMouseUp = true;
 
-                MinimapComponent.MinimapComponentCreateArgs minimapCreateArgs =
-                    new MinimapComponent.MinimapComponentCreateArgs();
+                MinimapComponent.MinimapComponentCreateArgs minimapCreateArgs = new();
                 minimapCreateArgs.offset = () => new Vector2(0f, EditorStyles.toolbar.fixedHeight);
 
-                PannerZoomer zoomer = new PannerZoomer(this, 0.05f, target.zoom, target.pan,
+                PannerZoomer zoomer = new(this, 0.05f, target.zoom, target.pan,
                     () => isDocked() ? 19.0f : 21.0f);
 
                 zoomer.onPanChange += pan => target.pan = pan;
@@ -323,7 +321,7 @@ namespace SchemaEditor
 
             foreach (Node node in nodesWithoutComponent)
             {
-                NodeComponent.NodeComponentCreateArgs args = new NodeComponent.NodeComponentCreateArgs();
+                NodeComponent.NodeComponentCreateArgs args = new();
                 args.fromExisting = node;
 
                 canvas.Create<NodeComponent>(args);
@@ -342,7 +340,7 @@ namespace SchemaEditor
 
             foreach (Conditional conditional in conditionalsWithoutComponent)
             {
-                ConditionalComponent.ConditionalComponentCreateArgs args = new ConditionalComponent.ConditionalComponentCreateArgs();
+                ConditionalComponent.ConditionalComponentCreateArgs args = new();
                 args.fromExisting = conditional;
 
                 canvas.Create<ConditionalComponent>(args);
@@ -364,7 +362,7 @@ namespace SchemaEditor
                 NodeComponent parent = (NodeComponent)canvas.FindComponent(n.Item1);
                 NodeComponent child = (NodeComponent)canvas.FindComponent(n.Item2);
 
-                ConnectionComponent.ConnectionComponentCreateArgs args = new ConnectionComponent.ConnectionComponentCreateArgs();
+                ConnectionComponent.ConnectionComponentCreateArgs args = new();
 
                 args.from = parent;
                 args.to = child;
@@ -376,7 +374,7 @@ namespace SchemaEditor
                 .Where(x => !target.nodes
                     .Select(x => x.children.Select(y => new Tuple<Node, Node>(y.parent, y)))
                     .SelectMany(x => x).Contains(new Tuple<Node, Node>(x.from.node, x.to.node))
-                    );
+                );
 
             foreach (ConnectionComponent connectionComponent in componentsWithoutConnection)
                 GUIComponent.Destroy(connectionComponent);
@@ -389,8 +387,7 @@ namespace SchemaEditor
 
             CalculateWindow();
 
-            WindowComponent.WindowComponentCreateArgs windowCreateArgs
-                = new WindowComponent.WindowComponentCreateArgs();
+            WindowComponent.WindowComponentCreateArgs windowCreateArgs = new();
 
             float height = 512f;
             float width = 512f;
@@ -407,12 +404,11 @@ namespace SchemaEditor
 
         private void CreateAddNodeWindow()
         {
-            QuickSearch search = new QuickSearch(
+            QuickSearch search = new(
                 HelperMethods.GetEnumerableOfType(typeof(Node)),
                 t =>
                 {
-                    NodeComponent.NodeComponentCreateArgs nodeCreateArgs =
-                        new NodeComponent.NodeComponentCreateArgs();
+                    NodeComponent.NodeComponentCreateArgs nodeCreateArgs = new();
                     nodeCreateArgs.graph = target;
                     nodeCreateArgs.nodeType = t;
                     nodeCreateArgs.position = canvas.zoomer.WindowToGridPosition(window.center);
@@ -421,7 +417,7 @@ namespace SchemaEditor
                 }
             );
 
-            WindowComponent.WindowComponentCreateArgs createArgs = new WindowComponent.WindowComponentCreateArgs();
+            WindowComponent.WindowComponentCreateArgs createArgs = new();
 
             createArgs.id = 1;
             createArgs.layer = 100;
@@ -442,24 +438,24 @@ namespace SchemaEditor
         public static bool CanAddConditional(ComponentCanvas canvas)
         {
             return canvas.selected.Length == 0 ||
-                        !canvas.selected.All(c =>
-                            (c is NodeComponent
-                             && (((NodeComponent)c).node.connectionDescriptor == Node.ConnectionDescriptor.Both
-                                 || ((NodeComponent)c).node.connectionDescriptor == Node.ConnectionDescriptor.OnlyInConnection))
-                            || c is ConnectionComponent
-                        );
+                   !canvas.selected.All(c =>
+                       (c is NodeComponent
+                        && (((NodeComponent)c).node.connectionDescriptor == Node.ConnectionDescriptor.Both
+                            || ((NodeComponent)c).node.connectionDescriptor ==
+                            Node.ConnectionDescriptor.OnlyInConnection))
+                       || c is ConnectionComponent
+                   );
         }
 
         private void CreateAddConditionalWindow()
         {
-            QuickSearch search = new QuickSearch(
+            QuickSearch search = new(
                 HelperMethods.GetEnumerableOfType(typeof(Conditional)),
                 t =>
                 {
                     foreach (GUIComponent component in canvas.selected)
                     {
-                        ConditionalComponent.ConditionalComponentCreateArgs conditionalCreateArgs =
-                            new ConditionalComponent.ConditionalComponentCreateArgs();
+                        ConditionalComponent.ConditionalComponentCreateArgs conditionalCreateArgs = new();
                         conditionalCreateArgs.node = component is NodeComponent
                             ? ((NodeComponent)component).node
                             : ((ConnectionComponent)component).to.node;
@@ -470,7 +466,7 @@ namespace SchemaEditor
                 }
             );
 
-            WindowComponent.WindowComponentCreateArgs createArgs = new WindowComponent.WindowComponentCreateArgs();
+            WindowComponent.WindowComponentCreateArgs createArgs = new();
 
             createArgs.id = 1;
             createArgs.layer = 100;
@@ -509,13 +505,13 @@ namespace SchemaEditor
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
             float yOffset = ((center.y - rect.size.y) * zoom + panOffset.y) / gridTex.height;
 
-            Vector2 tileOffset = new Vector2(xOffset, yOffset);
+            Vector2 tileOffset = new(xOffset, yOffset);
 
             // Amount of tiles
             float tileAmountX = Mathf.Round(rect.size.x * zoom) / gridTex.width;
             float tileAmountY = Mathf.Round(rect.size.y * zoom) / gridTex.height;
 
-            Vector2 tileAmount = new Vector2(tileAmountX, tileAmountY);
+            Vector2 tileAmount = new(tileAmountX, tileAmountY);
 
             GUI.DrawTextureWithTexCoords(rect, Icons.gridTexture2x, new Rect(tileOffset, tileAmount));
             GUI.color = new Color(1f, 1f, 1f, fac);
@@ -532,14 +528,14 @@ namespace SchemaEditor
                 Blackboard
             }
 
+            public static readonly float inspectorWidth = 350f;
+
+            public static readonly float padding = 8f;
+
             public NodeEditor editor;
             public Vector2 inspectorScroll;
             public InspectorView inspectorView;
             public bool inspectorToggled = true;
-
-            public static readonly float inspectorWidth = 350f;
-
-            public static readonly float padding = 8f;
         }
     }
 }

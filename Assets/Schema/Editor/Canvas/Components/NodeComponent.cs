@@ -13,7 +13,8 @@ using Object = UnityEngine.Object;
 namespace SchemaEditor.Internal.ComponentSystem.Components
 {
     public sealed class NodeComponent
-        : GUIComponent, ISelectable, IEditable, IFramable, IDeletable, IGraphObjectProvider, IViewElement, ICopyable, IPasteRecievier
+        : GUIComponent, ISelectable, IEditable, IFramable, IDeletable, IGraphObjectProvider, IViewElement, ICopyable,
+            IPasteRecievier
     {
         public enum HoverType
         {
@@ -24,9 +25,9 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         }
 
         private static readonly RectOffset ContentPadding = new(20, 20, 14, 14);
+        private static bool beginConnectionOrigin;
         private Vector2 beginDragNodePosition;
         private Vector2? beginDragPosition;
-        private static bool beginConnectionOrigin;
         private float cLerp;
         private bool isActive;
         private bool isSelected;
@@ -40,6 +41,16 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public NodeComponentLayout layout { get; set; }
         public ConnectionComponent parentConnection { get; set; }
         public static ConnectionComponent floatingConnection { get; set; }
+
+        public bool IsCopyable()
+        {
+            return isSelected;
+        }
+
+        public Object GetCopyable()
+        {
+            return node;
+        }
 
         public bool IsDeletable()
         {
@@ -92,6 +103,16 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             return false;
         }
 
+        public bool IsPastable()
+        {
+            return isSelected;
+        }
+
+        public Object GetReciever()
+        {
+            return node;
+        }
+
         public bool IsSelected()
         {
             return isSelected;
@@ -120,26 +141,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public void Deselect()
         {
             isSelected = false;
-        }
-
-        public bool IsCopyable()
-        {
-            return isSelected;
-        }
-
-        public bool IsPastable()
-        {
-            return isSelected;
-        }
-
-        public Object GetCopyable()
-        {
-            return node;
-        }
-
-        public Object GetReciever()
-        {
-            return node;
         }
 
         public override void Create(CreateArgs args)
@@ -241,7 +242,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (node.modifiers.Length > 0)
             {
                 GUI.color = Styles.outlineColor * tint;
-                GUIContent content = new GUIContent("", "Node has active modifiers");
+                GUIContent content = new("", "Node has active modifiers");
                 Styles.roundedBox.DrawIfRepaint(layout.modifierBox, content, false, false, false, false);
 
                 GUI.color = Color.white * tint;
@@ -275,8 +276,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     {
                         if (node.CanHaveParent())
                         {
-                            ConnectionComponent.ConnectionComponentCreateArgs createArgs =
-                                new ConnectionComponent.ConnectionComponentCreateArgs();
+                            ConnectionComponent.ConnectionComponentCreateArgs createArgs = new();
                             createArgs.to = this;
 
                             parentConnection = floatingConnection = canvas.Create<ConnectionComponent>(createArgs);
@@ -291,8 +291,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     }
                     else if (layout.outConnection.Contains(e.mousePosition) && node.CanHaveChildren())
                     {
-                        ConnectionComponent.ConnectionComponentCreateArgs createArgs =
-                            new ConnectionComponent.ConnectionComponentCreateArgs();
+                        ConnectionComponent.ConnectionComponentCreateArgs createArgs = new();
                         createArgs.from = this;
 
                         floatingConnection = canvas.Create<ConnectionComponent>(createArgs);
@@ -361,8 +360,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                         if (Prefs.gridSnap)
                             node.graphPosition = new Vector2(
-                                 Mathf.Round(node.graphPosition.x / snap) * snap,
-                                 Mathf.Round(node.graphPosition.y / snap) * snap
+                                Mathf.Round(node.graphPosition.x / snap) * snap,
+                                Mathf.Round(node.graphPosition.y / snap) * snap
                             );
 
                         beginDragNodePosition = node.graphPosition;
@@ -372,8 +371,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                     if (Prefs.gridSnap)
                         dxdy = new Vector2(
-                             Mathf.Round(dxdy.x / snap) * snap,
-                             Mathf.Round(dxdy.y / snap) * snap
+                            Mathf.Round(dxdy.x / snap) * snap,
+                            Mathf.Round(dxdy.y / snap) * snap
                         );
 
                     node.graphPosition = beginDragNodePosition + dxdy;
@@ -387,11 +386,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (!beginConnectionOrigin)
                 return;
 
-            QuickSearch search = new QuickSearch(
+            QuickSearch search = new(
                 HelperMethods.GetEnumerableOfType(typeof(Node)),
                 t =>
                 {
-                    NodeComponentCreateArgs nodeCreateArgs = new NodeComponentCreateArgs();
+                    NodeComponentCreateArgs nodeCreateArgs = new();
                     nodeCreateArgs.graph = node.graph;
                     nodeCreateArgs.nodeType = t;
                     nodeCreateArgs.position = position;
@@ -402,8 +401,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     n.node.graphPosition = new Vector2(n.node.graphPosition.x - n.layout.gridRect.width / 2f,
                         n.node.graphPosition.y);
 
-                    ConnectionComponent.ConnectionComponentCreateArgs connectionCreateArgs =
-                        new ConnectionComponent.ConnectionComponentCreateArgs();
+                    ConnectionComponent.ConnectionComponentCreateArgs connectionCreateArgs = new();
                     connectionCreateArgs.from = old;
                     connectionCreateArgs.to = n;
                     connectionCreateArgs.add = true;
@@ -413,7 +411,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 }
             );
 
-            WindowComponent.WindowComponentCreateArgs createArgs = new WindowComponent.WindowComponentCreateArgs();
+            WindowComponent.WindowComponentCreateArgs createArgs = new();
 
             float xDiff = (canvas.context.GetViewRect().width - 500f) / 2f;
             float yDiff = (canvas.context.GetViewRect().height - 500f) / 2f;
@@ -455,7 +453,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public override string GetDebugInfo()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             if (canvas.hovered == this)
                 sb.AppendLine(string.Format("<b>Hovered:</b> {0}", GetHoverType(Event.current.mousePosition)));
@@ -558,7 +556,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             public void Update()
             {
-                ShallowNode current = new ShallowNode(component.node);
+                ShallowNode current = new(component.node);
 
                 if (!current.Equals(last))
                     DoRect();
@@ -574,8 +572,10 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 body = r;
                 shadow = body.Pad(-10);
                 content = body.Pad(14);
-                iconContent = new Rect(content.x + content.width / 2f - iconSize.x / 2f, content.y + ContentPadding.top, iconSize.x, iconSize.y);
-                textContent = new Rect(content.x, content.yMax - textSize.y - ContentPadding.bottom, content.width, textSize.y);
+                iconContent = new Rect(content.x + content.width / 2f - iconSize.x / 2f, content.y + ContentPadding.top,
+                    iconSize.x, iconSize.y);
+                textContent = new Rect(content.x, content.yMax - textSize.y - ContentPadding.bottom, content.width,
+                    textSize.y);
                 errorBox = new Rect(body.xMax, body.yMax, 28f, 28f).UseCenter();
                 inConnection = new Rect(body.center.x, body.y - component.node.conditionals.Length * 50f - 6f, 24f, 12f)
                     .UseCenter();
