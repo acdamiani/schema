@@ -37,6 +37,12 @@ namespace Schema.Internal
             return execution;
         }
 
+        public ExecutableNode GetExecutableNode(Node node)
+        {
+            return nodes
+                .FirstOrDefault(x => x.node == node);
+        }
+
         public void Initialize(SchemaAgent agent)
         {
             ExecutionContext context = GetExecutionContext(agent);
@@ -69,7 +75,6 @@ namespace Schema.Internal
                 int i = nodes[context.node.index].Execute(context);
                 i = i > nodes.Length - 1 ? 0 : i;
 
-                context.last = context.node;
                 context.node = nodes[i];
 
                 if (++t == agent.maxStepsPerTick)

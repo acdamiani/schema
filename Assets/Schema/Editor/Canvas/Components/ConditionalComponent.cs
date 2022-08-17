@@ -22,6 +22,10 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public Rect rect => _rect;
         public Conditional conditional { get; private set; }
 
+        private float cLerp;
+        private Color statusColor;
+        private float t;
+
         public string uID { get; private set; }
 
         public bool isSelected { get; private set; }
@@ -122,6 +126,36 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             return new Rect(pos.x, pos.y, contentSize.x, height);
         }
 
+        private void HandleSelection(IEnumerable<GameObject> selection)
+        {
+            if (!Application.isPlaying || !Prefs.enableStatusIndicators || selection.Count() != 1)
+            {
+                cLerp = 0f;
+                return;
+            }
+
+            SchemaAgent agent = selection
+                .ElementAt(0)
+                .GetComponent<SchemaAgent>();
+
+            if (agent == null || agent.target != conditional.node.graph)
+                return;
+
+            ExecutableNode executableNode = agent.tree.GetExecutableNode(conditional.node);
+
+            switch (executableNode.GetLastConditionalStatus(Array.IndexOf(conditional.node.conditionals, conditional)))
+            {
+                case true:
+                    statusColor = Prefs.successColor;
+                    cLerp = 1.0f;
+                    break;
+                case false:
+                    statusColor = Prefs.failureColor;
+                    cLerp = 1.0f;
+                    break;
+            }
+        }
+
         public override void Create(CreateArgs args)
         {
             ConditionalComponentCreateArgs createArgs = args as ConditionalComponentCreateArgs;
@@ -171,6 +205,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             DoEvents();
 
+            HandleSelection(UnityEditor.Selection.gameObjects);
+
             float height = 32f;
 
             int upCount = length - index;
@@ -215,13 +251,22 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             GUI.backgroundColor = Styles.windowBackground;
             Styles.element.DrawIfRepaint(r.Pad(-10), false, false, false, false);
             Styles.conditional.DrawIfRepaint(r, content, false, false, false, false);
-            GUI.backgroundColor = isSelected ? Prefs.selectionColor : Styles.outlineColor;
+
+            Color c = isSelected ? Prefs.selectionColor : Styles.outlineColor;
+            cLerp -= Time.realtimeSinceStartup - t;
+            cLerp = Mathf.Clamp01(cLerp);
+
+            GUI.backgroundColor = Color.white;
+
+            GUI.color = Color.Lerp(c, statusColor, cLerp);
             Styles.outline.DrawIfRepaint(r, false, false, false, false);
+
+            GUI.color = Color.white;
 
             if (icon != null)
                 GUI.DrawTexture(new Rect(r.x + Styles.conditional.padding.left, r.y + 8f, 16f, 16f), icon);
 
-            GUI.backgroundColor = Color.white;
+            t = Time.realtimeSinceStartup;
         }
 
         private void DoEvents()

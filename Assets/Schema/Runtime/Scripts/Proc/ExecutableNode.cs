@@ -16,11 +16,13 @@ namespace Schema.Internal
             Invalid
         }
 
+        private readonly Dictionary<int, bool> lastConditionalStatus = new();
+
         private readonly Dictionary<int, object[]> conditionalMemory = new();
 
         private readonly Dictionary<int, object[]> modifierMemory = new();
 
-        private readonly Node node;
+        public readonly Node node;
 
         private readonly Dictionary<int, object> nodeMemory = new();
 
@@ -101,6 +103,14 @@ namespace Schema.Internal
                 default:
                     throw new Exception("Node is not of a valid type!");
             }
+        }
+
+        public bool? GetLastConditionalStatus(int index)
+        {
+            if (!lastConditionalStatus.ContainsKey(index))
+                return null;
+
+            return lastConditionalStatus[index];
         }
 
         private void InitializeFlow(int id, SchemaAgent agent)
@@ -186,6 +196,9 @@ namespace Schema.Internal
             for (int j = 0; j < flow.conditionals.Length; j++)
             {
                 run = flow.conditionals[j].Evaluate(conditionalMemory[id][j], context.agent);
+                run = flow.conditionals[j].invert ? !run : run;
+
+                lastConditionalStatus[j] = run;
 
                 if (!run)
                     break;
@@ -247,6 +260,9 @@ namespace Schema.Internal
                 for (int j = 0; j < action.conditionals.Length; j++)
                 {
                     run = action.conditionals[j].Evaluate(conditionalMemory[id][j], context.agent);
+                    run = action.conditionals[j].invert ? !run : run;
+
+                    lastConditionalStatus[j] = run;
 
                     if (!run)
                         break;

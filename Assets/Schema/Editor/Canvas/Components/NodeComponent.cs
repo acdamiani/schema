@@ -492,8 +492,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public void HandleSelection(IEnumerable<GameObject> selection)
         {
-            if (!Application.isPlaying || Prefs.liveLink || selection.Count() != 1)
+            if (!Application.isPlaying || !Prefs.enableStatusIndicators || selection.Count() != 1)
+            {
+                cLerp = 0f;
                 return;
+            }
 
             SchemaAgent agent = selection
                 .ElementAt(0)

@@ -127,7 +127,17 @@ namespace Schema
         /// <summary>
         ///     Name of the entry referenced by this selector
         /// </summary>
-        public string name => m_isDynamic ? m_dynamicName : m_entry?.name;
+        public string name => GetName();
+
+        private string GetName()
+        {
+            if (m_isDynamic)
+                return $"${m_dynamicName}";
+            else if (m_entry != null)
+                return $"${m_entry.name}";
+
+            return "$null";
+        }
 
         /// <summary>
         ///     Whether this selector is dynamic

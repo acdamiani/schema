@@ -128,12 +128,6 @@ namespace SchemaEditor.Internal
             set => EditorPrefs.SetBool("SCHEMA_PREF__gridSnap", value);
         }
 
-        public static bool liveLink
-        {
-            get => EditorPrefs.GetBool("SCHEMA_PREF__liveLink", false);
-            set => EditorPrefs.SetBool("SCHEMA_PREF__liveLink", value);
-        }
-
         public static bool minimapEnabled
         {
             get => EditorPrefs.GetBool("SCHEMA_PREF__minimapEnabled", false);

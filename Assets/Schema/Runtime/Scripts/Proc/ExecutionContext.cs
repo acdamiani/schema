@@ -24,21 +24,24 @@ namespace Schema.Internal
             get => _node;
             set
             {
+                if (value == null)
+                    return;
+
+                if (status == NodeStatus.Running || (_node != null && value.index - node.index < 0))
+                    lastStatus[_node.index] = status;
+
+                _last = _node;
                 _node = value;
-                lastStatus[_node.index] = status;
             }
         }
 
-        public ExecutableNode last { get; set; }
+        public ExecutableNode last { get => _last; }
+        private ExecutableNode _last;
 
         public NodeStatus status
         {
             get => _status;
-            set
-            {
-                _status = value;
-                lastStatus[_node.index] = status;
-            }
+            set => _status = value;
         }
 
         public NodeStatus? GetLastStatus(int index)

@@ -163,7 +163,7 @@ namespace SchemaEditor
 
             GUILayout.FlexibleSpace();
 
-            Prefs.liveLink = GUILayout.Toggle(Prefs.liveLink, "Live Link", EditorStyles.toolbarButton);
+            Prefs.enableStatusIndicators = GUILayout.Toggle(Prefs.enableStatusIndicators, "Live Link", EditorStyles.toolbarButton);
             Prefs.minimapEnabled = GUILayout.Toggle(Prefs.minimapEnabled, "Minimap", EditorStyles.toolbarButton);
             Prefs.gridSnap = GUILayout.Toggle(Prefs.gridSnap, "Grid Snap", EditorStyles.toolbarButton);
 
