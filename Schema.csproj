@@ -42,7 +42,6 @@
      <Compile Include="Assets/Schema/Runtime/Conditionals/SoundHeard.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Math/Log.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Physics/OverlapBox.cs" />
-     <Compile Include="Assets/Schema/Runtime/Nodes/Subtract.cs" />
      <Compile Include="Assets/Schema/Runtime/Conditionals/IsNull.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntry.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Quaternion/RotateTowardsQuaternion.cs" />
@@ -159,7 +158,6 @@
      <Compile Include="Assets/Schema/Runtime/Nodes/Vector/ReflectVector.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Vector/RotateTowardsVector.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/AnimationCurve/RemoveCurveKey.cs" />
-     <Compile Include="Assets/Schema/Runtime/Nodes/TriggerAnimator.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Quaternion/EulerAngles.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Base/Graph.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Math/Cos.cs" />
@@ -204,7 +202,6 @@
      <Compile Include="Assets/Schema/Runtime/Nodes/Physics/CapsuleCast.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Modifiers/ForceStatus.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Math/Log10.cs" />
-     <Compile Include="Assets/Schema/Runtime/Nodes/Wander.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/BlackboardEntrySelector.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Math/PingPong.cs" />
      <Compile Include="Assets/Schema/Runtime/Scripts/Blackboard/EntryType.cs" />
@@ -241,6 +238,12 @@
      <Compile Include="Assets/Schema/Runtime/Nodes/Misc/ReturnResult.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Transform/RotateAway.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Misc/EmptyAction.cs" />
+     <Compile Include="Assets/Schema/Runtime/Nodes/Movement/Wander.cs" />
+     <Compile Include="Assets/Schema/Runtime/Nodes/Animator/TriggerAnimator.cs" />
+     <Compile Include="Assets/Schema/Runtime/Nodes/Math/Add.cs" />
+     <Compile Include="Assets/Schema/Runtime/Nodes/Math/Subtract.cs" />
+     <Compile Include="Assets/Schema/Runtime/Nodes/Math/Multiply.cs" />
+     <Compile Include="Assets/Schema/Runtime/Nodes/Math/Divide.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2021.3.6f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

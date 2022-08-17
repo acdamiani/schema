@@ -214,6 +214,9 @@ public class QuickSearch : IWindowComponentProvider
 
         foreach (Type nodeType in results)
         {
+            if (nodeType == typeof(Schema.Root))
+                continue;
+
             Texture2D icon = icons.GetOrCreate(nodeType, () => GraphObject.GetIcon(nodeType));
             GUIContent content = new(nodeType.Name, icon);
 
@@ -303,18 +306,18 @@ public class QuickSearch : IWindowComponentProvider
         List<Type> ret = new();
 
         foreach (Type ty in types)
-        foreach (string q in queries)
-        {
-            string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
-            string search = category.ToLower() + ty.Name.ToLower();
-
-            int s = Search(q, search);
-            if (s != -1)
+            foreach (string q in queries)
             {
-                ret.Add(ty);
-                break;
+                string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
+                string search = category.ToLower() + ty.Name.ToLower();
+
+                int s = Search(q, search);
+                if (s != -1)
+                {
+                    ret.Add(ty);
+                    break;
+                }
             }
-        }
 
         return ret;
     }

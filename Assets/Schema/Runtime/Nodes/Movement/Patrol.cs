@@ -4,8 +4,8 @@ using UnityEngine.AI;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Movement", true)]
-    [LightIcon("Nodes/Movement", true)]
+    [DarkIcon("Nodes/d_Movement")]
+    [LightIcon("Nodes/Movement")]
     [Category("Movement")]
     public class Patrol : Action
     {

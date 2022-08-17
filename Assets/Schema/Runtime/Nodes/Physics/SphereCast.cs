@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_SphereCollider Icon")]
-    [LightIcon("SphereCollider Icon")]
+    [DarkIcon("d_SphereCollider Icon", true)]
+    [LightIcon("SphereCollider Icon", true)]
     [Category("Physics")]
     [Description("Casts a sphere along a ray and returns detailed information on what was hit")]
     public class SphereCast : Action
@@ -24,7 +24,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Specifies whether this query should hit triggers")]
         public QueryTriggerInteraction queryTriggerInteraction;
 
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object")] [WriteOnly]
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object")]
+        [WriteOnly]
         public BlackboardEntrySelector hit = new();
 
         protected override void OnObjectEnable()

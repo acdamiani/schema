@@ -65,7 +65,6 @@
      <Compile Include="Assets/Schema/Editor/Window/IWindowComponentProvider.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SelectRandomWeightedEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/GetPositionEditor.cs" />
-     <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/SetMatrixValueEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/Nodes/DebugLogEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CoverVolumeEditor.cs" />
      <Compile Include="Assets/Schema/Editor/CustomEditors/SchemaAgentEditor.cs" />

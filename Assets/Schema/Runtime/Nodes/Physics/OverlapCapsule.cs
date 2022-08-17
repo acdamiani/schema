@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_CapsuleCollider Icon")]
-    [LightIcon("CapsuleCollider Icon")]
+    [DarkIcon("d_CapsuleCollider Icon", true)]
+    [LightIcon("CapsuleCollider Icon", true)]
     [Category("Physics")]
     [Description("Gets colliders hit by a capsule positioned in the world")]
     public class OverlapCapsule : Action

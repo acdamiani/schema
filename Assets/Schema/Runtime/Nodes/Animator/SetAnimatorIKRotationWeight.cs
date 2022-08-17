@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("c_Animator")]
-    [LightIcon("c_Animator")]
+    [DarkIcon("d_Animator Icon", true)]
+    [LightIcon("Animator Icon", true)]
     [Name("Set Animator IK Rotation Weight")]
     [Category("Animator")]
     public class SetAnimatorIKRotationWeight : Action
