@@ -690,6 +690,9 @@
     <Reference Include="Unity.Rider.Editor">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="asset-store-tools-editor">
+        <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/asset-store-tools-editor.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
         <HintPath>/home/acdamiani/Documents/Schema-Unity/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
     </Reference>

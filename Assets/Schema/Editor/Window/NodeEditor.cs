@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using Schema;
 using Schema.Internal;
 using Schema.Utilities;
+using SchemaEditor.Utilities;
 using SchemaEditor.Internal;
 using SchemaEditor.Internal.ComponentSystem.Components;
 using UnityEditor;

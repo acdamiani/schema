@@ -12,21 +12,6 @@ namespace Schema.Utilities
         private static readonly Texture2D
             scriptIcon = EditorGUIUtility.IconContent("cs Script Icon").image as Texture2D;
 
-        internal static void AddItem(this GenericMenu menu, GUIContent content, bool on, GenericMenu.MenuFunction func,
-            bool disabled)
-        {
-            if (disabled)
-                menu.AddDisabledItem(content, on);
-            else
-                menu.AddItem(content, on, func);
-        }
-
-        internal static void AddItem(this GenericMenu menu, string content, bool on, GenericMenu.MenuFunction func,
-            bool disabled)
-        {
-            menu.AddItem(new GUIContent(content), on, func, disabled);
-        }
-
         private static void CreateFromTemplate(string fileName, string initialName)
         {
             string[] guids = AssetDatabase.FindAssets(fileName);

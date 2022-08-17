@@ -71,5 +71,19 @@ namespace SchemaEditor.Utilities
 
             style.Draw(position, content, isHover, isActive, on, hasKeyboardFocus);
         }
+        public static void AddItem(this GenericMenu menu, GUIContent content, bool on, GenericMenu.MenuFunction func,
+            bool disabled)
+        {
+            if (disabled)
+                menu.AddDisabledItem(content, on);
+            else
+                menu.AddItem(content, on, func);
+        }
+
+        public static void AddItem(this GenericMenu menu, string content, bool on, GenericMenu.MenuFunction func,
+            bool disabled)
+        {
+            menu.AddItem(new GUIContent(content), on, func, disabled);
+        }
     }
 }

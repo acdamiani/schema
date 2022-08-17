@@ -48,7 +48,6 @@ namespace Schema.Builtin.Nodes
         {
             public NavMeshAgent agent;
             public int currentIndex;
-            public PatrolRoute route;
         }
     }
 }

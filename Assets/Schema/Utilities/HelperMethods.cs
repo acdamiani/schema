@@ -107,8 +107,8 @@ namespace Schema.Utilities
         public static void SetHideFlags(HideFlags hideFlags, params List<ScriptableObject>[] objects)
         {
             foreach (List<ScriptableObject> sl in objects)
-            foreach (ScriptableObject s in sl)
-                s.hideFlags = hideFlags;
+                foreach (ScriptableObject s in sl)
+                    s.hideFlags = hideFlags;
         }
 
         public static Color ToColor(this string s)
@@ -349,8 +349,8 @@ namespace Schema.Utilities
             Color[] cols = new Color[texture.width * texture.height];
 
             for (int y = 0; y < texture.height; y++)
-            for (int x = 0; x < texture.width; x++)
-                cols[y * texture.width + x] = texture.GetPixel(x, y) * color;
+                for (int x = 0; x < texture.width; x++)
+                    cols[y * texture.width + x] = texture.GetPixel(x, y) * color;
 
             ret.SetPixels(cols);
             ret.name = "Tinted";
@@ -417,5 +417,6 @@ namespace Schema.Utilities
 
             return rect;
         }
+
     }
 }

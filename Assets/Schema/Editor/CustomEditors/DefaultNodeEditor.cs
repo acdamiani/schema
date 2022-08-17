@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Schema;
 using Schema.Utilities;
+using SchemaEditor.Utilities;
 using UnityEditor;
 using UnityEngine;
 

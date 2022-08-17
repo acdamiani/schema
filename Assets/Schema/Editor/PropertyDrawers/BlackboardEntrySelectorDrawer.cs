@@ -6,6 +6,7 @@ using System.Text;
 using Schema;
 using Schema.Internal;
 using Schema.Utilities;
+using SchemaEditor.Utilities;
 using UnityEditor;
 using UnityEngine;
 

@@ -1,7 +1,7 @@
 ﻿using Schema;
 using UnityEngine;
 
-namespace Scheam.Builtin.Nodes
+namespace Schema.Builtin.Nodes
 {
     [DarkIcon("d_Transform Icon", true)]
     [LightIcon("Transform Icon", true)]

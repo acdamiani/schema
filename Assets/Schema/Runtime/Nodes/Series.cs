@@ -1,6 +1,6 @@
 using Schema;
 
-namespace Scheam.Builtin.Nodes
+namespace Schema.Builtin.Nodes
 {
     [DarkIcon("Nodes/d_Sequence")]
     [LightIcon("Nodes/Sequence")]
