@@ -51,7 +51,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             switch (Prefs.minimapPosition)
             {
                 case 0:
-                    rect = new Rect(10f, rect.yMax - height - 10f - toolbarHeight, Prefs.minimapWidth,
+                    rect = new Rect(10f, rect.yMax - height - 10f, Prefs.minimapWidth,
                         height);
                     break;
                 case 1:
@@ -62,7 +62,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                         Prefs.minimapWidth, height);
                     break;
                 case 3:
-                    rect = new Rect(rect.xMax - 10f - Prefs.minimapWidth, 0f, Prefs.minimapWidth,
+                    rect = new Rect(rect.xMax - 10f - Prefs.minimapWidth, toolbarHeight + 10f, Prefs.minimapWidth,
                         height);
                     break;
             }

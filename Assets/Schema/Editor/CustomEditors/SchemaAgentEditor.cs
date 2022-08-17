@@ -1,35 +1,53 @@
-// [CustomEditor(typeof(SchemaAgent))]
-// public class SchemaAgentEditor : Editor
-// {
-//     [SerializeField] bool generalFoldout;
-//     [SerializeField] bool advancedFoldout;
-//     public override void OnInspectorGUI()
-//     {
-//         SchemaAgent agent = (SchemaAgent)target;
+using UnityEditor;
+using UnityEngine;
+using Schema;
 
-//         EditorGUI.BeginChangeCheck();
-//         agent.target = (Schema.Graph)EditorGUILayout.ObjectField("Target", agent.target, typeof(Schema.Graph), false);
-//         if (EditorGUI.EndChangeCheck())
-//         {
-//             agent.VerifyComponents();
-//         }
+namespace SchemaEditor.Editors
+{
+    [CustomEditor(typeof(SchemaAgent)), CanEditMultipleObjects]
+    public class SchemaAgentEditor : Editor
+    {
+        private SerializedProperty graphTarget;
+        private SerializedProperty description;
+        private SerializedProperty restartWhenComplete;
+        private SerializedProperty maxStepsPerTick;
+        private SerializedProperty resetBlackboardOnRestart;
+        [SerializeField] private bool optionsFoldout;
+        void OnEnable()
+        {
+            graphTarget = serializedObject.FindProperty("m_target");
+            description = serializedObject.FindProperty("m_agentDescription");
+            restartWhenComplete = serializedObject.FindProperty("m_restartWhenComplete");
+            maxStepsPerTick = serializedObject.FindProperty("m_maxStepsPerTick");
+            resetBlackboardOnRestart = serializedObject.FindProperty("m_resetBlackboardOnRestart");
+        }
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
 
-//         generalFoldout = EditorGUILayout.Foldout(generalFoldout, "General Settings", true, EditorStyles.foldoutHeader);
+            EditorGUILayout.BeginHorizontal();
 
-//         if (generalFoldout)
-//         {
-//             agent.restartOnComplete = EditorGUILayout.Toggle(new GUIContent("Restart On Complete", "Restart tree when execution has finished (when the engine has reached the root)"), true);
-//             agent.maxIterationsPerTick = EditorGUILayout.IntField(new GUIContent("Max Iterations Per Tick", "Maximum number of steps taken through the tree in a single tick."), agent.maxIterationsPerTick);
-//             agent.maxIterationsPerTick = Nodes/Mathf.Clamp(agent.maxIterationsPerTick, 0, System.Int32.MaxValue);
-//         }
+            EditorGUILayout.PropertyField(graphTarget);
 
-//         advancedFoldout = EditorGUILayout.Foldout(advancedFoldout, "Advanced Settings", true, EditorStyles.foldoutHeader);
+            EditorGUI.BeginDisabledGroup(graphTarget.objectReferenceValue == null);
+            if (GUILayout.Button("Open", GUILayout.ExpandWidth(false)))
+                AssetDatabase.OpenAsset(graphTarget.objectReferenceValue);
+            EditorGUI.EndDisabledGroup();
 
-//         if (advancedFoldout)
-//         {
-//             agent.logTaskChanges = EditorGUILayout.Toggle(new GUIContent("Log Task Changes", "When checked, will log whenever the task has changed to the console"), agent.logTaskChanges);
-//             agent.ignoreTickOverstep = EditorGUILayout.Toggle(new GUIContent("Ignore Tick Overstep", "Ignore the overstepping of the tick limit for this agent. It is highly recommended that this stay off, as checking it will no longer stop infinite loops"), agent.ignoreTickOverstep);
-//         }
-//     }
-// }
+            EditorGUILayout.EndHorizontal();
 
+            EditorGUILayout.PropertyField(description);
+
+            optionsFoldout = EditorGUILayout.Foldout(optionsFoldout, "Options", true);
+
+            if (optionsFoldout)
+            {
+                EditorGUILayout.PropertyField(maxStepsPerTick);
+                EditorGUILayout.PropertyField(restartWhenComplete);
+                EditorGUILayout.PropertyField(resetBlackboardOnRestart);
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
+    }
+}

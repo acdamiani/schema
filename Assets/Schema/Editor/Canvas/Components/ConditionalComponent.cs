@@ -212,6 +212,9 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             int upCount = length - index;
 
+            if (canvas.selected.Length == 1 && isSelected)
+                SchemaGUI.DoDescriptionLabel(canvas.context, conditional.description);
+
             GUIContent content = conditional.GetConditionalContent();
             Texture2D icon = conditional.icon;
 

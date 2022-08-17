@@ -38,6 +38,8 @@ namespace SchemaEditor
         //Validates connections between nodes also resets HideFlags
         private void OnEnable()
         {
+            minSize = new Vector2(Window.inspectorWidth + Prefs.minimapWidth + 75f, Prefs.maxMinimapHeight + 85f);
+
             if (windowInfo.inspectorToggled)
                 window = new Rect(0f, 0f, position.width - Window.inspectorWidth - Window.padding * 2,
                     position.height);

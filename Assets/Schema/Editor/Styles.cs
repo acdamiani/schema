@@ -53,6 +53,8 @@ namespace SchemaEditor
 
         private static GUIStyle _outline;
 
+        private static GUIStyle _description;
+
         public static Color windowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
         public static Color windowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
 
@@ -391,12 +393,28 @@ namespace SchemaEditor
             }
         }
 
+        public static GUIStyle description
+        {
+            get
+            {
+                if (_description == null)
+                {
+                    _description = new GUIStyle();
+                    _description.wordWrap = true;
+                    _description.fontSize = 12;
+                    _description.normal.textColor = Color.white;
+                }
+
+                return _description;
+            }
+        }
+
         private static Texture2D GenerateSolid(Color color, Vector2Int size)
         {
             Texture2D tex = new(size.y, size.x);
             for (int y = 0; y < size.y; y++)
-            for (int x = 0; x < size.x; x++)
-                tex.SetPixel(x, y, color);
+                for (int x = 0; x < size.x; x++)
+                    tex.SetPixel(x, y, color);
 
             tex.wrapMode = TextureWrapMode.Repeat;
             tex.name = "Solid";

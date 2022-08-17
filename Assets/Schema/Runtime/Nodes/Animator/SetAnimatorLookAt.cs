@@ -4,7 +4,7 @@ namespace Schema.Builtin.Nodes
 {
     [DarkIcon("d_Animator Icon", true)]
     [LightIcon("Animator Icon", true)]
-    [Category("Animation")]
+    [Category("Animator")]
     [Description("Set the look at position for an animator")]
     public class SetAnimatorLookAt : Action
     {

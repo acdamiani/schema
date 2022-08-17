@@ -9,7 +9,7 @@ namespace Schema.Internal
 {
     public abstract class GraphObject : ScriptableObject
     {
-        [SerializeField] [HideInInspector] private string m_uID = Guid.NewGuid().ToString("N");
+        [SerializeField][HideInInspector] private string m_uID = Guid.NewGuid().ToString("N");
 
         /// <summary>
         ///     The GUID for this object
@@ -19,23 +19,40 @@ namespace Schema.Internal
         /// <summary>
         ///     The icon for this object
         /// </summary>
-        public Texture2D icon { get; private set; }
+        public Texture2D icon { get { return _icon; } }
+        private Texture2D _icon;
 
 #endif
 
+        /// <summary>
+        ///     The description for this object
+        /// </summary>
+        public string description { get { return _description; } }
+        private string _description;
+
+        /// <summary>
+        ///     The category wof this object
+        /// </summary>
+        public string category { get { return _category; } }
+        private string _category;
+
         private void OnEnable()
         {
-            NameAttribute attribute = GetType().GetCustomAttribute<NameAttribute>();
+            Type t = GetType();
+
+            NameAttribute attribute = t.GetCustomAttribute<NameAttribute>();
 
             if (string.IsNullOrEmpty(name))
                 name = attribute != null
                     ? attribute.name
-                    : string.Concat(GetType().Name.Select(x => char.IsUpper(x) ? " " + x : x.ToString()))
+                    : string.Concat(t.Name.Select(x => char.IsUpper(x) ? " " + x : x.ToString()))
                         .TrimStart(' ');
 
+            _description = GetDescription(t);
+            _category = GetCategory(t);
 
 #if UNITY_EDITOR
-            icon = GetIcon(GetType());
+            _icon = GetIcon(t);
 #endif
 
             OnObjectEnable();

@@ -180,6 +180,9 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             HandleSelection(Selection.gameObjects);
 
+            if (canvas.selected.Length == 1 && isSelected)
+                SchemaGUI.DoDescriptionLabel(canvas.context, node.description);
+
             Color guiColor = GUI.color;
 
             Color tint = Prefs.dimUnconnectedNodes && node.priority < 1 ? new Color(0.8f, 0.8f, 0.8f, 1f) : Color.white;
