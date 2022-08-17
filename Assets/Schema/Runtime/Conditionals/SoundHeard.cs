@@ -6,6 +6,7 @@ namespace Schema.Builtin.Conditionals
     [Description(
         "Checks for playing AudioSources within a sphere. Note that these objects require a collider to be detected")]
     [DarkIcon("Conditionals/d_SoundHeard")]
+    [LightIcon("Conditionals/SoundHeard")]
     public class SoundHeard : Conditional
     {
         [Tooltip("Radius of the sphere that is registered as \"hearing\" a noise")]
@@ -18,9 +19,6 @@ namespace Schema.Builtin.Conditionals
             "The entry to store the first heard GameObject to. When multiple audio sources are detected, it will store the closest one.")]
         [WriteOnly]
         public BlackboardEntrySelector<GameObject> heard;
-
-        [Tooltip("Display heard noises locations in the editor for the currently selected agent")]
-        public bool visualize = true;
 
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {

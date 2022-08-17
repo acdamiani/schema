@@ -6,7 +6,8 @@ using UnityEngine.Rendering;
 
 namespace Schema.Builtin.Conditionals
 {
-    [DarkIcon("Conditionals/ConeCheck")]
+    [DarkIcon("Conditionals/d_ConeCheck")]
+    [LightIcon("Conditionals/ConeCheck")]
     public class ConeCheck : Conditional
     {
         public BlackboardEntrySelector<float> rayRange = new(10.0f);
@@ -17,10 +18,6 @@ namespace Schema.Builtin.Conditionals
             "How many rays to send to check for colliding Game Objects. Increasing this value will reduce performance but will result in more accurate results for smaller objects.")]
         [Range(10, 100)]
         public int resolution = 10;
-
-        [Tooltip("Visualize the cone for the selected agent with this tree attached")]
-        public bool visualize = true;
-
         public bool precisionMode;
         public Vector3 offset;
         public BlackboardEntrySelector<GameObject> parentObject;

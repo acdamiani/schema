@@ -37,7 +37,7 @@ namespace SchemaEditor.Editors
 
             EditorGUILayout.PropertyField(nodeName);
             EditorGUILayout.PropertyField(comment);
-            if (targets.Length == 0 && target.GetType() != typeof(Root))
+            if (targets.Length == 1 && target.GetType() != typeof(Root))
                 DoModifers(node.modifiers);
             EditorGUILayout.PropertyField(enableStatusIndicator);
 
