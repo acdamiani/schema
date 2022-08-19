@@ -55,6 +55,8 @@ namespace SchemaEditor
 
         private static GUIStyle _description;
 
+        private static GUIStyle _selectorDrawerMiniText;
+
         public static Color windowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
         public static Color windowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
 
@@ -406,6 +408,20 @@ namespace SchemaEditor
                 }
 
                 return _description;
+            }
+        }
+
+        public static GUIStyle selectorDrawerMiniText
+        {
+            get
+            {
+                if (_selectorDrawerMiniText == null)
+                {
+                    _selectorDrawerMiniText = new GUIStyle(EditorStyles.miniLabel);
+                    _selectorDrawerMiniText.padding = new RectOffset(2, 2, 0, 0);
+                }
+
+                return _selectorDrawerMiniText;
             }
         }
 
