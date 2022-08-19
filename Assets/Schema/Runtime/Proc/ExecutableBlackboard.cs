@@ -10,14 +10,25 @@ namespace Schema.Internal
         private readonly Dictionary<string, EntryData> dynamicValues = new();
         private readonly Dictionary<BlackboardEntry, EntryData> values = new();
 
+        public Blackboard blackboard { get; }
+
         public ExecutableBlackboard(Blackboard blackboard)
+        {
+            if (blackboard == null)
+                throw new ArgumentNullException("blackboard", "Blackboard cannot be null!");
+
+            this.blackboard = blackboard;
+
+            Reset();
+        }
+
+        public void Reset()
         {
             for (int i = 0; i < blackboard.entries.Length; i++)
             {
                 BlackboardEntry entry = blackboard.entries[i];
 
-                if (!values.ContainsKey(entry))
-                    values.Add(entry, new EntryData(entry));
+                values[entry] = new EntryData(entry);
             }
 
             if (globalValues == null)
@@ -28,8 +39,7 @@ namespace Schema.Internal
                 {
                     BlackboardEntry entry = Blackboard.global.entries[i];
 
-                    if (!globalValues.ContainsKey(entry))
-                        globalValues.Add(entry, new EntryData(entry));
+                    globalValues[entry] = new EntryData(entry);
                 }
             }
         }
@@ -56,8 +66,6 @@ namespace Schema.Internal
             ExecutionContext current = ExecutionContext.current;
 
             ExecutableNode parent = ExecutableTree.current.nodes[current.node.parent];
-
-            Debug.LogFormat("{0} {1}", parent.index, parent.breadth);
 
             if (!dynamicValues.ContainsKey(name))
                 dynamicValues[name] = new EntryData(value.GetType(), parent.index, parent.breadth);

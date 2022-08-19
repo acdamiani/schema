@@ -26,8 +26,14 @@ namespace Schema.Internal
                 if (value == null)
                     return;
 
+
                 if (status == NodeStatus.Running || (_node != null && value.index - node.index < 0))
+                {
                     lastStatus[_node.index] = status;
+
+                    if (value.index == 0)
+                        lastStatus[0] = status;
+                }
 
                 last = _node;
                 _node = value;

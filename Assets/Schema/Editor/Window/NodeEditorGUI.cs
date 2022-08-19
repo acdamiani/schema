@@ -28,10 +28,18 @@ namespace SchemaEditor
         private bool needsPan;
         public float tabHeight => isDocked() ? 19.0f : 21.0f;
         private Func<bool> isDocked => isDockedFunc ??= this.GetIsDockedDelegate();
+        private bool isSplash;
 
         private void OnGUI()
         {
             CalculateWindow();
+
+            if (target == null && !isSplash)
+            {
+                canvas = null;
+                titleContent = new GUIContent("Behavior Editor");
+                RebuildComponentTree();
+            }
 
             if (canvas != null)
                 canvas.Draw();
@@ -282,9 +290,12 @@ namespace SchemaEditor
         {
             if (target == null)
             {
+                isSplash = true;
                 DoSplashCanvas();
                 return;
             }
+
+            isSplash = false;
 
             if (canvas == null)
             {

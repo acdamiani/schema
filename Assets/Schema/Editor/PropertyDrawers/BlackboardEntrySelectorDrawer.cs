@@ -17,7 +17,7 @@ namespace SchemaEditor
     {
         private static readonly Dictionary<string, SelectorPropertyInfo> info = new();
         private static readonly Type[] valid = { typeof(Node), typeof(Conditional) };
-        private static readonly Dictionary<Type, Type> typeMappings = new();
+        private static readonly CacheDictionary<Type, Type> typeMappings = new();
         private static readonly Dictionary<Type, Tuple<string[], Type[]>> excluded = new();
         private static int i;
         private static event GUIDelayCall guiDelayCall;
@@ -117,10 +117,11 @@ namespace SchemaEditor
 
                     GUIContent content = new($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
                     size = EditorStyles.miniLabel.CalcSize(content);
+                    size.x += 4;
 
                     GUI.BeginClip(r, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
 
-                    EditorGUI.LabelField(new Rect(0f, 3f, size.x, size.y), content, EditorStyles.miniLabel);
+                    EditorGUI.LabelField(new Rect(2f, 3f, size.x, size.y), content, EditorStyles.miniLabel);
 
                     GUI.EndClip();
 
@@ -263,10 +264,7 @@ namespace SchemaEditor
 
             foreach (BlackboardEntry bEntry in Blackboard.instance.entries.Concat(Blackboard.global.entries))
             {
-                typeMappings.TryGetValue(bEntry.type, out Type value);
-
-                if (value == null)
-                    value = EntryType.GetMappedType(bEntry.type);
+                Type value = typeMappings.GetOrCreate(bEntry.type, () => EntryType.GetMappedType(bEntry.type));
 
                 if (disableDynamicBinding)
                 {

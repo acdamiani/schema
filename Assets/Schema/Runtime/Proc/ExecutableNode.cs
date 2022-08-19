@@ -28,6 +28,9 @@ namespace Schema.Internal
 
         public ExecutableNode(Node node)
         {
+            if (node == null)
+                throw new ArgumentNullException("node", "Node cannot be null!");
+
             this.node = node;
 
             index = node.priority - 1;
@@ -180,6 +183,22 @@ namespace Schema.Internal
 
         private int DoRoot(ExecutionContext context)
         {
+            if (context.last != null)
+            {
+                if (!context.agent.restartWhenComplete)
+                {
+                    context.agent.Stop();
+                }
+                else
+                {
+                    if (context.agent.treePauseTime > 0f)
+                        context.agent.Pause(context.agent.treePauseTime);
+
+                    if (context.agent.resetBlackboardOnRestart)
+                        context.agent.tree.blackboard.Reset();
+                }
+            }
+
             context.status = NodeStatus.Success;
             return index + 1;
         }

@@ -95,7 +95,7 @@ namespace SchemaEditor
             }
         }
 
-        public static void DoDescriptionLabel(ICanvasContextProvider context, string description)
+        public static void DoDescriptionLabel(ICanvasContextProvider context, string description, GUIStyle style)
         {
             if (String.IsNullOrEmpty(description) || context == null)
                 return;
@@ -104,18 +104,18 @@ namespace SchemaEditor
 
             float availableWidth = contextRect.width - (Prefs.minimapEnabled && (Prefs.minimapPosition == 0 || Prefs.minimapPosition == 2) ? Prefs.minimapWidth : 0f) - 30f;
 
-            float width = Mathf.Min(Styles.description.CalcSize(new GUIContent(description)).x, availableWidth);
-            float height = Styles.description.CalcHeight(new GUIContent(description), width);
+            float width = Mathf.Min(style.CalcSize(new GUIContent(description)).x, availableWidth);
+            float height = style.CalcHeight(new GUIContent(description), width);
 
             switch (Prefs.minimapPosition)
             {
                 case 0:
                 case 1:
-                    GUI.Label(new Rect(contextRect.xMax - width - 10f, contextRect.yMax - height - 10f, width, height), description, Styles.description);
+                    GUI.Label(new Rect(contextRect.xMax - width - 10f, contextRect.yMax - height - 10f, width, height), description, style);
                     break;
                 case 2:
                 case 3:
-                    GUI.Label(new Rect(contextRect.x + 10f, contextRect.yMax - height - 10f, width, height), description, Styles.description);
+                    GUI.Label(new Rect(contextRect.x + 10f, contextRect.yMax - height - 10f, width, height), description, style);
                     break;
             }
         }

@@ -53,10 +53,14 @@ namespace SchemaEditor
             Undo.undoRedoPerformed += UndoPerformed;
 
             instance = this;
-            if (target != null && target.blackboard != null)
-                Blackboard.instance = target.blackboard;
 
-            target?.PurgeNull();
+            if (target != null)
+            {
+                if (target.blackboard != null)
+                    Blackboard.instance = target.blackboard;
+                target.PurgeNull();
+            }
+
         }
 
         private void OnDestroy()

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,11 +11,16 @@ namespace Schema.Internal
 
         public ExecutableTree(Graph graph)
         {
+            if (graph == null)
+                throw new ArgumentNullException("graph", "Graph cannot be null!");
+
             tree = graph;
             nodes = graph.nodes
                 .Select(x => new ExecutableNode(x))
                 .OrderBy(x => x.index)
                 .ToArray();
+            root = nodes
+                .FirstOrDefault(x => x.nodeType == ExecutableNode.ExecutableNodeType.Root);
             blackboard = new ExecutableBlackboard(graph.blackboard);
             context = new Dictionary<int, ExecutionContext>();
         }
@@ -22,6 +28,7 @@ namespace Schema.Internal
         public static ExecutableTree current { get; private set; }
 
         public Graph tree { get; }
+        public ExecutableNode root { get; }
         public ExecutableNode[] nodes { get; }
         public ExecutableBlackboard blackboard { get; }
 
@@ -65,7 +72,7 @@ namespace Schema.Internal
             ExecutionContext context = GetExecutionContext(agent);
             ExecutionContext.current = context;
 
-            if (context.node == null)
+            if (context.node == null || agent.paused || agent.stopped)
                 return;
 
             int t = 0;
@@ -87,7 +94,7 @@ namespace Schema.Internal
 
                     return;
                 }
-            } while (context.last != context.node);
+            } while (context.last != context.node && !(agent.paused || agent.stopped));
         }
     }
 }

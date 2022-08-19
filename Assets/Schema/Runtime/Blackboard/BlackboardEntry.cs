@@ -13,6 +13,7 @@ namespace Schema.Internal
         [SerializeField] private string m_typeString;
         [SerializeField] private Blackboard m_blackboard;
         private Type _type;
+        private string lastTypeString;
 
         /// <summary>
         ///     Description of this entry
@@ -31,8 +32,11 @@ namespace Schema.Internal
         {
             get
             {
-                if (_type == null)
+                if (_type == null || !lastTypeString.Equals(m_typeString))
+                {
                     _type = Type.GetType(m_typeString);
+                    lastTypeString = m_typeString;
+                }
 
                 return _type;
             }

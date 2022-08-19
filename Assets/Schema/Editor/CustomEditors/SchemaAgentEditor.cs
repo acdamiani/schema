@@ -12,6 +12,7 @@ namespace SchemaEditor.Editors
         private SerializedProperty restartWhenComplete;
         private SerializedProperty maxStepsPerTick;
         private SerializedProperty resetBlackboardOnRestart;
+        private SerializedProperty treePauseTime;
         [SerializeField] private bool optionsFoldout;
         void OnEnable()
         {
@@ -20,6 +21,7 @@ namespace SchemaEditor.Editors
             restartWhenComplete = serializedObject.FindProperty("m_restartWhenComplete");
             maxStepsPerTick = serializedObject.FindProperty("m_maxStepsPerTick");
             resetBlackboardOnRestart = serializedObject.FindProperty("m_resetBlackboardOnRestart");
+            treePauseTime = serializedObject.FindProperty("m_treePauseTime");
         }
         public override void OnInspectorGUI()
         {
@@ -44,7 +46,10 @@ namespace SchemaEditor.Editors
             {
                 EditorGUILayout.PropertyField(maxStepsPerTick);
                 EditorGUILayout.PropertyField(restartWhenComplete);
+                EditorGUI.BeginDisabledGroup(!restartWhenComplete.boolValue);
+                EditorGUILayout.PropertyField(treePauseTime);
                 EditorGUILayout.PropertyField(resetBlackboardOnRestart);
+                EditorGUI.EndDisabledGroup();
             }
 
             serializedObject.ApplyModifiedProperties();

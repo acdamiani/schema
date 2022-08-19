@@ -401,7 +401,7 @@ namespace SchemaEditor
                 {
                     _description = new GUIStyle();
                     _description.wordWrap = true;
-                    _description.fontSize = 12;
+                    _description.fontSize = 14;
                     _description.normal.textColor = Color.white;
                 }
 

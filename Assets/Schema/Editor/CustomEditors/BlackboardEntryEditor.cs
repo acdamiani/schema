@@ -41,7 +41,7 @@ namespace SchemaEditor
                 )
             ].AssemblyQualifiedName;
 
-            if (!newType.Equals(entry.typeString))
+            if (!newType.Equals(typeString.stringValue))
             {
                 typeString.stringValue = newType;
                 Blackboard.InvokeEntryTypeChanged(entry);

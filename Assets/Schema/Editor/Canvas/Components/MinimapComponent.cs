@@ -31,6 +31,21 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public override void OnGUI()
         {
+            if (canvas.selected.Length == 1)
+            {
+                GUIComponent selected = canvas.selected[0];
+
+                string text = "";
+
+                if (selected is NodeComponent)
+                    text = ((NodeComponent)selected).node.description;
+                else if (selected is ConditionalComponent)
+                    text = ((ConditionalComponent)selected).conditional.description;
+
+                if (!String.IsNullOrEmpty(text))
+                    SchemaGUI.DoDescriptionLabel(canvas.context, text, Styles.description);
+            }
+
             if (!Prefs.minimapEnabled)
                 return;
 
