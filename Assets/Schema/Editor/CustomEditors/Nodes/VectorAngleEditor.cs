@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(VectorAngle))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(VectorAngle)), CanEditMultipleObjects]
     public class VectorAngleEditor : Editor
     {
         private SerializedProperty a;

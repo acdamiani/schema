@@ -2,9 +2,7 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform")]
     public class GetScale : Action
     {
         public ComponentSelector<Transform> transform;

@@ -2,16 +2,13 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Math")]
-    [LightIcon("Nodes/Math")]
-    [Category("Math")]
-    [Description("Get the tangent of an angle")]
+    [DarkIcon("Nodes/d_Math"), LightIcon("Nodes/Math"), Category("Math"), Description("Get the tangent of an angle")]
     public class Tan : Action
     {
         [Tooltip("Input for the tangent function")]
         public BlackboardEntrySelector<float> value;
 
-        [Tooltip("Selector to store the tangent in")] [WriteOnly]
+        [Tooltip("Selector to store the tangent in"), WriteOnly] 
         public BlackboardEntrySelector<float> result;
 
         [Tooltip("Input is degrees instead of radians")]

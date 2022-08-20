@@ -4,10 +4,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_BoxCollider Icon", true)]
-    [LightIcon("BoxCollider Icon", true)]
-    [Category("Physics")]
-    [Description("Gets colliders hit by a box positioned in the world")]
+    [DarkIcon("d_BoxCollider Icon", true), LightIcon("BoxCollider Icon", true), Category("Physics"),
+     Description("Gets colliders hit by a box positioned in the world")]
     public class OverlapBox : Action
     {
         [Tooltip("Center of the box")] public BlackboardEntrySelector<Vector3> center;
@@ -23,9 +21,9 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Specifies whether this query should hit triggers")]
         public QueryTriggerInteraction queryTriggerInteraction;
 
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit GameObject")]
-        [WriteOnly]
-        public BlackboardEntrySelector hit = new();
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit GameObject"),
+         WriteOnly]
+        public BlackboardEntrySelector hit = new BlackboardEntrySelector();
 
         protected override void OnObjectEnable()
         {

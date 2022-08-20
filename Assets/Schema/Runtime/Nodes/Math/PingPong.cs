@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Math")]
-    [LightIcon("Nodes/Math")]
-    [Category("Math")]
-    [Description("Get a value that will increment and decrement between the value 0 and length based on t")]
+    [DarkIcon("Nodes/d_Math"), LightIcon("Nodes/Math"), Category("Math"),
+     Description("Get a value that will increment and decrement between the value 0 and length based on t")]
     public class PingPong : Action
     {
         [Tooltip("T value for PingPong function")]
@@ -13,7 +11,7 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("Length of the PingPong")] public BlackboardEntrySelector<float> length;
 
-        [Tooltip("Sampled perlin value")] [WriteOnly]
+        [Tooltip("Sampled perlin value"), WriteOnly] 
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

@@ -1,8 +1,6 @@
 namespace Schema.Builtin.Modifiers
 {
-    [AllowOne]
-    [DisableIfTypes(typeof(LoopForever), typeof(Loop))]
-    [DarkIcon("Modifiers/LoopUntil")]
+    [AllowOne, DisableIfTypes(typeof(LoopForever), typeof(Loop)), DarkIcon("Modifiers/LoopUntil")]
     public class LoopUntil : Modifier
     {
         public enum ForcedStatus

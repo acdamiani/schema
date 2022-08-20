@@ -5,9 +5,7 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Debug")]
-    [LightIcon("Nodes/Debug")]
-    [Description("Logs a formatted message to the console.")]
+    [DarkIcon("Nodes/d_Debug"), LightIcon("Nodes/Debug"), Description("Logs a formatted message to the console.")]
     public class DebugLogFormat : Action
     {
         [TextArea] public string message;

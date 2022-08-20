@@ -3,8 +3,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(QuaternionAngleAxis))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(QuaternionAngleAxis)), CanEditMultipleObjects]
     public class QuaternionAngleAxisEditor : Editor
     {
         private SerializedProperty a;

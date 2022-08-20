@@ -42,7 +42,7 @@ namespace Schema.Internal
         {
             return blackboardTypes.Select(x => EntryType.GetMappedType(x)).ToArray();
         }
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public static Blackboard instance;
         public static Blackboard global => _global == null ? _global = LoadGlobal() : _global;
         private static Blackboard _global;
@@ -53,8 +53,8 @@ namespace Schema.Internal
 
         public static event EntryListChangedCallback entryListChanged;
         public static event EntryTypeChangedCallback entryTypeChanged;
-#endif
-#if UNITY_EDITOR
+        #endif
+        #if UNITY_EDITOR
         public int GetTypeMask(IEnumerable<string> filters)
         {
             List<Type> typeArray = filters.Select(s => Type.GetType(s)).ToList();
@@ -79,7 +79,7 @@ namespace Schema.Internal
             {
                 loaded = CreateInstance<Blackboard>();
 
-                DirectoryInfo res = new(Path.Join(Application.dataPath, "Resources"));
+                DirectoryInfo res = new DirectoryInfo(Path.Combine(Application.dataPath, "Resources"));
                 res.Create();
 
                 AssetDatabase.CreateAsset(loaded, "Assets/Resources/GlobalBlackboard.asset");
@@ -168,6 +168,6 @@ namespace Schema.Internal
         {
             entryTypeChanged?.Invoke(entry);
         }
-#endif
+        #endif
     }
 }

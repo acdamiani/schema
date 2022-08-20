@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
-    [Description("Transform a given position from local to world space")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform"),
+     Description("Transform a given position from local to world space")]
     public class TransformPoint : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;

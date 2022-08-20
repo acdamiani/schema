@@ -3,8 +3,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetScale))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(GetScale)), CanEditMultipleObjects]
     public class GetScaleEditor : Editor
     {
         private SerializedProperty gameObjectKey;

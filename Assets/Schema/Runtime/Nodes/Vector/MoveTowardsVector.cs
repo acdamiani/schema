@@ -2,24 +2,22 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Description(
-        "Calculate a position between the points specified by current and target, moving no farther than the distance specified by maxDistanceDelta.")]
-    [Category("Vector")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Description(
+         "Calculate a position between the points specified by current and target, moving no farther than the distance specified by maxDistanceDelta."),
+     Category("Vector")]
     public class MoveTowardsVector : Action
     {
         [Tooltip("The position to move from.")]
-        public BlackboardEntrySelector vectorOne = new();
+        public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
 
         [Tooltip("The position to move towards.")]
-        public BlackboardEntrySelector vectorTwo = new();
+        public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
 
         [Tooltip("Distance to move current per call.")]
         public BlackboardEntrySelector<float> maxDistanceDelta;
 
-        [Tooltip("Blackboard variable to store the new position vector in")] [WriteOnly]
-        public BlackboardEntrySelector newPosition = new();
+        [Tooltip("Blackboard variable to store the new position vector in"), WriteOnly] 
+        public BlackboardEntrySelector newPosition = new BlackboardEntrySelector();
 
         private void OnValidate()
         {

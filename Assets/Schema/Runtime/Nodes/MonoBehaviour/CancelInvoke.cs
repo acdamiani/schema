@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_cs Script Icon", true)]
-    [LightIcon("cs Script Icon", true)]
-    [Category("MonoBehaviour")]
-    [Description("Cancel all invokes on a MonoBehavior, or an invoke for a specified method")]
+    [DarkIcon("d_cs Script Icon", true), LightIcon("cs Script Icon", true), Category("MonoBehaviour"),
+     Description("Cancel all invokes on a MonoBehavior, or an invoke for a specified method")]
     public class CancelInvoke : Action
     {
         [Tooltip("MonoBehaviour to stop methods on")]

@@ -2,9 +2,7 @@
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform")]
     public class RotateAway : Action
     {
         public ComponentSelector<Transform> transform;

@@ -202,7 +202,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public override string GetDebugInfo()
         {
-            StringBuilder sb = new();
+            StringBuilder sb = new StringBuilder();
 
             sb.AppendLine(string.Format("<b>From:</b> {0}", from?.node.name));
             sb.AppendLine(string.Format("<b>To:</b> {0}", to?.node.name));

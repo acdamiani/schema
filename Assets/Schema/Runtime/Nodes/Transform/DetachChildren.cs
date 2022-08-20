@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
-    [Description("Unparent all children of a Transform")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform"),
+     Description("Unparent all children of a Transform")]
     public class DetachChildren : Action
     {
         [Tooltip("Transform to detach from children")]

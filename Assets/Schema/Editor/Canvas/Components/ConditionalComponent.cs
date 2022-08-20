@@ -127,7 +127,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             Vector2 contentSize = Styles.conditional.CalcSize(content);
             contentSize.x += icon != null ? 20f : 0f;
 
-            Vector2 pos = new(parent.layout.body.center.x - contentSize.x / 2f,
+            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f,
                 parent.layout.body.y - (height + 18f) * upCount);
 
             return new Rect(pos.x, pos.y, contentSize.x, height);
@@ -216,14 +216,14 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             Vector2 contentSize = Styles.conditional.CalcSize(content);
             contentSize.x += icon != null ? 20f : 0f;
 
-            Vector2 pos = new(parent.layout.body.center.x - contentSize.x / 2f,
+            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f,
                 parent.layout.body.y - (height + 18f) * upCount);
 
             _rect = new Rect(pos.x, pos.y, contentSize.x, height);
 
             GUI.color = Styles.windowBackground;
 
-            Rect decorator_out = new(_rect.center.x - 24f, _rect.yMax, 48f, 18f);
+            Rect decorator_out = new Rect(_rect.center.x - 24f, _rect.yMax, 48f, 18f);
 
             GUI.DrawTexture(decorator_out, Icons.GetResource("decorator_out", false));
             GUI.DrawTextureWithTexCoords(

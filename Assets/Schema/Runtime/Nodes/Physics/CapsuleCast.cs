@@ -4,10 +4,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_CapsuleCollider Icon", true)]
-    [LightIcon("CapsuleCollider Icon", true)]
-    [Category("Physics")]
-    [Description("Casts a capsule along a ray and returns detailed information on what was hit")]
+    [DarkIcon("d_CapsuleCollider Icon", true), LightIcon("CapsuleCollider Icon", true), Category("Physics"),
+     Description("Casts a capsule along a ray and returns detailed information on what was hit")]
     public class CapsuleCast : Action
     {
         [Tooltip("The center of the sphere at the beginning of the capsule")]
@@ -21,7 +19,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Direction in which to cast the capsule")]
         public BlackboardEntrySelector<Vector3> direction;
 
-        [Tooltip("Max length of the cast")] public BlackboardEntrySelector<float> maxDistance = new(Mathf.Infinity);
+        [Tooltip("Max length of the cast")] public BlackboardEntrySelector<float> maxDistance =
+            new BlackboardEntrySelector<float>(Mathf.Infinity);
 
         [Tooltip("Layer mask to use when casting the box")]
         public LayerMask layerMask;
@@ -29,8 +28,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Specifies whether this query should hit triggers")]
         public QueryTriggerInteraction queryTriggerInteraction;
 
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects")] [WriteOnly]
-        public BlackboardEntrySelector hit = new();
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects"), WriteOnly]
+        public BlackboardEntrySelector hit = new BlackboardEntrySelector();
 
         protected override void OnObjectEnable()
         {

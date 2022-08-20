@@ -29,10 +29,10 @@ namespace Schema
             Both
         }
 
-        [SerializeField] [HideInInspector] private Node m_node;
-        [SerializeField] [HideInInspector] private AbortsType m_abortsType;
-        [SerializeField] [HideInInspector] private AbortsWhen m_abortsWhen;
-        [SerializeField] [HideInInspector] private bool m_invert;
+        [SerializeField, HideInInspector]  private Node m_node;
+        [SerializeField, HideInInspector]  private AbortsType m_abortsType;
+        [SerializeField, HideInInspector]  private AbortsWhen m_abortsWhen;
+        [SerializeField, HideInInspector]  private bool m_invert;
 
         /// <summary>
         ///     Node that this conditional is attached to
@@ -95,7 +95,7 @@ namespace Schema
         {
             return new GUIContent(name);
         }
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public static Conditional Instantiate(Conditional conditional)
         {
             Conditional copy = ScriptableObject.Instantiate(conditional);
@@ -106,6 +106,6 @@ namespace Schema
 
             return copy;
         }
-#endif
+        #endif
     }
 }

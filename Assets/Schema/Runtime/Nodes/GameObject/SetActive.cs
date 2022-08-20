@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_GameObject Icon", true)]
-    [LightIcon("GameObject Icon", true)]
-    [Category("GameObject")]
-    [Description("Set a GameObject's active state based on a boolean value")]
+    [DarkIcon("d_GameObject Icon", true), LightIcon("GameObject Icon", true), Category("GameObject"),
+     Description("Set a GameObject's active state based on a boolean value")]
     public class SetActive : Action
     {
         [Tooltip("GameObject to set active state")]

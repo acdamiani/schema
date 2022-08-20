@@ -10,7 +10,7 @@ namespace SchemaEditor
     [CustomEditor(typeof(BlackboardEntry))]
     public class BlackboardEntryEditor : Editor
     {
-        private readonly List<Type> possibleTypes = new();
+        private readonly List<Type> possibleTypes = new List<Type>();
         private SerializedProperty description;
         private SerializedProperty entryName;
         private SerializedProperty typeString;

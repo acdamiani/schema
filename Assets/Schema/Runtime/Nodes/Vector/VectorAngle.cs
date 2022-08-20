@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Vector")]
-    [Description("Get the angle between two vectors A and B")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Vector"),
+     Description("Get the angle between two vectors A and B")]
     public class VectorAngle : Action
     {
         public enum Dir
@@ -18,9 +16,9 @@ namespace Schema.Builtin.Nodes
             Backward
         }
 
-        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new();
+        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
 
-        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new();
+        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
 
         [Tooltip("Whether to get the signed angle")]
         public bool signed;
@@ -33,7 +31,7 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("Use a custom axis")] public bool overrideAxis;
 
-        [Tooltip("Blackboard variable to store the angle between the vectors")] [WriteOnly]
+        [Tooltip("Blackboard variable to store the angle between the vectors"), WriteOnly] 
         public BlackboardEntrySelector<float> angle;
 
         protected override void OnObjectEnable()

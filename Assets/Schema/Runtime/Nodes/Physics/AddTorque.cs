@@ -2,10 +2,8 @@
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Rigidbody Icon", true)]
-    [LightIcon("Rigidbody Icon", true)]
-    [Description("Add a torque to a rigidbody")]
-    [Category("Physics")]
+    [DarkIcon("d_Rigidbody Icon", true), LightIcon("Rigidbody Icon", true), Description("Add a torque to a rigidbody"),
+     Category("Physics")]
     public class AddTorque : Action
     {
         public ComponentSelector<Rigidbody> rigidbody;

@@ -2,16 +2,14 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Math")]
-    [LightIcon("Nodes/Math")]
-    [Category("Math")]
-    [Description("Get the arctangent of a ratio y/x")]
+    [DarkIcon("Nodes/d_Math"), LightIcon("Nodes/Math"), Category("Math"),
+     Description("Get the arctangent of a ratio y/x")]
     public class Atan2 : Action
     {
         [Tooltip("Numerator of the ratio")] public BlackboardEntrySelector<float> y;
         [Tooltip("Denominator of the ratio")] public BlackboardEntrySelector<float> x;
 
-        [Tooltip("Selector to store the arctangent in")] [WriteOnly]
+        [Tooltip("Selector to store the arctangent in"), WriteOnly] 
         public BlackboardEntrySelector<float> result;
 
         [Tooltip("Return degrees instead of radians")]

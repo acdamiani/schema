@@ -34,17 +34,17 @@ namespace Schema.Utilities
             string className = Path.GetFileNameWithoutExtension(pathName).Replace(" ", string.Empty);
             string templateText = string.Empty;
 
-            UTF8Encoding encoding = new(true, false);
+            UTF8Encoding encoding = new UTF8Encoding(true, false);
 
             if (File.Exists(templatePath))
             {
-                StreamReader reader = new(templatePath);
+                StreamReader reader = new StreamReader(templatePath);
                 templateText = reader.ReadToEnd();
                 reader.Close();
 
                 templateText = templateText.Replace("#SCRIPTNAME#", className);
 
-                StreamWriter writer = new(Path.GetFullPath(pathName), false, encoding);
+                StreamWriter writer = new StreamWriter(Path.GetFullPath(pathName), false, encoding);
                 writer.Write(templateText);
                 writer.Close();
 

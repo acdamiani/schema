@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
-    [DarkIcon("Conditionals/d_Compare")]
-    [LightIcon("Conditionals/Compare")]
+    [DarkIcon("Conditionals/d_Compare"), LightIcon("Conditionals/Compare")]
     public class CompareTo : Conditional
     {
         public enum ComparisonType
@@ -46,7 +45,7 @@ namespace Schema.Builtin.Conditionals
 
         public override GUIContent GetConditionalContent()
         {
-            StringBuilder sb = new();
+            StringBuilder sb = new StringBuilder();
 
             sb.AppendFormat("If <color=red>{0}</color> is ", valueOne.name);
 

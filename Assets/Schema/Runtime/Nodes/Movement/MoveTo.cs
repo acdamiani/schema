@@ -3,9 +3,7 @@ using UnityEngine.AI;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Movement")]
-    [LightIcon("Light/Movement")]
-    [Category("Movement")]
+    [DarkIcon("Nodes/d_Movement"), LightIcon("Light/Movement"), Category("Movement")]
     public class MoveTo : Action
     {
         [Tooltip("The agent to move")] public ComponentSelector<NavMeshAgent> navMeshAgent;

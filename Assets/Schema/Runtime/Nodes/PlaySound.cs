@@ -2,8 +2,7 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Sound")]
-    [LightIcon("Nodes/Sound")]
+    [DarkIcon("Nodes/d_Sound"), LightIcon("Nodes/Sound")]
     public class PlaySound : Action
     {
         public ComponentSelector<AudioSource> audioSource;
@@ -14,7 +13,7 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("The clip to play")] public AudioClip clip;
 
-        [Tooltip("The volume to play the clip at")] [Range(0f, 1f)]
+        [Tooltip("The volume to play the clip at"), Range(0f, 1f)] 
         public float volume = 1f;
 
         public bool waitForCompletion;

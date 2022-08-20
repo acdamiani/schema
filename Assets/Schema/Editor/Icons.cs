@@ -7,9 +7,9 @@ namespace SchemaEditor
 {
     public static class Icons
     {
-        private static readonly Dictionary<string, Texture2D> editorCache = new();
+        private static readonly Dictionary<string, Texture2D> editorCache = new Dictionary<string, Texture2D>();
 
-        private static readonly Dictionary<string, Texture2D> resourceCache = new();
+        private static readonly Dictionary<string, Texture2D> resourceCache = new Dictionary<string, Texture2D>();
         private static Texture2D _gridTexture;
 
         private static Texture2D _gridTexture2x;
@@ -44,7 +44,7 @@ namespace SchemaEditor
             if (doPrefix)
                 file = (EditorGUIUtility.isProSkin ? "d_" : "") + file;
 
-            iconName = Path.Join(Path.GetDirectoryName(iconName), file);
+            iconName = Path.Combine(Path.GetDirectoryName(iconName), file);
 
             resourceCache.TryGetValue(iconName, out Texture2D value);
 
@@ -56,7 +56,7 @@ namespace SchemaEditor
 
         private static Texture2D GenerateGridTexture(Color dots, Color bg, bool large)
         {
-            Texture2D tex = new(64, 64);
+            Texture2D tex = new Texture2D(64, 64);
             Color[] cols = new Color[64 * 64];
             for (int y = 0; y < 64; y++)
             for (int x = 0; x < 64; x++)

@@ -2,14 +2,12 @@
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform")]
     public class GetPosition : Action
     {
         public ComponentSelector<Transform> transform;
 
-        [WriteOnly] [Tooltip("Key to store position in")]
+        [WriteOnly, Tooltip("Key to store position in")] 
         public BlackboardEntrySelector<Vector3> positionKey;
 
         [Tooltip("When toggled, will use local position (relative to parent) instead of world position")]

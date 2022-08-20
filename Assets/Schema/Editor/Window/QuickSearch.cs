@@ -14,23 +14,29 @@ using Action = System.Action;
 
 public class QuickSearch : IWindowComponentProvider
 {
-    private readonly CacheDictionary<Type, string> categories = new();
+    private readonly CacheDictionary<Type, string> categories = new CacheDictionary<Type, string>();
     private readonly Action<Type> createNodeAction;
     private readonly List<string> favorites = Prefs.GetList("SCHEMA_PREF__favorites").ToList();
-    private readonly CacheDictionary<Type, Texture2D> icons = new();
-    private readonly CacheDictionary<string, IEnumerable<Type>> search = new();
+    private readonly CacheDictionary<Type, Texture2D> icons = new CacheDictionary<Type, Texture2D>();
+
+    private readonly CacheDictionary<string, IEnumerable<Type>> search =
+        new CacheDictionary<string, IEnumerable<Type>>();
+
     private readonly SearchField searchField;
     private readonly IEnumerable<Type> types;
     private readonly KeyCode[] validMovementCodes = { KeyCode.UpArrow, KeyCode.DownArrow };
     private bool close;
-    private CacheDictionary<Type, string> descriptions = new();
+    private CacheDictionary<Type, string> descriptions = new CacheDictionary<Type, string>();
     private Vector2 mouseOverPosition;
     private Rect rect;
     private int refinementLength;
     private Vector2 scroll;
-    private CacheDictionary<string, IEnumerable<Type>> searchedFavorites = new();
     private bool searchFavorites;
     private string searchText = "";
+
+    private CacheDictionary<string, IEnumerable<Type>> searchedFavorites =
+        new CacheDictionary<string, IEnumerable<Type>>();
+
     private int selected;
     private float toolbarHeight;
 
@@ -183,7 +189,7 @@ public class QuickSearch : IWindowComponentProvider
             category += " \u25B8";
         }
 
-        GUIContent content = new(category);
+        GUIContent content = new GUIContent(category);
 
         rect.width = EditorStyles.label.CalcSize(content).x;
 
@@ -220,7 +226,7 @@ public class QuickSearch : IWindowComponentProvider
                 continue;
 
             Texture2D icon = icons.GetOrCreate(nodeType, () => GraphObject.GetIcon(nodeType));
-            GUIContent content = new(nodeType.Name, icon);
+            GUIContent content = new GUIContent(nodeType.Name, icon);
 
             DoSingleResult(
                 nodeType,
@@ -305,7 +311,7 @@ public class QuickSearch : IWindowComponentProvider
         query = query.ToLower();
         string[] queries = query.Split(' ').Where(s => s != "").ToArray();
 
-        List<Type> ret = new();
+        List<Type> ret = new List<Type>();
 
         foreach (Type ty in types)
         foreach (string q in queries)

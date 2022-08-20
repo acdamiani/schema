@@ -2,9 +2,7 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Animator Icon", true)]
-    [LightIcon("Animator Icon", true)]
-    [Category("Animator")]
+    [DarkIcon("d_Animator Icon", true), LightIcon("Animator Icon", true), Category("Animator")]
     public class PlayAnimation : Action
     {
         public ComponentSelector<Animator> animator;

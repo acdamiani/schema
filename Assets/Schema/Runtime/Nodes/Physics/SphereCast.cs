@@ -4,10 +4,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_SphereCollider Icon", true)]
-    [LightIcon("SphereCollider Icon", true)]
-    [Category("Physics")]
-    [Description("Casts a sphere along a ray and returns detailed information on what was hit")]
+    [DarkIcon("d_SphereCollider Icon", true), LightIcon("SphereCollider Icon", true), Category("Physics"),
+     Description("Casts a sphere along a ray and returns detailed information on what was hit")]
     public class SphereCast : Action
     {
         [Tooltip("Origin of the sphere")] public BlackboardEntrySelector<Vector3> origin;
@@ -16,7 +14,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Direction in which to cast the sphere")]
         public BlackboardEntrySelector<Vector3> direction;
 
-        [Tooltip("Max length of the cast")] public BlackboardEntrySelector<float> maxDistance = new(Mathf.Infinity);
+        [Tooltip("Max length of the cast")] public BlackboardEntrySelector<float> maxDistance =
+            new BlackboardEntrySelector<float>(Mathf.Infinity);
 
         [Tooltip("Layer mask to use when casting the box")]
         public LayerMask layerMask;
@@ -24,8 +23,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Specifies whether this query should hit triggers")]
         public QueryTriggerInteraction queryTriggerInteraction;
 
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object")] [WriteOnly]
-        public BlackboardEntrySelector hit = new();
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object"), WriteOnly] 
+        public BlackboardEntrySelector hit = new BlackboardEntrySelector();
 
         protected override void OnObjectEnable()
         {

@@ -81,7 +81,7 @@ namespace Schema.Utilities
             Vector2 j = (f + g) / 2f;
             Vector2 k = (h + j) / 2f;
 
-            Bezier next = new(k, j, g, p3, this.next);
+            Bezier next = new Bezier(k, j, g, p3, this.next);
 
             p1 = e;
             p2 = h;
@@ -103,7 +103,7 @@ namespace Schema.Utilities
             if (rect.Contains(p0) || rect.Contains(p3))
                 return true;
 
-            Bezier bezier = new(p0, p1, p2, p3);
+            Bezier bezier = new Bezier(p0, p1, p2, p3);
             bezier.Split();
 
             return bezier.Intersect(rect) || bezier.next.Intersect(rect);

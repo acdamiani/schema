@@ -1,7 +1,6 @@
 namespace Schema.Builtin.Nodes
 {
-    [Description("Immediately returns success")]
-    [Category("Miscellaneous")]
+    [Description("Immediately returns success"), Category("Miscellaneous")]
     public class EmptyAction : Action
     {
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

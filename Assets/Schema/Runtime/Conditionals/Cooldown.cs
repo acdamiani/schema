@@ -3,9 +3,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
-    [DarkIcon("Conditionals/d_Cooldown")]
-    [LightIcon("Conditionals/Cooldown")]
-    [Description("Disable running a node until it a time period has been elapsed since its last run")]
+    [DarkIcon("Conditionals/d_Cooldown"), LightIcon("Conditionals/Cooldown"),
+     Description("Disable running a node until it a time period has been elapsed since its last run")]
     public class Cooldown : Conditional
     {
         [Tooltip("Time until the node can be run after already being run")]
@@ -26,7 +25,7 @@ namespace Schema.Builtin.Conditionals
 
         public override GUIContent GetConditionalContent()
         {
-            StringBuilder sb = new();
+            StringBuilder sb = new StringBuilder();
 
             sb.Append("Cooldown for ");
 

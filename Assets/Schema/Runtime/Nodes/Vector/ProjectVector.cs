@@ -2,18 +2,16 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Vector")]
-    [Description("Projects a vector onto another vector")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Vector"),
+     Description("Projects a vector onto another vector")]
     public class ProjectVector : Action
     {
-        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new();
+        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
 
-        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new();
+        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
 
-        [Tooltip("Blackboard variable to store the new projected vector in")] [WriteOnly]
-        public BlackboardEntrySelector projected = new();
+        [Tooltip("Blackboard variable to store the new projected vector in"), WriteOnly] 
+        public BlackboardEntrySelector projected = new BlackboardEntrySelector();
 
         private void OnValidate()
         {

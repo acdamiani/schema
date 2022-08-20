@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors
 {
-    [CustomEditor(typeof(Raycast))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(Raycast)), CanEditMultipleObjects]
     public class RaycastEditor : Editor
     {
         private SerializedProperty direction;

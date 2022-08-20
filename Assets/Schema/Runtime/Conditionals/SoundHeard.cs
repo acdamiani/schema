@@ -4,9 +4,8 @@ using UnityEngine;
 namespace Schema.Builtin.Conditionals
 {
     [Description(
-        "Checks for playing AudioSources within a sphere. Note that these objects require a collider to be detected")]
-    [DarkIcon("Conditionals/d_SoundHeard")]
-    [LightIcon("Conditionals/SoundHeard")]
+         "Checks for playing AudioSources within a sphere. Note that these objects require a collider to be detected"),
+     DarkIcon("Conditionals/d_SoundHeard"), LightIcon("Conditionals/SoundHeard")]
     public class SoundHeard : Conditional
     {
         [Tooltip("Radius of the sphere that is registered as \"hearing\" a noise")]
@@ -16,8 +15,8 @@ namespace Schema.Builtin.Conditionals
         public TagFilter tagFilter;
 
         [Tooltip(
-            "The entry to store the first heard GameObject to. When multiple audio sources are detected, it will store the closest one.")]
-        [WriteOnly]
+             "The entry to store the first heard GameObject to. When multiple audio sources are detected, it will store the closest one."),
+         WriteOnly]
         public BlackboardEntrySelector<GameObject> heard;
 
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
@@ -25,7 +24,7 @@ namespace Schema.Builtin.Conditionals
             Collider[] colliders =
                 Physics.OverlapSphere(agent.transform.position, radius, -1, QueryTriggerInteraction.UseGlobal);
 
-            Tuple<AudioSource, float> closest = new(null, float.MaxValue);
+            Tuple<AudioSource, float> closest = new Tuple<AudioSource, float>(null, float.MaxValue);
 
             foreach (Collider c in colliders)
             {

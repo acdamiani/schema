@@ -2,16 +2,14 @@
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Description("Normalize a Vector")]
-    [Category("Vector")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Description("Normalize a Vector"),
+     Category("Vector")]
     public class NormalizeVector : Action
     {
-        [Tooltip("Vector to normalize")] public BlackboardEntrySelector vector = new();
+        [Tooltip("Vector to normalize")] public BlackboardEntrySelector vector = new BlackboardEntrySelector();
 
-        [Tooltip("Blackboard variable to store the normalized vector in")] [WriteOnly]
-        public BlackboardEntrySelector normalized = new();
+        [Tooltip("Blackboard variable to store the normalized vector in"), WriteOnly] 
+        public BlackboardEntrySelector normalized = new BlackboardEntrySelector();
 
         private void OnValidate()
         {

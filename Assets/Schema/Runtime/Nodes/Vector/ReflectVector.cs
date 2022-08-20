@@ -2,18 +2,16 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Description("Reflects a vector off another vector")]
-    [Category("Vector")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true),
+     Description("Reflects a vector off another vector"), Category("Vector")]
     public class ReflectVector : Action
     {
-        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new();
+        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
 
-        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new();
+        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
 
-        [Tooltip("Blackboard variable to store the new reflected vector in")] [WriteOnly]
-        public BlackboardEntrySelector reflected = new();
+        [Tooltip("Blackboard variable to store the new reflected vector in"), WriteOnly] 
+        public BlackboardEntrySelector reflected = new BlackboardEntrySelector();
 
         private void OnValidate()
         {

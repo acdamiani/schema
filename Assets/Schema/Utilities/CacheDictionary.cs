@@ -5,7 +5,7 @@ namespace Schema.Utilities
 {
     public class CacheDictionary<T1, T2>
     {
-        private readonly Dictionary<T1, T2> dict = new();
+        private readonly Dictionary<T1, T2> dict = new Dictionary<T1, T2>();
 
         public T2 GetOrCreate(T1 key, Func<T2> @default)
         {

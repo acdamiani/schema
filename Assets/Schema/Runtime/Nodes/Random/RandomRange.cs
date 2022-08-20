@@ -4,25 +4,22 @@ using Random = UnityEngine.Random;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_random")]
-    [LightIcon("random")]
-    [Category("Random")]
-    [Description("Get a random value in a range")]
+    [DarkIcon("d_random"), LightIcon("random"), Category("Random"), Description("Get a random value in a range")]
     public class RandomRange : Action
     {
-        public BlackboardEntrySelector target = new();
+        public BlackboardEntrySelector target = new BlackboardEntrySelector();
 
         [Tooltip("Mimimum allowed value for the range (inclusive)")]
         public BlackboardEntrySelector<float> floatMin;
 
         [Tooltip("Maximum allowed value for the range (inclusive)")]
-        public BlackboardEntrySelector<float> floatMax = new(1f);
+        public BlackboardEntrySelector<float> floatMax = new BlackboardEntrySelector<float>(1f);
 
         [Tooltip("Mimimum allowed value for the range (inclusive)")]
         public BlackboardEntrySelector<int> intMin;
 
         [Tooltip("Maximum allowed value for the range (inclusive)")]
-        public BlackboardEntrySelector<int> intMax = new(1);
+        public BlackboardEntrySelector<int> intMax = new BlackboardEntrySelector<int>(1);
 
         protected override void OnObjectEnable()
         {

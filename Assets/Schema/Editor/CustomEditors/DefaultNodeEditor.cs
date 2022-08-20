@@ -9,13 +9,15 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors
 {
-    [CustomEditor(typeof(Node))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(Node)), CanEditMultipleObjects]
     public class DefaultNodeEditor : Editor
     {
-        private readonly CacheDictionary<Type, bool> allowedOne = new();
-        private readonly CacheDictionary<Type, IEnumerable<Type>> disabled = new();
-        private readonly CacheDictionary<Type, Texture2D> icons = new();
+        private readonly CacheDictionary<Type, bool> allowedOne = new CacheDictionary<Type, bool>();
+
+        private readonly CacheDictionary<Type, IEnumerable<Type>> disabled =
+            new CacheDictionary<Type, IEnumerable<Type>>();
+
+        private readonly CacheDictionary<Type, Texture2D> icons = new CacheDictionary<Type, Texture2D>();
         private SerializedProperty comment;
         private SerializedProperty enableStatusIndicator;
         private SerializedProperty modifiers;
@@ -55,7 +57,7 @@ namespace SchemaEditor.Editors
         {
             IEnumerable<Type> types = HelperMethods.GetEnumerableOfType(typeof(Modifier));
 
-            GenericMenu menu = new();
+            GenericMenu menu = new GenericMenu();
 
             foreach (Type t in types)
             {

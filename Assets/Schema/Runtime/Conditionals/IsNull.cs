@@ -4,11 +4,10 @@ using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
-    [DarkIcon("Conditionals/d_IsNull")]
-    [LightIcon("Conditionals/IsNull")]
+    [DarkIcon("Conditionals/d_IsNull"), LightIcon("Conditionals/IsNull")]
     public class IsNull : Conditional
     {
-        [Tooltip("Entry to check for null")] public BlackboardEntrySelector entry = new();
+        [Tooltip("Entry to check for null")] public BlackboardEntrySelector entry = new BlackboardEntrySelector();
 
         protected override void OnObjectEnable()
         {
@@ -39,7 +38,7 @@ namespace Schema.Builtin.Conditionals
 
         public override GUIContent GetConditionalContent()
         {
-            StringBuilder sb = new();
+            StringBuilder sb = new StringBuilder();
 
             if (entry.isDynamic)
                 sb.Append("If dynamic variable ");

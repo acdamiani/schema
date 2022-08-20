@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_SphereCollider Icon", true)]
-    [LightIcon("SphereCollider Icon", true)]
-    [Category("Physics")]
-    [Description("Gets the closest point on a specified collider to a position")]
+    [DarkIcon("d_SphereCollider Icon", true), LightIcon("SphereCollider Icon", true), Category("Physics"),
+     Description("Gets the closest point on a specified collider to a position")]
     public class ClosestPoint : Action
     {
         [Tooltip("The point that you want to find the closest location to")]
@@ -17,7 +15,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Position of the collider")] public BlackboardEntrySelector<Vector3> position;
         [Tooltip("Rotation of the collider")] public BlackboardEntrySelector<Quaternion> rotation;
 
-        [Tooltip("Where to store the closest point")] [WriteOnly]
+        [Tooltip("Where to store the closest point"), WriteOnly] 
         public BlackboardEntrySelector<Vector3> target;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

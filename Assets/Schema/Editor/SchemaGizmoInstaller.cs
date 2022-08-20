@@ -15,21 +15,21 @@ namespace SchemaEditor.Internal
             for (int i = 0; i < gizmosToImport.Length; i++)
             {
                 string gizmo = gizmosToImport[i];
-                string path = Path.Join(Application.dataPath, string.Format("Gizmos/Schema/{0}", gizmo));
+                string path = Path.Combine(Application.dataPath, string.Format("Gizmos/Schema/{0}", gizmo));
 
-                FileInfo file = new(path);
+                FileInfo file = new FileInfo(path);
 
                 if (file.Exists)
                     continue;
 
-                string resPath = Path.Join(Path.GetDirectoryName(gizmo), Path.GetFileNameWithoutExtension(gizmo));
+                string resPath = Path.Combine(Path.GetDirectoryName(gizmo), Path.GetFileNameWithoutExtension(gizmo));
 
                 Texture2D image = Resources.Load<Texture2D>(resPath);
 
                 if (image == null)
                     continue;
 
-                Directory.CreateDirectory(Path.Join(Application.dataPath, "Gizmos/Schema"));
+                Directory.CreateDirectory(Path.Combine(Application.dataPath, "Gizmos/Schema"));
 
                 string databasePath = string.Format("Assets/Gizmos/Schema/{0}", gizmo);
 

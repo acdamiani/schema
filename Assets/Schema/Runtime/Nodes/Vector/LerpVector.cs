@@ -2,23 +2,22 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Vector")]
-    [Description("Linearly interpolate between two Vectors")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Vector"),
+     Description("Linearly interpolate between two Vectors")]
     public class LerpVector : Action
     {
-        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new();
+        [Tooltip("Vector A")] public BlackboardEntrySelector vectorOne = new BlackboardEntrySelector();
 
-        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new();
+        [Tooltip("Vector B")] public BlackboardEntrySelector vectorTwo = new BlackboardEntrySelector();
 
-        [Tooltip("Amount to interpolate by")] public BlackboardEntrySelector<float> t = new();
+        [Tooltip("Amount to interpolate by")] public BlackboardEntrySelector<float> t =
+            new BlackboardEntrySelector<float>();
 
         [Tooltip("Whether to clamp the t value")]
         public bool unclamped;
 
-        [Tooltip("Blackboard variable to store the lerped vector in.")] [WriteOnly]
-        public BlackboardEntrySelector lerped = new();
+        [Tooltip("Blackboard variable to store the lerped vector in."), WriteOnly] 
+        public BlackboardEntrySelector lerped = new BlackboardEntrySelector();
 
         private void OnValidate()
         {

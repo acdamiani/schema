@@ -2,15 +2,13 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Description("Rotates a vector towards a target")]
-    [Category("Vector")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true),
+     Description("Rotates a vector towards a target"), Category("Vector")]
     public class RotateTowardsVector : Action
     {
-        [Tooltip("Current managed vector")] public BlackboardEntrySelector current = new();
+        [Tooltip("Current managed vector")] public BlackboardEntrySelector current = new BlackboardEntrySelector();
 
-        [Tooltip("Target vector")] public BlackboardEntrySelector target = new();
+        [Tooltip("Target vector")] public BlackboardEntrySelector target = new BlackboardEntrySelector();
 
         [Tooltip("The maximum angle in radians allowed for this rotation")]
         public BlackboardEntrySelector<float> maxRadiansDelta;
@@ -18,8 +16,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("The maximum allowed change in vector magnitude for this rotation")]
         public BlackboardEntrySelector<float> maxMagnitudeDelta;
 
-        [Tooltip("Blackboard variable to store the new rotated vector in")] [WriteOnly]
-        public BlackboardEntrySelector rotated = new();
+        [Tooltip("Blackboard variable to store the new rotated vector in"), WriteOnly] 
+        public BlackboardEntrySelector rotated = new BlackboardEntrySelector();
 
         private void OnValidate()
         {

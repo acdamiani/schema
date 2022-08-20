@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_cs Script Icon", true)]
-    [LightIcon("cs Script Icon", true)]
-    [Category("MonoBehaviour")]
-    [Description("Start a coroutine on a MonoBehavior with a single given argument")]
+    [DarkIcon("d_cs Script Icon", true), LightIcon("cs Script Icon", true), Category("MonoBehaviour"),
+     Description("Start a coroutine on a MonoBehavior with a single given argument")]
     public class StartCoroutine : Action
     {
         [Tooltip("MonoBehaviour to stop methods on")]

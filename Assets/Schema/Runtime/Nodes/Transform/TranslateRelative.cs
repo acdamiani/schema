@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
-    [Description("Moves a transform in the direction and distance of a translation, relative to another Transform")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform"),
+     Description("Moves a transform in the direction and distance of a translation, relative to another Transform")]
     public class TranslateRelative : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;

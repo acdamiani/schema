@@ -4,8 +4,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors
 {
-    [CustomEditor(typeof(Conditional))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(Conditional)), CanEditMultipleObjects]
     public class DefaultConditionalEditor : Editor
     {
         private SerializedProperty abortsType;

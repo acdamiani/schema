@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(ConeCheck))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(ConeCheck)), CanEditMultipleObjects]
     public class ConeCheckEditor : Editor
     {
         private SerializedProperty coneType;

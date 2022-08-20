@@ -9,7 +9,7 @@ using UnityEngine;
 
 public static class GraphUtility
 {
-    private static readonly Dictionary<string, float> mod = new();
+    private static readonly Dictionary<string, float> mod = new Dictionary<string, float>();
 
     public static void Arrange(IEnumerable<Node> nodes)
     {
@@ -103,10 +103,8 @@ public static class GraphUtility
         {
             if (node.children.Length > 0)
             {
-                Vector2 v = new(
-                    node.children[0].GetPosition().x + node.children[0].GetSize().x / 2f - nodeSize.x / 2f,
-                    0f
-                );
+                Vector2 v = new Vector2(
+                    node.children[0].GetPosition().x + node.children[0].GetSize().x / 2f - nodeSize.x / 2f, 0f);
                 node.SetPosition(v);
             }
             else
@@ -194,7 +192,7 @@ public static class GraphUtility
 
         int nodeIndex = Array.IndexOf(node.parent.children, node);
 
-        Dictionary<int, float> nodeContour = new();
+        Dictionary<int, float> nodeContour = new Dictionary<int, float>();
 
         float shift = 0f;
 
@@ -202,7 +200,7 @@ public static class GraphUtility
 
         for (int i = 0; i < nodeIndex; i++)
         {
-            Dictionary<int, float> childContour = new();
+            Dictionary<int, float> childContour = new Dictionary<int, float>();
             GetRightContour(node.parent.children[i], 0f, ref childContour);
 
             for (int level = node.GetParentCount() + 1;
@@ -229,7 +227,7 @@ public static class GraphUtility
 
     private static IEnumerable<Node> PreOrder(Node root)
     {
-        List<Node> ret = new();
+        List<Node> ret = new List<Node>();
 
         if (root.children.Length == 0)
         {

@@ -5,11 +5,12 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetVectorComponents))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(GetVectorComponents)), CanEditMultipleObjects]
     public class GetVectorComponentsEditor : Editor
     {
-        private readonly Dictionary<Object, GetVectorComponents> vectors = new();
+        private readonly Dictionary<Object, GetVectorComponents>
+            vectors = new Dictionary<Object, GetVectorComponents>();
+
         private SerializedProperty vector;
         private SerializedProperty w;
         private SerializedProperty x;

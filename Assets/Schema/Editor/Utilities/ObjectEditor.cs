@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class ObjectEditor
 {
-    private static readonly Dictionary<Object, Editor> editors = new();
+    private static readonly Dictionary<Object, Editor> editors = new Dictionary<Object, Editor>();
 
     public static void DoEditor(Object obj)
     {

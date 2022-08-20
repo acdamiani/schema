@@ -107,7 +107,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                 Vector2 size = node.layout.body.size / graphRect.width * viewWidth;
 
-                Rect nodeRect = new(position, size);
+                Rect nodeRect = new Rect(position, size);
 
                 Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.windowBackground,
                     node.IsSelected() ? Prefs.selectionColor : Color.black);
@@ -138,14 +138,14 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public Vector2 GridToMinimapPosition(Vector2 position)
         {
             position = (position - graphRect.position) / graphRect.size;
-            Vector2 sizeFac = new(viewWidth, graphRect.height / graphRect.width * viewWidth);
+            Vector2 sizeFac = new Vector2(viewWidth, graphRect.height / graphRect.width * viewWidth);
 
             return position * sizeFac;
         }
 
         public Vector2 MinimapToGridPosition(Vector2 position)
         {
-            Vector2 sizeFac = new(viewWidth, graphRect.height / graphRect.width * viewWidth);
+            Vector2 sizeFac = new Vector2(viewWidth, graphRect.height / graphRect.width * viewWidth);
             position = position / sizeFac;
 
             position *= graphRect.size;

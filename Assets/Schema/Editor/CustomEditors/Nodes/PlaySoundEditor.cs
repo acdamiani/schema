@@ -3,8 +3,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(PlaySound))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(PlaySound)), CanEditMultipleObjects]
     public class PlaySoundEditor : Editor
     {
         private SerializedProperty clip;

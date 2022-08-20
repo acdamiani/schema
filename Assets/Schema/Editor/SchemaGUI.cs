@@ -31,7 +31,7 @@ namespace SchemaEditor
         private static GUIContent[] MakeContents(string text, GUIStyle style, params Texture[] images)
         {
             MatchCollection matchCollection = Regex.Matches(text, @"{(\d+)}");
-            List<int> i = new();
+            List<int> i = new List<int>();
 
             foreach (Match match in matchCollection)
             {
@@ -47,7 +47,7 @@ namespace SchemaEditor
 
             for (int j = 0; j < info.Length; j++)
             {
-                GUIContent label = new();
+                GUIContent label = new GUIContent();
 
                 if (j % 2 == 0)
                     label.text = s[j / 2];

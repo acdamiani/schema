@@ -4,8 +4,7 @@ using Random = UnityEngine.Random;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Selector")]
-    [LightIcon("Nodes/Selector")]
+    [DarkIcon("Nodes/d_Selector"), LightIcon("Nodes/Selector")]
     public class SelectRandomWeighted : Flow
     {
         public SerializableDictionary<string, int> weights;

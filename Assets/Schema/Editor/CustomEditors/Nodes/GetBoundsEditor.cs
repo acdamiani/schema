@@ -3,8 +3,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetBounds))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(GetBounds)), CanEditMultipleObjects]
     public class GetBoundsEditor : Editor
     {
         private SerializedProperty boundsKey;

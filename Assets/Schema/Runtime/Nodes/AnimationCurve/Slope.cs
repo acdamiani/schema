@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [Description("Gets slope of line tangent to an Animation Curve at t")]
-    [DarkIcon("Nodes/d_AnimationCurve")]
-    [LightIcon("Nodes/AnimationCurve")]
-    [Category("Animation")]
+    [Description("Gets slope of line tangent to an Animation Curve at t"), DarkIcon("Nodes/d_AnimationCurve"),
+     LightIcon("Nodes/AnimationCurve"), Category("Animation")]
     public class Slope : Action
     {
         private const double h = 1e-7f;
@@ -16,7 +14,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("t value for this graph (horizontal axis)")]
         public BlackboardEntrySelector<float> t;
 
-        [Tooltip("Entry to store the result of this operation")] [WriteOnly]
+        [Tooltip("Entry to store the result of this operation"), WriteOnly] 
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

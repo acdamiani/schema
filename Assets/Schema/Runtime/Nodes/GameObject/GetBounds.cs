@@ -2,9 +2,7 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_MeshFilter Icon", true)]
-    [LightIcon("MeshFilter Icon", true)]
-    [Category("GameObject")]
+    [DarkIcon("d_MeshFilter Icon", true), LightIcon("MeshFilter Icon", true), Category("GameObject")]
     public class GetBounds : Action
     {
         [Tooltip("When toggled, will get the bounds of the current SchemaAgent")]

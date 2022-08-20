@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_GameObject Icon", true)]
-    [LightIcon("GameObject Icon", true)]
-    [Category("GameObject")]
-    [Description("Calls a named method on every MonoBehaviour in this game object.")]
+    [DarkIcon("d_GameObject Icon", true), LightIcon("GameObject Icon", true), Category("GameObject"),
+     Description("Calls a named method on every MonoBehaviour in this game object.")]
     public class SendMessage : Action
     {
         [Tooltip("GameObject to send the message to")]
@@ -14,7 +12,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Name of method to invoke")] public BlackboardEntrySelector<string> methodName;
 
         [Tooltip("Optional argument to pass to the method")]
-        public BlackboardEntrySelector param = new();
+        public BlackboardEntrySelector param = new BlackboardEntrySelector();
 
         [Tooltip("Should an error be raised if the method doesn't exist on the target object?")]
         public SendMessageOptions options;

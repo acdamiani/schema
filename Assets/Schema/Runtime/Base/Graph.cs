@@ -7,8 +7,7 @@ using UnityEngine;
 
 namespace Schema
 {
-    [CreateAssetMenu(menuName = "Schema/Behavior Tree", order = 84)]
-    [Serializable]
+    [CreateAssetMenu(menuName = "Schema/Behavior Tree", order = 84), Serializable]
     public class Graph : ScriptableObject
     {
         [SerializeField] private Root m_root;
@@ -50,7 +49,7 @@ namespace Schema
             get => m_pan;
             set => m_pan = value;
         }
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public void Initialize()
         {
             if (blackboard == null)
@@ -190,7 +189,7 @@ namespace Schema
                 groupIndex = Undo.GetCurrentGroup();
             }
 
-            List<Node> original = new(nodes);
+            List<Node> original = new List<Node>(nodes);
             List<Node> roots = original.FindAll(node =>
                 {
                     if (node.GetType() == typeof(Root))
@@ -206,7 +205,7 @@ namespace Schema
                 }
             );
 
-            List<Node> dupl = new();
+            List<Node> dupl = new List<Node>();
 
             foreach (Node root in roots)
                 dupl.AddRange(DuplicateRecursive(nodes, root, offset, undo).GetAllChildren());
@@ -365,6 +364,6 @@ namespace Schema
                 else
                     node.PurgeNull();
         }
-#endif
+        #endif
     }
 }

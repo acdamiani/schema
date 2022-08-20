@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
-    [Description("Rotate a Transform towards a target smoothly")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform"),
+     Description("Rotate a Transform towards a target smoothly")]
     public class LookAtSmooth : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;

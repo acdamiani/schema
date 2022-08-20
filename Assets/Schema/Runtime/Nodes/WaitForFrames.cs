@@ -2,13 +2,12 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Wait")]
-    [LightIcon("Nodes/Wait")]
-    [Description("Waits a given number of frames, then resumes execution of the Behavior Tree")]
+    [DarkIcon("Nodes/d_Wait"), LightIcon("Nodes/Wait"),
+     Description("Waits a given number of frames, then resumes execution of the Behavior Tree")]
     public class WaitForFrames : Action
     {
         [Tooltip("The number of frames to wait for")]
-        public BlackboardEntrySelector<int> count = new(1);
+        public BlackboardEntrySelector<int> count = new BlackboardEntrySelector<int>(1);
 
         private void OnValidate()
         {

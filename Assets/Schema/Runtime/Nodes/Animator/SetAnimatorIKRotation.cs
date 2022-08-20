@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Animator Icon", true)]
-    [LightIcon("Animator Icon", true)]
-    [Name("Set Animator IK Rotation")]
-    [Category("Animator")]
+    [DarkIcon("d_Animator Icon", true), LightIcon("Animator Icon", true), Name("Set Animator IK Rotation"),
+     Category("Animator")]
     public class SetAnimatorIKRotation : Action
     {
         public ComponentSelector<Animator> animator;

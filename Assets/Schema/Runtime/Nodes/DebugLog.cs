@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Debug")]
-    [LightIcon("Nodes/Debug")]
-    [Category("Debug")]
-    [Description("Logs a rich-text enabled message to the console")]
+    [DarkIcon("Nodes/d_Debug"), LightIcon("Nodes/Debug"), Category("Debug"),
+     Description("Logs a rich-text enabled message to the console")]
     public class DebugLog : Action
     {
         public enum LogType

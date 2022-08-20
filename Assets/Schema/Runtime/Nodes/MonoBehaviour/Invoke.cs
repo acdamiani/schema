@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_cs Script Icon", true)]
-    [LightIcon("cs Script Icon", true)]
-    [Category("MonoBehaviour")]
-    [Description("Invoke a method specified by a name, at a specified time from now")]
+    [DarkIcon("d_cs Script Icon", true), LightIcon("cs Script Icon", true), Category("MonoBehaviour"),
+     Description("Invoke a method specified by a name, at a specified time from now")]
     public class Invoke : Action
     {
         [Tooltip("MonoBehaviour to invoke the method on")]

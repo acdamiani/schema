@@ -16,7 +16,7 @@ public class TagFilterDrawer : PropertyDrawer
         if (!initializedMask)
         {
             //Initialize mask from serialized string array
-            List<string> values = new();
+            List<string> values = new List<string>();
 
             for (int k = 0; k < selectedTags.arraySize; k++)
                 values.Add(selectedTags.GetArrayElementAtIndex(k).stringValue);

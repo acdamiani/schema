@@ -3,8 +3,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(SetAnimatorIKPositionWeight))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(SetAnimatorIKPositionWeight)), CanEditMultipleObjects]
     public class SetAnimatorIKPositionWeightEditor : Editor
     {
         private SerializedProperty animator;

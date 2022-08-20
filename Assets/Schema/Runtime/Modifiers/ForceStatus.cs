@@ -1,7 +1,6 @@
 namespace Schema.Builtin.Modifiers
 {
-    [AllowOne]
-    [DarkIcon("console.infoicon", true)]
+    [AllowOne, DarkIcon("console.infoicon", true)]
     public class ForceStatus : Modifier
     {
         public enum ForcedStatus

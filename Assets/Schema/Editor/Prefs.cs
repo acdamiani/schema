@@ -166,7 +166,8 @@ namespace SchemaEditor.Internal
 
         public static void ResetToDefault()
         {
-            List<TypeCode> valid = new() { TypeCode.String, TypeCode.Single, TypeCode.Boolean, TypeCode.Int32 };
+            List<TypeCode> valid = new List<TypeCode>
+                { TypeCode.String, TypeCode.Single, TypeCode.Boolean, TypeCode.Int32 };
 
             Type t = typeof(Prefs);
             PropertyInfo[] fields = t.GetProperties(BindingFlags.Static | BindingFlags.Public);

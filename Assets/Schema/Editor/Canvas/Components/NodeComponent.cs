@@ -24,7 +24,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             OutConnection
         }
 
-        private static readonly RectOffset ContentPadding = new(20, 20, 14, 14);
+        private static readonly RectOffset ContentPadding = new RectOffset(20, 20, 14, 14);
         private static bool beginConnectionOrigin;
         private Vector2 beginDragNodePosition;
         private Vector2? beginDragPosition;
@@ -241,7 +241,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (node.modifiers.Length > 0)
             {
                 GUI.color = Styles.outlineColor * tint;
-                GUIContent content = new("", "Node has active modifiers");
+                GUIContent content = new GUIContent("", "Node has active modifiers");
                 Styles.roundedBox.DrawIfRepaint(layout.modifierBox, content, false, false, false, false);
 
                 GUI.color = Color.white * tint;
@@ -285,7 +285,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     {
                         if (node.CanHaveParent())
                         {
-                            ConnectionComponent.ConnectionComponentCreateArgs createArgs = new();
+                            ConnectionComponent.ConnectionComponentCreateArgs createArgs =
+                                new ConnectionComponent.ConnectionComponentCreateArgs();
                             createArgs.to = this;
 
                             parentConnection = floatingConnection = canvas.Create<ConnectionComponent>(createArgs);
@@ -300,7 +301,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     }
                     else if (layout.outConnection.Contains(e.mousePosition) && node.CanHaveChildren())
                     {
-                        ConnectionComponent.ConnectionComponentCreateArgs createArgs = new();
+                        ConnectionComponent.ConnectionComponentCreateArgs createArgs =
+                            new ConnectionComponent.ConnectionComponentCreateArgs();
                         createArgs.from = this;
 
                         floatingConnection = canvas.Create<ConnectionComponent>(createArgs);
@@ -395,32 +397,30 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             if (!beginConnectionOrigin)
                 return;
 
-            QuickSearch search = new(
-                HelperMethods.GetEnumerableOfType(typeof(Node)),
-                t =>
-                {
-                    NodeComponentCreateArgs nodeCreateArgs = new();
-                    nodeCreateArgs.graph = node.graph;
-                    nodeCreateArgs.nodeType = t;
-                    nodeCreateArgs.position = position;
+            QuickSearch search = new QuickSearch(HelperMethods.GetEnumerableOfType(typeof(Node)), t =>
+            {
+                NodeComponentCreateArgs nodeCreateArgs = new NodeComponentCreateArgs();
+                nodeCreateArgs.graph = node.graph;
+                nodeCreateArgs.nodeType = t;
+                nodeCreateArgs.position = position;
 
-                    NodeComponent n = canvas.Create<NodeComponent>(nodeCreateArgs);
-                    n.layout.Update();
+                NodeComponent n = canvas.Create<NodeComponent>(nodeCreateArgs);
+                n.layout.Update();
 
-                    n.node.graphPosition = new Vector2(n.node.graphPosition.x - n.layout.gridRect.width / 2f,
-                        n.node.graphPosition.y);
+                n.node.graphPosition = new Vector2(n.node.graphPosition.x - n.layout.gridRect.width / 2f,
+                    n.node.graphPosition.y);
 
-                    ConnectionComponent.ConnectionComponentCreateArgs connectionCreateArgs = new();
-                    connectionCreateArgs.from = old;
-                    connectionCreateArgs.to = n;
-                    connectionCreateArgs.add = true;
+                ConnectionComponent.ConnectionComponentCreateArgs connectionCreateArgs =
+                    new ConnectionComponent.ConnectionComponentCreateArgs();
+                connectionCreateArgs.from = old;
+                connectionCreateArgs.to = n;
+                connectionCreateArgs.add = true;
 
-                    ConnectionComponent c = canvas.Create<ConnectionComponent>(connectionCreateArgs);
-                    n.parentConnection = c;
-                }
-            );
+                ConnectionComponent c = canvas.Create<ConnectionComponent>(connectionCreateArgs);
+                n.parentConnection = c;
+            });
 
-            WindowComponent.WindowComponentCreateArgs createArgs = new();
+            WindowComponent.WindowComponentCreateArgs createArgs = new WindowComponent.WindowComponentCreateArgs();
 
             float xDiff = (canvas.context.GetViewRect().width - 500f) / 2f;
             float yDiff = (canvas.context.GetViewRect().height - 500f) / 2f;
@@ -462,7 +462,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public override string GetDebugInfo()
         {
-            StringBuilder sb = new();
+            StringBuilder sb = new StringBuilder();
 
             if (canvas.hovered == this)
                 sb.AppendLine(string.Format("<b>Hovered:</b> {0}", GetHoverType(Event.current.mousePosition)));
@@ -556,7 +556,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             public void Update()
             {
-                ShallowNode current = new(component.node);
+                ShallowNode current = new ShallowNode(component.node);
 
                 if (!current.Equals(last))
                     DoRect();

@@ -15,10 +15,15 @@ namespace SchemaEditor
     [CustomPropertyDrawer(typeof(BlackboardEntrySelector), true)]
     public class BlackboardEntrySelectorDrawer : PropertyDrawer
     {
-        private static readonly Dictionary<string, SelectorPropertyInfo> info = new();
+        private static readonly Dictionary<string, SelectorPropertyInfo> info =
+            new Dictionary<string, SelectorPropertyInfo>();
+
         private static readonly Type[] valid = { typeof(Node), typeof(Conditional) };
-        private static readonly CacheDictionary<Type, Type> typeMappings = new();
-        private static readonly Dictionary<Type, Tuple<string[], Type[]>> excluded = new();
+        private static readonly CacheDictionary<Type, Type> typeMappings = new CacheDictionary<Type, Type>();
+
+        private static readonly Dictionary<Type, Tuple<string[], Type[]>> excluded =
+            new Dictionary<Type, Tuple<string[], Type[]>>();
+
         private static int i;
         private static event GUIDelayCall guiDelayCall;
 
@@ -61,7 +66,7 @@ namespace SchemaEditor
 
             if (!info.ContainsKey(property.propertyPath))
             {
-                SelectorPropertyInfo pi = new();
+                SelectorPropertyInfo pi = new SelectorPropertyInfo();
                 pi.writeOnly = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
                 info[property.propertyPath] = pi;
             }
@@ -71,10 +76,10 @@ namespace SchemaEditor
 
             Vector2 size = EditorStyles.miniButtonRight.CalcSize(new GUIContent(Icons.GetEditor("_Menu")));
 
-            Rect enumRect = new(position.x, position.y, position.width - size.x,
+            Rect enumRect = new Rect(position.x, position.y, position.width - size.x,
                 Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
-            Rect textRect = new(position.x, position.y + enumRect.height, position.width, enumRect.height);
-            Rect buttonRect = new(position.xMax - size.x, position.y, size.x,
+            Rect textRect = new Rect(position.x, position.y + enumRect.height, position.width, enumRect.height);
+            Rect buttonRect = new Rect(position.xMax - size.x, position.y, size.x,
                 Mathf.Min(position.height, EditorGUIUtility.singleLineHeight));
 
             Vector2 oldIconSize = EditorGUIUtility.GetIconSize();
@@ -115,7 +120,8 @@ namespace SchemaEditor
                     r = new Rect(r.x, textRect.y, r.width + size.x, r.height);
                     r.y += 3f;
 
-                    GUIContent content = new($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
+                    GUIContent content =
+                        new GUIContent($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
                     size = Styles.selectorDrawerMiniText.CalcSize(content);
 
                     GUI.BeginClip(r, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
@@ -149,7 +155,7 @@ namespace SchemaEditor
 
                 string path = valuePathProp.stringValue;
 
-                GUIContent buttonValue = new(entryValue == null
+                GUIContent buttonValue = new GUIContent(entryValue == null
                     ? "None"
                     : entryValue.name + valuePathProp.stringValue.Replace('/', '.').TrimEnd('.'));
 
@@ -200,7 +206,7 @@ namespace SchemaEditor
 
             if (!info.ContainsKey(property.propertyPath))
             {
-                SelectorPropertyInfo pi = new();
+                SelectorPropertyInfo pi = new SelectorPropertyInfo();
                 pi.writeOnly = fieldInfo.GetCustomAttribute<WriteOnlyAttribute>() != null;
                 info[property.propertyPath] = pi;
             }
@@ -235,9 +241,9 @@ namespace SchemaEditor
 
             bool isDynamicPropertyValue = isDynamicProperty.boolValue;
 
-            GenericMenu menu = new();
+            GenericMenu menu = new GenericMenu();
 
-            List<string> filtersList = new();
+            List<string> filtersList = new List<string>();
 
             SerializedProperty filters = property.FindPropertyRelative("m_filters");
 
@@ -257,7 +263,7 @@ namespace SchemaEditor
 
             bool disableDynamicBinding = fieldInfo.GetCustomAttribute<DisableDynamicBindingAttribute>() != null;
 
-            Dictionary<Type, IEnumerable<string>> tmp = new();
+            Dictionary<Type, IEnumerable<string>> tmp = new Dictionary<Type, IEnumerable<string>>();
 
             foreach (BlackboardEntry bEntry in Blackboard.instance.entries.Concat(Blackboard.global.entries))
             {
@@ -372,7 +378,7 @@ namespace SchemaEditor
             MemberInfo declaring = null
         )
         {
-            HashSet<Type> nonRecursiveTypes = new()
+            HashSet<Type> nonRecursiveTypes = new HashSet<Type>
             {
                 typeof(sbyte),
                 typeof(byte),

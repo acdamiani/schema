@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
-    [Description("Set the sibling index of a Transform")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform"),
+     Description("Set the sibling index of a Transform")]
     public class SetSiblingIndex : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;

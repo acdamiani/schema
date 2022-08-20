@@ -7,8 +7,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(SelectRandomWeighted))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(SelectRandomWeighted)), CanEditMultipleObjects]
     public class SelectRandomWeightedEditor : Editor
     {
         private SerializedProperty weights;
@@ -24,7 +23,7 @@ namespace SchemaEditor.Editors.Nodes
 
             node.weights ??= new SerializableDictionary<string, int>();
 
-            Dictionary<string, int> d = new(node.weights);
+            Dictionary<string, int> d = new Dictionary<string, int>(node.weights);
 
             foreach (KeyValuePair<string, int> kvp in d)
                 if (!node.children.Any(x => x.uID.Equals(kvp.Key)))

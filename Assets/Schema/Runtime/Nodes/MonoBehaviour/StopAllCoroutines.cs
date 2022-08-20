@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_cs Script Icon", true)]
-    [LightIcon("cs Script Icon", true)]
-    [Category("MonoBehaviour")]
-    [Description("Stop all coroutines on a MonoBehavior")]
+    [DarkIcon("d_cs Script Icon", true), LightIcon("cs Script Icon", true), Category("MonoBehaviour"),
+     Description("Stop all coroutines on a MonoBehavior")]
     public class StopAllCoroutines : Action
     {
         [Tooltip("MonoBehaviour with the running coroutine that you would like to terminate")]

@@ -35,8 +35,8 @@ namespace Schema
             ForceFailure
         }
 
-        [SerializeField] [HideInInspector] private Node m_node;
-        [SerializeField] [HideInInspector] private bool m_enabled = true;
+        [SerializeField, HideInInspector]  private Node m_node;
+        [SerializeField, HideInInspector]  private bool m_enabled = true;
 
         /// <summary>
         ///     Node that this modifier affects
@@ -209,7 +209,7 @@ namespace Schema
                 this.isEditorIcon = isEditorIcon;
             }
         }
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public static Modifier Instantiate(Modifier modifier)
         {
             Modifier copy = ScriptableObject.Instantiate(modifier);
@@ -250,7 +250,7 @@ namespace Schema
             set => m_expanded = value;
         }
 
-        [SerializeField] [HideInInspector] private bool m_expanded;
+        [SerializeField, HideInInspector]  private bool m_expanded;
         public static Texture2D GetModifierIcon(Type type)
         {
             DarkIconAttribute darkIcon = type.GetCustomAttribute<DarkIconAttribute>();
@@ -277,6 +277,6 @@ namespace Schema
 
             return null;
         }
-#endif
+        #endif
     }
 }

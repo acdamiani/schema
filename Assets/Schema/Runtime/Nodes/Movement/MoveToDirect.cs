@@ -2,9 +2,7 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Movement")]
-    [LightIcon("Nodes/Movement")]
-    [Category("Movement")]
+    [DarkIcon("Nodes/d_Movement"), LightIcon("Nodes/Movement"), Category("Movement")]
     public class MoveToDirect : Action
     {
         public float speed = 1;

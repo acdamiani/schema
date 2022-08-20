@@ -4,9 +4,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
-    [Description("Cast a ray absolutely or dynamically towards an object or point")]
-    [DarkIcon("Conditionals/d_Raycast")]
-    [LightIcon("Conditionals/Raycast")]
+    [Description("Cast a ray absolutely or dynamically towards an object or point"), DarkIcon("Conditionals/d_Raycast"),
+     LightIcon("Conditionals/Raycast")]
     public class Raycast : Conditional
     {
         public enum RaycastType
@@ -75,7 +74,7 @@ namespace Schema.Builtin.Conditionals
 
         public override GUIContent GetConditionalContent()
         {
-            StringBuilder sb = new();
+            StringBuilder sb = new StringBuilder();
 
             sb.Append("If raycast hits object");
 

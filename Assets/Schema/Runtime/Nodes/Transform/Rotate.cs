@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
-    [Description("Rotate a transform by applying a Euler Quaternion")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform"),
+     Description("Rotate a transform by applying a Euler Quaternion")]
     public class Rotate : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;

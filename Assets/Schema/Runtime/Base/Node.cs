@@ -21,21 +21,21 @@ namespace Schema
             Both
         }
 
-        [SerializeField] [HideInInspector] private Node m_parent;
-        [SerializeField] [HideInInspector] private Node[] m_children = Array.Empty<Node>();
-        [SerializeField] [HideInInspector] private Conditional[] m_conditionals = Array.Empty<Conditional>();
-        [SerializeField] [HideInInspector] private Modifier[] m_modifiers = Array.Empty<Modifier>();
-        [SerializeField] [HideInInspector] private Vector2 m_graphPosition;
-        [SerializeField] [HideInInspector] private int m_priority;
-        [SerializeField] [HideInInspector] private Graph m_graph;
+        [SerializeField, HideInInspector]  private Node m_parent;
+        [SerializeField, HideInInspector]  private Node[] m_children = Array.Empty<Node>();
+        [SerializeField, HideInInspector]  private Conditional[] m_conditionals = Array.Empty<Conditional>();
+        [SerializeField, HideInInspector]  private Modifier[] m_modifiers = Array.Empty<Modifier>();
+        [SerializeField, HideInInspector]  private Vector2 m_graphPosition;
+        [SerializeField, HideInInspector]  private int m_priority;
+        [SerializeField, HideInInspector]  private Graph m_graph;
 
-        [SerializeField] [HideInInspector] [TextArea]
+        [SerializeField, HideInInspector, TextArea]  
         private string m_comment;
 
-        [Tooltip("Toggle the status indicator for this node")] [HideInInspector] [SerializeField]
+        [Tooltip("Toggle the status indicator for this node"), HideInInspector, SerializeField]  
         private bool m_enableStatusIndicator = true;
 
-        internal Stack<Modifier.Message> messageStack = new();
+        internal Stack<Modifier.Message> messageStack = new Stack<Modifier.Message>();
 
         /// <summary>
         ///     The parent of this node
@@ -80,14 +80,14 @@ namespace Schema
             {
                 m_graphPosition = value;
 
-#if UNITY_EDITOR
+                #if UNITY_EDITOR
                 if (posNoCheck)
                     modifiedPositions.Add(this);
                 else
                     parent?.OrderChildren();
-#else
+                #else
                 parent?.OrderChildren();
-#endif
+                #endif
             }
         }
 
@@ -203,7 +203,7 @@ namespace Schema
         /// <returns>List of all children in subtree</returns>
         public IEnumerable<Node> GetAllChildren()
         {
-            List<Node> ret = new();
+            List<Node> ret = new List<Node>();
 
             foreach (Node child in children)
                 ret.AddRange(child.GetAllChildren());
@@ -212,7 +212,7 @@ namespace Schema
 
             return ret;
         }
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public static Node Instantiate(Node node)
         {
             Node copy = ScriptableObject.Instantiate(node);
@@ -688,7 +688,7 @@ namespace Schema
                     ArrayUtility.Remove(ref m_children, node);
         }
 
-        private static List<Node> modifiedPositions = new();
+        private static List<Node> modifiedPositions = new List<Node>();
         private static bool posNoCheck;
 
         public static void BeginPosNoCheck()
@@ -711,6 +711,6 @@ namespace Schema
 
             modifiedPositions.Clear();
         }
-#endif
+        #endif
     }
 }

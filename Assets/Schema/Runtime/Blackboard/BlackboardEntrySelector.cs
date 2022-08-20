@@ -106,20 +106,20 @@ namespace Schema
         {
             m_filters = filters.Select(x => x.AssemblyQualifiedName).ToList();
 
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             Blackboard.entryListChanged += BlackboardChangedCallback;
             Blackboard.entryTypeChanged += VerifyType;
-#endif
+            #endif
         }
 
         public BlackboardEntrySelector()
         {
             m_filters = new List<string>();
 
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             Blackboard.entryListChanged += BlackboardChangedCallback;
             Blackboard.entryTypeChanged += VerifyType;
-#endif
+            #endif
         }
 
         /// <summary>
@@ -380,7 +380,7 @@ namespace Schema
             if (entryType != null && filters.Contains(EntryType.GetMappedType(entryType)))
                 m_entry = null;
         }
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         private void BlackboardChangedCallback(Blackboard changed)
         {
             VerifyResults(changed);
@@ -405,7 +405,7 @@ namespace Schema
                 m_valuePath = "";
             }
         }
-#endif
+        #endif
     }
 
     [AttributeUsage(AttributeTargets.Field)]

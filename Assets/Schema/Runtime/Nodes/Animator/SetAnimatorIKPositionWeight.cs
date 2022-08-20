@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [Name("Set Animator IK Position Weight")]
-    [DarkIcon("d_Animator Icon", true)]
-    [LightIcon("Animator Icon", true)]
-    [Category("Animator")]
+    [Name("Set Animator IK Position Weight"), DarkIcon("d_Animator Icon", true), LightIcon("Animator Icon", true),
+     Category("Animator")]
     public class SetAnimatorIKPositionWeight : Action
     {
         public ComponentSelector<Animator> animator;

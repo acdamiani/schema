@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors
 {
-    [CustomEditor(typeof(SchemaAgent))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(SchemaAgent)), CanEditMultipleObjects]
     public class SchemaAgentEditor : Editor
     {
         [SerializeField] private bool optionsFoldout;

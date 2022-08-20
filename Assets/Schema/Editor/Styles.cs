@@ -427,7 +427,7 @@ namespace SchemaEditor
 
         private static Texture2D GenerateSolid(Color color, Vector2Int size)
         {
-            Texture2D tex = new(size.y, size.x);
+            Texture2D tex = new Texture2D(size.y, size.x);
             for (int y = 0; y < size.y; y++)
             for (int x = 0; x < size.x; x++)
                 tex.SetPixel(x, y, color);

@@ -6,8 +6,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(DebugLogFormat))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(DebugLogFormat)), CanEditMultipleObjects]
     public class DebugLogFormatEditor : Editor
     {
         private GUIStyle boxStyle;

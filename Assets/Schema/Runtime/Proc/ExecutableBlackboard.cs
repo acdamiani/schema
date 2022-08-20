@@ -6,8 +6,8 @@ namespace Schema.Internal
     public class ExecutableBlackboard
     {
         private static Dictionary<BlackboardEntry, EntryData> globalValues;
-        private readonly Dictionary<string, EntryData> dynamicValues = new();
-        private readonly Dictionary<BlackboardEntry, EntryData> values = new();
+        private readonly Dictionary<string, EntryData> dynamicValues = new Dictionary<string, EntryData>();
+        private readonly Dictionary<BlackboardEntry, EntryData> values = new Dictionary<BlackboardEntry, EntryData>();
 
         public ExecutableBlackboard(Blackboard blackboard)
         {
@@ -96,7 +96,7 @@ namespace Schema.Internal
         {
             private readonly object defaultValue;
             private readonly Dictionary<int, object> values;
-            public Tuple<int, int> position = new(-1, -1);
+            public Tuple<int, int> position = new Tuple<int, int>(-1, -1);
 
             public EntryData(BlackboardEntry entry)
             {

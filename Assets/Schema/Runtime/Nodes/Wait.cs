@@ -2,12 +2,11 @@
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Wait")]
-    [LightIcon("Nodes/Wait")]
-    [Description("Waits a given number of seconds, then resumes execution of the Behavior Tree")]
+    [DarkIcon("Nodes/d_Wait"), LightIcon("Nodes/Wait"),
+     Description("Waits a given number of seconds, then resumes execution of the Behavior Tree")]
     public class Wait : Action
     {
-        public BlackboardEntrySelector<float> seconds = new(0.001f);
+        public BlackboardEntrySelector<float> seconds = new BlackboardEntrySelector<float>(0.001f);
 
         private void OnValidate()
         {

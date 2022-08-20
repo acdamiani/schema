@@ -15,11 +15,11 @@ namespace Schema.Utilities
 
         public static bool IsMac()
         {
-#if UNITY_2017_1_OR_NEWER
+            #if UNITY_2017_1_OR_NEWER
             return SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
-#else
+            #else
             return SystemInfo.operatingSystem.StartsWith("Mac");
-#endif
+            #endif
         }
 
         public static void MoveItemAtIndexToFront<T>(this T[] array, int index)
@@ -129,7 +129,7 @@ namespace Schema.Utilities
         {
             if (node.parent != null)
             {
-                List<Node> ret = new();
+                List<Node> ret = new List<Node>();
 
                 Node current = node;
 
@@ -156,7 +156,7 @@ namespace Schema.Utilities
 
         public static IEnumerable<Type> GetEnumerableOfType(Type type)
         {
-            List<Type> objects = new();
+            List<Type> objects = new List<Type>();
             foreach (Type t in
                      Assembly.GetAssembly(type).GetTypes()
                          .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(type)))
@@ -298,7 +298,7 @@ namespace Schema.Utilities
             if (!type.IsGenericType)
                 return type.Name;
 
-            StringBuilder builder = new();
+            StringBuilder builder = new StringBuilder();
             string name = type.Name;
             int index = name.IndexOf("`");
             builder.Append(name.Substring(0, index));
@@ -320,7 +320,7 @@ namespace Schema.Utilities
             byte[] text = Encoding.UTF8.GetBytes(str);
             byte[] hash = md5.ComputeHash(text);
 
-            StringBuilder builder = new();
+            StringBuilder builder = new StringBuilder();
 
             for (int i = 0; i < hash.Length; i++)
                 builder.Append(hash[i].ToString("X2"));
@@ -345,7 +345,7 @@ namespace Schema.Utilities
 
         public static Texture2D Tint(this Texture2D texture, Color color)
         {
-            Texture2D ret = new(texture.width, texture.height);
+            Texture2D ret = new Texture2D(texture.width, texture.height);
             Color[] cols = new Color[texture.width * texture.height];
 
             for (int y = 0; y < texture.height; y++)
@@ -420,7 +420,7 @@ namespace Schema.Utilities
 
         public static bool CanConvertTo(this Type type, Type target)
         {
-            HashSet<Type> clrTypes = new()
+            HashSet<Type> clrTypes = new HashSet<Type>
             {
                 typeof(bool),
                 typeof(byte),

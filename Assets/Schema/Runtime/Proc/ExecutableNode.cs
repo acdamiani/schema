@@ -16,19 +16,19 @@ namespace Schema.Internal
             Invalid
         }
 
-        private readonly Dictionary<int, object[]> conditionalMemory = new();
+        private readonly Dictionary<int, object[]> conditionalMemory = new Dictionary<int, object[]>();
 
         private readonly int[] dynamicConditionals;
 
-        private readonly Dictionary<int, bool> lastConditionalStatus = new();
+        private readonly Dictionary<int, bool> lastConditionalStatus = new Dictionary<int, bool>();
 
-        private readonly Dictionary<int, bool> lastDynamicStatus = new();
+        private readonly Dictionary<int, bool> lastDynamicStatus = new Dictionary<int, bool>();
 
-        private readonly Dictionary<int, object[]> modifierMemory = new();
+        private readonly Dictionary<int, object[]> modifierMemory = new Dictionary<int, object[]>();
 
         public readonly Node node;
 
-        private readonly Dictionary<int, object> nodeMemory = new();
+        private readonly Dictionary<int, object> nodeMemory = new Dictionary<int, object>();
 
         public ExecutableNode(Node node)
         {
@@ -297,7 +297,7 @@ namespace Schema.Internal
 
             int i = flow.Tick(nodeMemory[id], context.status, caller);
 
-            int? child = i >= 0 && i < children.Length ? children[i] : null;
+            int? child = i >= 0 && i < children.Length ? children[i] : (int?)null;
 
             Modifier.Message message = Modifier.Message.None;
 

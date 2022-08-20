@@ -2,8 +2,7 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Selector")]
-    [LightIcon("Nodes/Selector")]
+    [DarkIcon("Nodes/d_Selector"), LightIcon("Nodes/Selector")]
     public class SelectRandom : Flow
     {
         public override int Tick(object nodeMemory, NodeStatus status, int index)

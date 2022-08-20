@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Quaternion")]
-    [LightIcon("Nodes/Quaternion")]
-    [Category("Quaternion")]
-    [Description("Creates a rotation which rotates a specified number of degrees around an axis")]
+    [DarkIcon("Nodes/d_Quaternion"), LightIcon("Nodes/Quaternion"), Category("Quaternion"),
+     Description("Creates a rotation which rotates a specified number of degrees around an axis")]
     public class QuaternionAngleAxis : Action
     {
         [Tooltip("Angle (in degrees) to rotate around an axis")]
@@ -19,7 +17,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Custom axis to rotate around")]
         public BlackboardEntrySelector<Vector3> axis;
 
-        [Tooltip("Blackboard variable to store the new rotation in")] [WriteOnly]
+        [Tooltip("Blackboard variable to store the new rotation in"), WriteOnly] 
         public BlackboardEntrySelector<Quaternion> rotation;
 
         private void OnValidate()

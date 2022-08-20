@@ -94,7 +94,7 @@ namespace SchemaEditor.Internal
                 UnityEditor.ShortcutManagement.ShortcutManager.instance.GetShortcutBinding(commandName)
                     .keyCombinationSequence;
 
-            KeyCombination defaultKeyCombination = new(KeyCode.None);
+            KeyCombination defaultKeyCombination = new KeyCombination(KeyCode.None);
 
             if (sequence.Count() > 0)
                 return UnityEditor.ShortcutManagement.ShortcutManager.instance.GetShortcutBinding(commandName)

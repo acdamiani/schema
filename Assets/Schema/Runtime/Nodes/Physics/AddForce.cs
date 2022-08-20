@@ -2,9 +2,7 @@
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Rigidbody Icon", true)]
-    [LightIcon("Rigidbody Icon", true)]
-    [Category("Physics")]
+    [DarkIcon("d_Rigidbody Icon", true), LightIcon("Rigidbody Icon", true), Category("Physics")]
     public class AddForce : Action
     {
         public ComponentSelector<Rigidbody> rigidbody;

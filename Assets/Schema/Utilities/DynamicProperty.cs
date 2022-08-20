@@ -7,8 +7,11 @@ using UnityEngine;
 
 public static class DynamicProperty
 {
-    private static readonly Dictionary<MemberInfo, Action<object, object>> setters = new();
-    private static readonly Dictionary<MemberInfo, Func<object, object>> getters = new();
+    private static readonly Dictionary<MemberInfo, Action<object, object>> setters =
+        new Dictionary<MemberInfo, Action<object, object>>();
+
+    private static readonly Dictionary<MemberInfo, Func<object, object>> getters =
+        new Dictionary<MemberInfo, Func<object, object>>();
 
     public static void Set(object obj, string path, object value)
     {
@@ -20,7 +23,7 @@ public static class DynamicProperty
         string assemblyName = type.AssemblyQualifiedName;
         string pathSuffix = '.' + path.Replace('/', '.').Trim('.');
 
-        Queue<string> pathParts = new(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
+        Queue<string> pathParts = new Queue<string>(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
 
         object currentObject = ValueTypeHolder.Wrap(obj);
         Type currentType = type;
@@ -82,7 +85,7 @@ public static class DynamicProperty
         string assemblyName = type.AssemblyQualifiedName;
         string pathSuffix = '.' + path.Replace('/', '.').Trim('.');
 
-        Queue<string> pathParts = new(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
+        Queue<string> pathParts = new Queue<string>(path.Split('/').Where(x => !string.IsNullOrWhiteSpace(x)));
 
         object currentObject = ValueTypeHolder.Wrap(obj);
         Type currentType = type;
@@ -122,9 +125,10 @@ public static class DynamicProperty
 
     private static Func<object, object> CreateGetMethod(MemberInfo memberInfo)
     {
-#if ENABLE_MONO
+        #if ENABLE_MONO && !NET_STANDARD_2_0
         string methodName = memberInfo.ReflectedType.FullName + ".get_" + memberInfo.Name;
-        DynamicMethod getterMethod = new(methodName, typeof(object), new Type[1] { typeof(object) }, true);
+        DynamicMethod getterMethod =
+            new DynamicMethod(methodName, typeof(object), new Type[1] { typeof(object) }, true);
         ILGenerator gen = getterMethod.GetILGenerator();
 
         Type targetType = memberInfo.DeclaringType;
@@ -180,7 +184,7 @@ public static class DynamicProperty
         gen.Emit(OpCodes.Ret);
 
         return (Func<object, object>)getterMethod.CreateDelegate(typeof(Func<object, object>));
-#else
+        #else
         if (memberInfo is FieldInfo)
         {
             return new Func<object, object>(obj => (memberInfo as FieldInfo).GetValue(obj));
@@ -193,14 +197,15 @@ public static class DynamicProperty
         {
             return new Func<object, object>(o => null);
         }
-#endif
+        #endif
     }
 
     private static Action<object, object> CreateSetMethod(MemberInfo memberInfo)
     {
-#if ENABLE_MONO
+        #if ENABLE_MONO && !NET_STANDARD_2_0
         string methodName = memberInfo.ReflectedType.FullName + ".set_" + memberInfo.Name;
-        DynamicMethod setterMethod = new(methodName, null, new Type[2] { typeof(object), typeof(object) }, true);
+        DynamicMethod setterMethod =
+            new DynamicMethod(methodName, null, new Type[2] { typeof(object), typeof(object) }, true);
         ILGenerator gen = setterMethod.GetILGenerator();
 
         Type targetType = memberInfo.DeclaringType;
@@ -262,7 +267,7 @@ public static class DynamicProperty
 
         return (Action<object, object>)setterMethod.CreateDelegate(typeof(Action<object, object>));
 
-#else
+        #else
         if (memberInfo is PropertyInfo)
         {
             return new Action<object, object>((o1, o2) => (memberInfo as PropertyInfo).SetValue(o1, o2));
@@ -271,7 +276,7 @@ public static class DynamicProperty
         {
             return new Action<object, object>((o1, o2) => { });
         }
-#endif
+        #endif
     }
 
     public class ValueTypeHolder

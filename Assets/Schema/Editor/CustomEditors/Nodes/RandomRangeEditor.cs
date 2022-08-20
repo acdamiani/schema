@@ -6,8 +6,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(RandomRange))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(RandomRange)), CanEditMultipleObjects]
     public class RangeEditor : Editor
     {
         private SerializedProperty floatMax;

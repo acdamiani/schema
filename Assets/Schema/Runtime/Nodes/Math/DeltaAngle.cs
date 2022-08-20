@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Math")]
-    [LightIcon("Nodes/Math")]
-    [Category("Math")]
-    [Description("Gets the shortest angular distance between two angles")]
+    [DarkIcon("Nodes/d_Math"), LightIcon("Nodes/Math"), Category("Math"),
+     Description("Gets the shortest angular distance between two angles")]
     public class DeltaAngle : Action
     {
         [Tooltip("Current angular position")] public BlackboardEntrySelector<float> current;
@@ -17,7 +15,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Whether target angular position is in radians")]
         public bool targetIsRadians;
 
-        [Tooltip("Shortest angular distance between the two values")] [WriteOnly]
+        [Tooltip("Shortest angular distance between the two values"), WriteOnly] 
         public BlackboardEntrySelector<float> delta;
 
         [Tooltip("Store the delta as radians instead of degrees")]

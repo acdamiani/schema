@@ -17,7 +17,7 @@ namespace SchemaEditor.Internal
         public delegate void OnComponentListModifiedHandler();
 
         private readonly Action<Rect, float, Vector2> _doGrid;
-        private readonly List<Func<GUIComponent, bool>> selectors = new();
+        private readonly List<Func<GUIComponent, bool>> selectors = new List<Func<GUIComponent, bool>>();
 
         private GUIComponent[] _components = Array.Empty<GUIComponent>();
         private GUIComponent _hovered;
@@ -41,7 +41,7 @@ namespace SchemaEditor.Internal
                 selectionBoxComponent.hidden = true;
             }
 
-            CreateArgs empty = new();
+            CreateArgs empty = new CreateArgs();
             empty.layer = 50;
 
             if (minimapComponentCreateArgs != null)
@@ -50,7 +50,8 @@ namespace SchemaEditor.Internal
                 minimapComponent = Create<MinimapComponent>(minimapComponentCreateArgs);
             }
 
-            BlockerComponent.BlockerComponentCreateArgs blockerComponentCreateArgs = new();
+            BlockerComponent.BlockerComponentCreateArgs blockerComponentCreateArgs =
+                new BlockerComponent.BlockerComponentCreateArgs();
             blockerComponentCreateArgs.rect =
                 () => new Rect(0f, 0f, context.GetViewRect().width, context.GetToolbarHeight());
             Create<BlockerComponent>(blockerComponentCreateArgs);
@@ -90,7 +91,7 @@ namespace SchemaEditor.Internal
 
         public T Create<T>(CreateArgs args) where T : GUIComponent, new()
         {
-            T component = new();
+            T component = new T();
             ArrayUtility.Add(ref _components, component);
             component.canvas = this;
             component.Create(args);
@@ -458,7 +459,7 @@ namespace SchemaEditor.Internal
 
         private GenericMenu BuildContextMenu()
         {
-            ContextBuilder menu = new();
+            ContextBuilder menu = new ContextBuilder();
 
             menu.AddShortcut("Main Menu/Edit/Cut", () => CommandHandler.CutCommand(this));
             menu.AddShortcut("Main Menu/Edit/Copy", () => CommandHandler.CopyCommand(this));

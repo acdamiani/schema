@@ -1,7 +1,6 @@
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Selector")]
-    [LightIcon("Light/Selector")]
+    [DarkIcon("Nodes/d_Selector"), LightIcon("Light/Selector")]
     public class Selector : Flow
     {
         public override int Tick(object nodeMemory, NodeStatus status, int index)

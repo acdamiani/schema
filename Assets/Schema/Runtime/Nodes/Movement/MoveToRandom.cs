@@ -3,9 +3,7 @@ using UnityEngine.AI;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Movement")]
-    [LightIcon("Nodes/Movement")]
-    [Category("Movement")]
+    [DarkIcon("Nodes/d_Movement"), LightIcon("Nodes/Movement"), Category("Movement")]
     public class MoveToRandom : Action
     {
         public ComponentSelector<Transform> transform;

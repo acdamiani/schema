@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(MoveToRandom))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(MoveToRandom)), CanEditMultipleObjects]
     public class MoveToRandomEditor : Editor
     {
         private SerializedProperty isRelative;

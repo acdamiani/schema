@@ -24,11 +24,11 @@ namespace SchemaEditor
         public static NodeEditor instance;
         private static Dictionary<Type, List<Type>> nodeTypes;
         private static Type[] decoratorTypes;
-        private static readonly List<Object> copyBuffer = new();
+        private static readonly List<Object> copyBuffer = new List<Object>();
         public Node requestingConnection;
         public Graph target;
         public Blackboard globalBlackboard;
-        public Window windowInfo = new();
+        public Window windowInfo = new Window();
         private int? _controlID;
         public Event eventNoZoom;
         private int nodeCount;
@@ -183,7 +183,7 @@ namespace SchemaEditor
             else
                 lastFiles.Insert(0, id);
 
-            List<string> f = new(lastFiles);
+            List<string> f = new List<string>(lastFiles);
 
             foreach (string s in f)
             {
@@ -210,7 +210,7 @@ namespace SchemaEditor
 
         private static GUIContent AggregateErrors(List<Error> errors)
         {
-            GUIContent ret = new();
+            GUIContent ret = new GUIContent();
 
             if (errors.Count == 0) return GUIContent.none;
 
@@ -243,7 +243,7 @@ namespace SchemaEditor
 
         private static GUIContent GetErrors(Node node)
         {
-            List<Error> errors = new(node.GetErrors());
+            List<Error> errors = new List<Error>(node.GetErrors());
 
             // foreach (Decorator d in node.decorators)
             //     errors.AddRange(d.GetErrors().Select(error => new Error($"{error.message} ({d.name})", error.severity)));

@@ -4,8 +4,7 @@ using UnityEngine;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetAnimatorVariable))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(GetAnimatorVariable)), CanEditMultipleObjects]
     public class GetAnimatorVariableEditor : Editor
     {
         private SerializedProperty boolValue;

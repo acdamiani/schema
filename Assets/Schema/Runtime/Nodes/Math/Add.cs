@@ -1,8 +1,6 @@
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Math")]
-    [LightIcon("Nodes/Math")]
-    [Category("Math")]
+    [DarkIcon("Nodes/d_Math"), LightIcon("Nodes/Math"), Category("Math")]
     public class Add : Action
     {
         public BlackboardEntrySelector<float> valueOne;

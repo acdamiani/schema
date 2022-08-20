@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Math")]
-    [LightIcon("Nodes/Math")]
-    [Category("Math")]
-    [Description("Linearly interpolate between two floats by a time parameter, wrapping properly around 360 degrees")]
+    [DarkIcon("Nodes/d_Math"), LightIcon("Nodes/Math"), Category("Math"),
+     Description("Linearly interpolate between two floats by a time parameter, wrapping properly around 360 degrees")]
     public class LerpAngle : Action
     {
         [Tooltip("Current angle")] public BlackboardEntrySelector<float> current;
@@ -20,7 +18,7 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("Parameter t to lerp by")] public BlackboardEntrySelector<float> t;
 
-        [Tooltip("The lerped angle")] [WriteOnly]
+        [Tooltip("The lerped angle"), WriteOnly] 
         public BlackboardEntrySelector<float> result;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

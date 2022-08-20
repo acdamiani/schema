@@ -3,8 +3,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(CancelInvoke))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(CancelInvoke)), CanEditMultipleObjects]
     public class CancelInvokeEditor : Editor
     {
         private SerializedProperty cancelAll;

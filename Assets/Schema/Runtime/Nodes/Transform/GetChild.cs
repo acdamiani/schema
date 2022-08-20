@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true)]
-    [LightIcon("Transform Icon", true)]
-    [Category("Transform")]
-    [Description("Get a child transform by an integer index")]
+    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true), Category("Transform"),
+     Description("Get a child transform by an integer index")]
     public class GetChild : Action
     {
         [Tooltip("Transform to operate on")] public ComponentSelector<Transform> transform;
@@ -13,7 +11,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Index of the child to find")]
         public BlackboardEntrySelector<int> index;
 
-        [Tooltip("Found transform")] [WriteOnly]
+        [Tooltip("Found transform"), WriteOnly] 
         public BlackboardEntrySelector<Transform> found;
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

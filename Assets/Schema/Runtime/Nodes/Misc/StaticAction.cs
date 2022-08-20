@@ -4,9 +4,7 @@ using UnityEngine.Events;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Action")]
-    [LightIcon("Nodes/Action")]
-    [Category("Miscellaneous")]
+    [DarkIcon("Nodes/d_Action"), LightIcon("Nodes/Action"), Category("Miscellaneous")]
     public class StaticAction : Action
     {
         [SerializeField] private NodeAction customAction;

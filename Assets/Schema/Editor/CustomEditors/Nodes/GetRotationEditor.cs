@@ -3,8 +3,7 @@ using UnityEditor;
 
 namespace SchemaEditor.Editors.Nodes
 {
-    [CustomEditor(typeof(GetRotation))]
-    [CanEditMultipleObjects]
+    [CustomEditor(typeof(GetRotation)), CanEditMultipleObjects]
     public class GetRotationEditor : Editor
     {
         private SerializedProperty eulerAngles;

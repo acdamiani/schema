@@ -6,9 +6,8 @@ using UnityEngine.Rendering;
 
 namespace Schema.Builtin.Conditionals
 {
-    [DarkIcon("Conditionals/d_ConeCheck")]
-    [LightIcon("Conditionals/ConeCheck")]
-    [Description("Use a cone to test for GameObject collisions. Stores the first hit gameObject in a given variable.")]
+    [DarkIcon("Conditionals/d_ConeCheck"), LightIcon("Conditionals/ConeCheck"),
+     Description("Use a cone to test for GameObject collisions. Stores the first hit gameObject in a given variable.")]
     public class ConeCheck : Conditional
     {
         public float rayRange = 10.0f;
@@ -16,14 +15,14 @@ namespace Schema.Builtin.Conditionals
         public float coneDirection;
 
         [Tooltip(
-            "How many rays to send to check for colliding Game Objects. Increasing this value will reduce performance but will result in more accurate results for smaller objects.")]
-        [Range(10, 100)]
+             "How many rays to send to check for colliding Game Objects. Increasing this value will reduce performance but will result in more accurate results for smaller objects."),
+         Range(10, 100)]
         public int resolution = 10;
 
         public bool precisionMode;
         public Vector3 offset;
 
-        [Tooltip("Where to store the object that this cone hit")] [WriteOnly]
+        [Tooltip("Where to store the object that this cone hit"), WriteOnly] 
         public BlackboardEntrySelector<GameObject> gameObjectKey;
 
         [Tooltip("The tags to filter from. Only these tags will be considered when checking the cone")]
@@ -56,7 +55,7 @@ namespace Schema.Builtin.Conditionals
 
                 for (int i = 0; i < rayRepresentations.Length; i++) rays[i] = (Ray)rayRepresentations[i];
 
-                Dictionary<Ray, RaycastHit> hits = new();
+                Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
                 hits = GetHitInfo(rays);
 
                 foreach (RaycastHit hit in hits.Values)
@@ -71,13 +70,12 @@ namespace Schema.Builtin.Conditionals
             float radius = Mathf.Tan(Mathf.Deg2Rad * halfAngle) * rayRange;
             Vector3 rotatedOffset = agent.transform.rotation * offset;
 
-            Vector3 position = new(agent.transform.position.x + rotatedOffset.x,
-                agent.transform.position.y + rotatedOffset.y,
-                agent.transform.position.z + rotatedOffset.z);
+            Vector3 position = new Vector3(agent.transform.position.x + rotatedOffset.x,
+                agent.transform.position.y + rotatedOffset.y, agent.transform.position.z + rotatedOffset.z);
 
             position += rotation * (Vector3.forward * (rayRange / 2f));
 
-            Vector3 size = new(radius * 2, radius * 2, rayRange);
+            Vector3 size = new Vector3(radius * 2, radius * 2, rayRange);
 
             Collider[] colliders = Physics.OverlapBox(
                 position,
@@ -122,7 +120,7 @@ namespace Schema.Builtin.Conditionals
 
         private Dictionary<Ray, RaycastHit> GetHitInfo(Ray[] rays)
         {
-            Dictionary<Ray, RaycastHit> hits = new();
+            Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
             for (int i = 0; i < rays.Length; i++)
             {
                 RaycastHit hitInfo;
@@ -184,7 +182,7 @@ namespace Schema.Builtin.Conditionals
 
         public override GUIContent GetConditionalContent()
         {
-            StringBuilder sb = new();
+            StringBuilder sb = new StringBuilder();
 
             if (invert)
                 sb.Append("If object doesn't hit cone");
@@ -213,7 +211,7 @@ namespace Schema.Builtin.Conditionals
                 return new Ray(rayRepresentation.start, rayRepresentation.direction.normalized);
             }
         }
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public override void DoConditionalGizmos(SchemaAgent agent)
         {
             if (!visualize)
@@ -226,7 +224,7 @@ namespace Schema.Builtin.Conditionals
 
                 for (int i = 0; i < rayRepresentations.Length; i++) rays[i] = (Ray)rayRepresentations[i];
 
-                Dictionary<Ray, RaycastHit> hits = new();
+                Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
                 hits = GetHitInfo(rays);
 
                 for (int i = 0; i < rays.Length; i++)
@@ -275,6 +273,6 @@ namespace Schema.Builtin.Conditionals
                 agent.transform.position + rotatedOffset + rotation * (topNoRotate + Vector3.right * radius), 2f);
             Handles.DrawWireDisc(agent.transform.position + rotatedOffset + topCenter, normal, radius, 2f);
         }
-#endif
+        #endif
     }
 }

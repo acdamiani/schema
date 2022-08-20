@@ -4,10 +4,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_BoxCollider Icon", true)]
-    [LightIcon("BoxCollider Icon", true)]
-    [Category("Physics")]
-    [Description("Casts a box along a ray and returns detailed information on what was hit")]
+    [DarkIcon("d_BoxCollider Icon", true), LightIcon("BoxCollider Icon", true), Category("Physics"),
+     Description("Casts a box along a ray and returns detailed information on what was hit")]
     public class BoxCast : Action
     {
         [Tooltip("Center of the box")] public BlackboardEntrySelector<Vector3> center;
@@ -18,10 +16,11 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Direction in which to cast the box")]
         public BlackboardEntrySelector<Vector3> direction;
 
-        [Tooltip("Orientation of the box")]
-        public BlackboardEntrySelector<Quaternion> orientation = new(Quaternion.identity);
+        [Tooltip("Orientation of the box")] public BlackboardEntrySelector<Quaternion> orientation =
+            new BlackboardEntrySelector<Quaternion>(Quaternion.identity);
 
-        [Tooltip("Max length of the cast")] public BlackboardEntrySelector<float> maxDistance = new(Mathf.Infinity);
+        [Tooltip("Max length of the cast")] public BlackboardEntrySelector<float> maxDistance =
+            new BlackboardEntrySelector<float>(Mathf.Infinity);
 
         [Tooltip("Layer mask to use when casting the box")]
         public LayerMask layerMask;
@@ -29,8 +28,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Specifies whether this query should hit triggers")]
         public QueryTriggerInteraction queryTriggerInteraction;
 
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object.")] [WriteOnly]
-        public BlackboardEntrySelector hit = new();
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit object."), WriteOnly] 
+        public BlackboardEntrySelector hit = new BlackboardEntrySelector();
 
         protected override void OnObjectEnable()
         {

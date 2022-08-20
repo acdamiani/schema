@@ -1,8 +1,7 @@
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Sequence")]
-    [LightIcon("Nodes/Sequence")]
-    [Description("Executes a series of nodes one after another, disregarding node status")]
+    [DarkIcon("Nodes/d_Sequence"), LightIcon("Nodes/Sequence"),
+     Description("Executes a series of nodes one after another, disregarding node status")]
     public class Series : Flow
     {
         public override int Tick(object nodeMemory, NodeStatus status, int index)

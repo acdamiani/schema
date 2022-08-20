@@ -2,9 +2,7 @@ using UnityEngine;
 
 namespace Schema.Builtin.Modifiers
 {
-    [AllowOne]
-    [DisableIfTypes(typeof(LoopForever), typeof(LoopUntil))]
-    [DarkIcon("Modifiers/Loop")]
+    [AllowOne, DisableIfTypes(typeof(LoopForever), typeof(LoopUntil)), DarkIcon("Modifiers/Loop")]
     public class Loop : Modifier
     {
         public enum ForcedStatus
