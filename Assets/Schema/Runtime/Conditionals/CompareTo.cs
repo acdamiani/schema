@@ -1,7 +1,6 @@
-using System;
 using System.Text;
-using UnityEngine;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
@@ -9,18 +8,20 @@ namespace Schema.Builtin.Conditionals
     [LightIcon("Conditionals/Compare")]
     public class CompareTo : Conditional
     {
-        [Tooltip("LHS of the comparison")] public BlackboardEntrySelector<float> valueOne;
-        [Tooltip("RHS of the comparison")] public BlackboardEntrySelector<float> valueTwo;
-        [Tooltip("The comparison type for this operation")] public ComparisonType comparisonType;
-
         public enum ComparisonType
         {
             Equal,
             GreaterThan,
             GreaterThanOrEqual,
             LessThan,
-            LessThanOrEqual,
+            LessThanOrEqual
         }
+
+        [Tooltip("LHS of the comparison")] public BlackboardEntrySelector<float> valueOne;
+        [Tooltip("RHS of the comparison")] public BlackboardEntrySelector<float> valueTwo;
+
+        [Tooltip("The comparison type for this operation")]
+        public ComparisonType comparisonType;
 
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {

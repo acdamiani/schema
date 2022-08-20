@@ -71,6 +71,7 @@ namespace SchemaEditor.Utilities
 
             style.Draw(position, content, isHover, isActive, on, hasKeyboardFocus);
         }
+
         public static void AddItem(this GenericMenu menu, GUIContent content, bool on, GenericMenu.MenuFunction func,
             bool disabled)
         {

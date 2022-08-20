@@ -179,7 +179,7 @@ namespace SchemaEditor.Internal
                 .Where(x => x is Conditional)
                 .Select(x => ((Conditional)x).node);
 
-            CopyBuffer tmp = new CopyBuffer(
+            CopyBuffer tmp = new(
                 canvas,
                 copyables,
                 NodeEditor.instance.target

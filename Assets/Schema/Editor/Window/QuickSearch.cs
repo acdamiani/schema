@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Schema;
 using Schema.Internal;
 using Schema.Utilities;
 using SchemaEditor;
@@ -9,6 +10,7 @@ using SchemaEditor.Internal.ComponentSystem;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using Action = System.Action;
 
 public class QuickSearch : IWindowComponentProvider
 {
@@ -17,6 +19,7 @@ public class QuickSearch : IWindowComponentProvider
     private readonly List<string> favorites = Prefs.GetList("SCHEMA_PREF__favorites").ToList();
     private readonly CacheDictionary<Type, Texture2D> icons = new();
     private readonly CacheDictionary<string, IEnumerable<Type>> search = new();
+    private readonly SearchField searchField;
     private readonly IEnumerable<Type> types;
     private readonly KeyCode[] validMovementCodes = { KeyCode.UpArrow, KeyCode.DownArrow };
     private bool close;
@@ -27,7 +30,6 @@ public class QuickSearch : IWindowComponentProvider
     private Vector2 scroll;
     private CacheDictionary<string, IEnumerable<Type>> searchedFavorites = new();
     private bool searchFavorites;
-    private readonly SearchField searchField;
     private string searchText = "";
     private int selected;
     private float toolbarHeight;
@@ -214,7 +216,7 @@ public class QuickSearch : IWindowComponentProvider
 
         foreach (Type nodeType in results)
         {
-            if (nodeType == typeof(Schema.Root))
+            if (nodeType == typeof(Root))
                 continue;
 
             Texture2D icon = icons.GetOrCreate(nodeType, () => GraphObject.GetIcon(nodeType));
@@ -306,18 +308,18 @@ public class QuickSearch : IWindowComponentProvider
         List<Type> ret = new();
 
         foreach (Type ty in types)
-            foreach (string q in queries)
-            {
-                string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
-                string search = category.ToLower() + ty.Name.ToLower();
+        foreach (string q in queries)
+        {
+            string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
+            string search = category.ToLower() + ty.Name.ToLower();
 
-                int s = Search(q, search);
-                if (s != -1)
-                {
-                    ret.Add(ty);
-                    break;
-                }
+            int s = Search(q, search);
+            if (s != -1)
+            {
+                ret.Add(ty);
+                break;
             }
+        }
 
         return ret;
     }

@@ -1,4 +1,4 @@
-using Schema;
+using System;
 using Schema.Internal;
 using Schema.Utilities;
 using UnityEngine;
@@ -9,12 +9,26 @@ namespace Schema
     {
         private static readonly CacheDictionary<Graph, ExecutableTree> treeMap = new();
 
-        [SerializeField][Tooltip("Target Graph asset for this agent")] private Graph m_target;
-        [SerializeField][TextArea][Tooltip("Description for this agent that will be displayed in the Node View")] private string m_agentDescription;
-        [SerializeField][Min(1)][Tooltip("Maximum number of steps to be taken throughout the tree before a forceful exit")] private int m_maxStepsPerTick = 1000;
-        [SerializeField][Tooltip("Restart the tree when complete")] private bool m_restartWhenComplete = true;
-        [SerializeField][Tooltip("Reset all blackboard values (excluding globals) when the tree restarts")] private bool m_resetBlackboardOnRestart;
-        [SerializeField][Min(0)][Tooltip("Amount of time in seconds to pause between executions of the tree")] private float m_treePauseTime;
+        [SerializeField] [Tooltip("Target Graph asset for this agent")]
+        private Graph m_target;
+
+        [SerializeField] [TextArea] [Tooltip("Description for this agent that will be displayed in the Node View")]
+        private string m_agentDescription;
+
+        [SerializeField]
+        [Min(1)]
+        [Tooltip("Maximum number of steps to be taken throughout the tree before a forceful exit")]
+        private int m_maxStepsPerTick = 1000;
+
+        [SerializeField] [Tooltip("Restart the tree when complete")]
+        private bool m_restartWhenComplete = true;
+
+        [SerializeField] [Tooltip("Reset all blackboard values (excluding globals) when the tree restarts")]
+        private bool m_resetBlackboardOnRestart;
+
+        [SerializeField] [Min(0)] [Tooltip("Amount of time in seconds to pause between executions of the tree")]
+        private float m_treePauseTime;
+
         private float t;
 
         public Graph target
@@ -54,107 +68,105 @@ namespace Schema
         }
 
         /// <summary>
-        /// Whether the current tree is paused - will return true during gaps caused by treePauseTime
+        ///     Whether the current tree is paused - will return true during gaps caused by treePauseTime
         /// </summary>
-        public bool paused { get { return _paused; } }
-        private bool _paused;
+        public bool paused { get; private set; }
 
         /// <summary>
-        /// Whether the current tree is stopped 
+        ///     Whether the current tree is stopped
         /// </summary>
-        public bool stopped { get { return _stopped; } }
-        private bool _stopped;
+        public bool stopped { get; private set; }
 
         /// <summary>
-        /// The executable tree for this agent
+        ///     The executable tree for this agent
         /// </summary>
-        public ExecutableTree tree { get { return _tree; } }
-        private ExecutableTree _tree;
+        public ExecutableTree tree { get; private set; }
+
+        /// <summary>
+        ///     Restarts the tree's execution
+        /// </summary>
+        public void Reset()
+        {
+            if (tree == null)
+                return;
+
+            tree.GetExecutionContext(this).node = tree.root;
+        }
+
+        /// <summary>
+        ///     Restarts the tree's execution and optionally reset its blackboard
+        /// </summary>
+        /// <param name="resetBlackboard">Whether to reset the blackboard when resetting the tree</param>
+        public void Reset(bool resetBlackboard)
+        {
+            if (tree == null)
+                return;
+
+            tree.GetExecutionContext(this).node = tree.root;
+
+            if (resetBlackboard)
+                tree.blackboard.Reset();
+        }
 
         private void Start()
         {
             if (m_target == null)
                 return;
 
-            _tree = treeMap.GetOrCreate(m_target, () => new ExecutableTree(m_target));
-            _tree.Initialize(this);
+            tree = treeMap.GetOrCreate(m_target, () => new ExecutableTree(m_target));
+            tree.Initialize(this);
         }
 
         private void Update()
         {
-            if (_paused && Time.time >= t)
+            if (paused && Time.time >= t)
                 Resume();
 
-            if (_tree == null)
+            if (tree == null)
                 return;
 
-            _tree.Tick(this);
+            tree.Tick(this);
         }
 
         /// <summary>
-        /// Pause the tree's execution
+        ///     Pause the tree's execution
         /// </summary>
         public void Pause()
         {
-            _paused = true;
+            paused = true;
         }
 
         /// <summary>
-        /// Pause the tree's execution for a given number of seconds
+        ///     Pause the tree's execution for a given number of seconds
         /// </summary>
         /// <param name="time">Number of seconds to pause the tree for</param>
         public void Pause(float time)
         {
             if (time <= 0f)
-                throw new System.ArgumentOutOfRangeException("time", "Time was less than or equal to zero seconds! Skipping...");
+                throw new ArgumentOutOfRangeException("time",
+                    "Time was less than or equal to zero seconds! Skipping...");
 
-            _paused = true;
+            paused = true;
 
             t = Time.time + time;
         }
 
         /// <summary>
-        /// Resume the tree's execution immediately
+        ///     Resume the tree's execution immediately
         /// </summary>
         public void Resume()
         {
-            _paused = false;
+            paused = false;
 
             t = 0f;
         }
 
         /// <summary>
-        /// Stop the tree's execution permanently. Cannot be resumed by Resume()
+        ///     Stop the tree's execution permanently. Cannot be resumed by Resume()
         /// </summary>
         public void Stop()
         {
-            _stopped = true;
-        }
-
-        /// <summary>
-        /// Restarts the tree's execution
-        /// </summary>
-        public void Reset()
-        {
-            if (_tree == null)
-                return;
-
-            _tree.GetExecutionContext(this).node = _tree.root;
-        }
-
-        /// <summary>
-        /// Restarts the tree's execution and optionally reset its blackboard
-        /// </summary>
-        /// <param name="resetBlackboard">Whether to reset the blackboard when resetting the tree</param>
-        public void Reset(bool resetBlackboard)
-        {
-            if (_tree == null)
-                return;
-
-            _tree.GetExecutionContext(this).node = _tree.root;
-
-            if (resetBlackboard)
-                _tree.blackboard.Reset();
+            stopped = true;
         }
     }
 }

@@ -9,32 +9,22 @@ namespace Schema.Internal
 {
     public abstract class GraphObject : ScriptableObject
     {
-        [SerializeField][HideInInspector] private string m_uID = Guid.NewGuid().ToString("N");
+        [SerializeField] [HideInInspector] private string m_uID = Guid.NewGuid().ToString("N");
 
         /// <summary>
         ///     The GUID for this object
         /// </summary>
         public string uID => m_uID;
-#if UNITY_EDITOR
-        /// <summary>
-        ///     The icon for this object
-        /// </summary>
-        public Texture2D icon { get { return _icon; } }
-        private Texture2D _icon;
-
-#endif
 
         /// <summary>
         ///     The description for this object
         /// </summary>
-        public string description { get { return _description; } }
-        private string _description;
+        public string description { get; private set; }
 
         /// <summary>
         ///     The category wof this object
         /// </summary>
-        public string category { get { return _category; } }
-        private string _category;
+        public string category { get; private set; }
 
         private void OnEnable()
         {
@@ -48,11 +38,11 @@ namespace Schema.Internal
                     : string.Concat(t.Name.Select(x => char.IsUpper(x) ? " " + x : x.ToString()))
                         .TrimStart(' ');
 
-            _description = GetDescription(t);
-            _category = GetCategory(t);
+            description = GetDescription(t);
+            category = GetCategory(t);
 
 #if UNITY_EDITOR
-            _icon = GetIcon(t);
+            icon = GetIcon(t);
 #endif
 
             OnObjectEnable();
@@ -219,6 +209,13 @@ namespace Schema.Internal
                 this.category = category;
             }
         }
+#if UNITY_EDITOR
+        /// <summary>
+        ///     The icon for this object
+        /// </summary>
+        public Texture2D icon { get; private set; }
+
+#endif
 #if UNITY_EDITOR
         /// <summary>
         ///     Get the icon for a specified type

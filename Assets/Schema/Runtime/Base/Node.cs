@@ -21,22 +21,18 @@ namespace Schema
             Both
         }
 
-        [SerializeField][HideInInspector] private Node m_parent;
-        [SerializeField][HideInInspector] private Node[] m_children = Array.Empty<Node>();
-        [SerializeField][HideInInspector] private Conditional[] m_conditionals = Array.Empty<Conditional>();
-        [SerializeField][HideInInspector] private Modifier[] m_modifiers = Array.Empty<Modifier>();
-        [SerializeField][HideInInspector] private Vector2 m_graphPosition;
-        [SerializeField][HideInInspector] private int m_priority;
-        [SerializeField][HideInInspector] private Graph m_graph;
+        [SerializeField] [HideInInspector] private Node m_parent;
+        [SerializeField] [HideInInspector] private Node[] m_children = Array.Empty<Node>();
+        [SerializeField] [HideInInspector] private Conditional[] m_conditionals = Array.Empty<Conditional>();
+        [SerializeField] [HideInInspector] private Modifier[] m_modifiers = Array.Empty<Modifier>();
+        [SerializeField] [HideInInspector] private Vector2 m_graphPosition;
+        [SerializeField] [HideInInspector] private int m_priority;
+        [SerializeField] [HideInInspector] private Graph m_graph;
 
-        [SerializeField]
-        [HideInInspector]
-        [TextArea]
+        [SerializeField] [HideInInspector] [TextArea]
         private string m_comment;
 
-        [Tooltip("Toggle the status indicator for this node")]
-        [HideInInspector]
-        [SerializeField]
+        [Tooltip("Toggle the status indicator for this node")] [HideInInspector] [SerializeField]
         private bool m_enableStatusIndicator = true;
 
         internal Stack<Modifier.Message> messageStack = new();
@@ -137,7 +133,7 @@ namespace Schema
         public virtual ConnectionDescriptor connectionDescriptor => ConnectionDescriptor.Both;
 
         /// <summary>
-        /// Get whether this node is in the sub tree of another node
+        ///     Get whether this node is in the sub tree of another node
         /// </summary>
         /// <param name="node">Node to check relation to</param>
         public bool IsSubTreeOf(Node node)
@@ -159,7 +155,7 @@ namespace Schema
         }
 
         /// <summary>
-        /// Get whether this node is lower priority of another node (to the right)
+        ///     Get whether this node is lower priority of another node (to the right)
         /// </summary>
         /// <param name="node">Node to check relation to</param>
         public bool IsLowerPriority(Node node)
@@ -179,11 +175,10 @@ namespace Schema
         }
 
         /// <summary>
-        /// Override this method to draw gizmos for this node in the Scene view
+        ///     Override this method to draw gizmos for this node in the Scene view
         /// </summary>
         public virtual void DoNodeGizmos(SchemaAgent agent)
         {
-
         }
 
         /// <summary>

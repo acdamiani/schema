@@ -22,12 +22,15 @@ namespace Schema.Builtin.Conditionals
 
         public bool precisionMode;
         public Vector3 offset;
-        [Tooltip("Where to store the object that this cone hit")][WriteOnly] public BlackboardEntrySelector<GameObject> gameObjectKey;
+
+        [Tooltip("Where to store the object that this cone hit")] [WriteOnly]
+        public BlackboardEntrySelector<GameObject> gameObjectKey;
 
         [Tooltip("The tags to filter from. Only these tags will be considered when checking the cone")]
         public TagFilter tagFilter;
 
-        [Tooltip("Visualize the cone in the Scene view")] public bool visualize;
+        [Tooltip("Visualize the cone in the Scene view")]
+        public bool visualize;
 
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
@@ -193,6 +196,23 @@ namespace Schema.Builtin.Conditionals
 
             return new GUIContent(sb.ToString());
         }
+
+        private struct RayRepresentation
+        {
+            public readonly Vector3 start;
+            public Vector3 direction;
+
+            public RayRepresentation(Vector3 start, Vector3 direction)
+            {
+                this.start = start;
+                this.direction = direction;
+            }
+
+            public static explicit operator Ray(RayRepresentation rayRepresentation)
+            {
+                return new Ray(rayRepresentation.start, rayRepresentation.direction.normalized);
+            }
+        }
 #if UNITY_EDITOR
         public override void DoConditionalGizmos(SchemaAgent agent)
         {
@@ -204,12 +224,9 @@ namespace Schema.Builtin.Conditionals
                 RayRepresentation[] rayRepresentations = GenerateRays(agent);
                 Ray[] rays = new Ray[rayRepresentations.Length];
 
-                for (int i = 0; i < rayRepresentations.Length; i++)
-                {
-                    rays[i] = (Ray)rayRepresentations[i];
-                }
+                for (int i = 0; i < rayRepresentations.Length; i++) rays[i] = (Ray)rayRepresentations[i];
 
-                Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
+                Dictionary<Ray, RaycastHit> hits = new();
                 hits = GetHitInfo(rays);
 
                 for (int i = 0; i < rays.Length; i++)
@@ -230,6 +247,7 @@ namespace Schema.Builtin.Conditionals
                 DrawCone(agent, TestCone(agent));
             }
         }
+
         private void DrawCone(SchemaAgent agent, bool hit)
         {
             Quaternion offsetRotation = Quaternion.AngleAxis(coneDirection, agent.transform.right);
@@ -258,21 +276,5 @@ namespace Schema.Builtin.Conditionals
             Handles.DrawWireDisc(agent.transform.position + rotatedOffset + topCenter, normal, radius, 2f);
         }
 #endif
-        private struct RayRepresentation
-        {
-            public readonly Vector3 start;
-            public Vector3 direction;
-
-            public RayRepresentation(Vector3 start, Vector3 direction)
-            {
-                this.start = start;
-                this.direction = direction;
-            }
-
-            public static explicit operator Ray(RayRepresentation rayRepresentation)
-            {
-                return new Ray(rayRepresentation.start, rayRepresentation.direction.normalized);
-            }
-        }
     }
 }

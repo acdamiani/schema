@@ -18,17 +18,17 @@ namespace Schema.Internal
 
         private readonly Dictionary<int, object[]> conditionalMemory = new();
 
+        private readonly int[] dynamicConditionals;
+
         private readonly Dictionary<int, bool> lastConditionalStatus = new();
+
+        private readonly Dictionary<int, bool> lastDynamicStatus = new();
 
         private readonly Dictionary<int, object[]> modifierMemory = new();
 
         public readonly Node node;
 
         private readonly Dictionary<int, object> nodeMemory = new();
-
-        private readonly int[] dynamicConditionals;
-
-        private readonly Dictionary<int, bool> lastDynamicStatus = new();
 
         public ExecutableNode(Node node)
         {
@@ -167,19 +167,21 @@ namespace Schema.Internal
                 int j = dynamicConditionals[i];
                 Conditional c = node.conditionals[j];
 
-                bool isSubAbort = c.abortsType == Conditional.AbortsType.Self || c.abortsType == Conditional.AbortsType.Both;
-                bool isPriorityAbort = c.abortsType == Conditional.AbortsType.LowerPriority || c.abortsType == Conditional.AbortsType.Both;
+                bool isSubAbort = c.abortsType == Conditional.AbortsType.Self ||
+                                  c.abortsType == Conditional.AbortsType.Both;
+                bool isPriorityAbort = c.abortsType == Conditional.AbortsType.LowerPriority ||
+                                       c.abortsType == Conditional.AbortsType.Both;
 
                 bool isSub = current.IsSubTreeOf(node);
                 bool isPriority = current.IsLowerPriority(node);
 
                 if (
-                    !((isSubAbort && isPriorityAbort) && (isSub || isPriority))
+                    !(isSubAbort && isPriorityAbort && (isSub || isPriority))
                     && (
-                    (isSubAbort && !isSub)
-                    || (isPriorityAbort && !isPriority)
+                        (isSubAbort && !isSub)
+                        || (isPriorityAbort && !isPriority)
                     )
-                    )
+                )
                     continue;
 
                 bool status = c.Evaluate(conditionalMemory[id][j], context.agent);
@@ -188,16 +190,16 @@ namespace Schema.Internal
                 lastDynamicStatus.TryGetValue(j, out bool last);
                 lastDynamicStatus[j] = status;
 
-                bool abortOnSuccess = c.abortsWhen == Conditional.AbortsWhen.OnSuccess || c.abortsWhen == Conditional.AbortsWhen.Both;
-                bool abortOnFailure = c.abortsWhen == Conditional.AbortsWhen.OnFailure || c.abortsWhen == Conditional.AbortsWhen.Both;
+                bool abortOnSuccess = c.abortsWhen == Conditional.AbortsWhen.OnSuccess ||
+                                      c.abortsWhen == Conditional.AbortsWhen.Both;
+                bool abortOnFailure = c.abortsWhen == Conditional.AbortsWhen.OnFailure ||
+                                      c.abortsWhen == Conditional.AbortsWhen.Both;
 
                 if (status != last
                     && ((status && abortOnSuccess) || (!status && abortOnFailure))
                     && ((isSubAbort && isSub) || (isPriorityAbort && isPriority))
-                )
-                {
+                   )
                     return true;
-                }
             }
 
             return false;

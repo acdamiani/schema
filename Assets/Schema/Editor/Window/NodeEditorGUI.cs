@@ -25,10 +25,10 @@ namespace SchemaEditor
         private bool editingPaused;
         private Editor editor;
         private Func<bool> isDockedFunc;
+        private bool isSplash;
         private bool needsPan;
         public float tabHeight => isDocked() ? 19.0f : 21.0f;
         private Func<bool> isDocked => isDockedFunc ??= this.GetIsDockedDelegate();
-        private bool isSplash;
 
         private void OnGUI()
         {
@@ -85,9 +85,11 @@ namespace SchemaEditor
 
             if (editor != null && editor.targets.Any(x => !x))
                 DestroyImmediate(editor);
-            else if (defaultNodeEditor != null && ((defaultNodeEditor.targets?.Any(x => !x) ?? true) || (editor.targets?.Any(x => !(x is Node)) ?? true)))
+            else if (defaultNodeEditor != null && ((defaultNodeEditor.targets?.Any(x => !x) ?? true) ||
+                                                   (editor.targets?.Any(x => !(x is Node)) ?? true)))
                 DestroyImmediate(defaultNodeEditor);
-            else if (defaultConditionalEditor != null && (((defaultConditionalEditor.targets?.Any(x => !x) ?? true) || (editor.targets?.Any(x => !(x is Conditional)) ?? true))))
+            else if (defaultConditionalEditor != null && ((defaultConditionalEditor.targets?.Any(x => !x) ?? true) ||
+                                                          (editor.targets?.Any(x => !(x is Conditional)) ?? true)))
                 DestroyImmediate(defaultConditionalEditor);
 
             List<Object> targets = new();

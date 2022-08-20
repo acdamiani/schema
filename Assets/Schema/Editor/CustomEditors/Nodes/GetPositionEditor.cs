@@ -7,9 +7,9 @@ namespace SchemaEditor.Editors.Nodes
     [CanEditMultipleObjects]
     public class GetPositionEditor : Editor
     {
-        private SerializedProperty transform;
         private SerializedProperty local;
         private SerializedProperty positionKey;
+        private SerializedProperty transform;
 
         private void OnEnable()
         {

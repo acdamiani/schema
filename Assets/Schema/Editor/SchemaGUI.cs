@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using SchemaEditor.Internal;
 using System.Text.RegularExpressions;
+using SchemaEditor.Internal;
 using UnityEditor;
 using UnityEngine;
 
@@ -97,12 +97,15 @@ namespace SchemaEditor
 
         public static void DoDescriptionLabel(ICanvasContextProvider context, string description, GUIStyle style)
         {
-            if (String.IsNullOrEmpty(description) || context == null)
+            if (string.IsNullOrEmpty(description) || context == null)
                 return;
 
             Rect contextRect = context.GetViewRect();
 
-            float availableWidth = contextRect.width - (Prefs.minimapEnabled && (Prefs.minimapPosition == 0 || Prefs.minimapPosition == 2) ? Prefs.minimapWidth : 0f) - 30f;
+            float availableWidth = contextRect.width -
+                                   (Prefs.minimapEnabled && (Prefs.minimapPosition == 0 || Prefs.minimapPosition == 2)
+                                       ? Prefs.minimapWidth
+                                       : 0f) - 30f;
 
             float width = Mathf.Min(style.CalcSize(new GUIContent(description)).x, availableWidth);
             float height = style.CalcHeight(new GUIContent(description), width);
@@ -111,11 +114,13 @@ namespace SchemaEditor
             {
                 case 0:
                 case 1:
-                    GUI.Label(new Rect(contextRect.xMax - width - 10f, contextRect.yMax - height - 10f, width, height), description, style);
+                    GUI.Label(new Rect(contextRect.xMax - width - 10f, contextRect.yMax - height - 10f, width, height),
+                        description, style);
                     break;
                 case 2:
                 case 3:
-                    GUI.Label(new Rect(contextRect.x + 10f, contextRect.yMax - height - 10f, width, height), description, style);
+                    GUI.Label(new Rect(contextRect.x + 10f, contextRect.yMax - height - 10f, width, height),
+                        description, style);
                     break;
             }
         }

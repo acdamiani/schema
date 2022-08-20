@@ -27,12 +27,14 @@ namespace Schema.Builtin.Conditionals
         public RaycastType type;
         public TagFilter tagFilter;
 
-        [Tooltip("Visualize the ray in the editor")] public bool visualize;
+        [Tooltip("Visualize the ray in the editor")]
+        public bool visualize;
 
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
             return TestCone(agent);
         }
+
         public override void DoConditionalGizmos(SchemaAgent agent)
         {
             if (type == RaycastType.Dynamic || !visualize) return;
@@ -50,6 +52,7 @@ namespace Schema.Builtin.Conditionals
 
             Gizmos.color = col;
         }
+
         private bool TestCone(SchemaAgent agent)
         {
             RaycastHit[] hits;

@@ -6,7 +6,9 @@ namespace Schema.Builtin.Nodes
     [Category("Miscellaneous")]
     public class GetSelf : Action
     {
-        [Tooltip("Where to store the gameObject executing this tree")][WriteOnly] public BlackboardEntrySelector<GameObject> gameObject;
+        [Tooltip("Where to store the gameObject executing this tree")] [WriteOnly]
+        public BlackboardEntrySelector<GameObject> gameObject;
+
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             if (gameObject.entry == null)

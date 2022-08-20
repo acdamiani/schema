@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Schema.Internal;
 using UnityEngine;
 
@@ -49,8 +50,7 @@ namespace Schema
 
                 if (typeof(T).IsAssignableFrom(t))
                     return (T)v;
-                else
-                    return (T)Convert.ChangeType(v, typeof(T));
+                return (T)Convert.ChangeType(v, typeof(T));
             }
             set
             {
@@ -163,7 +163,7 @@ namespace Schema
                     if (obj == null)
                         return null;
 
-                    string vPath = new System.Text.RegularExpressions.Regex(@" \(.*\)$").Replace(m_valuePath, "");
+                    string vPath = new Regex(@" \(.*\)$").Replace(m_valuePath, "");
 
                     if (!string.IsNullOrEmpty(m_valuePath))
                         return DynamicProperty.Get(obj, vPath);

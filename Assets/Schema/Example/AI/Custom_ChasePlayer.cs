@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
-using Schema;
 
 namespace Schema.Example
 {
@@ -12,12 +9,16 @@ namespace Schema.Example
         // The component selector is a special kind of BlackboardSelector. It will automatically get a component on a gameObject,
         // or it can get the component on the current SchemaAgent
         public ComponentSelector<NavMeshAgent> navMeshAgent;
+
         // This is used to get the player blackboard entry
         public BlackboardEntrySelector<GameObject> player;
+
         // The distance between the agent and target that the object is considered "caught"
         public BlackboardEntrySelector<float> minDistance;
+
         // The maximum distance the player can be from the agent before it gives up
         public BlackboardEntrySelector<float> maxDistance;
+
         // Tick will run once every frame, if the node is running
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
@@ -32,10 +33,8 @@ namespace Schema.Example
                 return NodeStatus.Failure;
 
             if (!a.SetDestination(playerObject.transform.position))
-            {
                 // Setting the destination wasn't successful, return failure
                 return NodeStatus.Failure;
-            }
 
             // Distance between the agent and the player object
             float distance = Vector3.Distance(playerObject.transform.position, a.transform.position);
@@ -55,7 +54,8 @@ namespace Schema.Example
                 return NodeStatus.Success;
             }
             // Too far away, give up
-            else if (distance >= max)
+
+            if (distance >= max)
             {
                 // Cancel the path since we lost the player
                 a.ResetPath();

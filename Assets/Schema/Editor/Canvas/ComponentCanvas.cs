@@ -1,7 +1,7 @@
-using Schema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Schema;
 using Schema.Internal;
 using Schema.Utilities;
 using SchemaEditor.Internal.ComponentSystem;
@@ -17,15 +17,12 @@ namespace SchemaEditor.Internal
         public delegate void OnComponentListModifiedHandler();
 
         private readonly Action<Rect, float, Vector2> _doGrid;
+        private readonly List<Func<GUIComponent, bool>> selectors = new();
 
         private GUIComponent[] _components = Array.Empty<GUIComponent>();
         private GUIComponent _hovered;
         private GUIComponent[] _selected = Array.Empty<GUIComponent>();
         private Vector2 lastMouse;
-        private readonly List<Func<GUIComponent, bool>> selectors = new();
-
-        public SchemaAgent activeInScene { get { return _activeInScene; } }
-        private SchemaAgent _activeInScene;
 
         private Vector2 mouseDownPos;
 
@@ -62,6 +59,8 @@ namespace SchemaEditor.Internal
             this.context = context;
             _doGrid = doGrid;
         }
+
+        public SchemaAgent activeInScene { get; private set; }
 
         public GUIComponent[] components => _components;
         public GUIComponent[] selected => _selected;
@@ -213,10 +212,12 @@ namespace SchemaEditor.Internal
                 return;
 
             SchemaAgent current = Selection.gameObjects
-                .Count() != 1 ? null : Selection.gameObjects.First().GetComponent<SchemaAgent>();
+                .Count() != 1
+                ? null
+                : Selection.gameObjects.First().GetComponent<SchemaAgent>();
 
             if (current != null)
-                _activeInScene = current;
+                activeInScene = current;
 
             if (!IsInSink(Event.current))
                 EditorGUIUtility.AddCursorRect(context.GetViewRect(), cursor);

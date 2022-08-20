@@ -20,7 +20,7 @@ namespace Schema
         }
 
         /// <summary>
-        ///      When the conditional should abort other actions
+        ///     When the conditional should abort other actions
         /// </summary>
         public enum AbortsWhen
         {
@@ -29,10 +29,10 @@ namespace Schema
             Both
         }
 
-        [SerializeField][HideInInspector] private Node m_node;
-        [SerializeField][HideInInspector] private AbortsType m_abortsType;
-        [SerializeField][HideInInspector] private AbortsWhen m_abortsWhen;
-        [SerializeField][HideInInspector] private bool m_invert;
+        [SerializeField] [HideInInspector] private Node m_node;
+        [SerializeField] [HideInInspector] private AbortsType m_abortsType;
+        [SerializeField] [HideInInspector] private AbortsWhen m_abortsWhen;
+        [SerializeField] [HideInInspector] private bool m_invert;
 
         /// <summary>
         ///     Node that this conditional is attached to
@@ -82,11 +82,10 @@ namespace Schema
         }
 
         /// <summary>
-        /// Override this method to draw gizmos for this node in the Scene view
+        ///     Override this method to draw gizmos for this node in the Scene view
         /// </summary>
         public virtual void DoConditionalGizmos(SchemaAgent agent)
         {
-
         }
 
         /// <summary>

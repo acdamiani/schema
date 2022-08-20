@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Schema.Internal
 {
@@ -9,8 +8,6 @@ namespace Schema.Internal
         private static Dictionary<BlackboardEntry, EntryData> globalValues;
         private readonly Dictionary<string, EntryData> dynamicValues = new();
         private readonly Dictionary<BlackboardEntry, EntryData> values = new();
-
-        public Blackboard blackboard { get; }
 
         public ExecutableBlackboard(Blackboard blackboard)
         {
@@ -21,6 +18,8 @@ namespace Schema.Internal
 
             Reset();
         }
+
+        public Blackboard blackboard { get; }
 
         public void Reset()
         {

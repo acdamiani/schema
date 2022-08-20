@@ -4,7 +4,6 @@ using System.Linq;
 using Schema.Internal;
 using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Schema
 {

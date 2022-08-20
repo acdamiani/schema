@@ -341,7 +341,6 @@ public static class GraphUtility
             float m = current.GetSize().y;
 
             if (current.parent != null)
-            {
                 foreach (Node n in current.parent.children)
                 {
                     if (n == current)
@@ -349,7 +348,6 @@ public static class GraphUtility
 
                     m = Mathf.Max(n.GetSize().y, m);
                 }
-            }
 
             size += m;
         }

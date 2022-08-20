@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 using Schema;
 using Schema.Internal;
 using Schema.Utilities;
-using SchemaEditor.Utilities;
 using SchemaEditor.Internal;
 using SchemaEditor.Internal.ComponentSystem.Components;
+using SchemaEditor.Utilities;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.ShortcutManagement;
@@ -60,7 +60,6 @@ namespace SchemaEditor
                     Blackboard.instance = target.blackboard;
                 target.PurgeNull();
             }
-
         }
 
         private void OnDestroy()

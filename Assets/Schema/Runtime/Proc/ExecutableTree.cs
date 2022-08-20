@@ -83,10 +83,8 @@ namespace Schema.Internal
                 ExecutableNode n = null;
 
                 for (int j = 0; j < nodes.Length; j++)
-                {
                     if (nodes[j].RunDynamicConditionals(context))
                         n = nodes[j];
-                }
 
                 if (n != null)
                 {

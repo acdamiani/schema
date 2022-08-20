@@ -1,20 +1,22 @@
+using Schema;
 using UnityEditor;
 using UnityEngine;
-using Schema;
 
 namespace SchemaEditor.Editors
 {
-    [CustomEditor(typeof(SchemaAgent)), CanEditMultipleObjects]
+    [CustomEditor(typeof(SchemaAgent))]
+    [CanEditMultipleObjects]
     public class SchemaAgentEditor : Editor
     {
-        private SerializedProperty graphTarget;
+        [SerializeField] private bool optionsFoldout;
         private SerializedProperty description;
-        private SerializedProperty restartWhenComplete;
+        private SerializedProperty graphTarget;
         private SerializedProperty maxStepsPerTick;
         private SerializedProperty resetBlackboardOnRestart;
+        private SerializedProperty restartWhenComplete;
         private SerializedProperty treePauseTime;
-        [SerializeField] private bool optionsFoldout;
-        void OnEnable()
+
+        private void OnEnable()
         {
             graphTarget = serializedObject.FindProperty("m_target");
             description = serializedObject.FindProperty("m_agentDescription");
@@ -23,6 +25,7 @@ namespace SchemaEditor.Editors
             resetBlackboardOnRestart = serializedObject.FindProperty("m_resetBlackboardOnRestart");
             treePauseTime = serializedObject.FindProperty("m_treePauseTime");
         }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

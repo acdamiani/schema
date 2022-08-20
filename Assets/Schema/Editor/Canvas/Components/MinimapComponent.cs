@@ -42,7 +42,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 else if (selected is ConditionalComponent)
                     text = ((ConditionalComponent)selected).conditional.description;
 
-                if (!String.IsNullOrEmpty(text))
+                if (!string.IsNullOrEmpty(text))
                     SchemaGUI.DoDescriptionLabel(canvas.context, text, Styles.description);
             }
 

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Schema.Utilities;
 using UnityEditor;
 using UnityEngine;
-using System.IO;
 
 namespace Schema.Internal
 {
@@ -79,7 +79,7 @@ namespace Schema.Internal
             {
                 loaded = CreateInstance<Blackboard>();
 
-                DirectoryInfo res = new DirectoryInfo(Path.Join(Application.dataPath, "Resources"));
+                DirectoryInfo res = new(Path.Join(Application.dataPath, "Resources"));
                 res.Create();
 
                 AssetDatabase.CreateAsset(loaded, "Assets/Resources/GlobalBlackboard.asset");

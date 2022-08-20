@@ -1,6 +1,5 @@
-using Schema;
-using System.Collections.Generic;
 using System.Linq;
+using Schema;
 using UnityEditor;
 
 namespace SchemaEditor.Editors
@@ -9,10 +8,10 @@ namespace SchemaEditor.Editors
     [CanEditMultipleObjects]
     public class DefaultConditionalEditor : Editor
     {
-        private SerializedProperty conditionalName;
-        private SerializedProperty invert;
         private SerializedProperty abortsType;
         private SerializedProperty abortsWhen;
+        private SerializedProperty conditionalName;
+        private SerializedProperty invert;
 
         private void OnEnable()
         {

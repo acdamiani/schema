@@ -1,5 +1,4 @@
-﻿using Schema;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 namespace Schema.Builtin.Nodes
@@ -10,12 +9,14 @@ namespace Schema.Builtin.Nodes
     public class Wander : Action
     {
         public ComponentSelector<NavMeshAgent> navMeshAgent;
+
         [Tooltip("The distance an agent will travel in any direction")]
         public float distance = 1f;
 
         public NavMeshAreaMask navmeshAreaMask;
 
-        [Tooltip("View the wander sphere in the editor")] public bool visualize;
+        [Tooltip("View the wander sphere in the editor")]
+        public bool visualize;
 
         public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
         {

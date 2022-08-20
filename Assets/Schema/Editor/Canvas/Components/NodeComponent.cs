@@ -252,7 +252,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             {
                 GUI.color = statusColor;
 
-                GUI.DrawTexture(new Rect(layout.body.position, Vector2.one * 16f).UseCenter(), Icons.GetResource("round", false));
+                GUI.DrawTexture(new Rect(layout.body.position, Vector2.one * 16f).UseCenter(),
+                    Icons.GetResource("round", false));
 
                 GUI.color = Color.white;
             }
@@ -498,7 +499,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public void DoHighlight()
         {
-            if (!Application.isPlaying || !Prefs.enableStatusIndicators || canvas.activeInScene == null || canvas.activeInScene.target != node.graph)
+            if (!Application.isPlaying || !Prefs.enableStatusIndicators || canvas.activeInScene == null ||
+                canvas.activeInScene.target != node.graph)
             {
                 statusColor = new Color(0f, 0f, 0f, 0f);
                 return;
