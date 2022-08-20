@@ -57,6 +57,27 @@ namespace SchemaEditor
             Repaint();
         }
 
+        [DrawGizmo(GizmoType.Selected | GizmoType.NonSelected)]
+        private static void DoGizmos(SchemaAgent agent, GizmoType gizmoType)
+        {
+            if (instance == null || agent.target != instance.target)
+                return;
+
+            IEnumerable<Node> nodes = instance.canvas.selected
+                .Where(x => x is NodeComponent)
+                .Select(x => ((NodeComponent)x).node);
+
+            foreach (Node node in nodes)
+                node.DoNodeGizmos(agent);
+
+            IEnumerable<Conditional> conditionals = instance.canvas.selected
+                .Where(x => x is ConditionalComponent)
+                .Select(x => ((ConditionalComponent)x).conditional);
+
+            foreach (Conditional conditional in conditionals)
+                conditional.DoConditionalGizmos(agent);
+        }
+
         private void CreateEditors()
         {
             if (blackboardEditor == null)

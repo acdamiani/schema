@@ -134,7 +134,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         {
             isSelected = true;
 
-            ArrayUtility.Add(ref ObjectSelection.nodeSelection, node);
             SceneView.RepaintAll();
         }
 
@@ -142,7 +141,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         {
             isSelected = false;
 
-            ArrayUtility.Remove(ref ObjectSelection.nodeSelection, node);
             SceneView.RepaintAll();
         }
 

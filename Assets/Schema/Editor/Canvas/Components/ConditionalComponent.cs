@@ -100,7 +100,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             dxdyMouseDown = canvas.mousePositionNoZoom - rect.position;
             originalIndex = Array.IndexOf(conditional.node.conditionals, conditional);
 
-            ArrayUtility.Add(ref ObjectSelection.conditionalSelection, conditional);
             SceneView.RepaintAll();
         }
 
@@ -108,7 +107,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         {
             isSelected = false;
 
-            ArrayUtility.Remove(ref ObjectSelection.conditionalSelection, conditional);
             SceneView.RepaintAll();
         }
 
