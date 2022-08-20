@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Schema.Builtin.Nodes
 {
     [DarkIcon("d_Animator Icon", true)]
-    [LightIcon("Aniamtor Icon", true)]
+    [LightIcon("Animator Icon", true)]
     [Category("Animator")]
     public class SetAnimatorVariable : Action
     {

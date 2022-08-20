@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Schema.Builtin.Nodes
 {
     [DarkIcon("d_CapsuleCollider Icon", true)]
-    [LightIcon("CapsuleCollider", true)]
+    [LightIcon("CapsuleCollider Icon", true)]
     [Category("Physics")]
     [Description("Casts a capsule along a ray and returns detailed information on what was hit")]
     public class CapsuleCast : Action
@@ -29,7 +29,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Specifies whether this query should hit triggers")]
         public QueryTriggerInteraction queryTriggerInteraction;
 
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects")] [WriteOnly]
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects")]
+        [WriteOnly]
         public BlackboardEntrySelector hit = new();
 
         protected override void OnObjectEnable()
