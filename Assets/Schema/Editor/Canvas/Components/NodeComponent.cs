@@ -51,7 +51,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
         public bool IsDeletable()
         {
-            return isSelected;
+            return isSelected && node.GetType() != typeof(Root);
         }
 
         public void Delete()
@@ -68,6 +68,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             if (parentConnection != null)
                 Destroy(parentConnection);
+
+            SceneView.RepaintAll();
         }
 
         public Object GetEditable()

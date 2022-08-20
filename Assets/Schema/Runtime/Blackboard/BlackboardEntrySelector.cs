@@ -163,8 +163,11 @@ namespace Schema
                     if (obj == null)
                         return null;
 
+                    string vPath = new System.Text.RegularExpressions.Regex(@" \(.*\)$").Replace(m_valuePath, "");
+
                     if (!string.IsNullOrEmpty(m_valuePath))
-                        return DynamicProperty.Get(obj, m_valuePath);
+                        return DynamicProperty.Get(obj, vPath);
+
                     return obj;
                 }
 

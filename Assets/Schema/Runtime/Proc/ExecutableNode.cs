@@ -167,22 +167,37 @@ namespace Schema.Internal
                 int j = dynamicConditionals[i];
                 Conditional c = node.conditionals[j];
 
+                bool isSubAbort = c.abortsType == Conditional.AbortsType.Self || c.abortsType == Conditional.AbortsType.Both;
+                bool isPriorityAbort = c.abortsType == Conditional.AbortsType.LowerPriority || c.abortsType == Conditional.AbortsType.Both;
+
+                bool isSub = current.IsSubTreeOf(node);
+                bool isPriority = current.IsLowerPriority(node);
+
+                if (
+                    !((isSubAbort && isPriorityAbort) && (isSub || isPriority))
+                    && (
+                    (isSubAbort && !isSub)
+                    || (isPriorityAbort && !isPriority)
+                    )
+                    )
+                    continue;
+
                 bool status = c.Evaluate(conditionalMemory[id][j], context.agent);
                 status = c.invert ? !status : status;
+
                 lastDynamicStatus.TryGetValue(j, out bool last);
-
-                if (status && !last)
-                {
-                    bool isSubAbort = c.abortsType == Conditional.AbortsType.Self || c.abortsType == Conditional.AbortsType.Both;
-                    bool isPriorityAbort = c.abortsType == Conditional.AbortsType.LowerPriority || c.abortsType == Conditional.AbortsType.Both;
-
-                    if (isSubAbort && current.IsSubTreeOf(node))
-                        return true;
-                    else if (isPriorityAbort && current.IsLowerPriority(node))
-                        return true;
-                }
-
                 lastDynamicStatus[j] = status;
+
+                bool abortOnSuccess = c.abortsWhen == Conditional.AbortsWhen.OnSuccess || c.abortsWhen == Conditional.AbortsWhen.Both;
+                bool abortOnFailure = c.abortsWhen == Conditional.AbortsWhen.OnFailure || c.abortsWhen == Conditional.AbortsWhen.Both;
+
+                if (status != last
+                    && ((status && abortOnSuccess) || (!status && abortOnFailure))
+                    && ((isSubAbort && isSub) || (isPriorityAbort && isPriority))
+                )
+                {
+                    return true;
+                }
             }
 
             return false;

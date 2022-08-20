@@ -7,16 +7,14 @@ namespace SchemaEditor.Editors.Nodes
     [CanEditMultipleObjects]
     public class GetPositionEditor : Editor
     {
-        private SerializedProperty gameObjectKey;
+        private SerializedProperty transform;
         private SerializedProperty local;
         private SerializedProperty positionKey;
-        private SerializedProperty useSelf;
 
         private void OnEnable()
         {
-            useSelf = serializedObject.FindProperty("useSelf");
+            transform = serializedObject.FindProperty("transform");
             local = serializedObject.FindProperty("local");
-            gameObjectKey = serializedObject.FindProperty("gameObject");
             positionKey = serializedObject.FindProperty("positionKey");
         }
 
@@ -24,12 +22,8 @@ namespace SchemaEditor.Editors.Nodes
         {
             serializedObject.Update();
 
-            EditorGUILayout.PropertyField(useSelf);
+            EditorGUILayout.PropertyField(transform);
             EditorGUILayout.PropertyField(local);
-
-            if (!useSelf.boolValue)
-                EditorGUILayout.PropertyField(gameObjectKey);
-
             EditorGUILayout.PropertyField(positionKey);
 
             serializedObject.ApplyModifiedProperties();

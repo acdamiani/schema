@@ -280,6 +280,7 @@ namespace SchemaEditor
                 GUILayout.Label("");
 
                 foreach (Type t in distinctTypes) EditorGUILayout.LabelField(t.Name);
+
                 return;
             }
 
@@ -292,10 +293,17 @@ namespace SchemaEditor
 
                 EditorGUILayout.LabelField(editor.targets[0].name, EditorStyles.boldLabel);
 
+                bool doGap = true;
+
                 if (defaultNodeEditor != null)
                     defaultNodeEditor.OnInspectorGUI();
                 else if (defaultConditionalEditor != null)
                     defaultConditionalEditor.OnInspectorGUI();
+                else
+                    doGap = false;
+
+                if (doGap)
+                    EditorGUILayout.LabelField("");
 
                 editor.OnInspectorGUI();
                 EditorGUI.EndDisabledGroup();

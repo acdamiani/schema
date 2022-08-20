@@ -152,7 +152,7 @@ namespace Schema
                 if (node == current)
                     return true;
 
-                current = node.parent;
+                current = current.parent;
             } while (current != null);
 
             return false;
@@ -167,7 +167,7 @@ namespace Schema
             if (node == null)
                 return false;
 
-            return priority > node.priority;
+            return priority > node.priority && !IsSubTreeOf(node);
         }
 
         /// <summary>

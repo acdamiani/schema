@@ -9,7 +9,7 @@ namespace Schema
     public abstract class Conditional : GraphObject
     {
         /// <summary>
-        ///     Possible ways the tree will respond to changes in this conditional's state
+        ///     Describes how nodes can be aborted by the conditional
         /// </summary>
         public enum AbortsType
         {
@@ -19,8 +19,19 @@ namespace Schema
             Both
         }
 
+        /// <summary>
+        ///      When the conditional should abort other actions
+        /// </summary>
+        public enum AbortsWhen
+        {
+            OnSuccess,
+            OnFailure,
+            Both
+        }
+
         [SerializeField][HideInInspector] private Node m_node;
         [SerializeField][HideInInspector] private AbortsType m_abortsType;
+        [SerializeField][HideInInspector] private AbortsWhen m_abortsWhen;
         [SerializeField][HideInInspector] private bool m_invert;
 
         /// <summary>
@@ -36,6 +47,12 @@ namespace Schema
         {
             get => m_abortsType;
             set => m_abortsType = value;
+        }
+
+        public AbortsWhen abortsWhen
+        {
+            get => m_abortsWhen;
+            set => m_abortsWhen = value;
         }
 
         /// <summary>

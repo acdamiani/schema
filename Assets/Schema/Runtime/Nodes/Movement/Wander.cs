@@ -15,6 +15,8 @@ namespace Schema.Builtin.Nodes
 
         public NavMeshAreaMask navmeshAreaMask;
 
+        [Tooltip("View the wander sphere in the editor")] public bool visualize;
+
         public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
         {
             WanderMemory memory = (WanderMemory)nodeMemory;
@@ -59,6 +61,16 @@ namespace Schema.Builtin.Nodes
             }
 
             return NodeStatus.Failure;
+        }
+
+        public override void DoNodeGizmos(SchemaAgent agent)
+        {
+            if (!visualize)
+                return;
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(agent.transform.position, distance);
+            Gizmos.color = Color.white;
         }
 
         private class WanderMemory

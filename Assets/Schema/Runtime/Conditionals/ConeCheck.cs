@@ -22,8 +22,7 @@ namespace Schema.Builtin.Conditionals
 
         public bool precisionMode;
         public Vector3 offset;
-        public BlackboardEntrySelector<GameObject> parentObject;
-        public BlackboardEntrySelector<GameObject> gameObjectKey;
+        [Tooltip("Where to store the object that this cone hit")][WriteOnly] public BlackboardEntrySelector<GameObject> gameObjectKey;
 
         [Tooltip("The tags to filter from. Only these tags will be considered when checking the cone")]
         public TagFilter tagFilter;

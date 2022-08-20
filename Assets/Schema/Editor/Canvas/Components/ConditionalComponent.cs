@@ -52,6 +52,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public void Delete()
         {
             conditional.node.RemoveConditional(conditional);
+
+            SceneView.RepaintAll();
         }
 
         public Object GetEditable()

@@ -16,24 +16,29 @@ namespace Schema.Builtin.Nodes
         {
             PatrolMemory memory = (PatrolMemory)nodeMemory;
 
-            NavMeshAgent a = memory.agent = agent.GetComponent(navMeshAgent);
+            if (points.Count == 0)
+                return;
+
+            NavMeshAgent a = agent.GetComponent(navMeshAgent);
 
             if (a == null)
                 return;
 
-            memory.agent.SetDestination(points[memory.currentIndex].value);
+            a.SetDestination(points[memory.currentIndex].value);
         }
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)
         {
             PatrolMemory memory = (PatrolMemory)nodeMemory;
 
-            if (memory.agent == null)
+            NavMeshAgent a = agent.GetComponent(navMeshAgent);
+
+            if (points.Count == 0 || a == null)
                 return NodeStatus.Failure;
 
-            if (!memory.agent.pathPending &&
-                memory.agent.remainingDistance <= memory.agent.stoppingDistance &&
-                (!memory.agent.hasPath || memory.agent.velocity.sqrMagnitude == 0f))
+            if (!a.pathPending &&
+                a.remainingDistance <= a.stoppingDistance &&
+                (!a.hasPath || a.velocity.sqrMagnitude == 0f))
             {
                 memory.currentIndex++;
                 memory.currentIndex = memory.currentIndex > points.Count - 1 ? 0 : memory.currentIndex;
@@ -46,7 +51,6 @@ namespace Schema.Builtin.Nodes
 
         private class PatrolMemory
         {
-            public NavMeshAgent agent;
             public int currentIndex;
         }
     }
