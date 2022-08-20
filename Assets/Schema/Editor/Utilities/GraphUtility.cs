@@ -23,16 +23,6 @@ public static class GraphUtility
         Node.EndPosNoCheck();
     }
 
-    private static Vector2 GetNodeSize(this Node node)
-    {
-        NodeComponent nodeComponent = NodeEditor.instance.canvas.FindComponent(node) as NodeComponent;
-
-        if (nodeComponent == null)
-            return Vector2.zero;
-
-        return nodeComponent.layout.body.size;
-    }
-
     private static Vector2 GetSize(this Node node)
     {
         NodeComponent nodeComponent = NodeEditor.instance.canvas.FindComponent(node) as NodeComponent;
@@ -260,7 +250,7 @@ public static class GraphUtility
         int pCount = node.GetParentCount();
 
         if (!values.ContainsKey(pCount))
-            values.Add(pCount, node.GetPosition().x + sum);
+            values.Add(pCount, node.GetPosition().x + sum + node.GetSize().x);
         else
             values[pCount] = Math.Max(values[pCount], node.GetPosition().x + sum + node.GetSize().x);
 
@@ -357,7 +347,7 @@ public static class GraphUtility
                     if (n == current)
                         continue;
 
-                    m = Mathf.Max(n.GetSize().y);
+                    m = Mathf.Max(n.GetSize().y, m);
                 }
             }
 
