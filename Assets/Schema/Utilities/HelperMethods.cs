@@ -418,5 +418,37 @@ namespace Schema.Utilities
             return rect;
         }
 
+        public static bool CanConvertTo(this Type type, Type target)
+        {
+            HashSet<Type> clrTypes = new()
+            {
+                typeof(bool),
+                typeof(byte),
+                typeof(char),
+                typeof(DateTime),
+                typeof(decimal),
+                typeof(double),
+                typeof(short),
+                typeof(int),
+                typeof(long),
+                typeof(sbyte),
+                typeof(float),
+                typeof(string),
+                typeof(ushort),
+                typeof(uint),
+                typeof(ulong)
+            };
+
+            if (type == null || target == null)
+                return false;
+
+            if (target.IsAssignableFrom(type))
+                return true;
+
+            bool hasIConvertible = type.GetInterface(nameof(IConvertible)) != null;
+            bool isCLR = clrTypes.Contains(target);
+
+            return (hasIConvertible && isCLR);
+        }
     }
 }

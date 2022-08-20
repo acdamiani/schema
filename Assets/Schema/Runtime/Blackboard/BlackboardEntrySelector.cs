@@ -40,14 +40,17 @@ namespace Schema
                 if (!isDynamic && entry == null)
                     return inspectorValue;
 
-                try
-                {
-                    return (T)base.value;
-                }
-                catch
-                {
+                object v = base.value;
+
+                Type t = v?.GetType();
+
+                if (t == null)
                     return default;
-                }
+
+                if (typeof(T).IsAssignableFrom(t))
+                    return (T)v;
+                else
+                    return (T)Convert.ChangeType(v, typeof(T));
             }
             set
             {

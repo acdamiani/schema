@@ -265,7 +265,7 @@ namespace SchemaEditor
 
                 if (disableDynamicBinding)
                 {
-                    if (!filtered.Any(t => value.IsAssignableFrom(t)))
+                    if (!filtered.Any(t => t.CanConvertTo(value)))
                         continue;
 
                     menu.AddItem(
@@ -275,7 +275,7 @@ namespace SchemaEditor
                         false
                     );
                 }
-                else if (filtered.Any(t => t.IsAssignableFrom(value)))
+                else if (filtered.Any(t => t.CanConvertTo(value)))
                 {
                     bool showType = filtered.Count > 1;
                     string typeSuffix = $" ({bEntry.type.Name})";
@@ -320,6 +320,7 @@ namespace SchemaEditor
 
             return menu;
         }
+
 
         private static void GenericMenuSelectOption(SerializedProperty property, BlackboardEntry entry,
             string path = "")
