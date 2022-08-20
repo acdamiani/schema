@@ -24,6 +24,12 @@ namespace SchemaEditor.Editors
 
         private void OnEnable()
         {
+            if (targets.Any(x => x == null))
+            {
+                DestroyImmediate(this);
+                return;
+            }
+
             nodeName = serializedObject.FindProperty("m_Name");
             comment = serializedObject.FindProperty("m_comment");
             enableStatusIndicator = serializedObject.FindProperty("m_enableStatusIndicator");

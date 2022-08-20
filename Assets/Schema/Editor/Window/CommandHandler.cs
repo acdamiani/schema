@@ -126,6 +126,9 @@ namespace SchemaEditor.Internal
 
         public static void PasteCommand(ComponentCanvas canvas)
         {
+            if (copyBuffer == null)
+                return;
+
             copyBuffer.Flush(
                 canvas.components
                     .Where(x => x is IPasteRecievier)
@@ -176,17 +179,15 @@ namespace SchemaEditor.Internal
                 .Where(x => x is Conditional)
                 .Select(x => ((Conditional)x).node);
 
-            copyBuffer = new CopyBuffer(
+            CopyBuffer tmp = new CopyBuffer(
                 canvas,
                 copyables,
                 NodeEditor.instance.target
             );
 
-            copyBuffer.Flush(
+            tmp.Flush(
                 toPaste
             );
-
-            copyBuffer = null;
 
             canvas.DeselectAll();
             canvas.context.Rebuild();

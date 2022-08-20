@@ -23,13 +23,13 @@ namespace SchemaEditor.Editors.Nodes
         {
             coneType = serializedObject.FindProperty("precisionMode");
             halfAngle = serializedObject.FindProperty("halfAngle");
-            visualize = serializedObject.FindProperty("visualize");
             tagFilter = serializedObject.FindProperty("tagFilter");
             resolution = serializedObject.FindProperty("resolution");
             rayRange = serializedObject.FindProperty("rayRange");
             offset = serializedObject.FindProperty("offset");
             direction = serializedObject.FindProperty("coneDirection");
             gameObjectKey = serializedObject.FindProperty("gameObjectKey");
+            visualize = serializedObject.FindProperty("visualize");
         }
 
         public override void OnInspectorGUI()

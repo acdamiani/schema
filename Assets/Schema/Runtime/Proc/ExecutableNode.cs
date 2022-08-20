@@ -26,6 +26,10 @@ namespace Schema.Internal
 
         private readonly Dictionary<int, object> nodeMemory = new();
 
+        private readonly int[] dynamicConditionals;
+
+        private readonly Dictionary<int, bool> lastDynamicStatus = new();
+
         public ExecutableNode(Node node)
         {
             if (node == null)
@@ -40,6 +44,11 @@ namespace Schema.Internal
                 .ToArray();
             breadth = GetBreadth(node);
             nodeType = GetNodeType(node);
+
+            dynamicConditionals = node.conditionals
+                .Where(x => x.abortsType != Conditional.AbortsType.None)
+                .Select(x => Array.IndexOf(node.conditionals, x))
+                .ToArray();
 
             if (node.parent != null)
             {
@@ -146,6 +155,37 @@ namespace Schema.Internal
 
             for (int i = 0; i < action.conditionals.Length; i++)
                 action.conditionals[i].OnInitialize(conditionalMemory[id][i], agent);
+        }
+
+        public bool RunDynamicConditionals(ExecutionContext context)
+        {
+            Node current = context.node.node;
+            int id = context.agent.GetInstanceID();
+
+            for (int i = 0; i < dynamicConditionals.Length; i++)
+            {
+                int j = dynamicConditionals[i];
+                Conditional c = node.conditionals[j];
+
+                bool status = c.Evaluate(conditionalMemory[id][j], context.agent);
+                status = c.invert ? !status : status;
+                lastDynamicStatus.TryGetValue(j, out bool last);
+
+                if (status && !last)
+                {
+                    bool isSubAbort = c.abortsType == Conditional.AbortsType.Self || c.abortsType == Conditional.AbortsType.Both;
+                    bool isPriorityAbort = c.abortsType == Conditional.AbortsType.LowerPriority || c.abortsType == Conditional.AbortsType.Both;
+
+                    if (isSubAbort && current.IsSubTreeOf(node))
+                        return true;
+                    else if (isPriorityAbort && current.IsLowerPriority(node))
+                        return true;
+                }
+
+                lastDynamicStatus[j] = status;
+            }
+
+            return false;
         }
 
         public int Execute(ExecutionContext context)

@@ -19,9 +19,9 @@ namespace Schema
             Both
         }
 
-        [SerializeField] [HideInInspector] private Node m_node;
-        [SerializeField] [HideInInspector] private AbortsType m_abortsType;
-        [SerializeField] [HideInInspector] private bool m_invert;
+        [SerializeField][HideInInspector] private Node m_node;
+        [SerializeField][HideInInspector] private AbortsType m_abortsType;
+        [SerializeField][HideInInspector] private bool m_invert;
 
         /// <summary>
         ///     Node that this conditional is attached to
@@ -62,6 +62,14 @@ namespace Schema
         /// <param name="agent">Agent executing this conditional</param>
         public virtual void OnInitialize(object conditionalMemory, SchemaAgent agent)
         {
+        }
+
+        /// <summary>
+        /// Override this method to draw gizmos for this node in the Scene view
+        /// </summary>
+        public virtual void DoConditionalGizmos(SchemaAgent agent)
+        {
+
         }
 
         /// <summary>

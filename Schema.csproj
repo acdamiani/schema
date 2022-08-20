@@ -69,7 +69,6 @@
      <Compile Include="Assets/Schema/Runtime/Nodes/GameObject/SendMessageUpwards.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Vector/ComposeVector3.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Random/PointInsideUnitCircle.cs" />
-     <Compile Include="Assets/Schema/Utilities/ConsoleToGUI.cs" />
      <Compile Include="Assets/Schema/Runtime/Proc/ExecutableBlackboard.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Vector/VectorAngle.cs" />
      <Compile Include="Assets/Schema/Runtime/Misc/TagList.cs" />
@@ -242,6 +241,8 @@
      <Compile Include="Assets/Schema/Runtime/Nodes/GameObject/SendMessage.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Transform/TranslateRelative.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Math/Subtract.cs" />
+     <Compile Include="Assets/Schema/Utilities/ObjectSelection.cs" />
+     <Compile Include="Assets/Schema/Examples/Player.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2021.3.6f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

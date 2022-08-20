@@ -28,10 +28,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         private static bool beginConnectionOrigin;
         private Vector2 beginDragNodePosition;
         private Vector2? beginDragPosition;
-        private float cLerp;
-        private bool isActive;
         private bool isSelected;
-        private NodeStatus status;
         private Color statusColor;
         private float t;
         public Node node { get; private set; }
@@ -136,11 +133,17 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public void Select(bool additive)
         {
             isSelected = true;
+
+            ArrayUtility.Add(ref ObjectSelection.nodeSelection, node);
+            SceneView.RepaintAll();
         }
 
         public void Deselect()
         {
             isSelected = false;
+
+            ArrayUtility.Remove(ref ObjectSelection.nodeSelection, node);
+            SceneView.RepaintAll();
         }
 
         public override void Create(CreateArgs args)
@@ -178,7 +181,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             DoEvents();
 
-            HandleSelection(Selection.gameObjects);
+            DoHighlight();
 
             Color guiColor = GUI.color;
 
@@ -203,11 +206,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             Styles.element.DrawIfRepaint(layout.shadow, false, false, false, false);
 
-            Color c = isSelected ? Prefs.selectionColor : Styles.outlineColor;
-            cLerp -= Time.realtimeSinceStartup - t;
-            cLerp = Mathf.Clamp01(cLerp);
-
-            GUI.color = Color.Lerp(c, statusColor, cLerp) * tint;
+            GUI.color = isSelected ? Prefs.selectionColor : Styles.outlineColor;
             Styles.outline.DrawIfRepaint(layout.body, false, false, false, false);
 
             GUI.color = Styles.windowAccent * tint;
@@ -247,6 +246,15 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                 GUI.color = Color.white * tint;
                 GUI.DrawTexture(layout.modifierBox.Pad(4), Icons.GetResource("Modifier", false));
+            }
+
+            if (statusColor != new Color(0f, 0f, 0f, 0f))
+            {
+                GUI.color = statusColor;
+
+                GUI.DrawTexture(new Rect(layout.body.position, Vector2.one * 16f).UseCenter(), Icons.GetResource("round", false));
+
+                GUI.color = Color.white;
             }
 
             if (node.priority > 0)
@@ -488,36 +496,26 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             return sb.ToString();
         }
 
-        public void HandleSelection(IEnumerable<GameObject> selection)
+        public void DoHighlight()
         {
-            if (!Application.isPlaying || !Prefs.enableStatusIndicators || selection.Count() != 1)
+            if (!Application.isPlaying || !Prefs.enableStatusIndicators || canvas.activeInScene == null || canvas.activeInScene.target != node.graph)
             {
-                cLerp = 0f;
+                statusColor = new Color(0f, 0f, 0f, 0f);
                 return;
             }
 
-            SchemaAgent agent = selection
-                .ElementAt(0)
-                .GetComponent<SchemaAgent>();
-
-            if (agent == null || agent.target != node.graph)
-                return;
-
-            ExecutionContext executionContext = agent.tree.GetExecutionContext(agent);
+            ExecutionContext executionContext = canvas.activeInScene.tree.GetExecutionContext(canvas.activeInScene);
 
             switch (executionContext.GetLastStatus(node.priority - 1))
             {
                 case NodeStatus.Success:
                     statusColor = Prefs.successColor;
-                    cLerp = 1.0f;
                     break;
                 case NodeStatus.Failure:
                     statusColor = Prefs.failureColor;
-                    cLerp = 1.0f;
                     break;
                 case NodeStatus.Running:
                     statusColor = Prefs.highlightColor;
-                    cLerp = 1.0f;
                     break;
             }
         }

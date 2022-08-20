@@ -26,7 +26,6 @@ namespace Schema.Internal
                 if (value == null)
                     return;
 
-
                 if (status == NodeStatus.Running || (_node != null && value.index - node.index < 0))
                 {
                     lastStatus[_node.index] = status;
@@ -43,6 +42,18 @@ namespace Schema.Internal
         public ExecutableNode last { get; private set; }
 
         public NodeStatus status { get; set; }
+
+        public void ForceStatus(ExecutableNode node)
+        {
+            if (node.index > 0)
+                lastStatus[node.index] = status;
+        }
+
+        public void RemoveStatus(ExecutableNode node)
+        {
+            if (node.index > 0 && lastStatus.ContainsKey(node.index))
+                lastStatus.Remove(node.index);
+        }
 
         public NodeStatus? GetLastStatus(int index)
         {

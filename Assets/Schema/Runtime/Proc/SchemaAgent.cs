@@ -156,5 +156,22 @@ namespace Schema
             if (resetBlackboard)
                 _tree.blackboard.Reset();
         }
+
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            foreach (Node node in ObjectSelection.nodeSelection)
+            {
+                if (node.graph == target)
+                    node.DoNodeGizmos(this);
+            }
+
+            foreach (Conditional conditional in ObjectSelection.conditionalSelection)
+            {
+                if (conditional.node.graph == target)
+                    conditional.DoConditionalGizmos(this);
+            }
+        }
+#endif
     }
 }

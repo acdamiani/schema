@@ -1,3 +1,4 @@
+using Schema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,9 @@ namespace SchemaEditor.Internal
         private GUIComponent[] _selected = Array.Empty<GUIComponent>();
         private Vector2 lastMouse;
         private readonly List<Func<GUIComponent, bool>> selectors = new();
+
+        public SchemaAgent activeInScene { get { return _activeInScene; } }
+        private SchemaAgent _activeInScene;
 
         public ComponentCanvas(
             ICanvasContextProvider context,
@@ -199,6 +203,12 @@ namespace SchemaEditor.Internal
                 && !context.GetViewRect().Contains(Event.current.mousePosition)
             )
                 return;
+
+            SchemaAgent current = Selection.gameObjects
+                .Count() != 1 ? null : Selection.gameObjects.First().GetComponent<SchemaAgent>();
+
+            if (current != null)
+                _activeInScene = current;
 
             if (!IsInSink(Event.current))
                 EditorGUIUtility.AddCursorRect(context.GetViewRect(), cursor);

@@ -15,10 +15,12 @@ namespace Schema.Builtin.Nodes
         [Tooltip("The NavMesh surfaces the agent is allowed to choose points on")]
         public NavMeshAreaMask areaMask;
 
-        [Range(10f, 180f)] [Tooltip("The maximum angle to choose a point in front of the agent")]
+        [Range(10f, 180f)]
+        [Tooltip("The maximum angle to choose a point in front of the agent")]
         public float angle = 45f;
 
-        [Min(1f)] [Tooltip("The maximum distance to choose a point")]
+        [Min(1f)]
+        [Tooltip("The maximum distance to choose a point")]
         public float maxDistance = 10f;
 
         [Tooltip("The minimum distance to choose a point")]
@@ -26,8 +28,6 @@ namespace Schema.Builtin.Nodes
 
         [Tooltip("The distance away from the enemy that the agent considers \"safe.\"")]
         public float safeDistance = 25f;
-
-        [Tooltip("Visualize the range")] public bool visualize;
 
         private Vector3 randomPoint;
 
@@ -111,44 +111,6 @@ namespace Schema.Builtin.Nodes
             return randomPoint;
         }
 
-#if UNITY_EDITOR
-        public override void DrawGizmos(SchemaAgent agent)
-        {
-            if (!visualize) return;
-
-            Debug.Log("hey");
-
-            Vector3 dir = (new Vector3(agent.transform.position.x, 0f, agent.transform.position.z) - Vector3.zero)
-                .normalized;
-            Quaternion rot = Quaternion.LookRotation(dir, Vector3.up);
-
-            float halfAngle = angle / 2f;
-            float rad = halfAngle * Mathf.Deg2Rad;
-            float halfPI = Mathf.PI / 2f;
-
-            float dx = Mathf.Cos(halfPI - rad);
-            float dy = Mathf.Sin(halfPI - rad);
-
-            Quaternion qa = Quaternion.Euler(0f, halfAngle, 0f);
-            Quaternion qb = Quaternion.Euler(0f, -halfAngle, 0f);
-
-            Vector3 from = rot * new Vector3(-dx, 0f, dy);
-
-            Gizmos.DrawCube(randomPoint, Vector3.one * 0.1f);
-
-            Handles.DrawWireArc(agent.transform.position, Vector3.up, from, angle, maxDistance);
-            Handles.DrawWireArc(agent.transform.position, Vector3.up, from, angle, minDistance);
-            Gizmos.DrawRay(agent.transform.position, qa * rot * Vector3.forward * maxDistance);
-            Gizmos.DrawRay(agent.transform.position, qb * rot * Vector3.forward * maxDistance);
-
-            Color handlesColor = Handles.color;
-            Handles.color = Color.green;
-
-            Handles.DrawWireDisc(agent.transform.position, Vector3.up, safeDistance);
-
-            Handles.color = handlesColor;
-        }
-#endif
         private class FleeMemory
         {
             public NavMeshAgent agent;

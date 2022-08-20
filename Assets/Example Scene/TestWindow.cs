@@ -19,9 +19,6 @@ public class TestWindow : EditorWindow
         GUILayout.BeginArea(new Rect(0f, 0f, 100f, 100f));
         GUILayout.BeginHorizontal();
 
-        if (Event.current.rawType != EventType.Layout && Event.current.rawType != EventType.Repaint)
-            Debug.Log(Event.current.rawType);
-
         GUILayout.EndHorizontal();
         GUILayout.EndArea();
     }

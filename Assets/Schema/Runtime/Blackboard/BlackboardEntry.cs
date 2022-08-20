@@ -13,7 +13,7 @@ namespace Schema.Internal
         [SerializeField] private string m_typeString;
         [SerializeField] private Blackboard m_blackboard;
         private Type _type;
-        private string lastTypeString;
+        private string lastTypeString = "";
 
         /// <summary>
         ///     Description of this entry

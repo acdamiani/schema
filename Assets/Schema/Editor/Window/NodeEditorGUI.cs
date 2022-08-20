@@ -64,9 +64,9 @@ namespace SchemaEditor
 
             if (editor != null && editor.targets.Any(x => !x))
                 DestroyImmediate(editor);
-            else if (defaultNodeEditor != null && (defaultNodeEditor.targets.Any(x => !x) || editor.targets.Any(x => !(x is Node))))
+            else if (defaultNodeEditor != null && ((defaultNodeEditor.targets?.Any(x => !x) ?? true) || (editor.targets?.Any(x => !(x is Node)) ?? true)))
                 DestroyImmediate(defaultNodeEditor);
-            else if (defaultConditionalEditor != null && (defaultConditionalEditor.targets.Any(x => !x) || editor.targets.Any(x => !(x is Conditional))))
+            else if (defaultConditionalEditor != null && (((defaultConditionalEditor.targets?.Any(x => !x) ?? true) || (editor.targets?.Any(x => !(x is Conditional)) ?? true))))
                 DestroyImmediate(defaultConditionalEditor);
 
             List<Object> targets = new();

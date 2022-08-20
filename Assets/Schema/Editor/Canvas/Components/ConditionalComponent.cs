@@ -20,7 +20,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         private static int originalIndex;
         private Rect _rect;
 
-        private float cLerp;
         private NodeComponent parent;
         private Color statusColor;
         private float t;
@@ -97,13 +96,20 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public void Select(bool additive)
         {
             isSelected = true;
+
             dxdyMouseDown = canvas.mousePositionNoZoom - rect.position;
             originalIndex = Array.IndexOf(conditional.node.conditionals, conditional);
+
+            ArrayUtility.Add(ref ObjectSelection.conditionalSelection, conditional);
+            SceneView.RepaintAll();
         }
 
         public void Deselect()
         {
             isSelected = false;
+
+            ArrayUtility.Remove(ref ObjectSelection.conditionalSelection, conditional);
+            SceneView.RepaintAll();
         }
 
         public Rect GetRect()
@@ -127,32 +133,23 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             return new Rect(pos.x, pos.y, contentSize.x, height);
         }
 
-        private void HandleSelection(IEnumerable<GameObject> selection)
+        private void DoHighlight()
         {
-            if (!Application.isPlaying || !Prefs.enableStatusIndicators || selection.Count() != 1)
+            if (!Application.isPlaying || !Prefs.enableStatusIndicators || canvas.activeInScene == null || canvas.activeInScene.target != conditional.node.graph)
             {
-                cLerp = 0f;
+                statusColor = new Color(0f, 0f, 0f, 0f);
                 return;
             }
 
-            SchemaAgent agent = selection
-                .ElementAt(0)
-                .GetComponent<SchemaAgent>();
-
-            if (agent == null || agent.target != conditional.node.graph)
-                return;
-
-            ExecutableNode executableNode = agent.tree.GetExecutableNode(conditional.node);
+            ExecutableNode executableNode = canvas.activeInScene.tree.GetExecutableNode(conditional.node);
 
             switch (executableNode.GetLastConditionalStatus(Array.IndexOf(conditional.node.conditionals, conditional)))
             {
                 case true:
                     statusColor = Prefs.successColor;
-                    cLerp = 1.0f;
                     break;
                 case false:
                     statusColor = Prefs.failureColor;
-                    cLerp = 1.0f;
                     break;
             }
         }
@@ -206,7 +203,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             DoEvents();
 
-            HandleSelection(Selection.gameObjects);
+            DoHighlight();
 
             float height = 32f;
 
@@ -253,19 +250,24 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             Styles.element.DrawIfRepaint(r.Pad(-10), false, false, false, false);
             Styles.conditional.DrawIfRepaint(r, content, false, false, false, false);
 
-            Color c = isSelected ? Prefs.selectionColor : Styles.outlineColor;
-            cLerp -= Time.realtimeSinceStartup - t;
-            cLerp = Mathf.Clamp01(cLerp);
-
             GUI.backgroundColor = Color.white;
 
-            GUI.color = Color.Lerp(c, statusColor, cLerp);
+            GUI.color = isSelected ? Prefs.selectionColor : Styles.outlineColor;
             Styles.outline.DrawIfRepaint(r, false, false, false, false);
 
             GUI.color = Color.white;
 
             if (icon != null)
                 GUI.DrawTexture(new Rect(r.x + Styles.conditional.padding.left, r.y + 8f, 16f, 16f), icon);
+
+            if (statusColor != new Color(0f, 0f, 0f, 0f))
+            {
+                GUI.color = statusColor;
+
+                GUI.DrawTexture(new Rect(_rect.position, Vector2.one * 16f).UseCenter(), Icons.GetResource("round", false));
+
+                GUI.color = Color.white;
+            }
 
             t = Time.realtimeSinceStartup;
         }

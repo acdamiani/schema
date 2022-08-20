@@ -250,8 +250,6 @@ namespace SchemaEditor
                 .FilterArrayByMask(Blackboard.mappedBlackboardTypes.Reverse().ToArray(), mask)
                 .ToList();
 
-            filtered.ForEach(Debug.Log);
-
             menu.AddItem("<None>", entry.objectReferenceValue == null && !isDynamicPropertyValue,
                 () => GenericMenuSelectOption(property, null), false);
             menu.AddSeparator("");

@@ -14,7 +14,6 @@ namespace Schema.Builtin.Nodes
         public float distance = 1f;
 
         public NavMeshAreaMask navmeshAreaMask;
-        public bool visualize;
 
         public override void OnNodeEnter(object nodeMemory, SchemaAgent agent)
         {
@@ -60,17 +59,6 @@ namespace Schema.Builtin.Nodes
             }
 
             return NodeStatus.Failure;
-        }
-
-        public override void DrawGizmos(SchemaAgent agent)
-        {
-            if (!visualize) return;
-
-            Color gizmosColor = Gizmos.color;
-
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(agent.transform.position, distance);
-            Gizmos.color = gizmosColor;
         }
 
         private class WanderMemory

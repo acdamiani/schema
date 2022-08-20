@@ -126,7 +126,7 @@ namespace SchemaEditor
         void IHasCustomMenu.AddItemsToMenu(GenericMenu menu)
         {
             menu.AddItem("Documentation", false,
-                () => OpenUrl("https://thinking-automation.vercel.app/docs/getting-started"), false);
+                () => OpenUrl("https://schemaunity.com/docs/getting-started"), false);
         }
 
         [DidReloadScripts]
@@ -136,7 +136,6 @@ namespace SchemaEditor
             foreach (Type t in HelperMethods.GetNodeTypes())
             {
                 IEnumerable<Type> test = HelperMethods.GetEnumerableOfType(t);
-                //Debug.Log(t + ": " + String.Join(",", test));
                 nodeTypes.Add(t, test.ToList());
             }
 

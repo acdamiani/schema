@@ -8,9 +8,10 @@ namespace Schema.Builtin.Conditionals
 {
     [DarkIcon("Conditionals/d_ConeCheck")]
     [LightIcon("Conditionals/ConeCheck")]
+    [Description("Use a cone to test for GameObject collisions. Stores the first hit gameObject in a given variable.")]
     public class ConeCheck : Conditional
     {
-        public BlackboardEntrySelector<float> rayRange = new(10.0f);
+        public float rayRange = 10.0f;
         [Range(0f, 85f)] public float halfAngle = 15.0f;
         public float coneDirection;
 
@@ -27,13 +28,15 @@ namespace Schema.Builtin.Conditionals
         [Tooltip("The tags to filter from. Only these tags will be considered when checking the cone")]
         public TagFilter tagFilter;
 
+        [Tooltip("Visualize the cone in the Scene view")] public bool visualize;
+
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
             GameObject go = TestCone(agent);
+
             if (go)
             {
                 gameObjectKey.value = go;
-
                 return true;
             }
 
@@ -63,16 +66,16 @@ namespace Schema.Builtin.Conditionals
 
             Quaternion offsetRotation = Quaternion.AngleAxis(coneDirection, agent.transform.right);
             Quaternion rotation = offsetRotation * agent.transform.rotation;
-            float radius = Mathf.Tan(Mathf.Deg2Rad * halfAngle) * rayRange.value;
+            float radius = Mathf.Tan(Mathf.Deg2Rad * halfAngle) * rayRange;
             Vector3 rotatedOffset = agent.transform.rotation * offset;
 
             Vector3 position = new(agent.transform.position.x + rotatedOffset.x,
                 agent.transform.position.y + rotatedOffset.y,
                 agent.transform.position.z + rotatedOffset.z);
 
-            position += rotation * (Vector3.forward * (rayRange.value / 2f));
+            position += rotation * (Vector3.forward * (rayRange / 2f));
 
-            Vector3 size = new(radius * 2, radius * 2, rayRange.value);
+            Vector3 size = new(radius * 2, radius * 2, rayRange);
 
             Collider[] colliders = Physics.OverlapBox(
                 position,
@@ -84,7 +87,7 @@ namespace Schema.Builtin.Conditionals
 
             foreach (Collider c in colliders)
                 if (c.transform != agent.transform && PointInsideCone(
-                        agent.transform.position + rotatedOffset, rotation * Vector3.forward, rayRange.value, radius,
+                        agent.transform.position + rotatedOffset, rotation * Vector3.forward, rayRange, radius,
                         c.transform.position
                     ) && tagFilter.tags.Contains(c.transform.tag))
                 {
@@ -92,7 +95,7 @@ namespace Schema.Builtin.Conditionals
                     //Cast ray to check if object is blocked by something
                     if (Physics.Raycast(agent.transform.position + rotatedOffset,
                             (c.transform.position - (agent.transform.position + rotatedOffset)).normalized, out hit,
-                            rayRange.value, -1, QueryTriggerInteraction.UseGlobal))
+                            rayRange, -1, QueryTriggerInteraction.UseGlobal))
                         if (hit.collider == c)
                             return c.transform.gameObject;
                 }
@@ -122,7 +125,7 @@ namespace Schema.Builtin.Conditionals
             {
                 RaycastHit hitInfo;
 
-                if (Physics.Raycast(rays[i], out hitInfo, rayRange.value)) hits.Add(rays[i], hitInfo);
+                if (Physics.Raycast(rays[i], out hitInfo, rayRange)) hits.Add(rays[i], hitInfo);
             }
 
             return hits;
@@ -144,7 +147,7 @@ namespace Schema.Builtin.Conditionals
             {
                 Vector3 modified = agent.transform.position + rotation * (Vector3.forward + (Vector3)points[i]);
                 Vector3 direction = (modified + rotatedOffset - (agent.transform.position + rotatedOffset)) *
-                                    rayRange.value;
+                                    rayRange;
 
                 rays[i] = new RayRepresentation(agent.transform.position + rotatedOffset, direction);
             }
@@ -181,60 +184,53 @@ namespace Schema.Builtin.Conditionals
         {
             StringBuilder sb = new();
 
-            if (gameObjectKey.isDynamic)
-                sb.Append("If dynamic variable ");
-            else if (gameObjectKey.entry != null)
-                sb.Append("If variable ");
-            else
-                sb.Append("If ");
-
-            sb.AppendFormat("<color=red>{0}</color> ",
-                gameObjectKey.name);
-
             if (invert)
-                sb.Append("is not inside cone");
+                sb.Append("If object doesn't hit cone");
             else
-                sb.Append("is inside cone");
+                sb.Append("If object hits cone");
+
+            sb.AppendFormat(", store in <color=red>{0}</color> ",
+                gameObjectKey.name);
 
             return new GUIContent(sb.ToString());
         }
 #if UNITY_EDITOR
-        // public override void DrawGizmos(SchemaAgent agent)
-        // {
-        //     if (!visualize)
-        //         return;
+        public override void DoConditionalGizmos(SchemaAgent agent)
+        {
+            if (!visualize)
+                return;
 
-        //     if (precisionMode)
-        //     {
-        //         RayRepresentation[] rayRepresentations = GenerateRays(agent);
-        //         Ray[] rays = new Ray[rayRepresentations.Length];
+            if (precisionMode)
+            {
+                RayRepresentation[] rayRepresentations = GenerateRays(agent);
+                Ray[] rays = new Ray[rayRepresentations.Length];
 
-        //         for (int i = 0; i < rayRepresentations.Length; i++)
-        //         {
-        //             rays[i] = (Ray)rayRepresentations[i];
-        //         }
+                for (int i = 0; i < rayRepresentations.Length; i++)
+                {
+                    rays[i] = (Ray)rayRepresentations[i];
+                }
 
-        //         Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
-        //         hits = GetHitInfo(rays);
+                Dictionary<Ray, RaycastHit> hits = new Dictionary<Ray, RaycastHit>();
+                hits = GetHitInfo(rays);
 
-        //         for (int i = 0; i < rays.Length; i++)
-        //         {
-        //             RayRepresentation rayRepresentation = rayRepresentations[i];
-        //             Ray ray = rays[i];
+                for (int i = 0; i < rays.Length; i++)
+                {
+                    RayRepresentation rayRepresentation = rayRepresentations[i];
+                    Ray ray = rays[i];
 
-        //             if (hits.ContainsKey(ray) && tagFilter.tags.Contains(hits[ray].transform.tag))
-        //                 Gizmos.color = Color.green;
-        //             else
-        //                 Gizmos.color = Color.white;
+                    if (hits.ContainsKey(ray) && tagFilter.tags.Contains(hits[ray].transform.tag))
+                        Gizmos.color = Color.green;
+                    else
+                        Gizmos.color = Color.white;
 
-        //             Gizmos.DrawRay(rayRepresentation.start, rayRepresentation.direction);
-        //         }
-        //     }
-        //     else
-        //     {
-        //         DrawCone(agent, TestCone(agent));
-        //     }
-        // }
+                    Gizmos.DrawRay(rayRepresentation.start, rayRepresentation.direction);
+                }
+            }
+            else
+            {
+                DrawCone(agent, TestCone(agent));
+            }
+        }
         private void DrawCone(SchemaAgent agent, bool hit)
         {
             Quaternion offsetRotation = Quaternion.AngleAxis(coneDirection, agent.transform.right);
@@ -242,11 +238,11 @@ namespace Schema.Builtin.Conditionals
 
             Vector3 rotatedOffset = agent.transform.rotation * offset;
 
-            float radius = Mathf.Tan(Mathf.Deg2Rad * halfAngle) * rayRange.value;
+            float radius = Mathf.Tan(Mathf.Deg2Rad * halfAngle) * rayRange;
 
             Vector3 normal = rotation * Vector3.forward;
             Vector3 tip = agent.transform.position + rotatedOffset;
-            Vector3 topNoRotate = Vector3.forward * rayRange.value;
+            Vector3 topNoRotate = Vector3.forward * rayRange;
             Vector3 topCenter = rotation * topNoRotate;
 
             Handles.color = hit ? Color.green : Color.white;
@@ -263,7 +259,7 @@ namespace Schema.Builtin.Conditionals
             Handles.DrawWireDisc(agent.transform.position + rotatedOffset + topCenter, normal, radius, 2f);
         }
 #endif
-        private class RayRepresentation
+        private struct RayRepresentation
         {
             public readonly Vector3 start;
             public Vector3 direction;

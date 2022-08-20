@@ -16,6 +16,7 @@ namespace Schema.Internal
 
             tree = graph;
             nodes = graph.nodes
+                .Where(x => x.priority >= 0)
                 .Select(x => new ExecutableNode(x))
                 .OrderBy(x => x.index)
                 .ToArray();
@@ -79,6 +80,21 @@ namespace Schema.Internal
 
             do
             {
+                ExecutableNode n = null;
+
+                for (int j = 0; j < nodes.Length; j++)
+                {
+                    if (nodes[j].RunDynamicConditionals(context))
+                        n = nodes[j];
+                }
+
+                if (n != null)
+                {
+                    context.RemoveStatus(context.node);
+                    context.node = n;
+                    context.ForceStatus(n);
+                }
+
                 int i = nodes[context.node.index].Execute(context);
                 i = i > nodes.Length - 1 ? 0 : i;
 
