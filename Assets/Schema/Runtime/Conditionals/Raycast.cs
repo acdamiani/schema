@@ -27,27 +27,29 @@ namespace Schema.Builtin.Conditionals
         public RaycastType type;
         public TagFilter tagFilter;
 
+        [Tooltip("Visualize the ray in the editor")] public bool visualize;
+
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
             return TestCone(agent);
         }
-        // public override void DrawGizmos(SchemaAgent agent)
-        // {
-        //     if (type == RaycastType.Dynamic) return;
+        public override void DoConditionalGizmos(SchemaAgent agent)
+        {
+            if (type == RaycastType.Dynamic || !visualize) return;
 
-        //     Color col = Gizmos.color;
-        //     Vector3 rotatedOffset = agent.transform.rotation * offset;
-        //     Vector3 rotatedDir = agent.transform.rotation * (Quaternion.Euler(direction) * Vector3.forward);
+            Color col = Gizmos.color;
+            Vector3 rotatedOffset = agent.transform.rotation * offset;
+            Vector3 rotatedDir = agent.transform.rotation * (Quaternion.Euler(direction) * Vector3.forward);
 
-        //     if (TestCone(agent))
-        //         Gizmos.color = Color.green;
-        //     else
-        //         Gizmos.color = Color.white;
+            if (TestCone(agent))
+                Gizmos.color = Color.green;
+            else
+                Gizmos.color = Color.white;
 
-        //     Gizmos.DrawRay(agent.transform.position + rotatedOffset, rotatedDir * maxDistance);
+            Gizmos.DrawRay(agent.transform.position + rotatedOffset, rotatedDir * maxDistance);
 
-        //     Gizmos.color = col;
-        // }
+            Gizmos.color = col;
+        }
         private bool TestCone(SchemaAgent agent)
         {
             RaycastHit[] hits;

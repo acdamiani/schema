@@ -31,6 +31,8 @@ namespace SchemaEditor.Editors
 
             raycast.type = (Raycast.RaycastType)GUILayout.Toolbar((int)raycast.type, new[] { "Absolute", "Dynamic" });
 
+            EditorGUILayout.PropertyField(visualize);
+
             EditorGUILayout.PropertyField(tagFilter);
 
             if (raycast.type == Raycast.RaycastType.Absolute)
