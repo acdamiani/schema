@@ -9,7 +9,7 @@ namespace Schema.Internal
 {
     public abstract class GraphObject : ScriptableObject
     {
-        [SerializeField, HideInInspector]  private string m_uID = Guid.NewGuid().ToString("N");
+        [SerializeField, HideInInspector] private string m_uID = Guid.NewGuid().ToString("N");
 
         /// <summary>
         ///     The GUID for this object
@@ -25,13 +25,13 @@ namespace Schema.Internal
         ///     The category wof this object
         /// </summary>
         public string category { get; private set; }
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         /// <summary>
         ///     The icon for this object
         /// </summary>
         public Texture2D icon { get; private set; }
 
-        #endif
+#endif
 
         private void OnEnable()
         {
@@ -48,9 +48,9 @@ namespace Schema.Internal
             description = GetDescription(t);
             category = GetCategory(t);
 
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             icon = GetIcon(t);
-            #endif
+#endif
 
             OnObjectEnable();
         }
@@ -216,7 +216,7 @@ namespace Schema.Internal
                 this.category = category;
             }
         }
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         /// <summary>
         ///     Get the icon for a specified type
         /// </summary>
@@ -266,6 +266,6 @@ namespace Schema.Internal
         {
             m_uID = Guid.NewGuid().ToString("N");
         }
-        #endif
+#endif
     }
 }
