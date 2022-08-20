@@ -85,7 +85,7 @@
      <Compile Include="Assets/Schema/Runtime/Nodes/Movement/MoveToDirect.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Math/Add.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Transform/SetParent.cs" />
-     <Compile Include="Assets/Schema/Examples/Scripts/Player.cs" />
+     <Compile Include="Assets/Schema/Example/Scripts/Player.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Transform/DetachChildren.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Misc/GetSelf.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Time/GetFixedDeltaTime.cs" />
@@ -231,6 +231,7 @@
      <Compile Include="Assets/Schema/Runtime/Nodes/GameObject/GetBounds.cs" />
      <Compile Include="Assets/Schema/Runtime/Blackboard/EntryType.cs" />
      <Compile Include="Assets/Schema/Runtime/Base/Node.cs" />
+     <Compile Include="Assets/Schema/Example/AI/Custom_ChasePlayer.cs" />
      <Compile Include="Assets/Schema/Runtime/Conditionals/ConeCheck.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Animator/PlayAnimation.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Transform/GetChild.cs" />
@@ -244,7 +245,6 @@
      <Compile Include="Assets/Schema/Runtime/Nodes/GameObject/SendMessage.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Transform/TranslateRelative.cs" />
      <Compile Include="Assets/Schema/Runtime/Nodes/Math/Subtract.cs" />
-     <Compile Include="Assets/Schema/Examples/AI/Custom_ChasePlayer.cs" />
      <None Include="Assets/Schema/Schema.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/home/acdamiani/Unity/Hub/Editor/2021.3.6f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

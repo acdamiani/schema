@@ -27,6 +27,8 @@ namespace SchemaEditor.Internal
         public SchemaAgent activeInScene { get { return _activeInScene; } }
         private SchemaAgent _activeInScene;
 
+        private Vector2 mouseDownPos;
+
         public ComponentCanvas(
             ICanvasContextProvider context,
             SelectionBoxComponent.SelectionBoxComponentCreateArgs selectionBoxComponentCreateArgs,
@@ -198,10 +200,16 @@ namespace SchemaEditor.Internal
 
         public void Draw()
         {
+            if (Event.current.rawType == EventType.MouseDown)
+                mouseDownPos = Event.current.mousePosition;
+
             if (
                 (Event.current.isKey || Event.current.isMouse || Event.current.isScrollWheel)
                 && !context.GetViewRect().Contains(Event.current.mousePosition)
             )
+                return;
+
+            if (Event.current.rawType == EventType.MouseDrag && !context.GetViewRect().Contains(mouseDownPos))
                 return;
 
             SchemaAgent current = Selection.gameObjects
