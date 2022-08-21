@@ -42,10 +42,31 @@ namespace Schema.Internal
         {
             return blackboardTypes.Select(x => EntryType.GetMappedType(x)).ToArray();
         }
-        #if UNITY_EDITOR
-        public static Blackboard instance;
         public static Blackboard global => _global == null ? _global = LoadGlobal() : _global;
         private static Blackboard _global;
+
+        private static Blackboard LoadGlobal()
+        {
+            Blackboard loaded = Resources.Load<Blackboard>("GlobalBlackboard");
+
+            #if UNITY_EDITOR
+            if (loaded == null)
+            {
+                loaded = CreateInstance<Blackboard>();
+
+                DirectoryInfo res = new DirectoryInfo(Path.Combine(Application.dataPath, "Resources"));
+                res.Create();
+
+                AssetDatabase.CreateAsset(loaded, "Assets/Resources/GlobalBlackboard.asset");
+            }
+            #endif
+
+            return loaded;
+        }
+
+
+        #if UNITY_EDITOR
+        public static Blackboard instance;
 
         public delegate void EntryListChangedCallback(Blackboard changed);
 
@@ -69,23 +90,6 @@ namespace Schema.Internal
             }
 
             return mask;
-        }
-
-        private static Blackboard LoadGlobal()
-        {
-            Blackboard loaded = Resources.Load<Blackboard>("GlobalBlackboard");
-
-            if (loaded == null)
-            {
-                loaded = CreateInstance<Blackboard>();
-
-                DirectoryInfo res = new DirectoryInfo(Path.Combine(Application.dataPath, "Resources"));
-                res.Create();
-
-                AssetDatabase.CreateAsset(loaded, "Assets/Resources/GlobalBlackboard.asset");
-            }
-
-            return loaded;
         }
 
         /// <summary>

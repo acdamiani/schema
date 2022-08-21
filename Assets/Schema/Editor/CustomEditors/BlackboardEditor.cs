@@ -48,8 +48,7 @@ namespace SchemaEditor.Editors
 
             GUILayout.Space(4);
 
-            if (GUILayout.Button(Icons.GetEditor("Toolbar Plus More"), EditorStyles.miniButton, GUILayout.Width(16),
-                    GUILayout.ExpandHeight(true))) ShowContext();
+            if (GUILayout.Button(Icons.GetEditor("Toolbar Plus More"), GUIStyle.none, GUILayout.Width(16f))) ShowContext();
 
             GUILayout.Space(10);
 
@@ -58,8 +57,7 @@ namespace SchemaEditor.Editors
             GUILayout.Space(10);
 
             EditorGUI.BeginDisabledGroup(selectedEntry == null);
-            if (GUILayout.Button(Icons.GetEditor("Toolbar Minus"), EditorStyles.miniButton, GUILayout.Width(16),
-                    GUILayout.Height(16))) RemoveSelected();
+            if (GUILayout.Button(Icons.GetEditor("Toolbar Minus"), GUIStyle.none, GUILayout.Width(16f))) RemoveSelected();
             EditorGUI.EndDisabledGroup();
 
             GUILayout.Space(4);

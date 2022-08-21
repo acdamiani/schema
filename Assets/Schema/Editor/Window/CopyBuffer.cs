@@ -88,6 +88,9 @@ namespace SchemaEditor.Internal
             {
                 Node original = copiesBackwards[copy];
 
+                if (original.parent == null)
+                    continue;
+
                 copiesForwards.TryGetValue(original.parent, out Node parent);
 
                 if (parent != null)

@@ -30,7 +30,7 @@ namespace Schema.Internal
                 values[entry] = new EntryData(entry);
             }
 
-            if (globalValues == null)
+            if (globalValues == null && Blackboard.global != null)
             {
                 globalValues = new Dictionary<BlackboardEntry, EntryData>();
 
