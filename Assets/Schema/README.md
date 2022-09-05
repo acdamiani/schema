@@ -11,7 +11,7 @@ displaying the capabilities of this package.
 This asset is usable both by programmers and non-programmers, and is designed
 to be as user-friendly as possible. If you find anything related to user
 experience that you think could be improved, email us at
-support@schemaunity.com
+support@schema-ai.com
 
 ## Required Unity versions
 
@@ -19,10 +19,9 @@ support@schemaunity.com
 
 ## Documentation
 
-The documentaiton for this asset is available
-[here](https://schemaunity.com/docs/getting-started)
+The documentation for this asset is available
+[here](https://schema-ai.com/docs/getting-started)
 
 If you need support, visit the
 [Discord](https://discord.com/channels/1009531388803960922/1009535818764918834)
 or email us at support@schemaunity.com
-
