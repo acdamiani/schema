@@ -508,7 +508,7 @@ namespace SchemaEditor
 
             createArgs.id = 1;
             createArgs.layer = 100;
-            createArgs.rect = new Rect((window.width - 500f) / 2f, (window.width - 500f) / 2f, 500f, 500f);
+            createArgs.rect = new Rect((window.width - 500f) / 2f, (window.height - 500f) / 2f, 500f, 500f);
             createArgs.style = Styles.window;
             createArgs.title = GUIContent.none;
             createArgs.windowProvider = search;
