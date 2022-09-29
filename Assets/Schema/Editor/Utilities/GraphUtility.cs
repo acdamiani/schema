@@ -30,10 +30,10 @@ public static class GraphUtility
         if (nodeComponent == null)
             return Vector2.zero;
 
-        float xMin = nodeComponent.layout.body.xMin;
-        float yMin = nodeComponent.layout.body.yMin;
-        float xMax = nodeComponent.layout.body.xMax;
-        float yMax = nodeComponent.layout.body.yMax;
+        float xMin = nodeComponent.layout.gridRect.xMin;
+        float yMin = nodeComponent.layout.gridRect.yMin;
+        float xMax = nodeComponent.layout.gridRect.xMax;
+        float yMax = nodeComponent.layout.gridRect.yMax;
 
         foreach (Conditional conditional in node.conditionals)
         {
@@ -42,14 +42,17 @@ public static class GraphUtility
 
             if (conditionalComponent == null)
                 return Vector2.zero;
+            
+            Rect conditionalRect = conditionalComponent.GetGridRect();
 
-            xMin = Mathf.Min(xMin, conditionalComponent.GetRect().xMin);
-            yMin = Mathf.Min(yMin, conditionalComponent.GetRect().yMin);
-            xMax = Mathf.Max(xMax, conditionalComponent.GetRect().xMax);
-            yMax = Mathf.Max(yMax, conditionalComponent.GetRect().yMax);
+            xMin = Mathf.Min(xMin, conditionalRect.xMin);
+            yMin = Mathf.Min(yMin, conditionalRect.yMin);
+            xMax = Mathf.Max(xMax, conditionalRect.xMax);
+            yMax = Mathf.Max(yMax, conditionalRect.yMax);
         }
 
-        return (new Vector2(xMax, yMax) - new Vector2(xMin, yMin)) * NodeEditor.instance.canvas.zoomer.zoom;
+        Vector2 v = new Vector2(xMax, yMax) - new Vector2(xMin, yMin);
+        return v;
     }
 
     private static void SetPosition(this Node node, Vector2 position)
@@ -61,7 +64,7 @@ public static class GraphUtility
 
         Vector2 min = node.GetPosition();
 
-        node.graphPosition = position - min + node.graphPosition;
+        node.graphPosition += position - min;
         nodeComponent.layout.Update();
     }
 
@@ -72,8 +75,8 @@ public static class GraphUtility
         if (nodeComponent == null)
             return Vector2.zero;
 
-        float xMin = nodeComponent.layout.body.xMin;
-        float yMin = nodeComponent.layout.body.yMin;
+        float xMin = nodeComponent.layout.gridRect.xMin;
+        float yMin = nodeComponent.layout.gridRect.yMin;
 
         foreach (Conditional conditional in node.conditionals)
         {
@@ -82,12 +85,17 @@ public static class GraphUtility
 
             if (conditionalComponent == null)
                 return Vector2.zero;
+            
+            Rect conditionalRect = conditionalComponent.GetGridRect();
 
-            xMin = Mathf.Min(xMin, conditionalComponent.GetRect().xMin);
-            yMin = Mathf.Min(yMin, conditionalComponent.GetRect().yMin);
+            xMin = Mathf.Min(xMin, conditionalRect.xMin);
+            yMin = Mathf.Min(yMin, conditionalRect.yMin);
         }
 
-        Vector2 min = NodeEditor.instance.canvas.zoomer.WindowToGridPosition(new Vector2(xMin, yMin));
+        Vector2 min = new Vector2(xMin, yMin);
+
+        if (node.name == "Root")
+            Debug.Log(min);
 
         return min;
     }

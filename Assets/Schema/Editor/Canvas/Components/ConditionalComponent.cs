@@ -112,7 +112,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             SceneView.RepaintAll();
         }
 
-        public Rect GetRect()
+        public Rect GetGridRect()
         {
             int index = Array.IndexOf(conditional.node.conditionals, conditional);
             int length = conditional.node.conditionals.Length;
@@ -127,10 +127,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             Vector2 contentSize = Styles.conditional.CalcSize(content);
             contentSize.x += icon != null ? 20f : 0f;
 
-            Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f,
-                parent.layout.body.y - (height + 18f) * upCount);
-
-            return new Rect(pos.x, pos.y, contentSize.x, height);
+            Vector2 pos = new Vector2(parent.layout.gridRect.center.x - contentSize.x / 2f,
+                parent.layout.gridRect.y - (height + 18f) * upCount);
+            
+            Rect r = new Rect(pos.x, pos.y, contentSize.x, height);
+            return r;
         }
 
         private void DoHighlight()

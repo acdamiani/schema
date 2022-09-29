@@ -9,14 +9,3 @@
 /Temp
 /UserSettings
 /obj
-*.fbx
-*.anim
-*.asset
-*.controller
-*.shader
-*.fbx.meta
-*.anim.meta
-*.asset.meta
-*.controller.meta
-*.shader.meta
-*.cs.meta

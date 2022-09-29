@@ -1,0 +1,21 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schema", "Schema.csproj", "{a985bfb0-1430-1f73-8faa-984114ce605e}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaEditor", "SchemaEditor.csproj", "{521d7755-e76b-8849-71a7-34d58d0442cd}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{a985bfb0-1430-1f73-8faa-984114ce605e}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{a985bfb0-1430-1f73-8faa-984114ce605e}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{521d7755-e76b-8849-71a7-34d58d0442cd}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{521d7755-e76b-8849-71a7-34d58d0442cd}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
