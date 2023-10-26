@@ -72,9 +72,9 @@ public class QuickSearch : IWindowComponentProvider
         searchFavorites = GUI.Toggle(r, searchFavorites, Icons.GetEditor("FolderFavorite Icon"),
             Styles.searchTopBarButton);
 
-        GUI.SetNextControlName("searchField");
-
         r = GUILayoutUtility.GetRect(new GUIContent(searchText), Styles.searchLarge);
+
+        GUI.SetNextControlName("searchField");
 
         if (Event.current.keyCode != KeyCode.Return)
             searchText = searchField.OnGUI(r, searchText, Styles.searchLarge, Styles.cancelButton, GUIStyle.none);

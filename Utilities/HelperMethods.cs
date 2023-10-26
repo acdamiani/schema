@@ -15,11 +15,11 @@ namespace Schema.Utilities
 
         public static bool IsMac()
         {
-            #if UNITY_2017_1_OR_NEWER
+#if UNITY_2017_1_OR_NEWER
             return SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
-            #else
+#else
             return SystemInfo.operatingSystem.StartsWith("Mac");
-            #endif
+#endif
         }
 
         public static void MoveItemAtIndexToFront<T>(this T[] array, int index)
@@ -107,8 +107,8 @@ namespace Schema.Utilities
         public static void SetHideFlags(HideFlags hideFlags, params List<ScriptableObject>[] objects)
         {
             foreach (List<ScriptableObject> sl in objects)
-            foreach (ScriptableObject s in sl)
-                s.hideFlags = hideFlags;
+                foreach (ScriptableObject s in sl)
+                    s.hideFlags = hideFlags;
         }
 
         public static Color ToColor(this string s)
@@ -125,43 +125,14 @@ namespace Schema.Utilities
             return col;
         }
 
-        public static List<Node> GetAllParents(this Node node)
-        {
-            if (node.parent != null)
-            {
-                List<Node> ret = new List<Node>();
-
-                Node current = node;
-
-                ret.Add(current);
-
-                while (current.parent != null)
-                {
-                    ret.Add(current.parent);
-                    current = current.parent;
-                }
-
-                return ret;
-            }
-
-            return new List<Node>();
-        }
-
-        public static IEnumerable<Type> GetNodeTypes()
-        {
-            //Gets all categories for Nodes
-            return Assembly.GetAssembly(typeof(Node)).GetTypes().Where(type =>
-                type != typeof(Root) && type.IsClass && type.BaseType == typeof(Node));
-        }
-
         public static IEnumerable<Type> GetEnumerableOfType(Type type)
         {
             List<Type> objects = new List<Type>();
-            foreach (Type t in
-                     Assembly.GetAssembly(type).GetTypes()
-                         .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(type)))
-                objects.Add(t);
-            return objects;
+
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(domainAssembly => domainAssembly.GetTypes())
+                .Where(t => type.IsAssignableFrom(t) && t != type && !t.IsAbstract
+                ).ToArray();
         }
 
         public static bool ContentEqual(this GUIContent c1, GUIContent c2)
@@ -349,8 +320,8 @@ namespace Schema.Utilities
             Color[] cols = new Color[texture.width * texture.height];
 
             for (int y = 0; y < texture.height; y++)
-            for (int x = 0; x < texture.width; x++)
-                cols[y * texture.width + x] = texture.GetPixel(x, y) * color;
+                for (int x = 0; x < texture.width; x++)
+                    cols[y * texture.width + x] = texture.GetPixel(x, y) * color;
 
             ret.SetPixels(cols);
             ret.name = "Tinted";

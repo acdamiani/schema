@@ -15,6 +15,7 @@ namespace SchemaEditor.Internal
         {
             switch (commandName)
             {
+                case "Delete":
                 case "SoftDelete":
                 case "Copy":
                 case "Cut":
@@ -33,6 +34,7 @@ namespace SchemaEditor.Internal
         {
             switch (commandName)
             {
+                case "Delete":
                 case "SoftDelete":
                     DeleteCommand(canvas);
                     break;

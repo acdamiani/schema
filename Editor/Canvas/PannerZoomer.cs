@@ -45,7 +45,7 @@ namespace SchemaEditor.Internal.ComponentSystem
 
         public void Begin()
         {
-            if (Event.current.rawType == EventType.MouseDown && Event.current.button == 2)
+            if ((Event.current.rawType == EventType.MouseDown && Event.current.button == 2) || (Event.current.rawType == EventType.MouseDown && Event.current.command && Event.current.button == 0))
             {
                 context.GetCanvas().cursor = MouseCursor.Pan;
             }
@@ -53,10 +53,9 @@ namespace SchemaEditor.Internal.ComponentSystem
             {
                 context.GetCanvas().cursor = MouseCursor.Arrow;
             }
-            else if (Event.current.rawType == EventType.MouseDrag && Event.current.button == 2)
+            else if ((Event.current.rawType == EventType.MouseDrag && Event.current.button == 2) || (Event.current.rawType == EventType.MouseDrag && Event.current.command && Event.current.button == 0))
             {
                 pan += Event.current.delta * zoom;
-
                 onPanChange?.Invoke(pan);
             }
 

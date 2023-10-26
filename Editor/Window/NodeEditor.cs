@@ -22,18 +22,9 @@ namespace SchemaEditor
     public partial class NodeEditor : EditorWindow, IHasCustomMenu, ICanvasContextProvider
     {
         public static NodeEditor instance;
-        private static Dictionary<Type, List<Type>> nodeTypes;
-        private static Type[] decoratorTypes;
-        private static readonly List<Object> copyBuffer = new List<Object>();
-        public Node requestingConnection;
         public Graph target;
-        public Blackboard globalBlackboard;
         public Window windowInfo = new Window();
         private int? _controlID;
-        public Event eventNoZoom;
-        private int nodeCount;
-
-        private Node orphanNode;
 
         //Validates connections between nodes also resets HideFlags
         private void OnEnable()
@@ -126,19 +117,6 @@ namespace SchemaEditor
         {
             menu.AddItem("Documentation", false,
                 () => OpenUrl("https://schemaunity.com/docs/getting-started"), false);
-        }
-
-        [DidReloadScripts]
-        private static void Init()
-        {
-            nodeTypes = new Dictionary<Type, List<Type>>();
-            foreach (Type t in HelperMethods.GetNodeTypes())
-            {
-                IEnumerable<Type> test = HelperMethods.GetEnumerableOfType(t);
-                nodeTypes.Add(t, test.ToList());
-            }
-
-            decoratorTypes = HelperMethods.GetEnumerableOfType(typeof(Conditional)).ToArray();
         }
 
         [MenuItem("Window/AI/Behavior Editor")]
@@ -307,6 +285,8 @@ namespace SchemaEditor
         [Shortcut("Schema/Add Node", KeyCode.A, ShortcutModifiers.Shift)]
         public static void AddNodeCommand()
         {
+            UnityEngine.Debug.Log("Hey adding node");
+
             if (instance == null) return;
 
             if (!Application.isPlaying)

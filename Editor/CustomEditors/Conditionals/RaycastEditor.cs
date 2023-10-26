@@ -21,6 +21,7 @@ namespace SchemaEditor.Editors
             point = serializedObject.FindProperty("point");
             tagFilter = serializedObject.FindProperty("tagFilter");
             maxDistance = serializedObject.FindProperty("maxDistance");
+            visualize = serializedObject.FindProperty("visualize");
         }
 
         public override void OnInspectorGUI()
