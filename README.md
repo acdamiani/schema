@@ -24,4 +24,4 @@ The documentation for this asset is available
 
 If you need support, visit the
 [Discord](https://discord.com/channels/1009531388803960922/1009535818764918834)
-or email us at support@schemaunity.com
+or email me at damiani.august@gmail.com
