@@ -19,6 +19,6 @@ experience that you think could be improved, email me at damiani.august@gmail.co
 ## Documentation
 
 The documentation for this asset is available
-[here](https://schema-ai.com/docs/getting-started)
+[here](https://github.com/acdamiani/schema/blob/main/Docs/00-quick-start.md)
 
 If you need support, shoot me an email me at damiani.august@gmail.com
