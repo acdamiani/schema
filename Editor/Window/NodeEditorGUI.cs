@@ -80,7 +80,7 @@ namespace SchemaEditor
 
         private void CreateEditors()
         {
-            if (blackboardEditor == null)
+            if (blackboardEditor == null || blackboardEditor.target != target)
                 blackboardEditor = Editor.CreateEditor(target.blackboard, typeof(BlackboardEditor));
 
             if (editor != null && editor.targets.Any(x => !x))
