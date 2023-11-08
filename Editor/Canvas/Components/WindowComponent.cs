@@ -13,6 +13,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
         public GUIStyle style { get; set; }
         private IWindowComponentProvider windowProvider { get; set; }
         public bool canClose { get; set; }
+        private bool wantsDestroy;
 
         public Rect GetRect()
         {
@@ -32,13 +33,14 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             title = createArgs.title;
             style = createArgs.style;
             canClose = createArgs.canClose;
+            
+            windowProvider.OnEnable();
         }
 
         public override void OnGUI()
         {
-            GUI.FocusWindow(id);
-
             bool insideWindow = rect.Contains(Event.current.mousePosition);
+            bool shouldDestroy = false;
 
             if (
                 canClose &&
@@ -47,18 +49,24 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                  || windowProvider.ShouldClose())
             )
             {
-                Destroy(this);
-                return;
+                windowProvider.OnDestroy();
+                wantsDestroy = true;
             }
 
             EditorWindow e = canvas.context.GetEditorWindow();
 
-            e?.BeginWindows();
+            if (!e) return;
+            
+            e.BeginWindows();
 
             windowProvider.HandleWinInfo(rect, title, style);
             rect = GUI.Window(id, rect, windowProvider.OnGUI, title, style);
 
-            e?.EndWindows();
+            e.EndWindows();
+            
+            // I don't know why I have to wait until repaint, but I do.
+            if (wantsDestroy && Event.current.type == EventType.Repaint)
+                Destroy(this);
         }
 
         public class WindowComponentCreateArgs : CreateArgs

@@ -30,6 +30,8 @@ namespace SchemaEditor
         public float tabHeight => isDocked() ? 19.0f : 21.0f;
         private Func<bool> isDocked => isDockedFunc ??= this.GetIsDockedDelegate();
 
+
+        private float _t;
         private void OnGUI()
         {
             CalculateWindow();

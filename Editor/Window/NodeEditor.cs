@@ -14,6 +14,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.ShortcutManagement;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 namespace SchemaEditor
@@ -282,15 +283,11 @@ namespace SchemaEditor
         }
 
         //--SCHEMA SHORTCUTS--//
-        [Shortcut("Schema/Add Node", KeyCode.A, ShortcutModifiers.Shift)]
-        public static void AddNodeCommand()
+        [Shortcut("Schema/Add Node", typeof(NodeEditor), KeyCode.A, ShortcutModifiers.Shift)]
+        public static void AddNodeCommand(ShortcutArguments args)
         {
-            UnityEngine.Debug.Log("Hey adding node");
-
-            if (instance == null) return;
-
             if (!Application.isPlaying)
-                instance.CreateAddNodeWindow();
+                (args.context as NodeEditor).CreateAddNodeWindow();
         }
 
         [Shortcut("Schema/Add Conditional", KeyCode.B, ShortcutModifiers.Shift)]

@@ -7,6 +7,7 @@ using Schema.Utilities;
 using SchemaEditor.Internal.ComponentSystem;
 using SchemaEditor.Internal.ComponentSystem.Components;
 using UnityEditor;
+using UnityEditor.ShortcutManagement;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -18,13 +19,14 @@ namespace SchemaEditor.Internal
 
         private readonly Action<Rect, float, Vector2> _doGrid;
         private readonly List<Func<GUIComponent, bool>> selectors = new List<Func<GUIComponent, bool>>();
+        
 
         private GUIComponent[] _components = Array.Empty<GUIComponent>();
         private GUIComponent _hovered;
         private GUIComponent[] _selected = Array.Empty<GUIComponent>();
         private Vector2 lastMouse;
-
         private Vector2 mouseDownPos;
+        private Vector2 mousePos;
 
         public ComponentCanvas(
             ICanvasContextProvider context,
@@ -203,11 +205,23 @@ namespace SchemaEditor.Internal
             if (Event.current.rawType == EventType.MouseDown)
                 mouseDownPos = Event.current.mousePosition;
 
+            if (Event.current.isMouse)
+                mousePos = Event.current.mousePosition;
+
+            if (mousePos == new Vector2(0, -21))
+            {
+                Debug.Log(Event.current.type);
+            }
+
+            // Bug in MacOS (maybe other platforms too) resets mousePosition to (0, -21) for non-mouse events. Weird.  
             if (
                 (Event.current.isKey || Event.current.isMouse || Event.current.isScrollWheel)
-                && !context.GetViewRect().Contains(Event.current.mousePosition)
+                && !context.GetViewRect().Contains(mousePos)
             )
+            {
+                Debug.Log(mousePos);
                 return;
+            }
 
             if (Event.current.rawType == EventType.MouseDrag && !context.GetViewRect().Contains(mouseDownPos))
                 return;
@@ -261,8 +275,10 @@ namespace SchemaEditor.Internal
             }
 
             for (int i = c.Length - 1; i >= 0; i--)
+            {
                 if (!isSinkEvent || c[i] is ICanvasMouseEventSink)
                     c[i].OnGUI();
+            }
         }
 
         public void DeselectAll()
@@ -460,6 +476,8 @@ namespace SchemaEditor.Internal
         private GenericMenu BuildContextMenu()
         {
             ContextBuilder menu = new ContextBuilder();
+            ShortcutArguments args = new ShortcutArguments();
+            args.context = context;
 
             menu.AddShortcut("Main Menu/Edit/Cut", () => CommandHandler.CutCommand(this));
             menu.AddShortcut("Main Menu/Edit/Copy", () => CommandHandler.CopyCommand(this));
@@ -484,7 +502,7 @@ namespace SchemaEditor.Internal
 
             menu.AddSeparator();
 
-            menu.AddShortcut("Schema/Add Node", NodeEditor.AddNodeCommand);
+            menu.AddShortcut("Schema/Add Node", () => NodeEditor.AddNodeCommand(args));
             menu.AddShortcut("Schema/Add Conditional", NodeEditor.AddConditionalCommand,
                 NodeEditor.CanAddConditional(this));
             menu.AddShortcut("Schema/Break Connections", NodeEditor.BreakConnectionsCommand);

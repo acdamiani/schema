@@ -11,6 +11,7 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using Action = System.Action;
+using Object = UnityEngine.Object;
 
 public class QuickSearch : IWindowComponentProvider
 {
@@ -22,7 +23,7 @@ public class QuickSearch : IWindowComponentProvider
     private readonly CacheDictionary<string, IEnumerable<Type>> search =
         new CacheDictionary<string, IEnumerable<Type>>();
 
-    private readonly SearchField searchField;
+    private SearchField searchField;
     private readonly IEnumerable<Type> types;
     private readonly KeyCode[] validMovementCodes = { KeyCode.UpArrow, KeyCode.DownArrow };
     private bool close;
@@ -39,6 +40,7 @@ public class QuickSearch : IWindowComponentProvider
 
     private int selected;
     private float toolbarHeight;
+    private bool shouldFocus = true;
 
     public QuickSearch(IEnumerable<Type> types, Action<Type> onSelectAction)
     {
@@ -61,7 +63,13 @@ public class QuickSearch : IWindowComponentProvider
 
     public void OnGUI(int id)
     {
-        searchField.SetFocus();
+        if (shouldFocus && Event.current.type == EventType.Layout)
+        {
+            GUI.FocusWindow(id);
+            searchField.SetFocus();
+            shouldFocus = false;
+        } 
+        
         Focus();
 
         GUILayout.BeginHorizontal(Styles.searchTopBar);
@@ -74,18 +82,16 @@ public class QuickSearch : IWindowComponentProvider
 
         r = GUILayoutUtility.GetRect(new GUIContent(searchText), Styles.searchLarge);
 
-        GUI.SetNextControlName("searchField");
-
         if (Event.current.keyCode != KeyCode.Return)
             searchText = searchField.OnGUI(r, searchText, Styles.searchLarge, Styles.cancelButton, GUIStyle.none);
+
+        GUILayout.EndHorizontal();
 
         GUI.DrawTexture(new Rect(r.x + 16f, r.center.y, 16f, 16f).UseCenter(), Icons.GetEditor("Search Icon"));
 
         if (!string.IsNullOrEmpty(searchText))
             GUI.DrawTexture(new Rect(r.xMax - 16f, r.center.y, 16f, 16f).UseCenter(),
                 Icons.GetResource("close", false));
-
-        GUILayout.EndHorizontal();
 
         if (Event.current.type == EventType.Repaint)
             toolbarHeight = GUILayoutUtility.GetLastRect().height;
@@ -110,7 +116,19 @@ public class QuickSearch : IWindowComponentProvider
         GUI.DragWindow();
     }
 
-    private void DoSingleResult(Type type, string favoriteName, int index, Action onClick)
+    public void OnEnable()
+    {
+        shouldFocus = true;
+    }
+    public void OnDestroy()
+    {
+        // Unset SearchField focus
+        GUIUtility.keyboardControl = 0; 
+        EditorGUIUtility.editingTextField = false;
+        Event.current.Use();
+    }
+
+private void DoSingleResult(Type type, string favoriteName, int index, Action onClick)
     {
         Event current = Event.current;
 

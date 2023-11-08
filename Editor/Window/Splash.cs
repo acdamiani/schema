@@ -107,6 +107,9 @@ public class Splash : IWindowComponentProvider
         GUILayout.EndVertical();
     }
 
+    public void OnEnable() {}
+    public void OnDestroy() {}
+
     private void CreateNew()
     {
         Graph graph = ScriptableObject.CreateInstance<Graph>();
