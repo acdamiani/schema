@@ -125,7 +125,6 @@ public class QuickSearch : IWindowComponentProvider
         // Unset SearchField focus
         GUIUtility.keyboardControl = 0; 
         EditorGUIUtility.editingTextField = false;
-        Event.current.Use();
     }
 
 private void DoSingleResult(Type type, string favoriteName, int index, Action onClick)
