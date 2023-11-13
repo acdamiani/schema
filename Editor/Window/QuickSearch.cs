@@ -22,6 +22,8 @@ public class QuickSearch : IWindowComponentProvider
     private readonly CacheDictionary<string, IEnumerable<Type>> search =
         new CacheDictionary<string, IEnumerable<Type>>();
 
+    private readonly SearchField searchField;
+
     private readonly IEnumerable<Type> types;
     private readonly KeyCode[] validMovementCodes = { KeyCode.UpArrow, KeyCode.DownArrow };
     private bool close;
@@ -35,8 +37,6 @@ public class QuickSearch : IWindowComponentProvider
         new CacheDictionary<string, IEnumerable<Type>>();
 
     private bool searchFavorites;
-
-    private readonly SearchField searchField;
     private string searchText = "";
 
     private int selected;
@@ -175,7 +175,8 @@ public class QuickSearch : IWindowComponentProvider
         switch (current.type)
         {
             case EventType.Repaint:
-                Styles.SearchResult.Draw(r, GUIContent.none, false, false, false, index == realSelection);
+                if (index == realSelection)
+                    SchemaGUI.DrawRoundedBox(r, GUI.skin.settings.selectionColor, 8);
                 DoCompleteLabel(r, type);
                 break;
             case EventType.MouseMove:

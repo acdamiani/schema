@@ -1,4 +1,3 @@
-using Schema.Utilities;
 using UnityEditor;
 using UnityEngine;
 
@@ -35,6 +34,7 @@ namespace SchemaEditor
         private static GUIStyle _priorityIndicator;
         public static Color WindowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
         public static Color WindowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
+        public static Color? WindowBorder => EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : null;
 
         public static Color OutlineColor =>
             EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : new Color32(176, 176, 176, 255);
@@ -63,8 +63,6 @@ namespace SchemaEditor
                 if (_window == null)
                 {
                     _window = new GUIStyle();
-                    _window.normal.background = Icons.GetResource("QuickSearch/search_bg");
-                    _window.border = new RectOffset(8, 8, 8, 8);
                     _window.padding = new RectOffset(2, 2, 2, 2);
                 }
 
@@ -113,11 +111,8 @@ namespace SchemaEditor
                 if (_searchResult == null)
                 {
                     _searchResult = new GUIStyle();
-                    _searchResult.border = new RectOffset(8, 8, 8, 8);
                     _searchResult.padding = new RectOffset(4, 0, 0, 0);
                     _searchResult.alignment = TextAnchor.MiddleLeft;
-                    _searchResult.hover.background =
-                        RoundedBox.normal.background.Tint(GUI.skin.settings.selectionColor);
                     _searchResult.hover.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
                     _searchResult.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
                 }

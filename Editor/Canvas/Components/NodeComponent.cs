@@ -434,6 +434,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             createArgs.title = GUIContent.none;
             createArgs.windowProvider = search;
             createArgs.canClose = true;
+            createArgs.doWindowBackground = true;
 
             canvas.Create<WindowComponent>(createArgs);
         }

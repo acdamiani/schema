@@ -469,6 +469,7 @@ namespace SchemaEditor
             createArgs.title = GUIContent.none;
             createArgs.windowProvider = search;
             createArgs.canClose = true;
+            createArgs.doWindowBackground = true;
 
             canvas.Create<WindowComponent>(createArgs);
         }
@@ -516,6 +517,7 @@ namespace SchemaEditor
             createArgs.title = GUIContent.none;
             createArgs.windowProvider = search;
             createArgs.canClose = true;
+            createArgs.doWindowBackground = true;
 
             canvas.Create<WindowComponent>(createArgs);
         }
