@@ -43,7 +43,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     text = ((ConditionalComponent)selected).conditional.description;
 
                 if (!string.IsNullOrEmpty(text))
-                    SchemaGUI.DoDescriptionLabel(canvas.context, text, Styles.description);
+                    SchemaGUI.DoDescriptionLabel(canvas.context, text, Styles.Description);
             }
 
             if (!Prefs.minimapEnabled)
@@ -109,7 +109,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
                 Rect nodeRect = new Rect(position, size);
 
-                Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.windowBackground,
+                Handles.DrawSolidRectangleWithOutline(nodeRect, Styles.WindowBackground,
                     node.IsSelected() ? Prefs.selectionColor : Color.black);
             }
 

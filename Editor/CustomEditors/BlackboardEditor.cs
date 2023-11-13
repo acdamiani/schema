@@ -48,7 +48,8 @@ namespace SchemaEditor.Editors
 
             GUILayout.Space(4);
 
-            if (GUILayout.Button(Icons.GetEditor("Toolbar Plus More"), GUIStyle.none, GUILayout.Width(16f))) ShowContext();
+            if (GUILayout.Button(Icons.GetEditor("Toolbar Plus More"), GUIStyle.none, GUILayout.Width(16f)))
+                ShowContext();
 
             GUILayout.Space(10);
 
@@ -57,7 +58,8 @@ namespace SchemaEditor.Editors
             GUILayout.Space(10);
 
             EditorGUI.BeginDisabledGroup(selectedEntry == null);
-            if (GUILayout.Button(Icons.GetEditor("Toolbar Minus"), GUIStyle.none, GUILayout.Width(16f))) RemoveSelected();
+            if (GUILayout.Button(Icons.GetEditor("Toolbar Minus"), GUIStyle.none, GUILayout.Width(16f)))
+                RemoveSelected();
             EditorGUI.EndDisabledGroup();
 
             GUILayout.Space(4);
@@ -71,7 +73,7 @@ namespace SchemaEditor.Editors
             BlackboardEntry[] globals = Blackboard.global.entries;
             BlackboardEntry[] locals = blackboard.entries;
 
-            scroll = GUILayout.BeginScrollView(scroll, Styles.blackboardEditorBackground);
+            scroll = GUILayout.BeginScrollView(scroll, Styles.BlackboardEditorBackground);
 
             if ((isShowingGlobal ? globals : locals).Length > 0)
                 DrawEntryList(isShowingGlobal ? globals : locals);
@@ -193,7 +195,7 @@ namespace SchemaEditor.Editors
 
             GUIContent content = new GUIContent(entry.name);
 
-            Rect rect = GUILayoutUtility.GetRect(content, Styles.blackboardEntry);
+            Rect rect = GUILayoutUtility.GetRect(content, Styles.BlackboardEntry);
 
             bool isSelected = selectedEntry == entry;
             bool isHovered = rect.Contains(current.mousePosition);
@@ -209,14 +211,14 @@ namespace SchemaEditor.Editors
 
             if (entry == editing)
             {
-                entry.name = EditorGUI.TextField(rect, entry.name, Styles.blackboardEntry);
+                entry.name = EditorGUI.TextField(rect, entry.name, Styles.BlackboardEntry);
 
                 if (GUI.GetNameOfFocusedControl() != entry.name)
                     editing = null;
             }
             else
             {
-                Styles.blackboardEntry.DrawIfRepaint(rect, content, isHovered, false, isSelected, false);
+                Styles.BlackboardEntry.DrawIfRepaint(rect, content, isHovered, false, isSelected, false);
             }
 
             entryGUIData.TryGetValue(entry.type, out Tuple<string, Color> entryData);
@@ -266,14 +268,14 @@ namespace SchemaEditor.Editors
             for (int j = 1; j <= m; d[0, j] = j++) ;
 
             for (int i = 1; i <= n; i++)
-                for (int j = 1; j <= m; j++)
-                {
-                    int cost = t[j - 1] == s[i - 1] ? 0 : 1;
-                    int min1 = d[i - 1, j] + 1;
-                    int min2 = d[i, j - 1] + 1;
-                    int min3 = d[i - 1, j - 1] + cost;
-                    d[i, j] = Mathf.Min(Mathf.Min(min1, min2), min3);
-                }
+            for (int j = 1; j <= m; j++)
+            {
+                int cost = t[j - 1] == s[i - 1] ? 0 : 1;
+                int min1 = d[i - 1, j] + 1;
+                int min2 = d[i, j - 1] + 1;
+                int min3 = d[i - 1, j - 1] + cost;
+                d[i, j] = Mathf.Min(Mathf.Min(min1, min2), min3);
+            }
 
             return d[n, m];
         }

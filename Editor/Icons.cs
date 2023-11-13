@@ -7,32 +7,32 @@ namespace SchemaEditor
 {
     public static class Icons
     {
-        private static readonly Dictionary<string, Texture2D> editorCache = new Dictionary<string, Texture2D>();
+        private static readonly Dictionary<string, Texture2D> EditorCache = new Dictionary<string, Texture2D>();
 
-        private static readonly Dictionary<string, Texture2D> resourceCache = new Dictionary<string, Texture2D>();
+        private static readonly Dictionary<string, Texture2D> ResourceCache = new Dictionary<string, Texture2D>();
         private static Texture2D _gridTexture;
 
-        private static Texture2D _gridTexture2x;
+        private static Texture2D _gridTexture2X;
 
-        public static Texture2D gridTexture => _gridTexture == null
-            ? _gridTexture = GenerateGridTexture(Color.Lerp(Color.white, Styles.windowAccent, 0.8f),
-                Styles.windowAccent, false)
+        public static Texture2D GridTexture => _gridTexture == null
+            ? _gridTexture = GenerateGridTexture(Color.Lerp(Color.white, Styles.WindowAccent, 0.8f),
+                Styles.WindowAccent, false)
             : _gridTexture;
 
-        public static Texture2D gridTexture2x => _gridTexture2x == null
-            ? _gridTexture2x = GenerateGridTexture(Color.Lerp(Color.white, Styles.windowAccent, 0.8f),
-                Styles.windowAccent, true)
-            : _gridTexture2x;
+        public static Texture2D GridTexture2X => _gridTexture2X == null
+            ? _gridTexture2X = GenerateGridTexture(Color.Lerp(Color.white, Styles.WindowAccent, 0.8f),
+                Styles.WindowAccent, true)
+            : _gridTexture2X;
 
         public static Texture2D GetEditor(string iconName, bool doPrefix = true)
         {
             if (doPrefix)
                 iconName = (EditorGUIUtility.isProSkin ? "d_" : "") + iconName;
 
-            editorCache.TryGetValue(iconName, out Texture2D value);
+            EditorCache.TryGetValue(iconName, out Texture2D value);
 
             if (value == null)
-                editorCache[iconName] = value = (Texture2D)EditorGUIUtility.IconContent(iconName).image;
+                EditorCache[iconName] = value = (Texture2D)EditorGUIUtility.IconContent(iconName).image;
 
             return value;
         }
@@ -46,10 +46,10 @@ namespace SchemaEditor
 
             iconName = Path.Combine(Path.GetDirectoryName(iconName), file);
 
-            resourceCache.TryGetValue(iconName, out Texture2D value);
+            ResourceCache.TryGetValue(iconName, out Texture2D value);
 
             if (value == null)
-                resourceCache[iconName] = value = Resources.Load<Texture2D>(iconName);
+                ResourceCache[iconName] = value = Resources.Load<Texture2D>(iconName);
 
             return value;
         }

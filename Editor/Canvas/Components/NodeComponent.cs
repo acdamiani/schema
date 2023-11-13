@@ -187,40 +187,41 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             Color tint = Prefs.dimUnconnectedNodes && node.priority < 1 ? new Color(0.8f, 0.8f, 0.8f, 1f) : Color.white;
 
-            GUI.color = Styles.windowBackground * tint;
+            GUI.color = Styles.WindowBackground * tint;
 
             if (
                 node.connectionDescriptor == Node.ConnectionDescriptor.OnlyInConnection
                 || node.connectionDescriptor == Node.ConnectionDescriptor.Both
             )
-                GUI.DrawTextureWithTexCoords(layout.inConnection, Icons.GetResource("in_connection", false),
-                    new Rect(0f, 0.5f, 1f, 0.5f));
+                SchemaGUI.DrawRoundedBox(layout.inConnection, Styles.WindowBackground * tint,
+                    new Vector4(8, 8, 0, 0));
 
-            GUI.color = Styles.windowBackground * tint;
+            GUI.color = Styles.WindowBackground * tint;
 
             if (
                 node.connectionDescriptor == Node.ConnectionDescriptor.OnlyOutConnection
                 || node.connectionDescriptor == Node.ConnectionDescriptor.Both
             )
-                Styles.roundedBox.DrawIfRepaint(layout.outConnectionDraw, false, false, false, false);
+                SchemaGUI.DrawRoundedBox(layout.outConnection, Styles.WindowBackground * tint,
+                    new Vector4(0, 0, 8, 8));
 
-            Styles.element.DrawIfRepaint(layout.shadow, false, false, false, false);
+            Debug.Log(layout.inConnection);
 
-            GUI.color = isSelected ? Prefs.selectionColor : Styles.outlineColor;
-            Styles.outline.DrawIfRepaint(layout.body, false, false, false, false);
+            SchemaGUI.DrawRoundedBox(layout.body, Styles.WindowBackground * tint,
+                isSelected ? Prefs.selectionColor : Styles.OutlineColor, 8, 2);
 
-            GUI.color = Styles.windowAccent * tint;
-            Styles.roundedBox.DrawIfRepaint(layout.content, false, false, false, false);
+            GUI.color = Styles.WindowAccent * tint;
+            Styles.RoundedBox.DrawIfRepaint(layout.content, false, false, false, false);
 
             GUI.color = Color.white * tint;
 
             Vector2 mousePos = Event.current.mousePosition;
 
             GUI.Label(layout.textContent,
-                new GUIContent(node.name), Styles.nodeLabel);
+                new GUIContent(node.name), Styles.NodeLabel);
 
             GUI.Label(layout.iconContent,
-                new GUIContent(node.icon), Styles.nodeIcon);
+                new GUIContent(node.icon), Styles.NodeIcon);
 
             // IEnumerable<Error> errors = new List<Error>() { new Error("Hello World", Error.Severity.Warning) };
 
@@ -240,12 +241,14 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             if (node.modifiers.Length > 0)
             {
-                GUI.color = Styles.outlineColor * tint;
                 GUIContent content = new GUIContent("", "Node has active modifiers");
-                Styles.roundedBox.DrawIfRepaint(layout.modifierBox, content, false, false, false, false);
-
+                SchemaGUI.DrawRoundedBox(layout.modifierBox, Styles.OutlineColor * tint, 8);
+                EditorStyles.label.DrawIfRepaint(layout.modifierBox, content, false, false, false, false);
                 GUI.color = Color.white * tint;
-                GUI.DrawTexture(layout.modifierBox.Pad(4), Icons.GetResource("Modifier", false));
+
+                Rect r = new Rect(layout.modifierBox.x + 4, layout.modifierBox.y + 4, 16f, 16f);
+                for (int i = 0; i < node.modifiers.Length; i++, r.y += 20f)
+                    GUI.DrawTexture(r, node.modifiers[i].icon);
             }
 
             if (statusColor != new Color(0f, 0f, 0f, 0f))
@@ -260,10 +263,9 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             if (node.priority > 0)
             {
-                GUI.backgroundColor = Styles.outlineColor * tint;
-                Styles.roundedBox.DrawIfRepaint(layout.priorityIndicator, new GUIContent(node.priority.ToString()),
-                    false, false, false, false);
-                GUI.backgroundColor = Color.white;
+                SchemaGUI.DrawRoundedBox(layout.priorityIndicator, Styles.OutlineColor * tint, 8f);
+                Styles.PriorityIndicator.DrawIfRepaint(layout.priorityIndicator,
+                    new GUIContent(node.priority.ToString()), false, false, false, false);
             }
 
             GUI.color = guiColor;
@@ -363,7 +365,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                     e.Use();
                     break;
                 case EventType.MouseDrag when e.button == 0 && isSelected && canvas.selectionBoxComponent.hidden:
-                    float snap = Icons.gridTexture.width / 4f;
+                    float snap = Icons.GridTexture.width / 4f;
 
                     if (beginDragPosition == null)
                     {
@@ -428,10 +430,11 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             createArgs.id = 1;
             createArgs.layer = 100;
             createArgs.rect = new Rect(xDiff, yDiff, 500f, 500f);
-            createArgs.style = Styles.window;
+            createArgs.style = Styles.Window;
             createArgs.title = GUIContent.none;
             createArgs.windowProvider = search;
             createArgs.canClose = true;
+            createArgs.doWindowBackground = true;
 
             canvas.Create<WindowComponent>(createArgs);
         }
@@ -566,7 +569,7 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 Rect r = gridRect;
                 r.position = component.canvas.zoomer.GridToWindowPositionNoClipped(r.position);
 
-                Vector2 v = Styles.roundedBox.CalcSize(new GUIContent(last.priority.ToString()));
+                Vector2 v = Styles.RoundedBox.CalcSize(new GUIContent(last.priority.ToString()));
                 v = new Vector2(Mathf.Max(24, v.x + 10), Mathf.Max(24, v.y + 10));
 
                 body = r;
@@ -577,24 +580,27 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 textContent = new Rect(content.x, content.yMax - textSize.y - ContentPadding.bottom, content.width,
                     textSize.y);
                 errorBox = new Rect(body.xMax, body.yMax, 28f, 28f).UseCenter();
-                inConnection = new Rect(body.center.x, body.y - component.node.conditionals.Length * 50f - 6f, 24f, 12f)
+                inConnection = new Rect(body.center.x,
+                        body.y - component.node.conditionals.Length *
+                        (ConditionalComponent.Height + ConditionalComponent.Separation) - 6f, 24f, 12f)
                     .UseCenter();
                 outConnection = new Rect(body.center.x, body.yMax + 6f, body.width - 48f, 12f).UseCenter();
                 outConnectionDraw = new Rect(outConnection.x, outConnection.y - 12f, outConnection.width, 24f);
                 priorityIndicator = new Rect(body.x, body.center.y, v.x, v.y).UseCenter();
-                modifierBox = new Rect(body.xMax, body.y, 28f, 28f).UseCenter();
+                modifierBox = new Rect(body.xMax, body.center.y, 24f, component.node.modifiers.Length * 20f + 4f)
+                    .UseCenter();
             }
 
             private void DoRect()
             {
-                textSize = Styles.nodeLabel.CalcSize(new GUIContent(component.node.name));
+                textSize = Styles.NodeLabel.CalcSize(new GUIContent(component.node.name));
 
                 float width = textSize.x + ContentPadding.left + ContentPadding.right + 28;
                 float height = textSize.y + ContentPadding.top + ContentPadding.bottom + 28;
 
                 if (component.node.icon != null)
                 {
-                    iconSize = Styles.nodeIcon.CalcSize(new GUIContent(component.node.icon));
+                    iconSize = Styles.NodeIcon.CalcSize(new GUIContent(component.node.icon));
 
                     width = Mathf.Max(width, iconSize.x + ContentPadding.left + ContentPadding.right + 28);
                     height += iconSize.y + ContentPadding.bottom;

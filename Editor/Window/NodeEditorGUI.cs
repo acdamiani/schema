@@ -17,6 +17,9 @@ namespace SchemaEditor
     public partial class NodeEditor
     {
         public Rect window;
+
+
+        private float _t;
         private Editor blackboardEditor;
         public ComponentCanvas canvas;
         private Editor defaultConditionalEditor;
@@ -30,8 +33,6 @@ namespace SchemaEditor
         public float tabHeight => isDocked() ? 19.0f : 21.0f;
         private Func<bool> isDocked => isDockedFunc ??= this.GetIsDockedDelegate();
 
-
-        private float _t;
         private void OnGUI()
         {
             CalculateWindow();
@@ -439,7 +440,7 @@ namespace SchemaEditor
 
             windowCreateArgs.id = 1;
             windowCreateArgs.rect = new Rect((window.width - width) / 2f, (window.height - height) / 2f, width, height);
-            windowCreateArgs.style = Styles.window;
+            windowCreateArgs.style = Styles.Window;
             windowCreateArgs.title = new GUIContent("Open Graph");
             windowCreateArgs.windowProvider = new Splash();
             windowCreateArgs.canClose = false;
@@ -464,10 +465,11 @@ namespace SchemaEditor
             createArgs.id = 1;
             createArgs.layer = 100;
             createArgs.rect = new Rect((window.width - 500f) / 2f, (window.height - 500f) / 2f, 500f, 500f);
-            createArgs.style = Styles.window;
+            createArgs.style = Styles.Window;
             createArgs.title = GUIContent.none;
             createArgs.windowProvider = search;
             createArgs.canClose = true;
+            createArgs.doWindowBackground = true;
 
             canvas.Create<WindowComponent>(createArgs);
         }
@@ -511,10 +513,11 @@ namespace SchemaEditor
             createArgs.id = 1;
             createArgs.layer = 100;
             createArgs.rect = new Rect((window.width - 500f) / 2f, (window.height - 500f) / 2f, 500f, 500f);
-            createArgs.style = Styles.window;
+            createArgs.style = Styles.Window;
             createArgs.title = GUIContent.none;
             createArgs.windowProvider = search;
             createArgs.canClose = true;
+            createArgs.doWindowBackground = true;
 
             canvas.Create<WindowComponent>(createArgs);
         }
@@ -526,7 +529,7 @@ namespace SchemaEditor
         {
             if (!Prefs.showGrid)
             {
-                EditorGUI.DrawRect(rect, Styles.windowAccent);
+                EditorGUI.DrawRect(rect, Styles.WindowAccent);
                 return;
             }
 
@@ -536,7 +539,7 @@ namespace SchemaEditor
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size * .5f;
-            Texture2D gridTex = zoom > 2f ? Icons.gridTexture2x : Icons.gridTexture;
+            Texture2D gridTex = zoom > 2f ? Icons.GridTexture2X : Icons.GridTexture;
 
             float fac = 1f - Mathf.Clamp(zoom - (transitionPoint - transitionWindow), 0f, transitionWindow * 2f) /
                 (transitionWindow * 2f);
@@ -553,9 +556,9 @@ namespace SchemaEditor
 
             Vector2 tileAmount = new Vector2(tileAmountX, tileAmountY);
 
-            GUI.DrawTextureWithTexCoords(rect, Icons.gridTexture2x, new Rect(tileOffset, tileAmount));
+            GUI.DrawTextureWithTexCoords(rect, Icons.GridTexture2X, new Rect(tileOffset, tileAmount));
             GUI.color = new Color(1f, 1f, 1f, fac);
-            GUI.DrawTextureWithTexCoords(rect, Icons.gridTexture, new Rect(tileOffset, tileAmount));
+            GUI.DrawTextureWithTexCoords(rect, Icons.GridTexture, new Rect(tileOffset, tileAmount));
             GUI.color = Color.white;
         }
 

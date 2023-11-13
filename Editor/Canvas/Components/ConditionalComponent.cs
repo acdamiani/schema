@@ -14,6 +14,8 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
     public sealed class ConditionalComponent : GUIComponent, IViewElement, ISelectable, IEditable, IGraphObjectProvider,
         IDeletable, ICopyable
     {
+        public const float Separation = 8f;
+        public const float Height = 32f;
         private static ConditionalComponent moving;
         private static Vector2 dxdyMouseDown;
         private static int desiredIndex;
@@ -124,12 +126,12 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
             GUIContent content = conditional.GetConditionalContent();
             Texture2D icon = conditional.icon;
 
-            Vector2 contentSize = Styles.conditional.CalcSize(content);
+            Vector2 contentSize = Styles.Conditional.CalcSize(content);
             contentSize.x += icon != null ? 20f : 0f;
 
             Vector2 pos = new Vector2(parent.layout.gridRect.center.x - contentSize.x / 2f,
                 parent.layout.gridRect.y - (height + 18f) * upCount);
-            
+
             Rect r = new Rect(pos.x, pos.y, contentSize.x, height);
             return r;
         }
@@ -207,31 +209,25 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             DoHighlight();
 
-            float height = 32f;
-
             int upCount = length - index;
 
             GUIContent content = conditional.GetConditionalContent();
             Texture2D icon = conditional.icon;
 
-            Vector2 contentSize = Styles.conditional.CalcSize(content);
+            Vector2 contentSize = Styles.Conditional.CalcSize(content);
             contentSize.x += icon != null ? 20f : 0f;
 
             Vector2 pos = new Vector2(parent.layout.body.center.x - contentSize.x / 2f,
-                parent.layout.body.y - (height + 18f) * upCount);
+                parent.layout.body.y - (Height + Separation) * upCount);
 
-            _rect = new Rect(pos.x, pos.y, contentSize.x, height);
+            _rect = new Rect(pos.x, pos.y, contentSize.x, Height);
 
-            GUI.color = Styles.windowBackground;
+            Rect decorator_out = new Rect(_rect.center.x - Separation * 1.5f, _rect.yMax, Separation * 3, Separation);
+            EditorGUI.DrawRect(decorator_out, Styles.WindowBackground);
 
-            Rect decorator_out = new Rect(_rect.center.x - 24f, _rect.yMax, 48f, 18f);
-
-            GUI.DrawTexture(decorator_out, Icons.GetResource("decorator_out", false));
-            GUI.DrawTextureWithTexCoords(
-                new Rect(_rect.center.x - 12f, decorator_out.yMax - 12f, 24f, 12f),
-                Icons.GetResource("in_connection", false),
-                new Rect(0f, 0.5f, 1f, 0.5f)
-            );
+            // GUI.DrawTexture(decorator_out, Icons.GetResource("decorator_out", false));
+            // SchemaGUI.DrawRoundedBox(new Rect(_rect.center.x - 12f, decorator_out.yMax - 12f, 24f, 12f),
+            //     Styles.windowBackground, new Vector4(8, 8, 0, 0));
 
             GUI.color = Color.white;
 
@@ -239,28 +235,21 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
 
             if (moving == this)
             {
-                GUI.backgroundColor = new Color(Styles.windowBackground.r, Styles.windowBackground.g,
-                    Styles.windowBackground.b, 0.5f);
-                Styles.element.DrawIfRepaint(_rect.Pad(-10), false, false, false, false);
+                GUI.backgroundColor = new Color(Styles.WindowBackground.r, Styles.WindowBackground.g,
+                    Styles.WindowBackground.b, 0.5f);
+                Styles.Element.DrawIfRepaint(_rect.Pad(-10), false, false, false, false);
                 GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
-                Styles.outline.DrawIfRepaint(_rect, false, false, false, false);
+                Styles.Outline.DrawIfRepaint(_rect, false, false, false, false);
 
-                r = new Rect(Event.current.mousePosition - dxdyMouseDown, new Vector2(contentSize.x, height));
+                r = new Rect(Event.current.mousePosition - dxdyMouseDown, new Vector2(contentSize.x, Height));
             }
 
-            GUI.backgroundColor = Styles.windowBackground;
-            Styles.element.DrawIfRepaint(r.Pad(-10), false, false, false, false);
-            Styles.conditional.DrawIfRepaint(r, content, false, false, false, false);
-
-            GUI.backgroundColor = Color.white;
-
-            GUI.color = isSelected ? Prefs.selectionColor : Styles.outlineColor;
-            Styles.outline.DrawIfRepaint(r, false, false, false, false);
-
-            GUI.color = Color.white;
+            SchemaGUI.DrawRoundedBox(r, Styles.WindowBackground,
+                isSelected ? Prefs.selectionColor : Styles.OutlineColor, 8f, 2f);
+            Styles.Conditional.DrawIfRepaint(r, content, false, false, false, false);
 
             if (icon != null)
-                GUI.DrawTexture(new Rect(r.x + Styles.conditional.padding.left, r.y + 8f, 16f, 16f), icon);
+                GUI.DrawTexture(new Rect(r.x + Styles.Conditional.padding.left, r.y + 8f, 16f, 16f), icon);
 
             if (statusColor != new Color(0f, 0f, 0f, 0f))
             {
