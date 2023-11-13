@@ -122,11 +122,11 @@ namespace SchemaEditor
 
                     GUIContent content =
                         new GUIContent($"Using {entryValue.name}{valuePathProp.stringValue.Replace('/', '.')}");
-                    size = Styles.selectorDrawerMiniText.CalcSize(content);
+                    size = Styles.SelectorDrawerMiniText.CalcSize(content);
 
                     GUI.BeginClip(r, new Vector2(info[property.propertyPath].scroll, 0f), Vector2.zero, false);
 
-                    EditorGUI.LabelField(new Rect(0f, 3f, size.x, size.y), content, Styles.selectorDrawerMiniText);
+                    EditorGUI.LabelField(new Rect(0f, 3f, size.x, size.y), content, Styles.SelectorDrawerMiniText);
 
                     GUI.EndClip();
 

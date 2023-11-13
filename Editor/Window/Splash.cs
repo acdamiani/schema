@@ -65,7 +65,7 @@ public class Splash : IWindowComponentProvider
         {
             c = new GUIContent(s.Value);
 
-            Rect r = GUILayoutUtility.GetRect(c, Styles.blackboardEntry);
+            Rect r = GUILayoutUtility.GetRect(c, Styles.BlackboardEntry);
 
             bool isHovered = r.Contains(current.mousePosition);
 
@@ -74,7 +74,7 @@ public class Splash : IWindowComponentProvider
 
             bool isSelected = selected == s.Key;
 
-            Styles.blackboardEntry.DrawIfRepaint(r, c, isHovered, false, isSelected, false);
+            Styles.BlackboardEntry.DrawIfRepaint(r, c, isHovered, false, isSelected, false);
         }
 
         GUILayout.EndScrollView();
@@ -107,8 +107,13 @@ public class Splash : IWindowComponentProvider
         GUILayout.EndVertical();
     }
 
-    public void OnEnable() {}
-    public void OnDestroy() {}
+    public void OnEnable()
+    {
+    }
+
+    public void OnDestroy()
+    {
+    }
 
     private void CreateNew()
     {

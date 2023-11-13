@@ -11,74 +11,35 @@ namespace SchemaEditor
         private static readonly Color DarkBorder = new Color32(40, 40, 40, 255);
         private static readonly Color LightBorder = new Color32(147, 147, 147, 255);
 
-        private static GUIStyle _title;
-
         private static GUIStyle _window;
-
         private static GUIStyle _blackboardScroll;
-
         private static GUIStyle _favoriteToggle;
-
-        private static GUIStyle _padding8x;
-
+        private static GUIStyle _padding8X;
         private static GUIStyle _searchResult;
-
         private static GUIStyle _shadow;
-
         private static GUIStyle _roundedBox;
-
         private static GUIStyle _nodeLabel;
-
         private static GUIStyle _nodeIcon;
-
         private static GUIStyle _conditional;
-
         private static GUIStyle _element;
-
         private static GUIStyle _center;
-
         private static GUIStyle _searchLarge;
-
         private static GUIStyle _searchTopBar;
-
         private static GUIStyle _searchTopBarButton;
-
         private static GUIStyle _cancelButton;
-
         private static GUIStyle _blackboardEditorBackground;
-
         private static GUIStyle _blackboardEntry;
-
         private static GUIStyle _outline;
-
         private static GUIStyle _description;
-
         private static GUIStyle _selectorDrawerMiniText;
-
         private static GUIStyle _priorityIndicator;
+        public static Color WindowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
+        public static Color WindowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
 
-        public static Color windowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
-        public static Color windowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
-
-        public static Color outlineColor =>
+        public static Color OutlineColor =>
             EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : new Color32(176, 176, 176, 255);
 
-        public static GUIStyle title
-        {
-            get
-            {
-                if (_title == null)
-                {
-                    _title = new GUIStyle(EditorStyles.label);
-                    _title.alignment = TextAnchor.MiddleCenter;
-                    _title.fontSize = 16;
-                }
-
-                return _title;
-            }
-        }
-
-        public static GUIStyle priorityIndicator
+        public static GUIStyle PriorityIndicator
         {
             get
             {
@@ -95,7 +56,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle window
+        public static GUIStyle Window
         {
             get
             {
@@ -111,21 +72,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle blackboardScroll
-        {
-            get
-            {
-                if (_blackboardScroll == null)
-                {
-                    _blackboardScroll = new GUIStyle(EditorStyles.helpBox);
-                    _blackboardScroll.padding = new RectOffset(0, 0, 0, 0);
-                }
-
-                return _blackboardScroll;
-            }
-        }
-
-        public static GUIStyle favoriteToggle
+        public static GUIStyle FavoriteToggle
         {
             get
             {
@@ -145,21 +92,21 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle padding8x
+        public static GUIStyle Padding8X
         {
             get
             {
-                if (_padding8x == null)
+                if (_padding8X == null)
                 {
-                    _padding8x = new GUIStyle();
-                    _padding8x.padding = new RectOffset(8, 8, 8, 8);
+                    _padding8X = new GUIStyle();
+                    _padding8X.padding = new RectOffset(8, 8, 8, 8);
                 }
 
-                return _padding8x;
+                return _padding8X;
             }
         }
 
-        public static GUIStyle searchResult
+        public static GUIStyle SearchResult
         {
             get
             {
@@ -170,7 +117,7 @@ namespace SchemaEditor
                     _searchResult.padding = new RectOffset(4, 0, 0, 0);
                     _searchResult.alignment = TextAnchor.MiddleLeft;
                     _searchResult.hover.background =
-                        roundedBox.normal.background.Tint(GUI.skin.settings.selectionColor);
+                        RoundedBox.normal.background.Tint(GUI.skin.settings.selectionColor);
                     _searchResult.hover.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
                     _searchResult.normal.textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black;
                 }
@@ -179,7 +126,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle shadow
+        public static GUIStyle Shadow
         {
             get
             {
@@ -194,7 +141,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle roundedBox
+        public static GUIStyle RoundedBox
         {
             get
             {
@@ -211,7 +158,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle nodeLabel
+        public static GUIStyle NodeLabel
         {
             get
             {
@@ -228,7 +175,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle nodeIcon
+        public static GUIStyle NodeIcon
         {
             get
             {
@@ -245,7 +192,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle conditional
+        public static GUIStyle Conditional
         {
             get
             {
@@ -264,7 +211,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle element
+        public static GUIStyle Element
         {
             get
             {
@@ -279,7 +226,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle center
+        public static GUIStyle Center
         {
             get
             {
@@ -293,7 +240,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle searchLarge
+        public static GUIStyle SearchLarge
         {
             get
             {
@@ -310,7 +257,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle searchTopBar
+        public static GUIStyle SearchTopBar
         {
             get
             {
@@ -325,7 +272,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle searchTopBarButton
+        public static GUIStyle SearchTopBarButton
         {
             get
             {
@@ -342,7 +289,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle cancelButton
+        public static GUIStyle CancelButton
         {
             get
             {
@@ -357,7 +304,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle blackboardEditorBackground
+        public static GUIStyle BlackboardEditorBackground
         {
             get
             {
@@ -371,7 +318,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle blackboardEntry
+        public static GUIStyle BlackboardEntry
         {
             get
             {
@@ -397,7 +344,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle outline
+        public static GUIStyle Outline
         {
             get
             {
@@ -412,7 +359,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle description
+        public static GUIStyle Description
         {
             get
             {
@@ -428,7 +375,7 @@ namespace SchemaEditor
             }
         }
 
-        public static GUIStyle selectorDrawerMiniText
+        public static GUIStyle SelectorDrawerMiniText
         {
             get
             {

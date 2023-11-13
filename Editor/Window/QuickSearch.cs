@@ -11,7 +11,6 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using Action = System.Action;
-using Object = UnityEngine.Object;
 
 public class QuickSearch : IWindowComponentProvider
 {
@@ -23,7 +22,6 @@ public class QuickSearch : IWindowComponentProvider
     private readonly CacheDictionary<string, IEnumerable<Type>> search =
         new CacheDictionary<string, IEnumerable<Type>>();
 
-    private SearchField searchField;
     private readonly IEnumerable<Type> types;
     private readonly KeyCode[] validMovementCodes = { KeyCode.UpArrow, KeyCode.DownArrow };
     private bool close;
@@ -32,15 +30,18 @@ public class QuickSearch : IWindowComponentProvider
     private Rect rect;
     private int refinementLength;
     private Vector2 scroll;
-    private bool searchFavorites;
-    private string searchText = "";
 
     private CacheDictionary<string, IEnumerable<Type>> searchedFavorites =
         new CacheDictionary<string, IEnumerable<Type>>();
 
+    private bool searchFavorites;
+
+    private readonly SearchField searchField;
+    private string searchText = "";
+
     private int selected;
-    private float toolbarHeight;
     private bool shouldFocus = true;
+    private float toolbarHeight;
 
     public QuickSearch(IEnumerable<Type> types, Action<Type> onSelectAction)
     {
@@ -68,22 +69,22 @@ public class QuickSearch : IWindowComponentProvider
             GUI.FocusWindow(id);
             searchField.SetFocus();
             shouldFocus = false;
-        } 
-        
+        }
+
         Focus();
 
-        GUILayout.BeginHorizontal(Styles.searchTopBar);
+        GUILayout.BeginHorizontal(Styles.SearchTopBar);
 
-        Rect r = GUILayoutUtility.GetRect(GUIContent.none, Styles.searchTopBarButton);
-        r.y += Styles.searchLarge.fixedHeight / 2f - r.height / 2f;
+        Rect r = GUILayoutUtility.GetRect(GUIContent.none, Styles.SearchTopBarButton);
+        r.y += Styles.SearchLarge.fixedHeight / 2f - r.height / 2f;
 
         searchFavorites = GUI.Toggle(r, searchFavorites, Icons.GetEditor("FolderFavorite Icon"),
-            Styles.searchTopBarButton);
+            Styles.SearchTopBarButton);
 
-        r = GUILayoutUtility.GetRect(new GUIContent(searchText), Styles.searchLarge);
+        r = GUILayoutUtility.GetRect(new GUIContent(searchText), Styles.SearchLarge);
 
         if (Event.current.keyCode != KeyCode.Return)
-            searchText = searchField.OnGUI(r, searchText, Styles.searchLarge, Styles.cancelButton, GUIStyle.none);
+            searchText = searchField.OnGUI(r, searchText, Styles.SearchLarge, Styles.CancelButton, GUIStyle.none);
 
         GUILayout.EndHorizontal();
 
@@ -104,7 +105,7 @@ public class QuickSearch : IWindowComponentProvider
             false,
             GUIStyle.none,
             GUIStyle.none,
-            Styles.padding8x,
+            Styles.Padding8X,
             GUILayout.Width(rect.width),
             GUILayout.ExpandHeight(true)
         );
@@ -120,18 +121,19 @@ public class QuickSearch : IWindowComponentProvider
     {
         shouldFocus = true;
     }
+
     public void OnDestroy()
     {
         // Unset SearchField focus
-        GUIUtility.keyboardControl = 0; 
+        GUIUtility.keyboardControl = 0;
         EditorGUIUtility.editingTextField = false;
     }
 
-private void DoSingleResult(Type type, string favoriteName, int index, Action onClick)
+    private void DoSingleResult(Type type, string favoriteName, int index, Action onClick)
     {
         Event current = Event.current;
 
-        float positionInView = index * 24f + Styles.padding8x.padding.top;
+        float positionInView = index * 24f + Styles.Padding8X.padding.top;
 
         if (positionInView + 24 < scroll.y || positionInView > rect.height - toolbarHeight + scroll.y)
         {
@@ -148,7 +150,7 @@ private void DoSingleResult(Type type, string favoriteName, int index, Action on
 
         bool isInFavorites = favorites.Contains(favoriteName);
 
-        if (GUI.Toggle(r, isInFavorites, GUIContent.none, Styles.favoriteToggle))
+        if (GUI.Toggle(r, isInFavorites, GUIContent.none, Styles.FavoriteToggle))
         {
             if (!isInFavorites)
             {
@@ -173,7 +175,7 @@ private void DoSingleResult(Type type, string favoriteName, int index, Action on
         switch (current.type)
         {
             case EventType.Repaint:
-                Styles.searchResult.Draw(r, GUIContent.none, false, false, false, index == realSelection);
+                Styles.SearchResult.Draw(r, GUIContent.none, false, false, false, index == realSelection);
                 DoCompleteLabel(r, type);
                 break;
             case EventType.MouseMove:
@@ -302,7 +304,7 @@ private void DoSingleResult(Type type, string favoriteName, int index, Action on
     {
         selected = CorrectSelection(selected);
 
-        float positionInView = selected * 24f + Styles.padding8x.padding.top;
+        float positionInView = selected * 24f + Styles.Padding8X.padding.top;
 
         if (positionInView < scroll.y)
             scroll.y = positionInView;
