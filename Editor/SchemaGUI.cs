@@ -31,7 +31,7 @@ namespace SchemaEditor
         private static GUIContent[] MakeContents(string text, GUIStyle style, params Texture[] images)
         {
             MatchCollection matchCollection = Regex.Matches(text, @"{(\d+)}");
-            List<int> i = new List<int>();
+            List<int> i = new();
 
             foreach (Match match in matchCollection)
             {
@@ -47,7 +47,7 @@ namespace SchemaEditor
 
             for (int j = 0; j < info.Length; j++)
             {
-                GUIContent label = new GUIContent();
+                GUIContent label = new();
 
                 if (j % 2 == 0)
                     label.text = s[j / 2];
@@ -78,6 +78,28 @@ namespace SchemaEditor
             }
 
             return ret;
+        }
+
+        public static void DrawRoundedBox(Rect position, Color background, float radius)
+        {
+            Texture2D tex = Icons.GetResource("px", false);
+            GUI.DrawTexture(position, tex, ScaleMode.StretchToFill, true, 0, background, 0, radius);
+        }
+
+        public static void DrawRoundedBox(Rect position, Color background, Vector4 radius)
+        {
+            Texture2D tex = Icons.GetResource("px", false);
+            GUI.DrawTexture(position, tex, ScaleMode.StretchToFill, true, 0, background, Vector4.zero, radius);
+        }
+
+        public static void DrawRoundedBox(Rect position, Color background, Color border, float radius,
+            float borderWidth)
+        {
+            Texture2D tex = Icons.GetResource("px", false);
+            // background
+            GUI.DrawTexture(position, tex, ScaleMode.StretchToFill, true, 0, background, 0, radius);
+            // border
+            GUI.DrawTexture(position, tex, ScaleMode.StretchToFill, true, 0, border, borderWidth, radius);
         }
 
         public static void DrawRotatedTexture(Rect position, Texture image, float angle)

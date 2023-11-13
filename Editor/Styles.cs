@@ -6,8 +6,6 @@ namespace SchemaEditor
 {
     internal static class Styles
     {
-        public static readonly Color lowerPriorityColor = new Color32(255, 140, 144, 255);
-        public static readonly Color selfColor = new Color32(71, 255, 166, 255);
         private static readonly Color DarkBackgroundColor = new Color32(56, 56, 56, 255);
         private static readonly Color LightBackgroundColor = new Color32(200, 200, 200, 255);
         private static readonly Color DarkBorder = new Color32(40, 40, 40, 255);
@@ -57,6 +55,8 @@ namespace SchemaEditor
 
         private static GUIStyle _selectorDrawerMiniText;
 
+        private static GUIStyle _priorityIndicator;
+
         public static Color windowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
         public static Color windowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
 
@@ -75,6 +75,23 @@ namespace SchemaEditor
                 }
 
                 return _title;
+            }
+        }
+
+        public static GUIStyle priorityIndicator
+        {
+            get
+            {
+                if (_priorityIndicator == null)
+                {
+                    _priorityIndicator = new GUIStyle(EditorStyles.label);
+                    _priorityIndicator.alignment = TextAnchor.MiddleCenter;
+                    _priorityIndicator.fontSize = 12;
+                    _priorityIndicator.fontStyle = FontStyle.Bold;
+                    _priorityIndicator.normal.textColor = Color.white;
+                }
+
+                return _priorityIndicator;
             }
         }
 
