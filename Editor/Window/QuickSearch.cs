@@ -337,9 +337,9 @@ public class QuickSearch : IWindowComponentProvider
         foreach (string q in queries)
         {
             string category = categories.GetOrCreate(ty, () => GraphObject.GetCategory(ty)) ?? "";
-            string search = category.ToLower() + ty.Name.ToLower();
+            string haystack = category.ToLower() + ty.Name.ToLower();
 
-            int s = Search(q, search);
+            int s = haystack.IndexOf(q, StringComparison.Ordinal);
             if (s != -1)
             {
                 ret.Add(ty);
@@ -348,46 +348,5 @@ public class QuickSearch : IWindowComponentProvider
         }
 
         return ret;
-    }
-
-    private static int Search(string needle, string haystack)
-    {
-        int[] T = Preprocess(needle);
-        int skip = 0;
-
-        while (haystack.Length - skip >= needle.Length)
-        {
-            if (Same(haystack.Substring(skip), needle, needle.Length))
-                return skip;
-            skip = skip + T[haystack[skip + needle.Length - 1]];
-        }
-
-        return -1;
-    }
-
-    private static bool Same(string s1, string s2, int len)
-    {
-        int i = len - 1;
-        while (s1[i] == s2[i])
-        {
-            if (i == 0)
-                return true;
-            i--;
-        }
-
-        return false;
-    }
-
-    private static int[] Preprocess(string pattern)
-    {
-        int[] T = new int[256];
-
-        for (int i = 0; i < 256; i++)
-            T[i] = pattern.Length;
-
-        for (int i = 0; i < pattern.Length - 1; i++)
-            T[pattern[i]] = pattern.Length - i - 1;
-
-        return T;
     }
 }

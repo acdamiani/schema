@@ -10,23 +10,24 @@ namespace Schema
         private static readonly CacheDictionary<Graph, ExecutableTree> treeMap =
             new CacheDictionary<Graph, ExecutableTree>();
 
-        [SerializeField, Tooltip("Target Graph asset for this agent")] 
+        [SerializeField] [Tooltip("Target Graph asset for this agent")]
         private Graph m_target;
 
-        [SerializeField, TextArea, Tooltip("Description for this agent that will be displayed in the Node View")]  
+        [SerializeField] [TextArea] [Tooltip("Description for this agent that will be displayed in the Node View")]
         private string m_agentDescription;
 
-        [SerializeField, Min(1),
-         Tooltip("Maximum number of steps to be taken throughout the tree before a forceful exit")]
+        [SerializeField]
+        [Min(1)]
+        [Tooltip("Maximum number of steps to be taken throughout the tree before a forceful exit")]
         private int m_maxStepsPerTick = 1000;
 
-        [SerializeField, Tooltip("Restart the tree when complete")] 
+        [SerializeField] [Tooltip("Restart the tree when complete")]
         private bool m_restartWhenComplete = true;
 
-        [SerializeField, Tooltip("Reset all blackboard values (excluding globals) when the tree restarts")] 
+        [SerializeField] [Tooltip("Reset all blackboard values (excluding globals) when the tree restarts")]
         private bool m_resetBlackboardOnRestart;
 
-        [SerializeField, Min(0), Tooltip("Amount of time in seconds to pause between executions of the tree")]  
+        [SerializeField] [Min(0)] [Tooltip("Amount of time in seconds to pause between executions of the tree")]
         private float m_treePauseTime;
 
         private float t;
