@@ -3,7 +3,9 @@ using UnityEngine.AI;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("Nodes/d_Movement"), LightIcon("Light/Movement"), Category("Movement")]
+    [DarkIcon("Nodes/d_Movement")]
+    [LightIcon("Light/Movement")]
+    [Category("Movement")]
     public class Wander : Action
     {
         public ComponentSelector<NavMeshAgent> navMeshAgent;

@@ -1,5 +1,6 @@
 using System;
 using Schema.Internal;
+using Schema.Utilities;
 using UnityEngine;
 
 namespace Schema
@@ -9,24 +10,24 @@ namespace Schema
     {
         [SerializeField] private bool m_useSelf = true;
         [SerializeField] private string m_fieldValueType = typeof(T).AssemblyQualifiedName;
-        private T cache;
+        private CacheDictionary<int, T> cache = new CacheDictionary<int, T>();
         public bool useSelf => m_useSelf;
 
         public T GetValue(GameObject gameObject)
         {
-            if (cache == null)
+            int id;
+            // Get component from gameObject, not underlying value
+            if (useSelf)
             {
-                if (useSelf)
-                    cache = gameObject.GetComponent<T>();
-                else
-                    return value?.GetComponent<T>();
-            }
-            else
-            {
-                return cache;
+                id = gameObject.GetInstanceID();
+                return cache.GetOrCreate(id, gameObject.GetComponent<T>);
             }
 
-            return cache;
+            if (!value) return null;
+
+            // Get component from underlying value
+            id = value.GetInstanceID();
+            return cache.GetOrCreate(id, value.GetComponent<T>);
         }
 
         public T GetValue(Component component)
