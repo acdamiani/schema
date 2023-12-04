@@ -297,7 +297,7 @@ namespace Schema.Internal
 
             int i = flow.Tick(nodeMemory[id], context.status, caller);
 
-            int? child = i >= 0 && i < children.Length ? children[i] : null;
+            int? child = i >= 0 && i < children.Length ? children[i] : (int?)null;
 
             Modifier.Message message = Modifier.Message.None;
 
