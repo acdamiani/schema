@@ -1,0 +1,27 @@
+{
+	"name": "com.acdamiani.schema",
+	"version": "1.0.4",
+	"displayName": "Schema",
+	"description": "Repository for Schema, a Unity Asset.",
+	"unity": "2020.1",
+	"author": {
+		"name": "August Damiani",
+		"email": "damiani.august@gmail.com"
+	},
+	"keywords": [
+		"behaviour trees",
+		"ai"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/acdamiani/schema"
+	},
+	"licensesUrl": "https://unity.com/legal/as-terms",
+	"samples": [
+		{
+			"displayName": "Behaviour Tree Example",
+			"description": "A sample AI made with Schema",
+			"path": "Samples~/Example"
+		}
+	]
+}

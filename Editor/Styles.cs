@@ -34,7 +34,7 @@ namespace SchemaEditor
         private static GUIStyle _priorityIndicator;
         public static Color WindowBackground => EditorGUIUtility.isProSkin ? DarkBackgroundColor : LightBackgroundColor;
         public static Color WindowAccent => EditorGUIUtility.isProSkin ? DarkBorder : LightBorder;
-        public static Color? WindowBorder => EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : null;
+        public static Color? WindowBorder => EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : (Color?)null;
 
         public static Color OutlineColor =>
             EditorGUIUtility.isProSkin ? new Color32(80, 80, 80, 255) : new Color32(176, 176, 176, 255);
