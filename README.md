@@ -1,23 +1,28 @@
-<p align="center">
-    <img src="https://github.com/acdamiani/schema/assets/65556364/c5d45adc-106c-41c7-aced-06af171f5ab5" alt="banner" />
-</p>
+[![Schema](https://github.com/acdamiani/schema/assets/65556364/30a3663a-482c-42f9-9e1d-86f992cee3fe)](https://schema-ai.com)
 
-<div align="center"><strong>Visual intelligence for the Unity game engine</strong></div>
+# Schema - Create AI in Unity
 
-<br />
-
-<div align="center">
-  <a href="https://assetstore.unity.com/packages/tools/behavior-ai/schema-200876">
-      <img src="https://img.shields.io/badge/Asset Store-100000?style=for-the-badge&logo=unity&logoColor=white" alt="Unity Logo" />
-  </a>
-  <img alt="Language" src="https://img.shields.io/github/v/release/acdamiani/schema?style=for-the-badge&label=Latest">
-  <img alt="License" src="https://img.shields.io/github/license/acdamiani/schema?style=for-the-badge">
-</div>
-
-<br />
+[![asset store](https://img.shields.io/badge/Asset_Store-100000?style=for-the-badge&logo=unity&logoColor=white)](https://assetstore.unity.com/packages/tools/behavior-ai/schema-200876) [![license](https://img.shields.io/github/license/acdamiani/schema?style=for-the-badge)](LICENSE.md) [![latest](https://img.shields.io/github/v/release/acdamiani/schema?style=for-the-badge&label=Latest)](https://github.com/acdamiani/schema/releases/latest)
 
 Schema is a visual scripting tool that allows you to create Behavior Trees for
 video games with minimal hassle and configuration.
+
+Features:
+- 150+ Nodes and Decorators
+- Simple API
+- Zero runtime allocations
+- Sub-millisecond execution per Agent
+- Extensive documentation
+- Data oriented design
+- Event driven
+- Intuitive editor
+- Supports built in Unity serialization (no manual saving or loading needed)
+- Supports custom editors out of the box
+- Blackboard variables
+- Blackboard properties (get and set)
+- Conditional aborts
+- Built in tree formatting
+- 100% free and open source under the [MIT License](LICENSE.md)
 
 ## Quick Start
 
