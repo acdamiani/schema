@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
-    [DarkIcon("Conditionals/d_Compare"), LightIcon("Conditionals/Compare")]
+    [DarkIcon("Conditionals/d_Compare")]
+    [LightIcon("Conditionals/Compare")]
     public class CompareTo : Conditional
     {
         public enum ComparisonType
@@ -24,8 +25,6 @@ namespace Schema.Builtin.Conditionals
 
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
-            Debug.Log(valueOne.value);
-
             switch (comparisonType)
             {
                 case ComparisonType.Equal:

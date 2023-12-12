@@ -42,7 +42,7 @@ public static class GraphUtility
 
             if (conditionalComponent == null)
                 return Vector2.zero;
-            
+
             Rect conditionalRect = conditionalComponent.GetGridRect();
 
             xMin = Mathf.Min(xMin, conditionalRect.xMin);
@@ -85,19 +85,14 @@ public static class GraphUtility
 
             if (conditionalComponent == null)
                 return Vector2.zero;
-            
+
             Rect conditionalRect = conditionalComponent.GetGridRect();
 
             xMin = Mathf.Min(xMin, conditionalRect.xMin);
             yMin = Mathf.Min(yMin, conditionalRect.yMin);
         }
 
-        Vector2 min = new Vector2(xMin, yMin);
-
-        if (node.name == "Root")
-            Debug.Log(min);
-
-        return min;
+        return new Vector2(xMin, yMin);
     }
 
     private static void Calc(Node node)

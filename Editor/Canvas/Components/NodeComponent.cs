@@ -205,8 +205,6 @@ namespace SchemaEditor.Internal.ComponentSystem.Components
                 SchemaGUI.DrawRoundedBox(layout.outConnection, Styles.WindowBackground * tint,
                     new Vector4(0, 0, 8, 8));
 
-            Debug.Log(layout.inConnection);
-
             SchemaGUI.DrawRoundedBox(layout.body, Styles.WindowBackground * tint,
                 isSelected ? Prefs.selectionColor : Styles.OutlineColor, 8, 2);
 

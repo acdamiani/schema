@@ -19,7 +19,7 @@ namespace SchemaEditor.Internal
 
         private readonly Action<Rect, float, Vector2> _doGrid;
         private readonly List<Func<GUIComponent, bool>> selectors = new List<Func<GUIComponent, bool>>();
-        
+
 
         private GUIComponent[] _components = Array.Empty<GUIComponent>();
         private GUIComponent _hovered;
@@ -208,20 +208,12 @@ namespace SchemaEditor.Internal
             if (Event.current.isMouse)
                 mousePos = Event.current.mousePosition;
 
-            if (mousePos == new Vector2(0, -21))
-            {
-                Debug.Log(Event.current.type);
-            }
-
             // Bug in MacOS (maybe other platforms too) resets mousePosition to (0, -21) for non-mouse events. Weird.  
             if (
                 (Event.current.isKey || Event.current.isMouse || Event.current.isScrollWheel)
                 && !context.GetViewRect().Contains(mousePos)
             )
-            {
-                Debug.Log(mousePos);
                 return;
-            }
 
             if (Event.current.rawType == EventType.MouseDrag && !context.GetViewRect().Contains(mouseDownPos))
                 return;
@@ -275,10 +267,8 @@ namespace SchemaEditor.Internal
             }
 
             for (int i = c.Length - 1; i >= 0; i--)
-            {
                 if (!isSinkEvent || c[i] is ICanvasMouseEventSink)
                     c[i].OnGUI();
-            }
         }
 
         public void DeselectAll()
