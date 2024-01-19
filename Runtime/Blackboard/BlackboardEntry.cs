@@ -32,11 +32,10 @@ namespace Schema.Internal
         {
             get
             {
-                if (_type == null || !lastTypeString.Equals(m_typeString))
-                {
-                    _type = Type.GetType(m_typeString);
-                    lastTypeString = m_typeString;
-                }
+                if (_type != null && lastTypeString.Equals(m_typeString)) return _type;
+
+                _type = Type.GetType(m_typeString);
+                lastTypeString = m_typeString;
 
                 return _type;
             }
