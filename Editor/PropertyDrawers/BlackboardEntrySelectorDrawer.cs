@@ -18,13 +18,12 @@ namespace SchemaEditor
         private static readonly Dictionary<string, SelectorPropertyInfo> info =
             new Dictionary<string, SelectorPropertyInfo>();
 
-        private static readonly Type[] valid = { typeof(Node), typeof(Conditional) };
+        private static readonly Type[] valid = { typeof(Node), typeof(Conditional), typeof(Modifier) };
         private static readonly CacheDictionary<Type, Type> typeMappings = new CacheDictionary<Type, Type>();
 
         private static readonly Dictionary<Type, Tuple<string[], Type[]>> excluded =
             new Dictionary<Type, Tuple<string[], Type[]>>();
 
-        private static int i;
         private static event GUIDelayCall guiDelayCall;
 
         public static void DoSelectorMenu(Rect position, SerializedProperty property, FieldInfo fieldInfo)
