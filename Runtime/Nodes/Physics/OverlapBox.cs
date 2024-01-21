@@ -28,8 +28,6 @@ namespace Schema.Builtin.Nodes
         protected override void OnObjectEnable()
         {
             hit.ApplyFilters(typeof(GameObject), typeof(List<GameObject>), typeof(Transform), typeof(List<Transform>));
-
-            ;
         }
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

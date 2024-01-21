@@ -13,6 +13,7 @@ namespace Schema.Internal
     {
         private static Type[] _blackboardTypes;
         private static Type[] _mappedBlackboardTypes;
+        private static Blackboard _global;
         [SerializeField] private BlackboardEntry[] m_entries = Array.Empty<BlackboardEntry>();
 
         public static Type[] blackboardTypes =>
@@ -26,6 +27,8 @@ namespace Schema.Internal
         ///     Array of entries for the Blackboard
         /// </summary>
         public BlackboardEntry[] entries => m_entries;
+
+        public static Blackboard global => _global == null ? _global = LoadGlobal() : _global;
 
         private void OnEnable()
         {
@@ -42,14 +45,12 @@ namespace Schema.Internal
         {
             return blackboardTypes.Select(x => EntryType.GetMappedType(x)).ToArray();
         }
-        public static Blackboard global => _global == null ? _global = LoadGlobal() : _global;
-        private static Blackboard _global;
 
         private static Blackboard LoadGlobal()
         {
             Blackboard loaded = Resources.Load<Blackboard>("GlobalBlackboard");
 
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (loaded == null)
             {
                 loaded = CreateInstance<Blackboard>();
@@ -59,13 +60,13 @@ namespace Schema.Internal
 
                 AssetDatabase.CreateAsset(loaded, "Assets/Resources/GlobalBlackboard.asset");
             }
-            #endif
+#endif
 
             return loaded;
         }
 
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         public static Blackboard instance;
 
         public delegate void EntryListChangedCallback(Blackboard changed);
@@ -74,8 +75,8 @@ namespace Schema.Internal
 
         public static event EntryListChangedCallback entryListChanged;
         public static event EntryTypeChangedCallback entryTypeChanged;
-        #endif
-        #if UNITY_EDITOR
+#endif
+#if UNITY_EDITOR
         public int GetTypeMask(IEnumerable<string> filters)
         {
             List<Type> typeArray = filters.Select(s => Type.GetType(s)).ToList();
@@ -172,6 +173,6 @@ namespace Schema.Internal
         {
             entryTypeChanged?.Invoke(entry);
         }
-        #endif
+#endif
     }
 }

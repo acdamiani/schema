@@ -1,10 +1,10 @@
-using System;
 using System.Text;
 using UnityEngine;
 
 namespace Schema.Builtin.Conditionals
 {
-    [DarkIcon("Conditionals/d_IsNull"), LightIcon("Conditionals/IsNull")]
+    [DarkIcon("Conditionals/d_IsNull")]
+    [LightIcon("Conditionals/IsNull")]
     public class IsNull : Conditional
     {
         [Tooltip("Entry to check for null")] public BlackboardEntrySelector entry = new BlackboardEntrySelector();
@@ -14,25 +14,8 @@ namespace Schema.Builtin.Conditionals
             entry.ApplyAllFilters();
         }
 
-        public override void OnInitialize(object decoratorMemory, SchemaAgent agent)
-        {
-            IsNullMemory memory = (IsNullMemory)decoratorMemory;
-
-            Type mapped = EntryType.GetMappedType(entry.entryType);
-
-            if (mapped != null)
-                memory.doReturn = mapped.IsValueType;
-            else
-                memory.doReturn = false;
-        }
-
         public override bool Evaluate(object decoratorMemory, SchemaAgent agent)
         {
-            IsNullMemory memory = (IsNullMemory)decoratorMemory;
-
-            if (memory.doReturn)
-                return true;
-
             return entry.value == null;
         }
 
@@ -53,11 +36,6 @@ namespace Schema.Builtin.Conditionals
                 sb.Append("is null");
 
             return new GUIContent(sb.ToString());
-        }
-
-        private class IsNullMemory
-        {
-            public bool doReturn;
         }
     }
 }

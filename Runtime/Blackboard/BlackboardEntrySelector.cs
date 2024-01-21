@@ -97,7 +97,9 @@ namespace Schema
         [SerializeField] private string m_dynamicName;
         [SerializeField] private bool m_isDynamic;
         [SerializeField] private List<string> m_filters;
-        private string lastEntryTypeString;
+        private Type _lastEntryTypeMapped;
+
+        private Type _lastEntryTypeUnmapped;
 
         /// <summary>
         ///     Whether the entry attached to this selector is null
@@ -142,7 +144,23 @@ namespace Schema
         /// </summary>
         public string dynamicName => m_dynamicName;
 
-        public Type entryType => entry == null ? null : entry.type;
+        public Type entryType
+        {
+            get
+            {
+                if (!entry)
+                    return null;
+
+                Type entryTypeUnmapped = entry.type;
+                if (_lastEntryTypeUnmapped == entryTypeUnmapped)
+                    return _lastEntryTypeMapped;
+
+                _lastEntryTypeMapped = EntryType.GetMappedType(entryTypeUnmapped);
+                _lastEntryTypeUnmapped = entryTypeUnmapped;
+
+                return _lastEntryTypeMapped;
+            }
+        }
 
         /// <summary>
         ///     The value of this selector (runtime only)
@@ -151,52 +169,44 @@ namespace Schema
         {
             get
             {
-                if (!Application.isPlaying || (!m_isDynamic && m_entry == null))
+                if (!Application.isPlaying || (!m_isDynamic && !m_entry))
                     return null;
 
-                if (m_isDynamic) return ExecutableTree.current.blackboard.GetDynamic(m_dynamicName);
+                if (m_isDynamic)
+                    return ExecutableTree.current.blackboard.GetDynamic(m_dynamicName);
 
-                if (entry != null)
-                {
-                    object obj = ExecutableTree.current.blackboard.Get(m_entry);
+                object obj = ExecutableTree.current.blackboard.Get(m_entry);
 
-                    if (obj == null)
-                        return null;
+                if (obj == null)
+                    return null;
 
-                    string vPath = new Regex(@" \(.*\)$").Replace(m_valuePath, "");
+                string vPath = new Regex(@" \(.*\)$").Replace(m_valuePath, "");
 
-                    if (!string.IsNullOrEmpty(m_valuePath))
-                        return DynamicProperty.Get(obj, vPath);
-
-                    return obj;
-                }
-
-                return null;
+                return !string.IsNullOrEmpty(m_valuePath) ? DynamicProperty.Get(obj, vPath) : obj;
             }
             set
             {
-                if (!Application.isPlaying || (!m_isDynamic && m_entry == null))
+                if (!Application.isPlaying || (!m_isDynamic && !m_entry))
                     return;
 
                 if (m_isDynamic)
                 {
                     ExecutableTree.current.blackboard.SetDynamic(m_dynamicName, value);
+                    return;
                 }
-                else if (m_entry != null)
+
+                if (!string.IsNullOrEmpty(m_valuePath.Trim('/')))
                 {
-                    if (!string.IsNullOrEmpty(m_valuePath.Trim('/')))
-                    {
-                        object valueObj = ExecutableTree.current.blackboard.Get(m_entry);
+                    object valueObj = ExecutableTree.current.blackboard.Get(m_entry);
 
-                        if (valueObj == null)
-                            return;
+                    if (valueObj == null)
+                        return;
 
-                        DynamicProperty.Set(valueObj, m_valuePath, value);
-                    }
-                    else
-                    {
-                        ExecutableTree.current.blackboard.Set(m_entry, value);
-                    }
+                    DynamicProperty.Set(valueObj, m_valuePath, value);
+                }
+                else
+                {
+                    ExecutableTree.current.blackboard.Set(m_entry, value);
                 }
             }
         }
@@ -265,9 +275,7 @@ namespace Schema
             if (!Application.isEditor)
                 return;
 
-            Type t = GetType();
-
-            if (t != typeof(BlackboardEntrySelector))
+            if (GetType() != typeof(BlackboardEntrySelector))
             {
                 Debug.LogWarning(
                     "Applying filters to a generic selector or component selector is not allowed. To use custom filters, create a non-generic BlackboardEntrySelector instead."
@@ -275,23 +283,19 @@ namespace Schema
                 return;
             }
 
-            m_filters.Clear();
+            IEnumerable<Type> validFilters = filters.Where(t =>
+            {
+                bool b = Blackboard.mappedBlackboardTypes.Contains(t);
+                if (!b)
+                    Debug.LogWarning(
+                        $"Type {t.Name} is not a valid Blackboard type and therefore is not allowed to be used as a filter");
+                return b;
+            }).ToList();
 
-            if (entryType != null && !filters.Contains(EntryType.GetMappedType(entryType)))
+            m_filters = validFilters.Select(t => t.AssemblyQualifiedName).ToList();
+
+            if (entryType != null && !validFilters.Contains(entryType))
                 m_entry = null;
-
-            m_filters = filters
-                .Where(t =>
-                {
-                    bool b = Blackboard.mappedBlackboardTypes.Contains(t);
-
-                    if (!b)
-                        Debug.LogWarning($"Type {t.Name} is not a valid Blackboard type");
-
-                    return b;
-                })
-                .Select(t => t.AssemblyQualifiedName)
-                .ToList();
         }
 
         /// <summary>
@@ -322,8 +326,7 @@ namespace Schema
                 return;
             }
 
-            m_filters.AddRange(filters
-                .Where(t =>
+            m_filters.AddRange(filters.Where(t =>
                 {
                     bool b = Blackboard.mappedBlackboardTypes.Contains(t);
 
@@ -331,8 +334,7 @@ namespace Schema
                         Debug.LogWarning($"Type {t.Name} is not a valid Blackboard type");
 
                     return b;
-                })
-                .Select(t => t.AssemblyQualifiedName)
+                }).Select(t => t.AssemblyQualifiedName)
             );
         }
 
@@ -364,8 +366,7 @@ namespace Schema
                 return;
             }
 
-            m_filters = m_filters.Except(filters
-                .Where(t =>
+            m_filters = m_filters.Except(filters.Where(t =>
                 {
                     bool b = Blackboard.mappedBlackboardTypes.Contains(t);
 
@@ -373,8 +374,7 @@ namespace Schema
                         Debug.LogWarning($"Type {t.Name} is not a valid Blackboard type");
 
                     return b;
-                })
-                .Select(t => t.AssemblyQualifiedName)
+                }).Select(t => t.AssemblyQualifiedName)
             ).ToList();
 
             if (entryType != null && filters.Contains(EntryType.GetMappedType(entryType)))

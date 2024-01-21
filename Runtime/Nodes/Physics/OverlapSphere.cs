@@ -4,8 +4,10 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_SphereCollider Icon", true), LightIcon("SphereCollider Icon", true), Category("Physics"),
-     Description("Gets colliders hit by a sphere positioned in the world")]
+    [DarkIcon("d_SphereCollider Icon", true)]
+    [LightIcon("SphereCollider Icon", true)]
+    [Category("Physics")]
+    [Description("Gets colliders hit by a sphere positioned in the world")]
     public class OverlapSphere : Action
     {
         [Tooltip("Position of the sphere")] public BlackboardEntrySelector<Vector3> position;
@@ -17,8 +19,8 @@ namespace Schema.Builtin.Nodes
         [Tooltip("Specifies whether this query should hit triggers")]
         public QueryTriggerInteraction queryTriggerInteraction;
 
-        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit GameObject"),
-         WriteOnly]
+        [Tooltip("BlackboardEntry to store a collection of the hit GameObjects, or the first hit GameObject")]
+        [WriteOnly]
         public BlackboardEntrySelector hit = new BlackboardEntrySelector();
 
         protected override void OnObjectEnable()

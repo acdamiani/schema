@@ -26,12 +26,8 @@ namespace Schema
             if (!typeof(EntryType).IsAssignableFrom(entryType))
                 throw new ArgumentException($"{entryType.Name} does not inherit from EntryType");
 
-            Color32? customColor = entryType.GetCustomAttribute<ColorAttribute>()?.color;
-
-            if (customColor == null)
-                customColor = entryType.Name.Hash().ToColor();
-
-            return (Color32)customColor;
+            return entryType.GetCustomAttribute<ColorAttribute>()?.color ??
+                   entryType.Name.Hash().ToColor();
         }
 
         public static Type GetMappedType(Type entryType)
@@ -42,9 +38,7 @@ namespace Schema
             if (!typeof(EntryType).IsAssignableFrom(entryType))
                 throw new ArgumentException($"{entryType.Name} does not inherit from EntryType");
 
-            Type mappedType = entryType.GetCustomAttribute<UseExternalTypeDefinitionAttribute>()?.other;
-
-            return mappedType ?? entryType;
+            return entryType.GetCustomAttribute<UseExternalTypeDefinitionAttribute>()?.other ?? entryType;
         }
 
         public static string[] GetExcludedPaths(Type entryType)
@@ -52,10 +46,8 @@ namespace Schema
             if (!typeof(EntryType).IsAssignableFrom(entryType))
                 throw new ArgumentException($"{entryType.Name} does not inherit from EntryType");
 
-            string[] paths = entryType.GetCustomAttributes<ExcludePathsAttribute>()?.Select(x => x.excludedPaths)
+            return entryType.GetCustomAttributes<ExcludePathsAttribute>()?.Select(x => x.excludedPaths)
                 .SelectMany(x => x).ToArray();
-
-            return paths ?? new string[0];
         }
 
         public static Type[] GetExcludedTypes(Type entryType)
@@ -63,10 +55,8 @@ namespace Schema
             if (!typeof(EntryType).IsAssignableFrom(entryType))
                 throw new ArgumentException($"{entryType.Name} does not inherit from EntryType");
 
-            Type[] types = entryType.GetCustomAttributes<ExcludeTypesAttribute>()?.Select(x => x.excludedTypes)
+            return entryType.GetCustomAttributes<ExcludeTypesAttribute>()?.Select(x => x.excludedTypes)
                 .SelectMany(x => x).ToArray();
-
-            return types ?? new Type[0];
         }
 
         /// <summary>
