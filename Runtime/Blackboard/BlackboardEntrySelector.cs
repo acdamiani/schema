@@ -156,7 +156,7 @@ namespace Schema
                     return _lastEntryTypeMapped;
 
                 _lastEntryTypeMapped = EntryType.GetMappedType(entryTypeUnmapped);
-                _lastEntryTypeUnmapped = entryType;
+                _lastEntryTypeUnmapped = entryTypeUnmapped;
 
                 return _lastEntryTypeMapped;
             }
