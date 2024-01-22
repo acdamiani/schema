@@ -22,8 +22,6 @@ namespace Schema.Internal
 
         private readonly Dictionary<int, bool> lastConditionalStatus = new Dictionary<int, bool>();
 
-        private readonly Dictionary<int, bool> lastDynamicStatus = new Dictionary<int, bool>();
-
         private readonly Dictionary<int, object[]> modifierMemory = new Dictionary<int, object[]>();
 
         public readonly Node node;
@@ -162,44 +160,36 @@ namespace Schema.Internal
             Node current = context.node.node;
             int id = context.agent.GetInstanceID();
 
-            for (int i = 0; i < dynamicConditionals.Length; i++)
+            foreach (int j in dynamicConditionals)
             {
-                int j = dynamicConditionals[i];
                 Conditional c = node.conditionals[j];
-
-                bool isSubAbort = c.abortsType == Conditional.AbortsType.Self ||
-                                  c.abortsType == Conditional.AbortsType.Both;
-                bool isPriorityAbort = c.abortsType == Conditional.AbortsType.LowerPriority ||
-                                       c.abortsType == Conditional.AbortsType.Both;
 
                 bool isSub = current.IsSubTreeOf(node);
                 bool isPriority = current.IsLowerPriority(node);
 
-                if (
-                    !(isSubAbort && isPriorityAbort && (isSub || isPriority))
-                    && (
-                        (isSubAbort && !isSub)
-                        || (isPriorityAbort && !isPriority)
-                    )
-                )
-                    continue;
+                switch (c.abortsType)
+                {
+                    case Conditional.AbortsType.Self when !isSub:
+                    case Conditional.AbortsType.LowerPriority when !isPriority:
+                    case Conditional.AbortsType.Both when !isPriority && !isSub:
+                        continue;
+                }
 
                 bool status = c.Evaluate(conditionalMemory[id][j], context.agent);
                 status = c.invert ? !status : status;
 
-                lastDynamicStatus.TryGetValue(j, out bool last);
-                lastDynamicStatus[j] = status;
+                if (!lastConditionalStatus.TryGetValue(j, out bool last)) last = status;
+                lastConditionalStatus[j] = status;
 
-                bool abortOnSuccess = c.abortsWhen == Conditional.AbortsWhen.OnSuccess ||
-                                      c.abortsWhen == Conditional.AbortsWhen.Both;
-                bool abortOnFailure = c.abortsWhen == Conditional.AbortsWhen.OnFailure ||
-                                      c.abortsWhen == Conditional.AbortsWhen.Both;
+                if (last == status) continue;
 
-                if (status != last
-                    && ((status && abortOnSuccess) || (!status && abortOnFailure))
-                    && ((isSubAbort && isSub) || (isPriorityAbort && isPriority))
-                   )
-                    return true;
+                switch (c.abortsWhen)
+                {
+                    case Conditional.AbortsWhen.OnSuccess when status:
+                    case Conditional.AbortsWhen.OnFailure when !status:
+                    case Conditional.AbortsWhen.Both:
+                        return true;
+                }
             }
 
             return false;
@@ -228,7 +218,7 @@ namespace Schema.Internal
                     i = DoFlow(id, context);
                     break;
                 case ExecutableNodeType.Action:
-                    i = DoAction(id, context);
+                    i = DoAction(id, context, context.forceActionConditionalEvaluation);
                     break;
                 case ExecutableNodeType.Invalid:
                 default:
@@ -267,18 +257,7 @@ namespace Schema.Internal
             if (flow == null)
                 throw new Exception("Node is not of type Flow but the execution method was run anyways.");
 
-            bool run = true;
-
-            for (int j = 0; j < flow.conditionals.Length; j++)
-            {
-                run = flow.conditionals[j].Evaluate(conditionalMemory[id][j], context.agent);
-                run = flow.conditionals[j].invert ? !run : run;
-
-                lastConditionalStatus[j] = run;
-
-                if (!run)
-                    break;
-            }
+            bool run = DoConditionalStack(id, context);
 
             if (!run)
             {
@@ -297,7 +276,7 @@ namespace Schema.Internal
 
             int i = flow.Tick(nodeMemory[id], context.status, caller);
 
-            int? child = i >= 0 && i < children.Length ? children[i] : (int?)null;
+            int? child = i >= 0 && i < children.Length ? children[i] : null;
 
             Modifier.Message message = Modifier.Message.None;
 
@@ -323,7 +302,7 @@ namespace Schema.Internal
             return child.Value;
         }
 
-        private int DoAction(int id, ExecutionContext context)
+        private int DoAction(int id, ExecutionContext context, bool forceConditionalEvaluation)
         {
             Action action = node as Action;
 
@@ -332,17 +311,8 @@ namespace Schema.Internal
 
             bool run = true;
 
-            if (context.last.index != index)
-                for (int j = 0; j < action.conditionals.Length; j++)
-                {
-                    run = action.conditionals[j].Evaluate(conditionalMemory[id][j], context.agent);
-                    run = action.conditionals[j].invert ? !run : run;
-
-                    lastConditionalStatus[j] = run;
-
-                    if (!run)
-                        break;
-                }
+            if (context.last.index != index || forceConditionalEvaluation)
+                run = DoConditionalStack(id, context);
 
             if (!run)
             {
@@ -382,16 +352,33 @@ namespace Schema.Internal
             }
         }
 
+        private bool DoConditionalStack(int id, ExecutionContext context)
+        {
+            bool run = true;
+
+            for (int j = 0; j < node.conditionals.Length; j++)
+            {
+                run = node.conditionals[j].Evaluate(conditionalMemory[id][j], context.agent);
+                run = node.conditionals[j].invert ? !run : run;
+
+                lastConditionalStatus[j] = run;
+
+                if (!run)
+                    break;
+            }
+
+            return run;
+        }
+
         private static ExecutableNodeType GetNodeType(Node node)
         {
-            if (node is Root)
-                return ExecutableNodeType.Root;
-            if (node is Flow)
-                return ExecutableNodeType.Flow;
-            if (node is Action)
-                return ExecutableNodeType.Action;
-
-            return ExecutableNodeType.Invalid;
+            return node switch
+            {
+                Root => ExecutableNodeType.Root,
+                Flow => ExecutableNodeType.Flow,
+                Action => ExecutableNodeType.Action,
+                _ => ExecutableNodeType.Invalid
+            };
         }
 
         private static int GetBreadth(Node node)

@@ -80,21 +80,23 @@ namespace Schema.Internal
 
             do
             {
-                ExecutableNode n = null;
+                ExecutableNode abortTarget = null;
 
-                for (int j = 0; j < nodes.Length; j++)
-                    if (nodes[j].RunDynamicConditionals(context))
-                        n = nodes[j];
+                foreach (ExecutableNode node in nodes)
+                    if (node.RunDynamicConditionals(context))
+                        abortTarget = node;
 
-                if (n != null)
+                if (abortTarget != null)
                 {
                     context.RemoveStatus(context.node);
-                    context.node = n;
-                    context.ForceStatus(n);
+                    context.node = abortTarget;
+                    context.forceActionConditionalEvaluation = true;
                 }
 
                 int i = nodes[context.node.index].Execute(context);
                 i = i > nodes.Length - 1 ? 0 : i;
+
+                context.forceActionConditionalEvaluation = false;
 
                 context.node = nodes[i];
 

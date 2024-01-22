@@ -43,6 +43,8 @@ namespace Schema.Internal
 
         public NodeStatus status { get; set; }
 
+        public bool forceActionConditionalEvaluation { get; set; }
+
         public void ForceStatus(ExecutableNode node)
         {
             if (node.index > 0)
