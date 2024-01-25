@@ -97,8 +97,8 @@ namespace Schema
         [SerializeField] private string m_dynamicName;
         [SerializeField] private bool m_isDynamic;
         [SerializeField] private List<string> m_filters;
-        private Type _lastEntryTypeMapped;
 
+        private Type _lastEntryTypeMapped;
         private Type _lastEntryTypeUnmapped;
 
         /// <summary>

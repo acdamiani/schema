@@ -2,8 +2,10 @@ using UnityEngine;
 
 namespace Schema.Builtin.Nodes
 {
-    [DarkIcon("d_Transform Icon", true), LightIcon("Transform Icon", true),
-     Description("Rotates a vector towards a target"), Category("Vector")]
+    [DarkIcon("d_Transform Icon", true)]
+    [LightIcon("Transform Icon", true)]
+    [Description("Rotates a vector towards a target")]
+    [Category("Vector")]
     public class RotateTowardsVector : Action
     {
         [Tooltip("Current managed vector")] public BlackboardEntrySelector current = new BlackboardEntrySelector();
@@ -16,7 +18,7 @@ namespace Schema.Builtin.Nodes
         [Tooltip("The maximum allowed change in vector magnitude for this rotation")]
         public BlackboardEntrySelector<float> maxMagnitudeDelta;
 
-        [Tooltip("Blackboard variable to store the new rotated vector in"), WriteOnly] 
+        [Tooltip("Blackboard variable to store the new rotated vector in")] [WriteOnly]
         public BlackboardEntrySelector rotated = new BlackboardEntrySelector();
 
         private void OnValidate()
@@ -59,8 +61,6 @@ namespace Schema.Builtin.Nodes
             current.ApplyFilters(typeof(Vector2), typeof(Vector3));
             target.ApplyFilters(typeof(Vector2), typeof(Vector3));
             rotated.ApplyFilters(typeof(Vector2), typeof(Vector3));
-
-            ;
         }
 
         public override NodeStatus Tick(object nodeMemory, SchemaAgent agent)

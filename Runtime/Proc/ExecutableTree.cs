@@ -16,8 +16,8 @@ namespace Schema.Internal
 
             tree = graph;
             nodes = graph.nodes
-                .Where(x => x.priority >= 0)
                 .Select(x => new ExecutableNode(x))
+                .Where(x => x.index > -1)
                 .OrderBy(x => x.index)
                 .ToArray();
             root = nodes
