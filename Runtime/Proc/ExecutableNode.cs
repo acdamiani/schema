@@ -30,42 +30,45 @@ namespace Schema.Internal
 
         public ExecutableNode(Node node)
         {
-            if (node == null)
+            if (!node)
                 throw new ArgumentNullException("node", "Node cannot be null!");
 
             this.node = node;
 
-            index = node.priority - 1;
-            children = node.children
+            Index = node.priority - 1;
+            Children = node.children
                 .Select(x => x.priority - 1)
                 .OrderBy(x => x)
                 .ToArray();
-            breadth = GetBreadth(node);
-            nodeType = GetNodeType(node);
+            Breadth = GetBreadth(node);
+            NodeType = GetNodeType(node);
 
             dynamicConditionals = node.conditionals
                 .Where(x => x.abortsType != Conditional.AbortsType.None)
                 .Select(x => Array.IndexOf(node.conditionals, x))
                 .ToArray();
 
-            if (node.parent != null)
+            DynamicConditionalCount = dynamicConditionals.Length;
+
+            if (node.parent)
             {
-                relativeIndex = Array.IndexOf(node.parent.children, node);
-                parent = node.parent.priority - 1;
+                RelativeIndex = Array.IndexOf(node.parent.children, node);
+                Parent = node.parent.priority - 1;
             }
             else
             {
-                relativeIndex = -1;
-                parent = -1;
+                RelativeIndex = -1;
+                Parent = -1;
             }
         }
 
-        public int index { get; }
-        public int relativeIndex { get; }
-        public int parent { get; }
-        public int[] children { get; }
-        public int breadth { get; }
-        public ExecutableNodeType nodeType { get; }
+        public int Index { get; }
+        public int RelativeIndex { get; }
+        public int DynamicConditionalCount { get; }
+        public int Parent { get; }
+        public int[] Children { get; }
+        public int Breadth { get; }
+        public ExecutableNodeType NodeType { get; }
 
         public void Initialize(ExecutionContext context)
         {
@@ -99,7 +102,7 @@ namespace Schema.Internal
                 }
             }
 
-            switch (nodeType)
+            switch (NodeType)
             {
                 case ExecutableNodeType.Root:
                     break;
@@ -204,12 +207,12 @@ namespace Schema.Internal
                 Debug.LogFormat(
                     "Agent {0} does not have a memory instance. This means that the initialization method was not run for this agent.",
                     context.agent.name);
-                return index + 1;
+                return Index + 1;
             }
 
             int i;
 
-            switch (nodeType)
+            switch (NodeType)
             {
                 case ExecutableNodeType.Root:
                     i = DoRoot(context);
@@ -247,7 +250,7 @@ namespace Schema.Internal
             }
 
             context.status = NodeStatus.Success;
-            return index + 1;
+            return Index + 1;
         }
 
         private int DoFlow(int id, ExecutionContext context)
@@ -262,21 +265,21 @@ namespace Schema.Internal
             if (!run)
             {
                 context.status = NodeStatus.Failure;
-                return parent;
+                return Parent;
             }
 
-            int diff = context.last.index - index;
+            int diff = context.last.Index - Index;
 
-            if (diff >= breadth || diff < 0) flow.OnFlowEnter(nodeMemory[id], context.agent);
+            if (diff >= Breadth || diff < 0) flow.OnFlowEnter(nodeMemory[id], context.agent);
 
             int caller = -1;
 
-            if (children.Contains(context.last.index))
-                caller = context.last.relativeIndex;
+            if (Children.Contains(context.last.Index))
+                caller = context.last.RelativeIndex;
 
             int i = flow.Tick(nodeMemory[id], context.status, caller);
 
-            int? child = i >= 0 && i < children.Length ? children[i] : null;
+            int? child = i >= 0 && i < Children.Length ? Children[i] : null;
 
             Modifier.Message message = Modifier.Message.None;
 
@@ -291,12 +294,12 @@ namespace Schema.Internal
             bool repeat = message == Modifier.Message.Repeat;
 
             if (repeat)
-                return index;
+                return Index;
 
             if (child == null)
             {
                 flow.OnFlowExit(nodeMemory[id], context.agent);
-                return parent;
+                return Parent;
             }
 
             return child.Value;
@@ -311,16 +314,16 @@ namespace Schema.Internal
 
             bool run = true;
 
-            if (context.last.index != index || forceConditionalEvaluation)
+            if (context.last.Index != Index || forceConditionalEvaluation)
                 run = DoConditionalStack(id, context);
 
             if (!run)
             {
                 context.status = NodeStatus.Failure;
-                return parent;
+                return Parent;
             }
 
-            if (context.last.index != index)
+            if (context.last.Index != Index)
                 action.OnNodeEnter(nodeMemory[id], context.agent);
 
             context.status = action.Tick(nodeMemory[id], context.agent);
@@ -328,7 +331,7 @@ namespace Schema.Internal
             switch (context.status)
             {
                 case NodeStatus.Running:
-                    return index;
+                    return Index;
                 case NodeStatus.Success:
                 case NodeStatus.Failure:
                 default:
@@ -345,10 +348,10 @@ namespace Schema.Internal
                     bool repeat = message == Modifier.Message.Repeat;
 
                     if (repeat)
-                        return index;
+                        return Index;
 
                     action.OnNodeExit(nodeMemory[id], context.agent);
-                    return parent;
+                    return Parent;
             }
         }
 

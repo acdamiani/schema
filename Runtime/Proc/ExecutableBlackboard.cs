@@ -49,8 +49,8 @@ namespace Schema.Internal
 
             dynamicValues.TryGetValue(name, out EntryData data);
 
-            if (data != null && (current.node.index < data.position.Item1 ||
-                                 current.node.index >= data.position.Item1 + data.position.Item2))
+            if (data != null && (current.node.Index < data.position.Item1 ||
+                                 current.node.Index >= data.position.Item1 + data.position.Item2))
             {
                 dynamicValues.Remove(name);
 
@@ -64,10 +64,10 @@ namespace Schema.Internal
         {
             ExecutionContext current = ExecutionContext.current;
 
-            ExecutableNode parent = ExecutableTree.current.nodes[current.node.parent];
+            ExecutableNode parent = ExecutableTree.current.nodes[current.node.Parent];
 
             if (!dynamicValues.ContainsKey(name))
-                dynamicValues[name] = new EntryData(value.GetType(), parent.index, parent.breadth);
+                dynamicValues[name] = new EntryData(value.GetType(), parent.Index, parent.Breadth);
 
             dynamicValues[name].SetValue(current.agent.GetInstanceID(), value);
         }

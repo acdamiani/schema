@@ -17,11 +17,11 @@ namespace Schema.Internal
             tree = graph;
             nodes = graph.nodes
                 .Select(x => new ExecutableNode(x))
-                .Where(x => x.index > -1)
-                .OrderBy(x => x.index)
+                .Where(x => x.Index > -1)
+                .OrderBy(x => x.Index)
                 .ToArray();
             root = nodes
-                .FirstOrDefault(x => x.nodeType == ExecutableNode.ExecutableNodeType.Root);
+                .FirstOrDefault(x => x.NodeType == ExecutableNode.ExecutableNodeType.Root);
             blackboard = new ExecutableBlackboard(graph.blackboard);
             context = new Dictionary<int, ExecutionContext>();
         }
@@ -63,7 +63,7 @@ namespace Schema.Internal
                 node.Initialize(context);
             }
 
-            context.node = nodes.FirstOrDefault(x => x.nodeType == ExecutableNode.ExecutableNodeType.Root);
+            context.node = nodes.FirstOrDefault(x => x.NodeType == ExecutableNode.ExecutableNodeType.Root);
         }
 
         public void Tick(SchemaAgent agent)
@@ -82,9 +82,14 @@ namespace Schema.Internal
             {
                 ExecutableNode abortTarget = null;
 
-                foreach (ExecutableNode node in nodes)
-                    if (node.RunDynamicConditionals(context))
-                        abortTarget = node;
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    ExecutableNode node = nodes[i];
+                    if (node.DynamicConditionalCount <= 0) continue;
+
+                    if (node.RunDynamicConditionals(context)) abortTarget = node;
+                    else i += node.Breadth - 1;
+                }
 
                 if (abortTarget != null)
                 {
@@ -93,12 +98,12 @@ namespace Schema.Internal
                     context.forceActionConditionalEvaluation = true;
                 }
 
-                int i = nodes[context.node.index].Execute(context);
-                i = i > nodes.Length - 1 ? 0 : i;
+                int next = nodes[context.node.Index].Execute(context);
+                next = next > nodes.Length - 1 ? 0 : next;
 
                 context.forceActionConditionalEvaluation = false;
 
-                context.node = nodes[i];
+                context.node = nodes[next];
 
                 if (++t == agent.maxStepsPerTick)
                 {
