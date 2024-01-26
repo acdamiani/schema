@@ -157,7 +157,7 @@ namespace Schema
         /// <param name="node">Node to check relation to</param>
         public bool IsLowerPriority(Node node)
         {
-            if (!node || !parent)
+            if (!node)
                 return false;
 
             return priority > node.priority && !IsSubTreeOf(node);
