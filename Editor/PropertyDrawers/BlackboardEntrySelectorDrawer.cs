@@ -262,7 +262,8 @@ namespace SchemaEditor
 
             bool disableDynamicBinding = fieldInfo.GetCustomAttribute<DisableDynamicBindingAttribute>() != null;
 
-            Dictionary<Type, IEnumerable<string>> tmp = new Dictionary<Type, IEnumerable<string>>();
+            Dictionary<Type, IEnumerable<EnumeratedProperty>> tmp =
+                new Dictionary<Type, IEnumerable<EnumeratedProperty>>();
 
             foreach (BlackboardEntry bEntry in Blackboard.instance.entries.Concat(Blackboard.global.entries))
             {
@@ -276,7 +277,7 @@ namespace SchemaEditor
                     menu.AddItem(
                         bEntry.name + (filtered.Count > 1 ? " (" + bEntry.type.Name + ")" : ""),
                         entry.objectReferenceValue == bEntry,
-                        () => GenericMenuSelectOption(property, bEntry, "/"),
+                        () => GenericMenuSelectOption(property, bEntry, path: "/"),
                         false
                     );
                 }
@@ -296,28 +297,26 @@ namespace SchemaEditor
                 {
                     excluded.TryGetValue(bEntry.type, out Tuple<string[], Type[]> e);
 
-                    if (e == null)
-                        e = excluded[bEntry.type] = new Tuple<string[], Type[]>(EntryType.GetExcludedPaths(bEntry.type),
-                            EntryType.GetExcludedTypes(bEntry.type));
+                    e ??= excluded[bEntry.type] = new Tuple<string[], Type[]>(EntryType.GetExcludedPaths(bEntry.type),
+                        EntryType.GetExcludedTypes(bEntry.type));
 
-                    tmp.TryGetValue(bEntry.type, out IEnumerable<string> enumerated);
+                    tmp.TryGetValue(bEntry.type, out IEnumerable<EnumeratedProperty> enumerated);
 
-                    if (enumerated == null)
-                        enumerated = tmp[bEntry.type] = EnumerateProperties(
-                            value,
-                            filtered,
-                            e.Item1,
-                            e.Item2,
-                            needsSetter: info.ContainsKey(property.propertyPath) &&
-                                         info[property.propertyPath].writeOnly,
-                            showType: filtered.Count > 1
-                        );
+                    enumerated ??= tmp[bEntry.type] = EnumerateProperties(
+                        value,
+                        filtered,
+                        e.Item1,
+                        e.Item2,
+                        needsSetter: info.ContainsKey(property.propertyPath) &&
+                                     info[property.propertyPath].writeOnly,
+                        showType: filtered.Count > 1
+                    );
 
-                    foreach (string ss in enumerated)
+                    foreach (EnumeratedProperty p in enumerated)
                         menu.AddItem(
-                            bEntry.name + ss,
-                            valuePathProp.stringValue.Equals(ss) && entry.objectReferenceValue == bEntry,
-                            () => GenericMenuSelectOption(property, bEntry, ss),
+                            bEntry.name + p.MenuPath,
+                            valuePathProp.stringValue.Equals(p.MenuPath) && entry.objectReferenceValue == bEntry,
+                            () => GenericMenuSelectOption(property, bEntry, p.Type, p.MenuPath),
                             false
                         );
                 }
@@ -328,13 +327,17 @@ namespace SchemaEditor
 
 
         private static void GenericMenuSelectOption(SerializedProperty property, BlackboardEntry entry,
-            string path = "")
+            Type entryType = null, string path = "")
         {
+            EntryType.TryGetMappedType(entry.type, out Type mappedEntryType);
+
             SerializedProperty entryProp = property.FindPropertyRelative("m_entry");
+            SerializedProperty typeString = property.FindPropertyRelative("m_valueTypeString");
             SerializedProperty valuePathProperty = property.FindPropertyRelative("m_valuePath");
             SerializedProperty isDynamicProperty = property.FindPropertyRelative("m_isDynamic");
 
             entryProp.objectReferenceValue = entry;
+            typeString.stringValue = entryType?.AssemblyQualifiedName ?? mappedEntryType.AssemblyQualifiedName;
             valuePathProperty.stringValue = path;
             isDynamicProperty.boolValue = false;
 
@@ -346,10 +349,12 @@ namespace SchemaEditor
         private static void ToggleDynamic(SerializedProperty property)
         {
             SerializedProperty entryProp = property.FindPropertyRelative("m_entry");
+            SerializedProperty typeString = property.FindPropertyRelative("m_valueTypeString");
             SerializedProperty valuePathProperty = property.FindPropertyRelative("m_valuePath");
             SerializedProperty isDynamicProperty = property.FindPropertyRelative("m_isDynamic");
 
             entryProp.objectReferenceValue = null;
+            typeString.stringValue = "";
             valuePathProperty.stringValue = "";
             isDynamicProperty.boolValue = !isDynamicProperty.boolValue;
 
@@ -366,7 +371,7 @@ namespace SchemaEditor
             guiDelayCall -= UpdateChanged;
         }
 
-        private static IEnumerable<string> EnumerateProperties(
+        private static IEnumerable<EnumeratedProperty> EnumerateProperties(
             Type type,
             IEnumerable<Type> targets,
             IEnumerable<string> excludePaths,
@@ -400,29 +405,48 @@ namespace SchemaEditor
                 .Cast<MemberInfo>()
                 .Concat(type.GetProperties(BindingFlags.Public | BindingFlags.Instance));
 
+            IEnumerable<Type> targetsArray = targets as Type[] ?? targets.ToArray();
+            IEnumerable<string> excludePathsArray = excludePaths as string[] ?? excludePaths.ToArray();
+            IEnumerable<Type> excludeTypesArray = excludeTypes as Type[] ?? excludeTypes.ToArray();
+
             foreach (MemberInfo member in members)
             {
                 ObsoleteAttribute obsoleteAttribute = member.GetCustomAttribute<ObsoleteAttribute>();
 
                 Type memberType = (member as FieldInfo)?.FieldType ?? (member as PropertyInfo)?.PropertyType;
-                bool hasSetMethod = member is FieldInfo ? true : (member as PropertyInfo)?.GetSetMethod(false) != null;
+                bool hasSetMethod = member is FieldInfo || (member as PropertyInfo)?.GetSetMethod(false) != null;
 
                 if (
                     obsoleteAttribute != null ||
                     (needsSetter && member.DeclaringType.IsValueType) ||
                     member.Name == "Item" ||
-                    excludePaths.Contains((path + "/" + member.Name).Trim('/').Replace('/', '.')) ||
-                    excludeTypes.Contains(memberType)
+                    excludePathsArray.Contains((path + "/" + member.Name).Trim('/').Replace('/', '.')) ||
+                    excludeTypesArray.Contains(memberType)
                 )
                     continue;
 
-                if (targets.Any(t => t.IsAssignableFrom(memberType)) && (!needsSetter || hasSetMethod))
-                    yield return $"{path}/{member.Name}{(showType ? $" ({memberType.Name})" : "")}";
+                if (targetsArray.Any(t => t.IsAssignableFrom(memberType)) && (!needsSetter || hasSetMethod))
+                    yield return new EnumeratedProperty(
+                        $"{path}/{member.Name}{(showType ? $" ({memberType.Name})" : "")}",
+                        memberType);
                 else if (member.Name != declaring?.Name && !nonRecursiveTypes.Any(t => t.IsAssignableFrom(memberType)))
-                    foreach (string s in EnumerateProperties(memberType, targets, excludePaths, excludeTypes,
+                    foreach (EnumeratedProperty s in EnumerateProperties(memberType, targetsArray, excludePathsArray,
+                                 excludeTypesArray,
                                  path + "/" + member.Name, needsSetter, showType, member))
                         yield return s;
             }
+        }
+
+        private class EnumeratedProperty
+        {
+            public EnumeratedProperty(string menuPath, Type type)
+            {
+                MenuPath = menuPath;
+                Type = type;
+            }
+
+            public string MenuPath { get; }
+            public Type Type { get; }
         }
 
         private delegate void GUIDelayCall(SerializedProperty property);

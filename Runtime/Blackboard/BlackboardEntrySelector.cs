@@ -97,9 +97,10 @@ namespace Schema
         [SerializeField] private string m_dynamicName;
         [SerializeField] private bool m_isDynamic;
         [SerializeField] private List<string> m_filters;
+        [SerializeField] private string m_valueTypeString;
 
-        private Type _lastEntryTypeMapped;
-        private Type _lastEntryTypeUnmapped;
+        private Type _lastValueType;
+        private string _lastValueTypeString;
 
         /// <summary>
         ///     Whether the entry attached to this selector is null
@@ -151,14 +152,13 @@ namespace Schema
                 if (!entry)
                     return null;
 
-                Type entryTypeUnmapped = entry.type;
-                if (_lastEntryTypeUnmapped == entryTypeUnmapped)
-                    return _lastEntryTypeMapped;
+                if (m_valueTypeString == _lastValueTypeString)
+                    return _lastValueType;
 
-                _lastEntryTypeMapped = EntryType.GetMappedType(entryTypeUnmapped);
-                _lastEntryTypeUnmapped = entryTypeUnmapped;
+                _lastValueTypeString = m_valueTypeString;
+                _lastValueType = Type.GetType(_lastValueTypeString);
 
-                return _lastEntryTypeMapped;
+                return _lastValueType;
             }
         }
 
