@@ -41,6 +41,18 @@ namespace Schema
             return entryType.GetCustomAttribute<UseExternalTypeDefinitionAttribute>()?.other ?? entryType;
         }
 
+        public static bool TryGetMappedType(Type entryType, out Type mapped)
+        {
+            if (!typeof(EntryType).IsAssignableFrom(entryType))
+            {
+                mapped = null;
+                return false;
+            }
+
+            mapped = entryType.GetCustomAttribute<UseExternalTypeDefinitionAttribute>()?.other ?? entryType;
+            return true;
+        }
+
         public static string[] GetExcludedPaths(Type entryType)
         {
             if (!typeof(EntryType).IsAssignableFrom(entryType))
