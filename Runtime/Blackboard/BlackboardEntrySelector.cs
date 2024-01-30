@@ -388,13 +388,11 @@ namespace Schema
 
         public void VerifyResults(Blackboard changed)
         {
-            BlackboardEntry e = Array.Find(changed.entries, entry => this.entry == entry);
+            if (Array.Find(changed.entries, e => entry == e) || (entry && entry.blackboard != changed))
+                return;
 
-            if (e == null)
-            {
-                m_entry = null;
-                m_valuePath = "";
-            }
+            m_entry = null;
+            m_valuePath = "";
         }
 
         private void VerifyType(BlackboardEntry entry)
