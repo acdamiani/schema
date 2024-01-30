@@ -45,7 +45,7 @@ namespace Schema
         {
             if (!typeof(EntryType).IsAssignableFrom(entryType))
             {
-                mapped = null;
+                mapped = entryType;
                 return false;
             }
 

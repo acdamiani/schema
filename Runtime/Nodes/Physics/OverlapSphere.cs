@@ -33,6 +33,8 @@ namespace Schema.Builtin.Nodes
             Collider[] colliders =
                 Physics.OverlapSphere(position.value, radius.value, layerMask, queryTriggerInteraction);
 
+            Debug.Log(hit.entryType);
+
             if (colliders.Length == 0)
                 return NodeStatus.Failure;
 
