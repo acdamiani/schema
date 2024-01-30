@@ -330,7 +330,7 @@ namespace SchemaEditor
         private static void GenericMenuSelectOption(SerializedProperty property, BlackboardEntry entry,
             Type entryType = null, string path = "")
         {
-            EntryType.TryGetMappedType(entry.type, out Type mappedEntryType);
+            EntryType.TryGetMappedType(entryType ?? entry.type, out Type mappedEntryType);
 
             SerializedProperty entryProp = property.FindPropertyRelative("m_entry");
             SerializedProperty typeString = property.FindPropertyRelative("m_valueTypeString");
@@ -338,7 +338,7 @@ namespace SchemaEditor
             SerializedProperty isDynamicProperty = property.FindPropertyRelative("m_isDynamic");
 
             entryProp.objectReferenceValue = entry;
-            typeString.stringValue = entryType?.AssemblyQualifiedName ?? mappedEntryType.AssemblyQualifiedName;
+            typeString.stringValue = mappedEntryType.AssemblyQualifiedName;
             valuePathProperty.stringValue = path;
             isDynamicProperty.boolValue = false;
 
