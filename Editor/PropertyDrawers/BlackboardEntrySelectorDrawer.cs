@@ -268,6 +268,7 @@ namespace SchemaEditor
             foreach (BlackboardEntry bEntry in Blackboard.instance.entries.Concat(Blackboard.global.entries))
             {
                 Type value = typeMappings.GetOrCreate(bEntry.type, () => EntryType.GetMappedType(bEntry.type));
+                string entryName = bEntry.blackboard == Blackboard.global ? $"(Global) {bEntry.name}" : bEntry.name;
 
                 if (disableDynamicBinding)
                 {
@@ -275,7 +276,7 @@ namespace SchemaEditor
                         continue;
 
                     menu.AddItem(
-                        bEntry.name + (filtered.Count > 1 ? " (" + bEntry.type.Name + ")" : ""),
+                        entryName + (filtered.Count > 1 ? " (" + bEntry.type.Name + ")" : ""),
                         entry.objectReferenceValue == bEntry,
                         () => GenericMenuSelectOption(property, bEntry, path: "/"),
                         false
@@ -287,7 +288,7 @@ namespace SchemaEditor
                     string typeSuffix = $" ({bEntry.type.Name})";
 
                     menu.AddItem(
-                        $"{bEntry.name}{(showType ? typeSuffix : "")}",
+                        $"{entryName}{(showType ? typeSuffix : "")}",
                         entry.objectReferenceValue == bEntry,
                         () => GenericMenuSelectOption(property, bEntry),
                         false
