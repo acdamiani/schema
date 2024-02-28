@@ -26,11 +26,11 @@ namespace Schema.Internal
                 if (value == null)
                     return;
 
-                if (status == NodeStatus.Running || (_node != null && value.index - node.index < 0))
+                if (status == NodeStatus.Running || (_node != null && value.Index - node.Index < 0))
                 {
-                    lastStatus[_node.index] = status;
+                    lastStatus[_node.Index] = status;
 
-                    if (value.index == 0)
+                    if (value.Index == 0)
                         lastStatus[0] = status;
                 }
 
@@ -47,14 +47,14 @@ namespace Schema.Internal
 
         public void ForceStatus(ExecutableNode node)
         {
-            if (node.index > 0)
-                lastStatus[node.index] = status;
+            if (node.Index > 0)
+                lastStatus[node.Index] = status;
         }
 
         public void RemoveStatus(ExecutableNode node)
         {
-            if (node.index > 0 && lastStatus.ContainsKey(node.index))
-                lastStatus.Remove(node.index);
+            if (node.Index > 0 && lastStatus.ContainsKey(node.Index))
+                lastStatus.Remove(node.Index);
         }
 
         public NodeStatus? GetLastStatus(int index)

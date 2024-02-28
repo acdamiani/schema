@@ -21,18 +21,18 @@ namespace Schema
             Both
         }
 
-        [SerializeField, HideInInspector] private Node m_parent;
-        [SerializeField, HideInInspector] private Node[] m_children = Array.Empty<Node>();
-        [SerializeField, HideInInspector] private Conditional[] m_conditionals = Array.Empty<Conditional>();
-        [SerializeField, HideInInspector] private Modifier[] m_modifiers = Array.Empty<Modifier>();
-        [SerializeField, HideInInspector] private Vector2 m_graphPosition;
-        [SerializeField, HideInInspector] private int m_priority;
-        [SerializeField, HideInInspector] private Graph m_graph;
+        [SerializeField] [HideInInspector] private Node m_parent;
+        [SerializeField] [HideInInspector] private Node[] m_children = Array.Empty<Node>();
+        [SerializeField] [HideInInspector] private Conditional[] m_conditionals = Array.Empty<Conditional>();
+        [SerializeField] [HideInInspector] private Modifier[] m_modifiers = Array.Empty<Modifier>();
+        [SerializeField] [HideInInspector] private Vector2 m_graphPosition;
+        [SerializeField] [HideInInspector] private int m_priority;
+        [SerializeField] [HideInInspector] private Graph m_graph;
 
-        [SerializeField, HideInInspector, TextArea]
+        [SerializeField] [HideInInspector] [TextArea]
         private string m_comment;
 
-        [Tooltip("Toggle the status indicator for this node"), HideInInspector, SerializeField]
+        [Tooltip("Toggle the status indicator for this node")] [HideInInspector] [SerializeField]
         private bool m_enableStatusIndicator = true;
 
         internal Stack<Modifier.Message> messageStack = new Stack<Modifier.Message>();
@@ -80,12 +80,12 @@ namespace Schema
             {
                 m_graphPosition = value;
 
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if (posNoCheck)
                     modifiedPositions.Add(this);
                 else
                     parent?.OrderChildren();
-                #endif
+#endif
             }
         }
 
@@ -136,7 +136,7 @@ namespace Schema
         /// <param name="node">Node to check relation to</param>
         public bool IsSubTreeOf(Node node)
         {
-            if (node == null)
+            if (!node)
                 return false;
 
             Node current = this;
@@ -145,9 +145,8 @@ namespace Schema
             {
                 if (node == current)
                     return true;
-
                 current = current.parent;
-            } while (current != null);
+            } while (current);
 
             return false;
         }
@@ -158,7 +157,7 @@ namespace Schema
         /// <param name="node">Node to check relation to</param>
         public bool IsLowerPriority(Node node)
         {
-            if (node == null)
+            if (!node)
                 return false;
 
             return priority > node.priority && !IsSubTreeOf(node);

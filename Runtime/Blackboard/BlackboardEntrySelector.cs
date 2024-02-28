@@ -152,7 +152,7 @@ namespace Schema
                 if (!entry)
                     return null;
 
-                if (m_valueTypeString == _lastValueTypeString && _lastValueType != null)
+                if (m_valueTypeString == _lastValueTypeString)
                     return _lastValueType;
 
                 _lastValueTypeString = m_valueTypeString;
