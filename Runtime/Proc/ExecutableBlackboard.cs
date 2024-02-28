@@ -45,31 +45,31 @@ namespace Schema.Internal
 
         public object GetDynamic(string name)
         {
-            ExecutionContext current = ExecutionContext.current;
+            ExecutionContext current = ExecutionContext.Current;
 
             dynamicValues.TryGetValue(name, out EntryData data);
 
-            if (data != null && (current.node.index < data.position.Item1 ||
-                                 current.node.index >= data.position.Item1 + data.position.Item2))
+            if (data != null && (current.Node.Index < data.position.Item1 ||
+                                 current.Node.Index >= data.position.Item1 + data.position.Item2))
             {
                 dynamicValues.Remove(name);
 
                 return null;
             }
 
-            return data?.GetValue(current.agent.GetInstanceID());
+            return data?.GetValue(current.Agent.GetInstanceID());
         }
 
         public void SetDynamic(string name, object value)
         {
-            ExecutionContext current = ExecutionContext.current;
+            ExecutionContext current = ExecutionContext.Current;
 
-            ExecutableNode parent = ExecutableTree.current.nodes[current.node.parent];
+            ExecutableNode parent = ExecutableTree.current.nodes[current.Node.Parent];
 
             if (!dynamicValues.ContainsKey(name))
-                dynamicValues[name] = new EntryData(value.GetType(), parent.index, parent.breadth);
+                dynamicValues[name] = new EntryData(value.GetType(), parent.Index, parent.Breadth);
 
-            dynamicValues[name].SetValue(current.agent.GetInstanceID(), value);
+            dynamicValues[name].SetValue(current.Agent.GetInstanceID(), value);
         }
 
         public object Get(BlackboardEntry entry)
@@ -79,7 +79,7 @@ namespace Schema.Internal
             if (data == null)
                 globalValues.TryGetValue(entry, out data);
 
-            return data?.GetValue(ExecutionContext.current.agent.GetInstanceID());
+            return data?.GetValue(ExecutionContext.Current.Agent.GetInstanceID());
         }
 
         public void Set(BlackboardEntry entry, object value)
@@ -89,7 +89,7 @@ namespace Schema.Internal
             if (data == null)
                 globalValues.TryGetValue(entry, out data);
 
-            data?.SetValue(ExecutionContext.current.agent.GetInstanceID(), value);
+            data?.SetValue(ExecutionContext.Current.Agent.GetInstanceID(), value);
         }
 
         internal class EntryData
