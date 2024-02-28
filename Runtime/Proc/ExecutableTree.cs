@@ -17,11 +17,11 @@ namespace Schema.Internal
             tree = graph;
             nodes = graph.nodes
                 .Select(x => new ExecutableNode(x))
-                .Where(x => x.index > -1)
-                .OrderBy(x => x.index)
+                .Where(x => x.Index > -1)
+                .OrderBy(x => x.Index)
                 .ToArray();
             root = nodes
-                .FirstOrDefault(x => x.nodeType == ExecutableNode.ExecutableNodeType.Root);
+                .FirstOrDefault(x => x.NodeType == ExecutableNode.ExecutableNodeType.Root);
             blackboard = new ExecutableBlackboard(graph.blackboard);
             context = new Dictionary<int, ExecutionContext>();
         }
@@ -48,7 +48,7 @@ namespace Schema.Internal
         public ExecutableNode GetExecutableNode(Node node)
         {
             return nodes
-                .FirstOrDefault(x => x.node == node);
+                .FirstOrDefault(x => x.Node == node);
         }
 
         public void Initialize(SchemaAgent agent)
@@ -63,7 +63,7 @@ namespace Schema.Internal
                 node.Initialize(context);
             }
 
-            context.node = nodes.FirstOrDefault(x => x.nodeType == ExecutableNode.ExecutableNodeType.Root);
+            context.Node = nodes.FirstOrDefault(x => x.NodeType == ExecutableNode.ExecutableNodeType.Root);
         }
 
         public void Tick(SchemaAgent agent)
@@ -71,9 +71,9 @@ namespace Schema.Internal
             current = this;
 
             ExecutionContext context = GetExecutionContext(agent);
-            ExecutionContext.current = context;
+            ExecutionContext.Current = context;
 
-            if (context.node == null || agent.paused || agent.stopped)
+            if (context.Node == null || agent.paused || agent.stopped)
                 return;
 
             int t = 0;
@@ -88,17 +88,16 @@ namespace Schema.Internal
 
                 if (abortTarget != null)
                 {
-                    context.RemoveStatus(context.node);
-                    context.node = abortTarget;
-                    context.forceActionConditionalEvaluation = true;
+                    context.RemoveStatus(context.Node);
+                    context.Node = abortTarget;
+                    context.ForceActionConditionalEvaluation = true;
                 }
 
-                int i = nodes[context.node.index].Execute(context);
+                int i = nodes[context.Node.Index].Execute(context);
                 i = i > nodes.Length - 1 ? 0 : i;
 
-                context.forceActionConditionalEvaluation = false;
-
-                context.node = nodes[i];
+                context.ForceActionConditionalEvaluation = false;
+                context.Node = nodes[i];
 
                 if (++t == agent.maxStepsPerTick)
                 {
@@ -110,7 +109,7 @@ namespace Schema.Internal
 
                     return;
                 }
-            } while (context.last != context.node && !(agent.paused || agent.stopped));
+            } while (context.Last != context.Node && !(agent.paused || agent.stopped));
         }
     }
 }

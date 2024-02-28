@@ -16,98 +16,95 @@ namespace Schema.Internal
             Invalid
         }
 
-        private readonly Dictionary<int, object[]> conditionalMemory = new Dictionary<int, object[]>();
+        private readonly Dictionary<int, object[]> _conditionalMemory = new Dictionary<int, object[]>();
+        private readonly int[] _dynamicConditionals;
+        private readonly Dictionary<int, bool> _lastConditionalStatus = new Dictionary<int, bool>();
+        private readonly Dictionary<int, object[]> _modifierMemory = new Dictionary<int, object[]>();
 
-        private readonly int[] dynamicConditionals;
-
-        private readonly Dictionary<int, bool> lastConditionalStatus = new Dictionary<int, bool>();
-
-        private readonly Dictionary<int, object[]> modifierMemory = new Dictionary<int, object[]>();
-
-        public readonly Node node;
-
-        private readonly Dictionary<int, object> nodeMemory = new Dictionary<int, object>();
+        public readonly Node Node;
 
         public ExecutableNode(Node node)
         {
-            if (node == null)
+            if (!node)
                 throw new ArgumentNullException("node", "Node cannot be null!");
 
-            this.node = node;
+            Node = node;
 
-            index = node.priority - 1;
-            children = node.children
+            Index = node.priority - 1;
+            Children = node.children
                 .Select(x => x.priority - 1)
                 .OrderBy(x => x)
                 .ToArray();
-            breadth = GetBreadth(node);
-            nodeType = GetNodeType(node);
+            Breadth = GetBreadth(node);
+            NodeType = GetNodeType(node);
+            Memory = new Dictionary<int, object>();
 
-            dynamicConditionals = node.conditionals
+            _dynamicConditionals = node.conditionals
                 .Where(x => x.abortsType != Conditional.AbortsType.None)
                 .Select(x => Array.IndexOf(node.conditionals, x))
                 .ToArray();
 
             if (node.parent != null)
             {
-                relativeIndex = Array.IndexOf(node.parent.children, node);
-                parent = node.parent.priority - 1;
+                RelativeIndex = Array.IndexOf(node.parent.children, node);
+                Parent = node.parent.priority - 1;
             }
             else
             {
-                relativeIndex = -1;
-                parent = -1;
+                RelativeIndex = -1;
+                Parent = -1;
             }
         }
 
-        public int index { get; }
-        public int relativeIndex { get; }
-        public int parent { get; }
-        public int[] children { get; }
-        public int breadth { get; }
-        public ExecutableNodeType nodeType { get; }
+        public int Index { get; }
+        public int RelativeIndex { get; }
+        public int Parent { get; }
+        public int[] Children { get; }
+        public int Breadth { get; }
+        public ExecutableNodeType NodeType { get; }
+        public Dictionary<int, object> Memory { get; }
 
         public void Initialize(ExecutionContext context)
         {
-            int id = context.agent.GetInstanceID();
+            int id = context.Agent.GetInstanceID();
 
-            if (!nodeMemory.ContainsKey(id))
+            if (!Memory.ContainsKey(id))
             {
-                Type memType = node.GetType().GetMemoryType();
-                nodeMemory[id] = memType == null ? null : Activator.CreateInstance(memType);
+                Type memType = Node.GetType().GetMemoryType();
+                Memory[id] = memType == null ? null : Activator.CreateInstance(memType);
             }
 
-            if (!conditionalMemory.ContainsKey(id))
+            if (!_conditionalMemory.ContainsKey(id))
             {
-                conditionalMemory[id] = new object[node.conditionals.Length];
+                _conditionalMemory[id] = new object[Node.conditionals.Length];
 
-                for (int i = 0; i < node.conditionals.Length; i++)
+                for (int i = 0; i < Node.conditionals.Length; i++)
                 {
-                    Type memType = node.conditionals[i].GetType().GetMemoryType();
-                    conditionalMemory[id][i] = memType == null ? null : Activator.CreateInstance(memType);
+                    Type memType = Node.conditionals[i].GetType().GetMemoryType();
+                    _conditionalMemory[id][i] = memType == null ? null : Activator.CreateInstance(memType);
                 }
             }
 
-            if (!modifierMemory.ContainsKey(id))
+            if (!_modifierMemory.ContainsKey(id))
             {
-                modifierMemory[id] = new object[node.modifiers.Length];
+                _modifierMemory[id] = new object[Node.modifiers.Length];
 
-                for (int i = 0; i < node.modifiers.Length; i++)
+                for (int i = 0; i < Node.modifiers.Length; i++)
                 {
-                    Type memType = node.modifiers[i].GetType().GetMemoryType();
-                    modifierMemory[id][i] = memType == null ? null : Activator.CreateInstance(memType);
+                    Type memType = Node.modifiers[i].GetType().GetMemoryType();
+                    _modifierMemory[id][i] = memType == null ? null : Activator.CreateInstance(memType);
                 }
             }
 
-            switch (nodeType)
+            switch (NodeType)
             {
                 case ExecutableNodeType.Root:
                     break;
                 case ExecutableNodeType.Flow:
-                    InitializeFlow(id, context.agent);
+                    InitializeFlow(id, context.Agent);
                     break;
                 case ExecutableNodeType.Action:
-                    InitializeAction(id, context.agent);
+                    InitializeAction(id, context.Agent);
                     break;
                 case ExecutableNodeType.Invalid:
                 default:
@@ -117,55 +114,55 @@ namespace Schema.Internal
 
         public bool? GetLastConditionalStatus(int index)
         {
-            if (!lastConditionalStatus.ContainsKey(index))
+            if (!_lastConditionalStatus.ContainsKey(index))
                 return null;
 
-            return lastConditionalStatus[index];
+            return _lastConditionalStatus[index];
         }
 
         private void InitializeFlow(int id, SchemaAgent agent)
         {
-            Flow flow = node as Flow;
+            Flow flow = Node as Flow;
 
             if (flow == null)
                 throw new Exception("Node is not of type Flow but the initialization method was run anyways.");
 
-            flow.OnInitialize(nodeMemory[id], agent);
+            flow.OnInitialize(Memory[id], agent);
 
             for (int i = 0; i < flow.modifiers.Length; i++)
-                flow.modifiers[i].OnInitialize(modifierMemory[id][i], agent);
+                flow.modifiers[i].OnInitialize(_modifierMemory[id][i], agent);
 
             for (int i = 0; i < flow.conditionals.Length; i++)
-                flow.conditionals[i].OnInitialize(conditionalMemory[id][i], agent);
+                flow.conditionals[i].OnInitialize(_conditionalMemory[id][i], agent);
         }
 
         private void InitializeAction(int id, SchemaAgent agent)
         {
-            Action action = node as Action;
+            Action action = Node as Action;
 
             if (action == null)
                 throw new Exception("Node is not of type Action but the initialization method was run anyways.");
 
-            action.OnInitialize(nodeMemory[id], agent);
+            action.OnInitialize(Memory[id], agent);
 
             for (int i = 0; i < action.modifiers.Length; i++)
-                action.modifiers[i].OnInitialize(modifierMemory[id][i], agent);
+                action.modifiers[i].OnInitialize(_modifierMemory[id][i], agent);
 
             for (int i = 0; i < action.conditionals.Length; i++)
-                action.conditionals[i].OnInitialize(conditionalMemory[id][i], agent);
+                action.conditionals[i].OnInitialize(_conditionalMemory[id][i], agent);
         }
 
         public bool RunDynamicConditionals(ExecutionContext context)
         {
-            Node current = context.node.node;
-            int id = context.agent.GetInstanceID();
+            Node current = context.Node.Node;
+            int id = context.Agent.GetInstanceID();
 
-            foreach (int j in dynamicConditionals)
+            foreach (int j in _dynamicConditionals)
             {
-                Conditional c = node.conditionals[j];
+                Conditional c = Node.conditionals[j];
 
-                bool isSub = current.IsSubTreeOf(node);
-                bool isPriority = current.IsLowerPriority(node);
+                bool isSub = current.IsSubTreeOf(Node);
+                bool isPriority = current.IsLowerPriority(Node);
 
                 switch (c.abortsType)
                 {
@@ -175,11 +172,11 @@ namespace Schema.Internal
                         continue;
                 }
 
-                bool status = c.Evaluate(conditionalMemory[id][j], context.agent);
+                bool status = c.Evaluate(_conditionalMemory[id][j], context.Agent);
                 status = c.invert ? !status : status;
 
-                if (!lastConditionalStatus.TryGetValue(j, out bool last)) last = status;
-                lastConditionalStatus[j] = status;
+                if (!_lastConditionalStatus.TryGetValue(j, out bool last)) last = status;
+                _lastConditionalStatus[j] = status;
 
                 if (last == status) continue;
 
@@ -197,19 +194,19 @@ namespace Schema.Internal
 
         public int Execute(ExecutionContext context)
         {
-            int id = context.agent.GetInstanceID();
+            int id = context.Agent.GetInstanceID();
 
-            if (!nodeMemory.ContainsKey(id))
+            if (!Memory.ContainsKey(id))
             {
                 Debug.LogFormat(
                     "Agent {0} does not have a memory instance. This means that the initialization method was not run for this agent.",
-                    context.agent.name);
-                return index + 1;
+                    context.Agent.name);
+                return Index + 1;
             }
 
             int i;
 
-            switch (nodeType)
+            switch (NodeType)
             {
                 case ExecutableNodeType.Root:
                     i = DoRoot(context);
@@ -218,7 +215,7 @@ namespace Schema.Internal
                     i = DoFlow(id, context);
                     break;
                 case ExecutableNodeType.Action:
-                    i = DoAction(id, context, context.forceActionConditionalEvaluation);
+                    i = DoAction(id, context, context.ForceActionConditionalEvaluation);
                     break;
                 case ExecutableNodeType.Invalid:
                 default:
@@ -230,125 +227,113 @@ namespace Schema.Internal
 
         private int DoRoot(ExecutionContext context)
         {
-            if (context.last != null)
+            if (context.Last != null)
             {
-                if (!context.agent.restartWhenComplete)
+                if (!context.Agent.restartWhenComplete)
                 {
-                    context.agent.Stop();
+                    context.Agent.Stop();
                 }
                 else
                 {
-                    if (context.agent.treePauseTime > 0f)
-                        context.agent.Pause(context.agent.treePauseTime);
+                    if (context.Agent.treePauseTime > 0f)
+                        context.Agent.Pause(context.Agent.treePauseTime);
 
-                    if (context.agent.resetBlackboardOnRestart)
-                        context.agent.tree.blackboard.Reset();
+                    if (context.Agent.resetBlackboardOnRestart)
+                        context.Agent.tree.blackboard.Reset();
                 }
             }
 
-            context.status = NodeStatus.Success;
-            return index + 1;
+            context.Status = NodeStatus.Success;
+            return Index + 1;
         }
 
         private int DoFlow(int id, ExecutionContext context)
         {
-            Flow flow = node as Flow;
+            Flow flow = Node as Flow;
 
-            if (flow == null)
+            if (!flow)
                 throw new Exception("Node is not of type Flow but the execution method was run anyways.");
 
             bool run = DoConditionalStack(id, context);
 
             if (!run)
             {
-                context.status = NodeStatus.Failure;
-                return parent;
+                context.Status = NodeStatus.Failure;
+                return Parent;
             }
-
-            int diff = context.last.index - index;
-
-            if (diff >= breadth || diff < 0) flow.OnFlowEnter(nodeMemory[id], context.agent);
 
             int caller = -1;
 
-            if (children.Contains(context.last.index))
-                caller = context.last.relativeIndex;
+            if (Children.Contains(context.Last.Index))
+                caller = context.Last.RelativeIndex;
 
-            int i = flow.Tick(nodeMemory[id], context.status, caller);
+            int i = flow.Tick(Memory[id], context.Status, caller);
 
-            int? child = i >= 0 && i < children.Length ? children[i] : null;
+            int? child = i >= 0 && i < Children.Length ? Children[i] : null;
 
             Modifier.Message message = Modifier.Message.None;
 
             for (int j = 0; j < flow.modifiers.Length; j++)
-                message = flow.modifiers[j].Modify(modifierMemory[id][j], context.agent, context.status);
+                message = flow.modifiers[j].Modify(_modifierMemory[id][j], context.Agent, context.Status);
 
-            if (message == Modifier.Message.ForceFailure)
-                context.status = NodeStatus.Failure;
-            else if (message == Modifier.Message.ForceSuccess)
-                context.status = NodeStatus.Success;
+            context.Status = message switch
+            {
+                Modifier.Message.ForceFailure => NodeStatus.Failure,
+                Modifier.Message.ForceSuccess => NodeStatus.Success,
+                _ => context.Status
+            };
 
             bool repeat = message == Modifier.Message.Repeat;
 
             if (repeat)
-                return index;
+                return Index;
 
-            if (child == null)
-            {
-                flow.OnFlowExit(nodeMemory[id], context.agent);
-                return parent;
-            }
-
-            return child.Value;
+            return child ?? Parent;
         }
 
         private int DoAction(int id, ExecutionContext context, bool forceConditionalEvaluation)
         {
-            Action action = node as Action;
+            Action action = Node as Action;
 
             if (action == null)
                 throw new Exception("Node is not of type Action but the execution method was run anyways.");
 
             bool run = true;
 
-            if (context.last.index != index || forceConditionalEvaluation)
+            if (context.Last.Index != Index || forceConditionalEvaluation)
                 run = DoConditionalStack(id, context);
 
             if (!run)
             {
-                context.status = NodeStatus.Failure;
-                return parent;
+                context.Status = NodeStatus.Failure;
+                return Parent;
             }
 
-            if (context.last.index != index)
-                action.OnNodeEnter(nodeMemory[id], context.agent);
+            context.Status = action.Tick(Memory[id], context.Agent);
 
-            context.status = action.Tick(nodeMemory[id], context.agent);
-
-            switch (context.status)
+            switch (context.Status)
             {
                 case NodeStatus.Running:
-                    return index;
+                    return Index;
                 case NodeStatus.Success:
                 case NodeStatus.Failure:
                 default:
                     Modifier.Message message = Modifier.Message.None;
 
                     for (int j = 0; j < action.modifiers.Length; j++)
-                        message = action.modifiers[j].Modify(modifierMemory[id][j], context.agent, context.status);
+                        message = action.modifiers[j].Modify(_modifierMemory[id][j], context.Agent, context.Status);
 
                     if (message == Modifier.Message.ForceFailure)
-                        context.status = NodeStatus.Failure;
+                        context.Status = NodeStatus.Failure;
                     else if (message == Modifier.Message.ForceSuccess)
-                        context.status = NodeStatus.Success;
+                        context.Status = NodeStatus.Success;
 
                     bool repeat = message == Modifier.Message.Repeat;
 
                     if (repeat)
-                        return index;
+                        return Index;
 
-                    action.OnNodeExit(nodeMemory[id], context.agent);
-                    return parent;
+                    return Parent;
             }
         }
 
@@ -356,12 +341,12 @@ namespace Schema.Internal
         {
             bool run = true;
 
-            for (int j = 0; j < node.conditionals.Length; j++)
+            for (int j = 0; j < Node.conditionals.Length; j++)
             {
-                run = node.conditionals[j].Evaluate(conditionalMemory[id][j], context.agent);
-                run = node.conditionals[j].invert ? !run : run;
+                run = Node.conditionals[j].Evaluate(_conditionalMemory[id][j], context.Agent);
+                run = Node.conditionals[j].invert ? !run : run;
 
-                lastConditionalStatus[j] = run;
+                _lastConditionalStatus[j] = run;
 
                 if (!run)
                     break;

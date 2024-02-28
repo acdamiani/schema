@@ -91,7 +91,7 @@ namespace Schema
             if (tree == null)
                 return;
 
-            tree.GetExecutionContext(this).node = tree.root;
+            tree.GetExecutionContext(this).Node = tree.root;
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Schema
             if (tree == null)
                 return;
 
-            tree.GetExecutionContext(this).node = tree.root;
+            tree.GetExecutionContext(this).Node = tree.root;
 
             if (resetBlackboard)
                 tree.blackboard.Reset();
