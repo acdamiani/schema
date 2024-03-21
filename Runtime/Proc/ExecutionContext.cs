@@ -24,7 +24,7 @@ namespace Schema.Internal
             get => _node;
             set
             {
-                if (value == null || value == _node)
+                if (value == null)
                     return;
 
                 if (Status == NodeStatus.Running || (_node != null && value.Index - _node.Index < 0))
@@ -35,11 +35,16 @@ namespace Schema.Internal
                         _lastStatus[0] = Status;
                 }
 
-                StepOut(_node);
-                StepIn(value);
-
                 Last = _node;
                 _node = value;
+
+                if (value == _node)
+                    return;
+
+                if (Last != null)
+                    StepOut(Last);
+
+                StepIn(value);
             }
         }
 
